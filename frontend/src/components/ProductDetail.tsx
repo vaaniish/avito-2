@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Star,
   User,
+  Zap,
 } from "lucide-react";
 import type { Product } from "../types";
 import { apiDelete, apiGet, apiPost } from "../lib/api";
@@ -18,6 +19,7 @@ interface ProductDetailProps {
   product: Product;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
+  onBuyNow: (product: Product) => void;
   onUpdateQuantity?: (productId: string, quantity: number) => void;
   cartQuantity?: number;
   relatedProducts: Product[];
@@ -37,6 +39,7 @@ export function ProductDetail({
   product,
   onBack,
   onAddToCart,
+  onBuyNow,
   onUpdateQuantity,
   cartQuantity = 0,
 }: ProductDetailProps) {
@@ -283,13 +286,22 @@ export function ProductDetail({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2 mb-4"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Добавить в корзину
-              </button>
+              <div className="flex flex-col w-full items-center gap-2 mb-4">
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Добавить в корзину
+                </button>
+                <button
+                  onClick={() => onBuyNow(product)}
+                  className="w-full py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2"
+                >
+                  <Zap className="w-4 h-4" />
+                  Купить сейчас
+                </button>
+              </div>
             )}
 
             <div className="bg-gray-50 rounded-xl p-4">

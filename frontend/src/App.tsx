@@ -114,6 +114,22 @@ export default function App() {
   const currentItems = viewMode === "products" ? products : services;
   const currentCategories = viewMode === "products" ? productCategories : serviceCategories;
 
+  const categoryMap = useMemo(() => {
+    const newMap = new Map<string, Set<string>>();
+    for (const category of currentCategories) {
+      const allSubCategoryItems = new Set<string>();
+      for (const subcategory of category.subcategories) {
+        const subCategoryItems = new Set(subcategory.items);
+        newMap.set(subcategory.name, subCategoryItems);
+        for (const item of subCategoryItems) {
+          allSubCategoryItems.add(item);
+        }
+      }
+      newMap.set(category.name, allSubCategoryItems);
+    }
+    return newMap;
+  }, [currentCategories]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -195,6 +211,15 @@ export default function App() {
     scrollToTop();
   };
 
+  const handleBuyNow = (product: Product) => {
+    const itemInCart = cartItems.find((item) => item.id === product.id);
+    if (!itemInCart) {
+      addToCart(product);
+    }
+    setCurrentView("checkout");
+    scrollToTop();
+  };
+
   const handleCheckout = () => {
     setCurrentView("checkout");
     scrollToTop();
@@ -235,8 +260,22 @@ export default function App() {
   };
 
   const filteredItems = useMemo(() => {
+    const effectiveCategories = new Set<string>();
+    if (filters.categories.length > 0) {
+      for (const selectedCategory of filters.categories) {
+        const children = categoryMap.get(selectedCategory);
+        if (children) {
+          for (const child of children) {
+            effectiveCategories.add(child);
+          }
+        } else {
+          effectiveCategories.add(selectedCategory);
+        }
+      }
+    }
+
     return currentItems.filter((item) => {
-      if (filters.categories.length > 0 && !filters.categories.includes(item.category)) return false;
+      if (effectiveCategories.size > 0 && !effectiveCategories.has(item.category)) return false;
       if (item.price < filters.priceRange[0] || item.price > filters.priceRange[1]) return false;
       if (item.rating < filters.minRating) return false;
 
@@ -265,7 +304,7 @@ export default function App() {
 
       return true;
     });
-  }, [currentItems, filters]);
+  }, [currentItems, filters, categoryMap]);
 
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((left, right) => {
@@ -303,10 +342,14 @@ export default function App() {
           product={selectedProduct}
           onBack={() => setCurrentView("home")}
           onAddToCart={addToCart}
+          onBuyNow={handleBuyNow}
           onUpdateQuantity={updateQuantity}
           cartQuantity={cartQuantity}
           relatedProducts={currentItems
-            .filter((item) => item.id !== selectedProduct.id && item.category === selectedProduct.category)
+            .filter(
+              (item) =>
+                item.id !== selectedProduct.id && item.category === selectedProduct.category
+            )
             .slice(0, 4)}
         />
         <Footer onNavigate={handleFooterNavigation} />

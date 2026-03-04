@@ -59,7 +59,7 @@ export function FilterPanel({
     });
   };
 
-  const toggleSubcategory = (subcategoryId: string) => {
+  const toggleSubcategoryExpansion = (subcategoryId: string) => {
     setExpandedSubcategories((prev) => {
       const next = new Set(prev);
       if (next.has(subcategoryId)) {
@@ -71,7 +71,7 @@ export function FilterPanel({
     });
   };
 
-  const toggleCategory = (categoryName: string) => {
+  const toggleCategorySelection = (categoryName: string) => {
     const nextCategories = tempFilters.categories.includes(categoryName)
       ? tempFilters.categories.filter((category) => category !== categoryName)
       : [...tempFilters.categories, categoryName];
@@ -80,6 +80,18 @@ export function FilterPanel({
       ...tempFilters,
       categories: nextCategories,
     });
+  };
+
+  const toggleSubCategorySelection = (subcategory: CatalogSubcategory) => {
+    const subcategoryItems = subcategory.items;
+    const areAllSelected = subcategoryItems.every((item) => tempFilters.categories.includes(item));
+    let nextCategories: string[];
+    if (areAllSelected) {
+      nextCategories = tempFilters.categories.filter((c) => !subcategoryItems.includes(c));
+    } else {
+      nextCategories = [...new Set([...tempFilters.categories, ...subcategoryItems])];
+    }
+    setTempFilters({ ...tempFilters, categories: nextCategories });
   };
 
   const updatePriceRange = (min: number, max: number) => {
@@ -186,20 +198,31 @@ export function FilterPanel({
                     <div className="ml-6 space-y-1">
                       {category.subcategories.map((subcategory) => {
                         const isSubExpanded = expandedSubcategories.has(subcategory.id);
+                        const areAllItemsSelected = subcategory.items.every((item) =>
+                          tempFilters.categories.includes(item),
+                        );
 
                         return (
                           <div key={subcategory.id} className="space-y-1">
-                            <button
-                              onClick={() => toggleSubcategory(subcategory.id)}
-                              className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                            >
-                              <ChevronRight
-                                className={`w-3 h-3 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                                  isSubExpanded ? "rotate-90" : ""
-                                }`}
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                              <input
+                                type="checkbox"
+                                checked={areAllItemsSelected}
+                                onChange={() => toggleSubCategorySelection(subcategory)}
+                                className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer flex-shrink-0"
                               />
-                              <span className="text-sm text-gray-700 text-left flex-1">{subcategory.name}</span>
-                            </button>
+                              <button
+                                onClick={() => toggleSubcategoryExpansion(subcategory.id)}
+                                className="w-full flex items-center gap-2"
+                              >
+                                <span className="text-sm text-gray-700 text-left flex-1">{subcategory.name}</span>
+                                <ChevronRight
+                                  className={`w-3 h-3 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                                    isSubExpanded ? "rotate-90" : ""
+                                  }`}
+                                />
+                              </button>
+                            </div>
 
                             {isSubExpanded && subcategory.items.length > 0 && (
                               <div className="ml-4 space-y-1">
@@ -211,7 +234,7 @@ export function FilterPanel({
                                     <input
                                       type="checkbox"
                                       checked={tempFilters.categories.includes(item)}
-                                      onChange={() => toggleCategory(item)}
+                                      onChange={() => toggleCategorySelection(item)}
                                       className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer flex-shrink-0"
                                     />
                                     <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-200">
