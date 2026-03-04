@@ -1,24 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Check, CreditCard, MapPin } from "lucide-react";
-import type { CartItem } from "../types";
+import type { CartItem, Product } from "../types";
 import { apiGet, apiPost } from "../lib/api";
+import { YandexMapPicker } from "./YandexMapPicker";
 
 interface CheckoutPageProps {
   items: CartItem[];
+  deliveryType: "delivery" | "pickup";
   onBack: () => void;
+  onRemoveUnavailableItems?: (itemIds: string[]) => void;
   onComplete: (result: {
     orderIds: string[];
     total: number;
     paymentMethod: "card" | "cash";
+    deliveryType: "delivery" | "pickup";
   }) => void;
 }
-
-type Address = {
-  id: string;
-  label: string;
-  fullAddress: string;
-  isDefault: boolean;
-};
 
 type CreateOrdersResponse = {
   success: boolean;
@@ -27,73 +24,68 @@ type CreateOrdersResponse = {
     total_price: number;
   }>;
   total: number;
+  payment?: {
+    provider: "yoomoney";
+    paymentId: string | null;
+    status: string | null;
+    confirmationUrl: string | null;
+  } | null;
 };
 
-export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const [customAddress, setCustomAddress] = useState("");
-  const [useCustomAddress, setUseCustomAddress] = useState(false);
+const DELIVERY_PVZ_STUB = "Тестовый ПВЗ (заглушка), Москва, ул. Тестовая, 1";
+
+export function CheckoutPage({
+  items,
+  deliveryType,
+  onBack,
+  onRemoveUnavailableItems,
+  onComplete,
+}: CheckoutPageProps) {
+  const [pickupPoint, setPickupPoint] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
-  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvc: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const loadAddresses = async () => {
-      try {
-        const result = await apiGet<Address[]>("/profile/addresses");
-        if (!ignore) {
-          setAddresses(result);
-          const defaultAddress = result.find((address) => address.isDefault);
-          setSelectedAddress(defaultAddress?.id ?? result[0]?.id ?? null);
-        }
-      } catch (_error) {
-        if (!ignore) {
-          setAddresses([]);
-        }
-      }
-    };
-
-    void loadAddresses();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items],
   );
-  const shipping = 0;
+  const shipping = deliveryType === "delivery" ? 500 : 0;
   const total = subtotal + shipping;
 
   const handlePlaceOrder = async () => {
-    if (!useCustomAddress && !selectedAddress) {
-      alert("Пожалуйста, выберите адрес доставки");
-      return;
-    }
-    if (useCustomAddress && !customAddress.trim()) {
-      alert("Пожалуйста, введите адрес доставки");
-      return;
-    }
-
-    if (paymentMethod === "card") {
-      if (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvc) {
-        alert("Пожалуйста, заполните данные карты");
-        return;
-      }
-    }
+    const effectivePickupPoint =
+      deliveryType === "delivery"
+        ? pickupPoint.trim() || DELIVERY_PVZ_STUB
+        : "Самовывоз";
 
     setIsSubmitting(true);
     try {
+      const [productListings, serviceListings] = await Promise.all([
+        apiGet<Product[]>("/catalog/listings?type=products"),
+        apiGet<Product[]>("/catalog/listings?type=services"),
+      ]);
+
+      const availableIds = new Set(
+        [...productListings, ...serviceListings].map((listing) => listing.id),
+      );
+      const unavailableItemIds = items
+        .map((item) => item.id)
+        .filter((itemId) => !availableIds.has(itemId));
+
+      if (unavailableItemIds.length > 0) {
+        onRemoveUnavailableItems?.(unavailableItemIds);
+        alert(
+          "Некоторые товары уже недоступны и были удалены из корзины. Проверьте заказ и попробуйте снова.",
+        );
+        onBack();
+        return;
+      }
+
       const response = await apiPost<CreateOrdersResponse>("/profile/orders", {
         items: items.map((item) => ({ listingId: item.id, quantity: item.quantity })),
-        addressId: useCustomAddress ? null : selectedAddress,
-        customAddress: useCustomAddress ? customAddress.trim() : null,
-        deliveryType: "delivery",
+        addressId: null,
+        customAddress: effectivePickupPoint,
+        deliveryType,
         paymentMethod,
       });
 
@@ -102,10 +94,32 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
         throw new Error("Сервер не вернул созданные заказы");
       }
 
+      if (paymentMethod === "card") {
+        const confirmationUrl = response.payment?.confirmationUrl;
+        if (!confirmationUrl) {
+          throw new Error("Не удалось получить ссылку на оплату YooMoney");
+        }
+
+        const paymentWindow = window.open(confirmationUrl, "_blank", "noopener,noreferrer");
+
+        onComplete({
+          orderIds,
+          total: response.total,
+          paymentMethod,
+          deliveryType,
+        });
+
+        if (!paymentWindow) {
+          window.location.assign(confirmationUrl);
+        }
+        return;
+      }
+
       onComplete({
         orderIds,
         total: response.total,
         paymentMethod,
+        deliveryType,
       });
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось оформить заказ");
@@ -115,76 +129,49 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-24 md:pt-28 pb-16">
+    <div className="min-h-screen app-shell pb-16 pt-[calc(var(--header-height,84px)+1rem)] md:pt-[calc(var(--header-height,84px)+1.4rem)]">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
         <h1 className="text-3xl md:text-5xl text-gray-900 mb-8 md:mb-12 text-center">Оформление заказа</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 md:gap-8">
           <div className="space-y-6 md:space-y-8">
             <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200">
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-6">Адрес доставки</h2>
-
-              <div className="mb-6 space-y-3">
-                <p className="text-sm text-gray-600 uppercase tracking-wide mb-3">Выберите из сохраненных адресов</p>
-                {addresses.map((address) => (
-                  <button
-                    key={address.id}
-                    onClick={() => {
-                      setSelectedAddress(address.id);
-                      setUseCustomAddress(false);
-                    }}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 ${
-                      selectedAddress === address.id && !useCustomAddress
-                        ? "border-gray-900 bg-gray-50"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 mb-1">
-                            {address.label}
-                            {address.isDefault && <span className="ml-2 text-xs text-green-600">(по умолчанию)</span>}
-                          </p>
-                          <p className="text-sm text-gray-600">{address.fullAddress}</p>
-                        </div>
-                      </div>
-                      {selectedAddress === address.id && !useCustomAddress && (
-                        <div className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3" />
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => setUseCustomAddress((prev) => !prev)}
-                  className="flex items-center gap-2 text-sm text-gray-900 hover:text-gray-700 transition-colors duration-300 mb-4"
-                >
-                  <div
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
-                      useCustomAddress ? "border-gray-900 bg-gray-900" : "border-gray-300"
-                    }`}
-                  >
-                    {useCustomAddress && <Check className="w-3 h-3 text-white" />}
+              {deliveryType === "delivery" ? (
+                <>
+                  <h2 className="text-xl md:text-2xl text-gray-900 mb-4">Выберите ПВЗ</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Выберите пункт выдачи на карте платформы.
+                  </p>
+                  <div className="h-[420px]">
+                    <YandexMapPicker
+                      onAddressSelect={(address) => {
+                        const formatted = [address.city, address.street, address.building]
+                          .filter(Boolean)
+                          .join(", ");
+                        setPickupPoint(formatted);
+                      }}
+                    />
                   </div>
-                  Ввести новый адрес
-                </button>
-
-                {useCustomAddress && (
-                  <input
-                    type="text"
-                    value={customAddress}
-                    onChange={(event) => setCustomAddress(event.target.value)}
-                    placeholder="Введите полный адрес доставки"
-                    className="w-full px-4 py-3 bg-white rounded-xl border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-gray-900 transition-colors duration-300"
-                  />
-                )}
-              </div>
+                  <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                    {pickupPoint
+                      ? `Выбранный ПВЗ: ${pickupPoint}`
+                      : `ПВЗ еще не выбран. Будет использована заглушка: ${DELIVERY_PVZ_STUB}`}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl md:text-2xl text-gray-900 mb-4">Самовывоз</h2>
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                    <div className="flex items-center gap-2 text-gray-900 mb-2">
+                      <MapPin className="w-4 h-4" />
+                      <span className="font-medium">Вы выбрали самовывоз</span>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      После оформления заказа продавец свяжется с вами для согласования точки и времени получения.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200">
@@ -229,34 +216,14 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
 
               {paymentMethod === "card" && (
                 <div className="space-y-4 pt-6 border-t border-gray-200">
-                  <input
-                    type="text"
-                    value={cardDetails.number}
-                    onChange={(event) =>
-                      setCardDetails((prev) => ({ ...prev, number: event.target.value }))
-                    }
-                    placeholder="Номер карты"
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-gray-900"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      value={cardDetails.expiry}
-                      onChange={(event) =>
-                        setCardDetails((prev) => ({ ...prev, expiry: event.target.value }))
-                      }
-                      placeholder="ММ/ГГ"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-gray-900"
-                    />
-                    <input
-                      type="text"
-                      value={cardDetails.cvc}
-                      onChange={(event) =>
-                        setCardDetails((prev) => ({ ...prev, cvc: event.target.value }))
-                      }
-                      placeholder="CVC"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-gray-900"
-                    />
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                    <p className="font-medium text-gray-900 mb-2">Оплата через YooMoney (тестовый режим)</p>
+                    <p className="mb-2">
+                      После нажатия кнопки вы перейдете на защищенную страницу YooMoney для ввода данных карты.
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Тестовая карта: 5555 5555 5555 4477, срок 01/30, CVC 123.
+                    </p>
                   </div>
                 </div>
               )}
@@ -290,8 +257,10 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
                   <span className="text-gray-900">{subtotal.toLocaleString("ru-RU")} ₽</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Доставка</span>
-                  <span className="text-green-600">Бесплатно</span>
+                  <span className="text-gray-600">{deliveryType === "delivery" ? "Доставка до ПВЗ" : "Самовывоз"}</span>
+                  <span className={deliveryType === "delivery" ? "text-gray-900" : "text-green-600"}>
+                    {shipping > 0 ? `${shipping.toLocaleString("ru-RU")} ₽` : "Бесплатно"}
+                  </span>
                 </div>
               </div>
 
@@ -304,13 +273,17 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
                 <button
                   onClick={() => void handlePlaceOrder()}
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] disabled:bg-gray-400 text-white rounded-xl transition-all duration-300 text-sm md:text-base"
+                  className="btn-primary w-full py-4 text-sm disabled:bg-gray-400 md:text-base"
                 >
-                  {isSubmitting ? "Оформляем..." : "Оформить заказ"}
+                  {isSubmitting
+                    ? "Оформляем..."
+                    : paymentMethod === "card"
+                      ? "Перейти к оплате YooMoney"
+                      : "Оформить заказ"}
                 </button>
                 <button
                   onClick={onBack}
-                  className="w-full py-4 bg-white text-gray-900 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 text-sm md:text-base"
+                  className="btn-secondary w-full py-4 text-sm md:text-base"
                 >
                   Вернуться в корзину
                 </button>

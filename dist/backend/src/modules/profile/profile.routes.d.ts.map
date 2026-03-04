@@ -1,1 +1,1 @@
-{"version":3,"file":"profile.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/profile/profile.routes.ts"],"names":[],"mappings":"AAKA,QAAA,MAAM,aAAa,4CAAW,CAAC;AAq1B/B,OAAO,EAAE,aAAa,EAAE,CAAC"}
+{"version":3,"file":"profile.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/profile/profile.routes.ts"],"names":[],"mappings":"AAkBA,QAAA,MAAM,aAAa,4CAAW,CAAC;AAirC/B,OAAO,EAAE,aAAa,EAAE,CAAC"}

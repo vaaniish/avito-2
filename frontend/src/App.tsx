@@ -55,12 +55,13 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<SessionRole>("regular");
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
-  const [redirectAfterLogin, setRedirectAfterLogin] = useState<AppView | null>(null);
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [lastOrderTotal, setLastOrderTotal] = useState(0);
   const [lastPaymentMethod, setLastPaymentMethod] = useState<"card" | "cash">("card");
   const [lastOrderIds, setLastOrderIds] = useState<string[]>([]);
+  const [selectedDeliveryType, setSelectedDeliveryType] = useState<"delivery" | "pickup">("delivery");
+  const [lastDeliveryType, setLastDeliveryType] = useState<"delivery" | "pickup">("delivery");
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode, setViewMode] = useState<"products" | "services">("products");
@@ -134,7 +135,17 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const addToCart = (product: Product) => {
+  const requestLoginForCartAccess = () => {
+    if (isAuthenticated) {
+      return true;
+    }
+
+    setCurrentView("auth");
+    scrollToTop();
+    return false;
+  };
+
+  const addToCartUnsafe = (product: Product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -150,6 +161,13 @@ export default function App() {
 
       return [...prev, { ...product, quantity: 1 }];
     });
+  };
+
+  const addToCart = (product: Product) => {
+    if (!requestLoginForCartAccess()) {
+      return;
+    }
+    addToCartUnsafe(product);
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -201,6 +219,9 @@ export default function App() {
   };
 
   const handleCartClick = () => {
+    if (!requestLoginForCartAccess()) {
+      return;
+    }
     setCurrentView("cart");
     scrollToTop();
   };
@@ -212,22 +233,26 @@ export default function App() {
   };
 
   const handleBuyNow = (product: Product) => {
+    if (!requestLoginForCartAccess()) {
+      return;
+    }
+
     const itemInCart = cartItems.find((item) => item.id === product.id);
     if (!itemInCart) {
-      addToCart(product);
+      addToCartUnsafe(product);
     }
     setCurrentView("checkout");
     scrollToTop();
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = (deliveryType: "delivery" | "pickup") => {
+    setSelectedDeliveryType(deliveryType);
     setCurrentView("checkout");
     scrollToTop();
   };
 
   const handleFooterNavigation = (page: FooterPage) => {
     if (page === "partnership" && !isAuthenticated) {
-      setRedirectAfterLogin("partnership");
       setCurrentView("auth");
       scrollToTop();
       return;
@@ -328,8 +353,8 @@ export default function App() {
     const cartQuantity = cartItem ? cartItem.quantity : 0;
 
     return (
-      <div className="min-h-screen bg-white">
-        <div className="h-[100px]" aria-hidden="true" />
+      <div className="min-h-screen app-shell">
+        <div className="app-header-spacer" aria-hidden="true" />
 
         <Header
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
@@ -360,13 +385,6 @@ export default function App() {
   if (currentView === "cart") {
     return (
       <>
-        <Header
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
         <CartPage items={cartItems} onUpdateQuantity={updateQuantity} onCheckout={handleCheckout} />
         <Footer onNavigate={handleFooterNavigation} />
       </>
@@ -385,11 +403,16 @@ export default function App() {
         />
         <CheckoutPage
           items={cartItems}
+          deliveryType={selectedDeliveryType}
           onBack={() => setCurrentView("cart")}
+          onRemoveUnavailableItems={(itemIds) => {
+            setCartItems((prev) => prev.filter((item) => !itemIds.includes(item.id)));
+          }}
           onComplete={(result) => {
             setLastOrderTotal(result.total);
             setLastPaymentMethod(result.paymentMethod);
             setLastOrderIds(result.orderIds);
+            setLastDeliveryType(result.deliveryType);
             setCartItems([]);
             setCurrentView("orderComplete");
           }}
@@ -413,6 +436,7 @@ export default function App() {
           orderTotal={lastOrderTotal}
           orderIds={lastOrderIds}
           paymentMethod={lastPaymentMethod}
+          deliveryType={lastDeliveryType}
           onViewHistory={() => {
             setCurrentView("profile");
             scrollToTop();
@@ -521,15 +545,7 @@ export default function App() {
             return;
           }
 
-          if (redirectAfterLogin === "partnership") {
-            setCurrentView("profile");
-            setRedirectAfterLogin(null);
-          } else if (redirectAfterLogin) {
-            setCurrentView(redirectAfterLogin);
-            setRedirectAfterLogin(null);
-          } else {
-            setCurrentView("profile");
-          }
+          setCurrentView("profile");
         }}
       />
     );
@@ -547,7 +563,7 @@ export default function App() {
           setCurrentView("auth");
         }}
         userType={userType === "partner" ? "partner" : "regular"}
-        initialTab={userType === "partner" ? "partner-achievements" : redirectAfterLogin === "partnership" ? "partnership" : undefined}
+        initialTab={undefined}
       />
     );
   }
@@ -585,8 +601,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="h-[100px]" aria-hidden="true" />
+    <div className="min-h-screen app-shell">
+      <div className="app-header-spacer" aria-hidden="true" />
 
       <Header
         cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
@@ -598,11 +614,11 @@ export default function App() {
 
       {!isSearchActive && <Hero onBannerClick={handleBannerClick} />}
 
-      <div className="max-w-[1440px] mx-auto px-[21px] pb-[56px] sm:pb-16">
+      <div className="page-container pb-14 sm:pb-16">
         <div className="lg:hidden mb-6">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300">
+              <button className="btn-primary flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold sm:text-base">
                 <SlidersHorizontal className="w-5 h-5" />
                 <span>Фильтры</span>
               </button>
@@ -631,7 +647,7 @@ export default function App() {
           </Sheet>
         </div>
 
-        <div className="mt-[70px] flex gap-6 lg:gap-8">
+        <div className="mt-6 flex gap-4 lg:mt-8 lg:gap-7">
           <aside className="w-80 flex-shrink-0 hidden lg:block self-start">
             <FilterPanel
               filters={filters}

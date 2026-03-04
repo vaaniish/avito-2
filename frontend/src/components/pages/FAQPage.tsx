@@ -61,39 +61,36 @@ export function FAQPage({ onBack }: FAQPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-16">
-        {/* Back Button */}
+    <div className="min-h-screen app-shell">
+      <div className="page-container pb-12 pt-[calc(var(--header-height,84px)+1.1rem)] sm:pb-16">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 text-lg transition-colors duration-300"
+          className="back-link mb-7 text-sm sm:text-base"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="h-5 w-5" />
           Назад
         </button>
 
-        {/* Header */}
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <h1 className="text-5xl sm:text-6xl text-gray-900 mb-6">Часто задаваемые вопросы</h1>
-          <p className="text-2xl text-gray-600">
+        <div className="content-page mb-10 text-center sm:mb-12">
+          <h1 className="mb-4 text-slate-900">Часто задаваемые вопросы</h1>
+          <p className="text-base text-slate-600 sm:text-xl">
             Ответы на популярные вопросы о работе платформы
           </p>
         </div>
 
-        {/* FAQ List */}
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="content-page space-y-3">
           {faqData.map((item, index) => (
             <div
               key={index}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg"
+              className="surface-card overflow-hidden transition-all duration-300"
             >
               <button
                 onClick={() => toggleQuestion(index)}
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors duration-200"
+                className="flex w-full items-center justify-between p-4 text-left transition-colors duration-200 hover:bg-slate-50 sm:p-5"
               >
-                <span className="text-xl text-gray-900 pr-4">{item.question}</span>
+                <span className="pr-3 text-base font-semibold text-slate-900 sm:text-lg">{item.question}</span>
                 <ChevronDown
-                  className={`w-6 h-6 text-gray-500 flex-shrink-0 transition-transform duration-300 ${
+                  className={`h-5 w-5 flex-shrink-0 text-gray-500 transition-transform duration-300 sm:h-6 sm:w-6 ${
                     openIndex === index ? 'rotate-180' : ''
                   }`}
                 />
@@ -104,7 +101,7 @@ export function FAQPage({ onBack }: FAQPageProps) {
                   openIndex === index ? 'max-h-96' : 'max-h-0'
                 }`}
               >
-                <div className="px-6 pb-6 text-lg text-gray-600 leading-relaxed">
+                <div className="px-4 pb-4 text-sm leading-relaxed text-gray-600 sm:px-5 sm:pb-5 sm:text-base">
                   {item.answer}
                 </div>
               </div>
@@ -112,22 +109,21 @@ export function FAQPage({ onBack }: FAQPageProps) {
           ))}
         </div>
 
-        {/* Contact CTA */}
-        <div className="max-w-4xl mx-auto mt-16 bg-[rgb(0,0,0)] text-white rounded-2xl p-8 sm:p-12 text-center">
-          <h2 className="text-3xl mb-4">Не нашли ответ на свой вопрос?</h2>
-          <p className="text-xl text-gray-300 mb-6">
+        <div className="content-page mt-10 rounded-2xl bg-[rgb(15,30,53)] p-6 text-center text-white sm:mt-12 sm:p-10">
+          <h2 className="mb-3 text-2xl font-semibold sm:text-3xl">Не нашли ответ на свой вопрос?</h2>
+          <p className="mb-6 text-sm text-blue-100 sm:text-lg">
             Наша служба поддержки всегда готова помочь
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
               href="mailto:support@ecom.ru"
-              className="px-8 py-4 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-all duration-300 text-lg"
+              className="btn-secondary px-5 py-3 text-sm font-semibold sm:text-base"
             >
               Напишите нам на почту: support@ecom.ru
             </a>
             <a
               href="tel:88001234567"
-              className="px-8 py-4 border border-white text-white rounded-xl hover:bg-white/10 transition-all duration-300 text-lg"
+              className="rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:text-base"
             >
               или позвоните по номеру телефона: 8-800-123-45-67
             </a>

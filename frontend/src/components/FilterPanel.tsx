@@ -132,6 +132,7 @@ export function FilterPanel({
       <div className="mb-6 pb-6 border-b border-gray-200">
         <div className="flex rounded-xl bg-gray-50 p-1.5 border border-gray-200">
           <button
+            type="button"
             onClick={() => {
               onViewModeChange("products");
               setExpandedCategories(new Set());
@@ -146,6 +147,7 @@ export function FilterPanel({
             Товары
           </button>
           <button
+            type="button"
             onClick={() => {
               onViewModeChange("services");
               setExpandedCategories(new Set());
@@ -164,6 +166,7 @@ export function FilterPanel({
 
       <div className="border-b border-gray-200 pb-6 mb-6">
         <button
+          type="button"
           onClick={() => setCategoriesOpen((prev) => !prev)}
           className="flex items-center justify-between w-full mb-4"
         >
@@ -183,6 +186,7 @@ export function FilterPanel({
               return (
                 <div key={category.id} className="space-y-1">
                   <button
+                    type="button"
                     onClick={() => toggleMainCategory(category.id)}
                     className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                   >
@@ -212,6 +216,7 @@ export function FilterPanel({
                                 className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer flex-shrink-0"
                               />
                               <button
+                                type="button"
                                 onClick={() => toggleSubcategoryExpansion(subcategory.id)}
                                 className="w-full flex items-center gap-2"
                               >
@@ -258,6 +263,7 @@ export function FilterPanel({
 
       <div className="border-b border-gray-200 pb-6 mb-6">
         <button
+          type="button"
           onClick={() => setPriceOpen((prev) => !prev)}
           className="flex items-center justify-between w-full mb-4"
         >
@@ -297,6 +303,7 @@ export function FilterPanel({
 
       <div className="border-b border-gray-200 pb-6 mb-6">
         <button
+          type="button"
           onClick={() => setRatingOpen((prev) => !prev)}
           className="flex items-center justify-between w-full mb-4"
         >
@@ -424,6 +431,7 @@ export function FilterPanel({
       </div>
 
       <button
+        type="button"
         onClick={handleResetFilters}
         className="w-full py-3 text-base border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300"
       >
@@ -431,6 +439,7 @@ export function FilterPanel({
       </button>
 
       <button
+        type="button"
         onClick={handleApplyFilters}
         className="w-full mt-3 py-3 text-base text-white bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] rounded-xl transition-all duration-300"
       >

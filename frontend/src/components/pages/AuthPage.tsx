@@ -73,20 +73,20 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-white/95 backdrop-blur-3xl rounded-2xl border-2 border-[rgb(38,83,141)] shadow-2xl p-6 sm:p-8 md:p-10 relative z-10">
+    <div className="min-h-screen app-shell relative flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-xl sm:p-8 md:p-10">
         <button
           onClick={onBack}
-          className="text-sm text-gray-600 hover:text-black transition-colors duration-300 block w-full text-left font-bold mb-4"
+          className="back-link mb-4 block w-full text-left text-sm"
         >
           ← На главную
         </button>
 
-        <div className="flex gap-2 mb-6 bg-gray-100 rounded-xl p-[3px]">
+        <div className="mb-6 flex gap-2 rounded-xl border border-slate-200 bg-slate-100 p-[3px]">
           <button
             type="button"
             onClick={() => setIsSignUp(false)}
-            className={`flex-1 py-3 rounded-lg text-base transition-all duration-300 ${
+            className={`flex-1 rounded-lg py-3 text-sm transition-all duration-300 sm:text-base ${
               !isSignUp ? "bg-white text-black shadow-sm" : "bg-transparent text-gray-600 hover:text-black"
             }`}
           >
@@ -95,7 +95,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           <button
             type="button"
             onClick={() => setIsSignUp(true)}
-            className={`flex-1 py-3 rounded-lg text-base transition-all duration-300 ${
+            className={`flex-1 rounded-lg py-3 text-sm transition-all duration-300 sm:text-base ${
               isSignUp ? "bg-white text-black shadow-sm" : "bg-transparent text-gray-600 hover:text-black"
             }`}
           >
@@ -111,7 +111,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               value={formData.name}
               onChange={(event) => setFormData({ ...formData, name: event.target.value })}
               placeholder="Ваше имя"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300"
+              className="field-control"
             />
           )}
 
@@ -122,7 +122,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               value={formData.username}
               onChange={(event) => setFormData({ ...formData, username: event.target.value })}
               placeholder="Имя пользователя"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300"
+              className="field-control"
             />
           )}
 
@@ -132,7 +132,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
             value={formData.email}
             onChange={(event) => setFormData({ ...formData, email: event.target.value })}
             placeholder="Email"
-            className="w-full px-4 py-3 rounded-xl border border-gray-300"
+            className="field-control"
           />
 
           <div className="relative">
@@ -142,7 +142,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               value={formData.password}
               onChange={(event) => setFormData({ ...formData, password: event.target.value })}
               placeholder="Пароль"
-              className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300"
+              className="field-control pr-12"
             />
             <button
               type="button"
@@ -156,14 +156,14 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] disabled:bg-gray-400 text-white rounded-xl transition-all duration-300"
+            className="btn-primary w-full py-3 disabled:bg-gray-400"
           >
             {isLoading ? "Подождите..." : isSignUp ? "Зарегистрироваться" : "Войти"}
           </button>
         </form>
 
         {!isSignUp && (
-          <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs space-y-2">
+          <div className="mt-6 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
             <p className="font-semibold text-center">Тестовые данные для входа</p>
             <p>
               Пользователь: <code>{DEMO_CREDENTIALS.regular.email}</code> / <code>{DEMO_CREDENTIALS.regular.password}</code>
@@ -178,7 +178,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
         )}
 
         <div className="mt-5 text-center">
-          <button onClick={onPartnershipClick} className="text-sm text-[rgb(38,83,141)] hover:underline">
+          <button onClick={onPartnershipClick} className="text-sm text-[rgb(38,83,141)] hover:text-[rgb(58,103,161)]">
             Стать партнером
           </button>
         </div>

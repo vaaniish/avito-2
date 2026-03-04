@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { LogOut, MapPin, Package, Plus, Settings, Star, Store, User as UserIcon, X } from "lucide-react";
+import { LogOut, MapPin, Package, Plus, Star, Store, User as UserIcon, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { AchievementsPage } from "../partner/AchievementsPage";
 import { PartnerListingsPage } from "./PartnerListingsPage";
@@ -95,12 +95,19 @@ type ProfilePayload = {
   wishlist: WishlistItem[];
 };
 
-const baseTabsRegular: Array<{ id: TabType; label: string; icon: typeof UserIcon }> = [
+const regularTabs: Array<{ id: TabType; label: string; icon: typeof UserIcon }> = [
   { id: "profile", label: "Профиль", icon: UserIcon },
   { id: "addresses", label: "Адреса", icon: MapPin },
   { id: "orders", label: "Заказы", icon: Package },
   { id: "wishlist", label: "Избранное", icon: Star },
   { id: "partnership", label: "Партнерство", icon: Store },
+];
+
+const partnerBaseTabs: Array<{ id: TabType; label: string; icon: typeof UserIcon }> = [
+  { id: "profile", label: "Профиль", icon: UserIcon },
+  { id: "addresses", label: "Адреса", icon: MapPin },
+  { id: "orders", label: "Заказы", icon: Package },
+  { id: "wishlist", label: "Избранное", icon: Star },
 ];
 
 const partnerTabs: Array<{ id: TabType; label: string; icon: typeof Store }> = [
@@ -153,9 +160,15 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   });
 
   const tabs = useMemo(
-    () => (userType === "partner" ? [...baseTabsRegular, ...partnerTabs] : baseTabsRegular),
+    () => (userType === "partner" ? [...partnerBaseTabs, ...partnerTabs] : regularTabs),
     [userType],
   );
+
+  useEffect(() => {
+    if (!tabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(userType === "partner" ? "partner-achievements" : "profile");
+    }
+  }, [activeTab, tabs, userType]);
 
   const loadProfile = async () => {
     setIsLoading(true);
@@ -483,55 +496,100 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   }
 
   return (
-    <div className="pt-24 md:pt-28 pb-16 bg-gray-50 min-h-screen">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <aside className="lg:w-80 bg-white border border-gray-200 rounded-2xl p-4 h-fit">
-            <button onClick={onBack} className="text-sm text-gray-500 hover:text-gray-900 mb-4">← На главную</button>
+    <div className="min-h-screen app-shell pb-16 pt-24 md:pt-28">
+      <div className="page-container">
+        <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
+          <aside className="surface-card h-fit lg:w-80 p-4">
+            <button onClick={onBack} className="back-link mb-4 text-sm">← На главную</button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden">
-                {profile?.avatar ? (
+            <div className="mb-4 flex items-center gap-3">
+              <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                {userType !== "partner" && profile?.avatar ? (
                   <img src={profile.avatar} alt={profile.displayName} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-500">
-                    <UserIcon className="w-6 h-6" />
+                    <UserIcon className="h-5 w-5" />
                   </div>
                 )}
               </div>
               <div>
-                <div className="font-semibold">{profile?.displayName || profile?.name}</div>
+                <div className="text-sm font-semibold">{profile?.displayName || profile?.name}</div>
                 <div className="text-xs text-gray-500">На Ecomm с {profile?.joinDate} года</div>
               </div>
             </div>
 
-            <div className="space-y-1 mb-4">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 ${
-                      activeTab === tab.id ? "bg-[rgb(38,83,141)] text-white" : "hover:bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
+            {userType === "partner" ? (
+              <div className="mb-4 space-y-4">
+                <div>
+                  <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-gray-500">Базовые</p>
+                  <div className="space-y-1">
+                    {partnerBaseTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+                            activeTab === tab.id ? "bg-[rgb(38,83,141)] text-white" : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-gray-500">Партнерские</p>
+                  <div className="space-y-1">
+                    {partnerTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+                            activeTab === tab.id ? "bg-[rgb(38,83,141)] text-white" : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-4 space-y-1">
+                {regularTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+                        activeTab === tab.id ? "bg-[rgb(38,83,141)] text-white" : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <button
               onClick={onLogout}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-700 flex items-center justify-center gap-2"
+              className="btn-secondary flex w-full items-center justify-center gap-2 px-3 py-2 text-sm text-gray-700"
             >
-              <LogOut className="w-4 h-4" /> Выйти
+              <LogOut className="h-4 w-4" /> Выйти
             </button>
           </aside>
 
-          <main className="flex-1 bg-white border border-gray-200 rounded-2xl p-4 md:p-6">
+          <main className="surface-card flex-1 p-4 md:p-6">
             {renderActiveTab()}
           </main>
         </div>

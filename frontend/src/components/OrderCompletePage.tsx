@@ -1,10 +1,11 @@
 import React from "react";
-import { Check, Package, Truck, Home } from "lucide-react";
+import { Check, Package, Truck, Home, Store } from "lucide-react";
 
 interface OrderCompletePageProps {
   orderTotal: number;
   orderIds: string[];
   paymentMethod: "card" | "cash";
+  deliveryType: "delivery" | "pickup";
   onViewHistory: () => void;
   onBackToHome: () => void;
 }
@@ -13,6 +14,7 @@ export function OrderCompletePage({
   orderTotal,
   orderIds,
   paymentMethod,
+  deliveryType,
   onViewHistory,
   onBackToHome,
 }: OrderCompletePageProps) {
@@ -29,9 +31,11 @@ export function OrderCompletePage({
     paymentMethod === "card"
       ? "Банковская карта"
       : "Наличные при получении";
+  const secondStepLabel = deliveryType === "pickup" ? "Готов к выдаче" : "В пути";
+  const thirdStepLabel = deliveryType === "pickup" ? "Получен" : "Доставлен";
 
   return (
-    <div className="min-h-screen bg-white pt-24 md:pt-28 pb-16">
+    <div className="min-h-screen app-shell pb-16 pt-[calc(var(--header-height,84px)+1rem)] md:pt-[calc(var(--header-height,84px)+1.4rem)]">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
         {/* Page Title */}
         <h1 className="text-3xl md:text-5xl text-gray-900 mb-8 md:mb-12 text-center">
@@ -118,18 +122,22 @@ export function OrderCompletePage({
                 </span>
               </div>
 
-              {/* Step 2 - In Transit */}
+              {/* Step 2 */}
               <div className="flex flex-col items-center">
                 <div className="relative mb-3">
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                    <Truck className="w-8 h-8 md:w-10 md:h-10 text-gray-500" />
+                    {deliveryType === "pickup" ? (
+                      <Store className="w-8 h-8 md:w-10 md:h-10 text-gray-500" />
+                    ) : (
+                      <Truck className="w-8 h-8 md:w-10 md:h-10 text-gray-500" />
+                    )}
                   </div>
                   <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center text-xs">
                     2
                   </div>
                 </div>
                 <span className="text-xs md:text-sm text-gray-400">
-                  В пути
+                  {secondStepLabel}
                 </span>
               </div>
 
@@ -144,7 +152,7 @@ export function OrderCompletePage({
                   </div>
                 </div>
                 <span className="text-xs md:text-sm text-gray-400">
-                  Доставлен
+                  {thirdStepLabel}
                 </span>
               </div>
             </div>
@@ -199,13 +207,13 @@ export function OrderCompletePage({
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={onViewHistory}
-                className="flex-1 py-3 md:py-4 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] text-white rounded-xl transition-all duration-300 text-sm md:text-base"
+                className="btn-primary flex-1 py-3 text-sm md:py-4 md:text-base"
               >
                 История покупок
               </button>
               <button
                 onClick={onBackToHome}
-                className="flex-1 py-3 md:py-4 bg-white text-gray-900 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 text-sm md:text-base"
+                className="btn-secondary flex-1 py-3 text-sm md:py-4 md:text-base"
               >
                 На главную
               </button>
@@ -215,8 +223,9 @@ export function OrderCompletePage({
           {/* Additional Info */}
           <div className="mt-8 md:mt-10 text-center">
             <p className="text-sm md:text-base text-gray-600 mb-2">
-              Информация о доставке отправлена на вашу
-              электронную почту
+              {deliveryType === "pickup"
+                ? "Информация о самовывозе отправлена на вашу электронную почту"
+                : "Информация о доставке отправлена на вашу электронную почту"}
             </p>
             <p className="text-xs md:text-sm text-gray-500">
               Вы можете отслеживать статус заказа в разделе

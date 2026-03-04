@@ -105,9 +105,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-[rgb(38,83,141)] text-white sticky top-0 z-50 border-b-2 border-white">
+    <div className="min-h-screen app-shell">
+      <header className="sticky top-0 z-50 border-b border-slate-300 bg-[rgb(38,83,141)] text-white shadow-sm">
         <div className="px-3 md:px-6 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-4">
             <button
@@ -142,13 +141,12 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
         <aside
           className={`${
             isMobileMenuOpen
               ? "translate-x-0"
               : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:sticky top-[56px] md:top-[73px] left-0 h-[calc(100vh-56px)] md:h-[calc(100vh-73px)] w-72 md:w-80 bg-white border-r-2 border-gray-200 transition-transform duration-300 z-40 overflow-y-auto`}
+          } fixed left-0 top-[56px] z-40 h-[calc(100vh-56px)] w-72 overflow-y-auto border-r border-slate-200 bg-white transition-transform duration-300 md:top-[73px] md:h-[calc(100vh-73px)] md:w-80 lg:sticky lg:translate-x-0`}
         >
           <nav className="p-3 md:p-4 space-y-1.5 md:space-y-2">
             {navigation.map((item) => {
@@ -189,7 +187,6 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           </nav>
         </aside>
 
-        {/* Mobile Overlay */}
         {isMobileMenuOpen && (
           <div
             onClick={() => setIsMobileMenuOpen(false)}
@@ -197,8 +194,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-3 md:p-6 lg:p-8 w-full min-w-0">
+        <main className="w-full min-w-0 flex-1 p-3 md:p-6 lg:p-8">
           {renderPage()}
         </main>
       </div>

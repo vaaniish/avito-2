@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.profileRouter = void 0;
+const crypto_1 = require("crypto");
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
@@ -18,9 +19,69 @@ function toLocalizedDeliveryDate(date) {
         month: "long",
     });
 }
+function getYooKassaConfig() {
+    const shopId = process.env.YOOKASSA_SHOP_ID?.trim();
+    const secretKey = process.env.YOOKASSA_SECRET_KEY?.trim();
+    if (!shopId || !secretKey) {
+        throw new Error("YooKassa is not configured. Set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY.");
+    }
+    return {
+        shopId,
+        secretKey,
+        returnUrl: process.env.YOOKASSA_RETURN_URL?.trim() || "http://127.0.0.1:3000",
+        apiUrl: process.env.YOOKASSA_API_URL?.trim() || "https://api.yookassa.ru/v3",
+    };
+}
+async function createYooKassaPayment(params) {
+    const config = getYooKassaConfig();
+    const authToken = Buffer.from(`${config.shopId}:${config.secretKey}`, "utf8").toString("base64");
+    const response = await fetch(`${config.apiUrl}/payments`, {
+        method: "POST",
+        headers: {
+            Authorization: `Basic ${authToken}`,
+            "Content-Type": "application/json",
+            "Idempotence-Key": (0, crypto_1.randomUUID)(),
+        },
+        body: JSON.stringify({
+            amount: {
+                value: params.amountRub.toFixed(2),
+                currency: "RUB",
+            },
+            capture: true,
+            confirmation: {
+                type: "redirect",
+                return_url: config.returnUrl,
+            },
+            description: params.description,
+            metadata: params.metadata,
+        }),
+    });
+    const rawBody = await response.text();
+    const payload = rawBody ? JSON.parse(rawBody) : {};
+    if (!response.ok) {
+        const message = typeof payload === "object" &&
+            payload !== null &&
+            "description" in payload &&
+            typeof payload.description === "string"
+            ? payload.description
+            : `YooKassa request failed with status ${response.status}`;
+        throw new Error(message);
+    }
+    if (typeof payload !== "object" ||
+        payload === null ||
+        typeof payload.id !== "string" ||
+        typeof payload.status !== "string") {
+        throw new Error("Invalid YooKassa response");
+    }
+    return payload;
+}
 profileRouter.get("/me", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -122,7 +183,11 @@ profileRouter.get("/me", async (req, res) => {
 });
 profileRouter.patch("/me", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -138,8 +203,12 @@ profileRouter.patch("/me", async (req, res) => {
         }
         const firstName = typeof body.firstName === "string" ? body.firstName.trim() : undefined;
         const lastName = typeof body.lastName === "string" ? body.lastName.trim() : undefined;
-        const displayName = typeof body.displayName === "string" ? body.displayName.trim() : undefined;
-        const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : undefined;
+        const displayName = typeof body.displayName === "string"
+            ? body.displayName.trim()
+            : undefined;
+        const email = typeof body.email === "string"
+            ? body.email.trim().toLowerCase()
+            : undefined;
         const oldPassword = typeof body.oldPassword === "string" ? body.oldPassword : "";
         const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
         if (newPassword && oldPassword !== user.password) {
@@ -153,7 +222,9 @@ profileRouter.patch("/me", async (req, res) => {
                 last_name: lastName ?? undefined,
                 display_name: displayName ?? undefined,
                 email: email ?? undefined,
-                name: displayName || [firstName, lastName].filter(Boolean).join(" ") || undefined,
+                name: displayName ||
+                    [firstName, lastName].filter(Boolean).join(" ") ||
+                    undefined,
                 password: newPassword || undefined,
             },
             select: {
@@ -187,7 +258,11 @@ profileRouter.patch("/me", async (req, res) => {
 });
 profileRouter.get("/addresses", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -215,7 +290,11 @@ profileRouter.get("/addresses", async (req, res) => {
 });
 profileRouter.post("/addresses", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -268,7 +347,11 @@ profileRouter.post("/addresses", async (req, res) => {
 });
 profileRouter.patch("/addresses/:id", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -301,7 +384,9 @@ profileRouter.patch("/addresses/:id", async (req, res) => {
                 city: typeof body.city === "string" ? body.city.trim() : undefined,
                 street: typeof body.street === "string" ? body.street.trim() : undefined,
                 building: typeof body.building === "string" ? body.building.trim() : undefined,
-                postal_code: typeof body.postalCode === "string" ? body.postalCode.trim() : undefined,
+                postal_code: typeof body.postalCode === "string"
+                    ? body.postalCode.trim()
+                    : undefined,
                 is_default: isDefault,
             },
         });
@@ -323,7 +408,11 @@ profileRouter.patch("/addresses/:id", async (req, res) => {
 });
 profileRouter.delete("/addresses/:id", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -352,7 +441,11 @@ profileRouter.delete("/addresses/:id", async (req, res) => {
 });
 profileRouter.post("/addresses/:id/default", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -388,7 +481,11 @@ profileRouter.post("/addresses/:id/default", async (req, res) => {
 });
 profileRouter.post("/orders", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -401,12 +498,18 @@ profileRouter.post("/orders", async (req, res) => {
             listingId: typeof item.listingId === "string" ? item.listingId : "",
             quantity: Number(item.quantity ?? 0),
         }))
-            .filter((item) => item.listingId && Number.isInteger(item.quantity) && item.quantity > 0);
+            .filter((item) => item.listingId &&
+            Number.isInteger(item.quantity) &&
+            item.quantity > 0);
         if (parsedItems.length === 0) {
-            res.status(400).json({ error: "Корзина пуста или содержит некорректные позиции" });
+            res
+                .status(400)
+                .json({ error: "Корзина пуста или содержит некорректные позиции" });
             return;
         }
-        const listingPublicIds = [...new Set(parsedItems.map((item) => item.listingId))];
+        const listingPublicIds = [
+            ...new Set(parsedItems.map((item) => item.listingId)),
+        ];
         const listings = await prisma_1.prisma.marketplaceListing.findMany({
             where: {
                 public_id: { in: listingPublicIds },
@@ -423,7 +526,9 @@ profileRouter.post("/orders", async (req, res) => {
             },
         });
         if (listings.length !== listingPublicIds.length) {
-            res.status(400).json({ error: "Некоторые товары недоступны для заказа" });
+            res
+                .status(400)
+                .json({ error: "Некоторые товары недоступны для заказа" });
             return;
         }
         const listingByPublicId = new Map(listings.map((listing) => [listing.public_id, listing]));
@@ -475,29 +580,56 @@ profileRouter.post("/orders", async (req, res) => {
             res.status(400).json({ error: "Укажите адрес доставки" });
             return;
         }
+        const preparedOrders = Array.from(groupedBySeller.entries()).map(([sellerId, items], index) => {
+            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const deliveryCost = deliveryType === "DELIVERY" ? 500 : 0;
+            const discount = 0;
+            const totalPrice = subtotal + deliveryCost - discount;
+            const publicId = `ORD-${Date.now()}-${index + 1}`;
+            return {
+                sellerId,
+                items,
+                subtotal,
+                deliveryCost,
+                discount,
+                totalPrice,
+                publicId,
+            };
+        });
+        const totalAmount = preparedOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+        const yookassaPayment = paymentMethod === "card"
+            ? await createYooKassaPayment({
+                amountRub: totalAmount,
+                description: `Оплата заказа в Ecomm (${preparedOrders.length} шт.)`,
+                metadata: {
+                    source: "avito-2",
+                    buyer_id: String(session.user.id),
+                    orders_count: String(preparedOrders.length),
+                },
+            })
+            : null;
+        if (paymentMethod === "card" &&
+            !yookassaPayment?.confirmation?.confirmation_url) {
+            throw new Error("YooKassa did not return confirmation URL for redirect payment");
+        }
         const createdOrders = await prisma_1.prisma.$transaction(async (tx) => {
             const result = [];
             let sequence = 0;
-            for (const [sellerId, items] of groupedBySeller.entries()) {
+            for (const preparedOrder of preparedOrders) {
                 sequence += 1;
-                const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                const deliveryCost = deliveryType === "DELIVERY" ? 500 : 0;
-                const discount = 0;
-                const totalPrice = subtotal + deliveryCost - discount;
-                const publicId = `ORD-${Date.now()}-${sequence}`;
                 const order = await tx.marketOrder.create({
                     data: {
-                        public_id: publicId,
+                        public_id: preparedOrder.publicId,
                         buyer_id: session.user.id,
-                        seller_id: sellerId,
+                        seller_id: preparedOrder.sellerId,
                         status: "PAID",
                         delivery_type: deliveryType,
                         delivery_address: deliveryType === "DELIVERY" ? deliveryAddress : "Самовывоз",
-                        total_price: totalPrice,
-                        delivery_cost: deliveryCost,
-                        discount,
+                        total_price: preparedOrder.totalPrice,
+                        delivery_cost: preparedOrder.deliveryCost,
+                        discount: preparedOrder.discount,
                         items: {
-                            create: items.map((item) => ({
+                            create: preparedOrder.items.map((item) => ({
                                 listing_id: item.listing_id,
                                 name: item.name,
                                 image: item.image,
@@ -508,32 +640,53 @@ profileRouter.post("/orders", async (req, res) => {
                     },
                 });
                 const commissionRate = 3.5;
-                const commission = Math.round((totalPrice * commissionRate) / 100);
+                const commission = Math.round((preparedOrder.totalPrice * commissionRate) / 100);
                 await tx.platformTransaction.create({
                     data: {
                         public_id: `TXN-${Date.now()}-${sequence}`,
                         order_id: order.id,
                         buyer_id: session.user.id,
-                        seller_id: sellerId,
-                        amount: totalPrice,
+                        seller_id: preparedOrder.sellerId,
+                        amount: preparedOrder.totalPrice,
                         status: paymentMethod === "cash" ? "SUCCESS" : "HELD",
                         commission_rate: commissionRate,
                         commission,
-                        payment_provider: paymentMethod === "cash" ? "Cash" : "Card",
-                        payment_intent_id: `pay_${Date.now()}_${sequence}`,
+                        payment_provider: paymentMethod === "cash" ? "Cash" : "YooMoney",
+                        payment_intent_id: paymentMethod === "cash"
+                            ? `pay_${Date.now()}_${sequence}`
+                            : yookassaPayment?.id ?? `pay_${Date.now()}_${sequence}`,
                     },
                 });
                 result.push({
                     order_id: order.public_id,
-                    total_price: totalPrice,
+                    total_price: preparedOrder.totalPrice,
                 });
             }
             return result;
+        });
+        await prisma_1.prisma.auditLog.create({
+            data: {
+                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                admin_id: session.user.id,
+                action: "create_order",
+                target_id: createdOrders.map((o) => o.order_id).join(", "),
+                target_type: "order",
+                details: `Пользователь ${session.user.email} создал ${createdOrders.length} заказ(а/ов) на сумму ${createdOrders.reduce((sum, order) => sum + order.total_price, 0)}.`,
+                ip_address: req.ip || "127.0.0.1",
+            },
         });
         res.status(201).json({
             success: true,
             orders: createdOrders,
             total: createdOrders.reduce((sum, order) => sum + order.total_price, 0),
+            payment: paymentMethod === "card"
+                ? {
+                    provider: "yoomoney",
+                    paymentId: yookassaPayment?.id ?? null,
+                    status: yookassaPayment?.status ?? null,
+                    confirmationUrl: yookassaPayment?.confirmation?.confirmation_url ?? null,
+                }
+                : null,
         });
     }
     catch (error) {
@@ -543,7 +696,11 @@ profileRouter.post("/orders", async (req, res) => {
 });
 profileRouter.get("/orders", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -589,7 +746,11 @@ profileRouter.get("/orders", async (req, res) => {
 });
 profileRouter.get("/wishlist", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -621,14 +782,18 @@ profileRouter.get("/wishlist", async (req, res) => {
 });
 profileRouter.post("/wishlist/:listingPublicId", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
         }
         const { listingPublicId } = req.params;
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
-            where: { public_id: listingPublicId },
+            where: { public_id: String(listingPublicId) },
             select: { id: true },
         });
         if (!listing) {
@@ -648,6 +813,17 @@ profileRouter.post("/wishlist/:listingPublicId", async (req, res) => {
             },
             update: {},
         });
+        await prisma_1.prisma.auditLog.create({
+            data: {
+                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                admin_id: session.user.id,
+                action: "add_to_wishlist",
+                target_id: String(listingPublicId),
+                target_type: "listing",
+                details: `Пользователь ${session.user.email} добавил товар ${listingPublicId} в избранное.`,
+                ip_address: req.ip || "127.0.0.1",
+            },
+        });
         res.status(201).json({ success: true });
     }
     catch (error) {
@@ -657,14 +833,18 @@ profileRouter.post("/wishlist/:listingPublicId", async (req, res) => {
 });
 profileRouter.delete("/wishlist/:listingPublicId", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
         }
         const { listingPublicId } = req.params;
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
-            where: { public_id: listingPublicId },
+            where: { public_id: String(listingPublicId) },
             select: { id: true },
         });
         if (!listing) {
@@ -677,6 +857,17 @@ profileRouter.delete("/wishlist/:listingPublicId", async (req, res) => {
                 listing_id: listing.id,
             },
         });
+        await prisma_1.prisma.auditLog.create({
+            data: {
+                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                admin_id: session.user.id,
+                action: "remove_from_wishlist",
+                target_id: String(listingPublicId),
+                target_type: "listing",
+                details: `Пользователь ${session.user.email} удалил товар ${listingPublicId} из избранного.`,
+                ip_address: req.ip || "127.0.0.1",
+            },
+        });
         res.json({ success: true });
     }
     catch (error) {
@@ -686,7 +877,11 @@ profileRouter.delete("/wishlist/:listingPublicId", async (req, res) => {
 });
 profileRouter.post("/partnership-requests", async (req, res) => {
     try {
-        const session = await (0, session_1.requireAnyRole)(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
         if (!session.ok) {
             res.status(session.status).json({ error: session.message });
             return;
@@ -716,8 +911,12 @@ profileRouter.post("/partnership-requests", async (req, res) => {
                 category,
                 inn: typeof body.inn === "string" ? body.inn.trim() : null,
                 geography: typeof body.geography === "string" ? body.geography.trim() : null,
-                social_profile: typeof body.socialProfile === "string" ? body.socialProfile.trim() : null,
-                credibility: typeof body.credibility === "string" ? body.credibility.trim() : null,
+                social_profile: typeof body.socialProfile === "string"
+                    ? body.socialProfile.trim()
+                    : null,
+                credibility: typeof body.credibility === "string"
+                    ? body.credibility.trim()
+                    : null,
                 why_us: whyUs,
             },
         });

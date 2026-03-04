@@ -5,7 +5,7 @@ import type { CartItem } from "../types";
 interface CartPageProps {
   items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
-  onCheckout: () => void;
+  onCheckout: (deliveryType: "delivery" | "pickup") => void;
 }
 
 export function CartPage({
@@ -14,8 +14,8 @@ export function CartPage({
   onCheckout,
 }: CartPageProps) {
   const [shippingMethod, setShippingMethod] = useState<
-    "free" | "express" | "pickup"
-  >("free");
+    "delivery" | "pickup"
+  >("delivery");
   const [couponCode, setCouponCode] = useState("");
   const [editingQuantities, setEditingQuantities] = useState<{
     [key: string]: string;
@@ -92,8 +92,7 @@ export function CartPage({
   );
 
   const shippingCosts = {
-    free: 0,
-    express: 1500,
+    delivery: 500,
     pickup: 0,
   };
 
@@ -106,7 +105,7 @@ export function CartPage({
   };
 
   return (
-    <div className="min-h-screen bg-white pt-6 md:pt-12 pb-24">
+    <div className="min-h-screen app-shell pb-24 pt-6 md:pt-12">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
         {/* Page Title */}
         <h1 className="text-center mb-8 md:mb-12">Корзина</h1>
@@ -406,7 +405,7 @@ export function CartPage({
                   />
                   <button
                     onClick={handleApplyCoupon}
-                    className="px-4 sm:px-6 md:px-8 py-3 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] text-white rounded-xl transition-colors text-sm sm:text-base whitespace-nowrap flex-shrink-0"
+                    className="btn-primary whitespace-nowrap px-4 py-3 text-sm font-medium sm:px-6 sm:text-base md:px-8"
                   >
                     Применить
                   </button>
@@ -428,38 +427,18 @@ export function CartPage({
                       <input
                         type="radio"
                         name="shipping"
-                        checked={shippingMethod === "free"}
+                        checked={shippingMethod === "delivery"}
                         onChange={() =>
-                          setShippingMethod("free")
+                          setShippingMethod("delivery")
                         }
                         className="w-4 h-4 md:w-5 md:h-5 accent-gray-900"
                       />
                       <span className="text-sm md:text-base">
-                        Бесплатная доставка
+                        Доставка до ПВЗ платформы
                       </span>
                     </div>
                     <span className="text-sm md:text-base">
-                      0 ₽
-                    </span>
-                  </label>
-
-                  <label className="flex items-center justify-between p-3 md:p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="shipping"
-                        checked={shippingMethod === "express"}
-                        onChange={() =>
-                          setShippingMethod("express")
-                        }
-                        className="w-4 h-4 md:w-5 md:h-5 accent-gray-900"
-                      />
-                      <span className="text-sm md:text-base">
-                        Экспресс-доставка
-                      </span>
-                    </div>
-                    <span className="text-sm md:text-base">
-                      +1 500 ₽
+                      +500 ₽
                     </span>
                   </label>
 
@@ -516,8 +495,8 @@ export function CartPage({
 
                 {/* Checkout Button */}
                 <button
-                  onClick={onCheckout}
-                  className="w-full py-3 md:py-4 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] text-white rounded-xl transition-all duration-300 text-base"
+                  onClick={() => onCheckout(shippingMethod)}
+                  className="btn-primary w-full py-3 text-base md:py-4"
                 >
                   Оформить заказ
                 </button>

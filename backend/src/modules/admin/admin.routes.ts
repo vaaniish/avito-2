@@ -1,3 +1,13 @@
+import {
+  AppUser,
+  AuditLog,
+  CommissionTier,
+  Complaint,
+  KycRequest,
+  MarketplaceListing,
+  MarketOrderItem,
+  PlatformTransaction,
+} from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { requireRole } from "../../lib/session";
@@ -101,20 +111,27 @@ adminRouter.get("/transactions", async (req: Request, res: Response) => {
     });
 
     res.json(
-      transactions.map((transaction) => ({
-        id: transaction.public_id,
-        orderId: transaction.order.public_id,
-        buyerName: transaction.buyer.name,
-        sellerName: transaction.seller.name,
-        listingTitle:
-          transaction.order.items[0]?.name ?? "Позиция без названия",
-        amount: transaction.amount,
-        commission: transaction.commission,
-        commissionRate: transaction.commission_rate,
-        status: transaction.status.toLowerCase(),
-        paymentProvider: transaction.payment_provider,
-        createdAt: transaction.created_at,
-      })),
+      transactions.map(
+        (
+          transaction: PlatformTransaction & {
+            order: { public_id: string; items: MarketOrderItem[] };
+            buyer: { name: string };
+            seller: { name: string };
+          },
+        ) => ({
+          id: transaction.public_id,
+          orderId: transaction.order.public_id,
+          buyerName: transaction.buyer.name,
+          sellerName: transaction.seller.name,
+          listingTitle: transaction.order.items[0]?.name ?? "Позиция без названия",
+          amount: transaction.amount,
+          commission: transaction.commission,
+          commissionRate: transaction.commission_rate,
+          status: transaction.status.toLowerCase(),
+          paymentProvider: transaction.payment_provider,
+          createdAt: transaction.created_at,
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -156,23 +173,32 @@ adminRouter.get("/complaints", async (req: Request, res: Response) => {
     });
 
     res.json(
-      complaints.map((complaint) => ({
-        id: complaint.public_id,
-        createdAt: complaint.created_at,
-        status: complaint.status.toLowerCase(),
-        complaintType: complaint.complaint_type,
-        listingId: complaint.listing.public_id,
-        listingTitle: complaint.listing.title,
-        sellerId: complaint.seller.public_id,
-        sellerName: complaint.seller.name,
-        reporterName: complaint.reporter.name,
-        sellerViolationsCount: complaint.seller_violations_count,
-        description: complaint.description,
-        evidence: complaint.evidence,
-        checkedAt: complaint.checked_at,
-        checkedBy: complaint.checked_by?.name ?? null,
-        actionTaken: complaint.action_taken,
-      })),
+      complaints.map(
+        (
+          complaint: Complaint & {
+            listing: { public_id: string; title: string };
+            seller: { public_id: string; name: string };
+            reporter: { name: string };
+            checked_by: { name: string } | null;
+          },
+        ) => ({
+          id: complaint.public_id,
+          createdAt: complaint.created_at,
+          status: complaint.status.toLowerCase(),
+          complaintType: complaint.complaint_type,
+          listingId: complaint.listing.public_id,
+          listingTitle: complaint.listing.title,
+          sellerId: complaint.seller.public_id,
+          sellerName: complaint.seller.name,
+          reporterName: complaint.reporter.name,
+          sellerViolationsCount: complaint.seller_violations_count,
+          description: complaint.description,
+          evidence: complaint.evidence,
+          checkedAt: complaint.checked_at,
+          checkedBy: complaint.checked_by?.name ?? null,
+          actionTaken: complaint.action_taken,
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching complaints:", error);
@@ -198,7 +224,7 @@ adminRouter.patch("/complaints/:publicId", async (req: Request, res: Response) =
     }
 
     const existing = await prisma.complaint.findUnique({
-      where: { public_id: publicId },
+      where: { public_id: String(publicId) },
       select: { id: true },
     });
 
@@ -213,17 +239,16 @@ adminRouter.patch("/complaints/:publicId", async (req: Request, res: Response) =
         status: parsedStatus,
         checked_at: new Date(),
         checked_by_id: access.user.id,
-        action_taken:
-          typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
+        action_taken: typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
       },
     });
 
     await writeAudit(
       access.user.id,
       parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint",
-      publicId,
+      String(publicId),
       "complaint",
-      `Complaint status changed to ${parsedStatus}`,
+      `Статус жалобы изменен на ${parsedStatus}`,
       req,
     );
 
@@ -260,23 +285,30 @@ adminRouter.get("/kyc-requests", async (req: Request, res: Response) => {
     });
 
     res.json(
-      requests.map((requestItem) => ({
-        id: requestItem.public_id,
-        createdAt: requestItem.created_at,
-        status: requestItem.status.toLowerCase(),
-        sellerId: requestItem.seller.public_id,
-        sellerName: requestItem.seller.name,
-        email: requestItem.email,
-        phone: requestItem.phone,
-        companyName: requestItem.company_name,
-        inn: requestItem.inn,
-        address: requestItem.address,
-        documents: requestItem.documents,
-        notes: requestItem.notes,
-        reviewedAt: requestItem.reviewed_at,
-        reviewedBy: requestItem.reviewed_by?.name ?? null,
-        rejectionReason: requestItem.rejection_reason,
-      })),
+      requests.map(
+        (
+          requestItem: KycRequest & {
+            seller: { public_id: string; name: string };
+            reviewed_by: { name: string } | null;
+          },
+        ) => ({
+          id: requestItem.public_id,
+          createdAt: requestItem.created_at,
+          status: requestItem.status.toLowerCase(),
+          sellerId: requestItem.seller.public_id,
+          sellerName: requestItem.seller.name,
+          email: requestItem.email,
+          phone: requestItem.phone,
+          companyName: requestItem.company_name,
+          inn: requestItem.inn,
+          address: requestItem.address,
+          documents: requestItem.documents,
+          notes: requestItem.notes,
+          reviewedAt: requestItem.reviewed_at,
+          reviewedBy: requestItem.reviewed_by?.name ?? null,
+          rejectionReason: requestItem.rejection_reason,
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching KYC requests:", error);
@@ -302,7 +334,7 @@ adminRouter.patch("/kyc-requests/:publicId", async (req: Request, res: Response)
     }
 
     const existing = await prisma.kycRequest.findUnique({
-      where: { public_id: publicId },
+      where: { public_id: String(publicId) },
       select: { id: true },
     });
 
@@ -327,9 +359,9 @@ adminRouter.patch("/kyc-requests/:publicId", async (req: Request, res: Response)
     await writeAudit(
       access.user.id,
       parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc",
-      publicId,
+      String(publicId),
       "kyc_request",
-      `KYC status changed to ${parsedStatus}`,
+      `Статус KYC изменен на ${parsedStatus}`,
       req,
     );
 
@@ -403,22 +435,29 @@ adminRouter.get("/listings", async (req: Request, res: Response) => {
     });
 
     res.json(
-      listings.map((listing) => ({
-        id: listing.public_id,
-        title: listing.title,
-        sellerId: listing.seller.public_id,
-        sellerName: listing.seller.name,
-        status: toAdminListingStatus(listing.moderation_status),
-        createdAt: listing.created_at,
-        category: listing.category_name,
-        price: listing.price,
-        complaintsCount: listing._count.complaints,
-        autoFlags: buildAutoFlags({
-          description: listing.description,
-          seller: listing.seller,
-          complaints_count: listing._count.complaints,
+      listings.map(
+        (
+          listing: MarketplaceListing & {
+            seller: { public_id: string; name: string; joined_at: Date };
+            _count: { complaints: number };
+          },
+        ) => ({
+          id: listing.public_id,
+          title: listing.title,
+          sellerId: listing.seller.public_id,
+          sellerName: listing.seller.name,
+          status: toAdminListingStatus(listing.moderation_status),
+          createdAt: listing.created_at,
+          category: listing.category_name,
+          price: listing.price,
+          complaintsCount: listing._count.complaints,
+          autoFlags: buildAutoFlags({
+            description: listing.description,
+            seller: listing.seller,
+            complaints_count: listing._count.complaints,
+          }),
         }),
-      })),
+      ),
     );
   } catch (error) {
     console.error("Error fetching listings:", error);
@@ -441,7 +480,7 @@ adminRouter.patch("/listings/:publicId/moderation", async (req: Request, res: Re
     }
 
     const existing = await prisma.marketplaceListing.findUnique({
-      where: { public_id: publicId },
+      where: { public_id: String(publicId) },
       select: { id: true },
     });
 
@@ -451,11 +490,7 @@ adminRouter.patch("/listings/:publicId/moderation", async (req: Request, res: Re
     }
 
     const nextListingStatus =
-      parsedStatus === "APPROVED"
-        ? "ACTIVE"
-        : parsedStatus === "REJECTED"
-          ? "INACTIVE"
-          : "MODERATION";
+      parsedStatus === "APPROVED" ? "ACTIVE" : parsedStatus === "REJECTED" ? "INACTIVE" : "MODERATION";
 
     const updated = await prisma.marketplaceListing.update({
       where: { id: existing.id },
@@ -468,9 +503,9 @@ adminRouter.patch("/listings/:publicId/moderation", async (req: Request, res: Re
     await writeAudit(
       access.user.id,
       parsedStatus === "APPROVED" ? "approve_listing" : "reject_listing",
-      publicId,
+      String(publicId),
       "listing",
-      `Listing moderation changed to ${parsedStatus}`,
+      `Статус модерации объявления изменен на ${parsedStatus}`,
       req,
     );
 
@@ -506,21 +541,31 @@ adminRouter.get("/users", async (req: Request, res: Response) => {
     });
 
     res.json(
-      users.map((user) => ({
-        id: user.public_id,
-        name: user.name,
-        email: user.email,
-        role: toClientRole(user.role),
-        status: user.status.toLowerCase(),
-        joinedAt: user.joined_at,
-        city: user.city,
-        phone: user.phone,
-        blockReason: user.block_reason,
-        buyerOrders: user.orders_as_buyer.length,
-        sellerOrders: user.orders_as_seller.length,
-        buyerSpent: user.orders_as_buyer.reduce((sum, order) => sum + order.total_price, 0),
-        sellerRevenue: user.orders_as_seller.reduce((sum, order) => sum + order.total_price, 0),
-      })),
+      users.map(
+        (
+          user: AppUser & {
+            orders_as_buyer: { total_price: number }[];
+            orders_as_seller: { total_price: number }[];
+          },
+        ) => ({
+          id: user.public_id,
+          name: user.name,
+          email: user.email,
+          role: toClientRole(user.role),
+          status: user.status.toLowerCase(),
+          joinedAt: user.joined_at,
+          city: user.city,
+          phone: user.phone,
+          blockReason: user.block_reason,
+          buyerOrders: user.orders_as_buyer.length,
+          sellerOrders: user.orders_as_seller.length,
+          buyerSpent: user.orders_as_buyer.reduce((sum: number, order: { total_price: number }) => sum + order.total_price, 0),
+          sellerRevenue: user.orders_as_seller.reduce(
+            (sum: number, order: { total_price: number }) => sum + order.total_price,
+            0,
+          ),
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -546,7 +591,7 @@ adminRouter.patch("/users/:publicId/status", async (req: Request, res: Response)
     }
 
     const existing = await prisma.appUser.findUnique({
-      where: { public_id: publicId },
+      where: { public_id: String(publicId) },
       select: {
         id: true,
         role: true,
@@ -568,18 +613,16 @@ adminRouter.patch("/users/:publicId/status", async (req: Request, res: Response)
       data: {
         status: parsedStatus,
         block_reason:
-          parsedStatus === "BLOCKED" && typeof body.blockReason === "string"
-            ? body.blockReason.trim()
-            : null,
+          parsedStatus === "BLOCKED" && typeof body.blockReason === "string" ? body.blockReason.trim() : null,
       },
     });
 
     await writeAudit(
       access.user.id,
       parsedStatus === "BLOCKED" ? "block_user" : "unblock_user",
-      publicId,
+      String(publicId),
       "user",
-      `User status changed to ${parsedStatus}`,
+      `Статус пользователя изменен на ${parsedStatus}`,
       req,
     );
 
@@ -603,7 +646,7 @@ adminRouter.get("/commission-tiers", async (req: Request, res: Response) => {
     });
 
     res.json(
-      tiers.map((tier) => ({
+      tiers.map((tier: CommissionTier) => ({
         id: tier.public_id,
         name: tier.name,
         minSales: tier.min_sales,
@@ -635,7 +678,7 @@ adminRouter.patch("/commission-tiers/:publicId", async (req: Request, res: Respo
     };
 
     const existing = await prisma.commissionTier.findUnique({
-      where: { public_id: publicId },
+      where: { public_id: String(publicId) },
       select: { id: true },
     });
 
@@ -648,29 +691,25 @@ adminRouter.patch("/commission-tiers/:publicId", async (req: Request, res: Respo
       where: { id: existing.id },
       data: {
         name: typeof body.name === "string" ? body.name.trim() : undefined,
-        min_sales:
-          body.minSales === undefined ? undefined : Math.max(0, Number(body.minSales)),
+        min_sales: body.minSales === undefined ? undefined : Math.max(0, Number(body.minSales)),
         max_sales:
           body.maxSales === undefined
             ? undefined
             : body.maxSales === null
-              ? null
-              : Math.max(0, Number(body.maxSales)),
-        commission_rate:
-          body.commissionRate === undefined ? undefined : Number(body.commissionRate),
-        description:
-          typeof body.description === "string" ? body.description.trim() : undefined,
-        sellers_count:
-          body.sellersCount === undefined ? undefined : Math.max(0, Number(body.sellersCount)),
+            ? null
+            : Math.max(0, Number(body.maxSales)),
+        commission_rate: body.commissionRate === undefined ? undefined : Number(body.commissionRate),
+        description: typeof body.description === "string" ? body.description.trim() : undefined,
+        sellers_count: body.sellersCount === undefined ? undefined : Math.max(0, Number(body.sellersCount)),
       },
     });
 
     await writeAudit(
       access.user.id,
       "update_commission_tier",
-      publicId,
+      String(publicId),
       "commission_tier",
-      `Commission tier ${publicId} updated`,
+      `Уровень комиссии ${publicId} обновлен`,
       req,
     );
 
@@ -709,7 +748,7 @@ adminRouter.get("/audit-logs", async (req: Request, res: Response) => {
     });
 
     res.json(
-      logs.map((log) => ({
+      logs.map((log: AuditLog & { admin: { name: string } }) => ({
         id: log.public_id,
         timestamp: log.timestamp,
         admin: log.admin.name,

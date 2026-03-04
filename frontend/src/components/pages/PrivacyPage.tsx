@@ -7,27 +7,27 @@ interface PrivacyPageProps {
 
 export function PrivacyPage({ onBack }: PrivacyPageProps) {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-16">
+    <div className="min-h-screen app-shell">
+      <div className="page-container pb-12 pt-[calc(var(--header-height,84px)+1.1rem)] sm:pb-16">
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 text-lg transition-colors duration-300"
+          className="back-link mb-7 text-sm sm:text-base"
         >
           <ArrowLeft className="w-6 h-6" />
           Назад
         </button>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl text-gray-900 mb-6">Политика конфиденциальности</h1>
-          <p className="text-xl text-gray-600 mb-12">Обновлено: 20 декабря 2025</p>
+        <div className="content-page">
+          <h1 className="mb-6 text-slate-900">Политика конфиденциальности</h1>
+          <p className="text-base sm:text-lg text-gray-600 mb-10">Обновлено: 20 декабря 2025</p>
 
           <div className="space-y-10 text-gray-700">
             {/* Section 1 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">1. Общие положения</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">1. Общие положения</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Настоящая Политика конфиденциальности (далее — «Политика») определяет порядок обработки и защиты 
                   персональных данных пользователей платформы Ecom (далее — «Платформа»).
@@ -45,8 +45,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 2 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">2. Какие данные мы собираем</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">2. Какие данные мы собираем</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Мы собираем следующие категории персональных данных:</p>
                 
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
@@ -73,8 +73,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 3 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">3. Как мы используем ваши данные</h2>
-              <div className="space-y-3 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">3. Как мы используем ваши данные</h2>
+              <div className="space-y-3 text-base sm:text-lg leading-relaxed">
                 <p>Мы используем собранные данные для:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Обработки и доставки заказов</li>
@@ -90,8 +90,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 4 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">4. Передача данных третьим лицам</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">4. Передача данных третьим лицам</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы не продаём и не передаём ваши персональные данные третьим лицам, за исключением следующих случаев:
                 </p>
@@ -109,8 +109,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 5 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">5. Защита данных</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">5. Защита данных</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы применяем технические и организационные меры для защиты ваших данных:
                 </p>
@@ -129,8 +129,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 6 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">6. Ваши права</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">6. Ваши права</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>В соответствии с законодательством вы имеете право:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Получить информацию о хранящихся у нас данных</li>
@@ -149,8 +149,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 7 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">7. Cookies</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">7. Cookies</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы используем cookies для улучшения работы Платформы. Cookies — это небольшие текстовые файлы, 
                   сохраняемые на вашем устройстве.
@@ -171,8 +171,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 8 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">8. Хранение данных</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">8. Хранение данных</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы храним ваши персональные данные только в течение необходимого срока:
                 </p>
@@ -187,8 +187,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 9 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">9. Изменения в Политике</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">9. Изменения в Политике</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы оставляем за собой право изменять данную Политику. При внесении существенных изменений мы 
                   уведомим вас по email или через уведомление на сайте.
@@ -201,8 +201,8 @@ export function PrivacyPage({ onBack }: PrivacyPageProps) {
 
             {/* Section 10 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">10. Контакты</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">10. Контакты</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   По вопросам обработки персональных данных свяжитесь с нами:
                 </p>

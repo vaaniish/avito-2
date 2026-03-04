@@ -3,8 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
 }
 
 model AppUser {
@@ -84,19 +83,10 @@ model CatalogSubcategory {
   updated_at     DateTime              @updatedAt
 
   category       CatalogCategory       @relation(fields: [category_id], references: [id], onDelete: Cascade)
-  items          CatalogSubcategoryItem[]
+
 }
 
-model CatalogSubcategoryItem {
-  id              Int               @id @default(autoincrement())
-  subcategory_id  Int
-  name            String
-  order_index     Int               @default(0)
-  created_at      DateTime          @default(now())
-  updated_at      DateTime          @updatedAt
 
-  subcategory     CatalogSubcategory @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
-}
 
 model MarketplaceListing {
   id                   Int               @id @default(autoincrement())

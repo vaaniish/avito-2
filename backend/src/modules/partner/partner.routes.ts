@@ -1,7 +1,17 @@
+import {
+  ListingQuestion,
+  MarketplaceListing,
+  MarketOrder,
+  MarketOrderItem,
+} from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { requireAnyRole } from "../../lib/session";
-import { toClientCondition, toPartnerListingStatus, toQuestionStatus } from "../../utils/format";
+import {
+  toClientCondition,
+  toPartnerListingStatus,
+  toQuestionStatus,
+} from "../../utils/format";
 
 const partnerRouter = Router();
 const ROLE_SELLER = "SELLER";
@@ -60,7 +70,7 @@ partnerRouter.get("/listings", async (req: Request, res: Response) => {
     });
 
     res.json(
-      listings.map((listing) => ({
+      listings.map((listing: MarketplaceListing) => ({
         id: listing.public_id,
         title: listing.title,
         price: listing.price,
@@ -101,8 +111,10 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
     const title = typeof body.title === "string" ? body.title.trim() : "";
     const price = Number(body.price ?? 0);
     const condition = parseCondition(body.condition);
-    const description = typeof body.description === "string" ? body.description.trim() : "";
-    const category = typeof body.category === "string" ? body.category.trim() : "Без категории";
+    const description =
+      typeof body.description === "string" ? body.description.trim() : "";
+    const category =
+      typeof body.category === "string" ? body.category.trim() : "Без категории";
     const image = typeof body.image === "string" ? body.image.trim() : "";
     const type = parseListingType(body.type);
     const city = typeof body.city === "string" ? body.city.trim() : "Москва";
@@ -154,154 +166,175 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
   }
 });
 
-partnerRouter.patch("/listings/:publicId", async (req: Request, res: Response) => {
-  try {
-    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
-    if (!session.ok) {
-      res.status(session.status).json({ error: session.message });
-      return;
+partnerRouter.patch(
+  "/listings/:publicId",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      const { publicId } = req.params;
+      const existing = await prisma.marketplaceListing.findFirst({
+        where: {
+          public_id: String(publicId),
+          seller_id: session.user.id,
+        },
+      });
+
+      if (!existing) {
+        res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      const body = (req.body ?? {}) as {
+        title?: unknown;
+        price?: unknown;
+        condition?: unknown;
+        description?: unknown;
+        category?: unknown;
+        image?: unknown;
+        city?: unknown;
+      };
+
+      const price = body.price === undefined ? undefined : Number(body.price);
+      if (price !== undefined && (!Number.isFinite(price) || price <= 0)) {
+        res.status(400).json({ error: "Некорректная цена" });
+        return;
+      }
+
+      const updated = await prisma.marketplaceListing.update({
+        where: { id: existing.id },
+        data: {
+          title: typeof body.title === "string" ? body.title.trim() : undefined,
+          price: price === undefined ? undefined : Math.round(price),
+          condition:
+            body.condition === undefined
+              ? undefined
+              : parseCondition(body.condition),
+          description:
+            typeof body.description === "string"
+              ? body.description.trim()
+              : undefined,
+          category_name:
+            typeof body.category === "string"
+              ? body.category.trim()
+              : undefined,
+          image: typeof body.image === "string" ? body.image.trim() : undefined,
+          city: typeof body.city === "string" ? body.city.trim() : undefined,
+          status: LISTING_MODERATION,
+          moderation_status: "PENDING",
+        },
+      });
+
+      res.json({
+        id: updated.public_id,
+        title: updated.title,
+        price: updated.price,
+        condition: toClientCondition(updated.condition),
+        status: toPartnerListingStatus(updated.status),
+        views: updated.views,
+        created_at: updated.created_at,
+        image: updated.image,
+        description: updated.description,
+        category: updated.category_name,
+      });
+    } catch (error) {
+      console.error("Error updating listing:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
+  },
+);
 
-    const { publicId } = req.params;
-    const existing = await prisma.marketplaceListing.findFirst({
-      where: {
-        public_id: publicId,
-        seller_id: session.user.id,
-      },
-    });
+partnerRouter.post(
+  "/listings/:publicId/toggle-status",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
 
-    if (!existing) {
-      res.status(404).json({ error: "Listing not found" });
-      return;
+      const { publicId } = req.params;
+      const existing = await prisma.marketplaceListing.findFirst({
+        where: {
+          public_id: String(publicId),
+          seller_id: session.user.id,
+        },
+      });
+
+      if (!existing) {
+        res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      let nextStatus: string = existing.status;
+      if (existing.status === LISTING_ACTIVE) {
+        nextStatus = LISTING_INACTIVE;
+      } else if (existing.status === LISTING_INACTIVE) {
+        nextStatus = LISTING_MODERATION;
+      }
+
+      const updated = await prisma.marketplaceListing.update({
+        where: { id: existing.id },
+        data: {
+          status: nextStatus,
+          moderation_status:
+            nextStatus === LISTING_MODERATION
+              ? "PENDING"
+              : existing.moderation_status,
+        },
+      });
+
+      res.json({
+        success: true,
+        status: toPartnerListingStatus(updated.status),
+      });
+    } catch (error) {
+      console.error("Error toggling listing status:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
+  },
+);
 
-    const body = (req.body ?? {}) as {
-      title?: unknown;
-      price?: unknown;
-      condition?: unknown;
-      description?: unknown;
-      category?: unknown;
-      image?: unknown;
-      city?: unknown;
-    };
+partnerRouter.delete(
+  "/listings/:publicId",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
 
-    const price = body.price === undefined ? undefined : Number(body.price);
-    if (price !== undefined && (!Number.isFinite(price) || price <= 0)) {
-      res.status(400).json({ error: "Некорректная цена" });
-      return;
+      const { publicId } = req.params;
+      const existing = await prisma.marketplaceListing.findFirst({
+        where: {
+          public_id: String(publicId),
+          seller_id: session.user.id,
+        },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      await prisma.marketplaceListing.delete({
+        where: { id: existing.id },
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const updated = await prisma.marketplaceListing.update({
-      where: { id: existing.id },
-      data: {
-        title: typeof body.title === "string" ? body.title.trim() : undefined,
-        price: price === undefined ? undefined : Math.round(price),
-        condition: body.condition === undefined ? undefined : parseCondition(body.condition),
-        description: typeof body.description === "string" ? body.description.trim() : undefined,
-        category_name: typeof body.category === "string" ? body.category.trim() : undefined,
-        image: typeof body.image === "string" ? body.image.trim() : undefined,
-        city: typeof body.city === "string" ? body.city.trim() : undefined,
-        status: LISTING_MODERATION,
-        moderation_status: "PENDING",
-      },
-    });
-
-    res.json({
-      id: updated.public_id,
-      title: updated.title,
-      price: updated.price,
-      condition: toClientCondition(updated.condition),
-      status: toPartnerListingStatus(updated.status),
-      views: updated.views,
-      created_at: updated.created_at,
-      image: updated.image,
-      description: updated.description,
-      category: updated.category_name,
-    });
-  } catch (error) {
-    console.error("Error updating listing:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-partnerRouter.post("/listings/:publicId/toggle-status", async (req: Request, res: Response) => {
-  try {
-    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
-    if (!session.ok) {
-      res.status(session.status).json({ error: session.message });
-      return;
-    }
-
-    const { publicId } = req.params;
-    const existing = await prisma.marketplaceListing.findFirst({
-      where: {
-        public_id: publicId,
-        seller_id: session.user.id,
-      },
-    });
-
-    if (!existing) {
-      res.status(404).json({ error: "Listing not found" });
-      return;
-    }
-
-    let nextStatus: string = existing.status;
-    if (existing.status === LISTING_ACTIVE) {
-      nextStatus = LISTING_INACTIVE;
-    } else if (existing.status === LISTING_INACTIVE) {
-      nextStatus = LISTING_MODERATION;
-    }
-
-    const updated = await prisma.marketplaceListing.update({
-      where: { id: existing.id },
-      data: {
-        status: nextStatus,
-        moderation_status: nextStatus === LISTING_MODERATION ? "PENDING" : existing.moderation_status,
-      },
-    });
-
-    res.json({
-      success: true,
-      status: toPartnerListingStatus(updated.status),
-    });
-  } catch (error) {
-    console.error("Error toggling listing status:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-partnerRouter.delete("/listings/:publicId", async (req: Request, res: Response) => {
-  try {
-    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
-    if (!session.ok) {
-      res.status(session.status).json({ error: session.message });
-      return;
-    }
-
-    const { publicId } = req.params;
-    const existing = await prisma.marketplaceListing.findFirst({
-      where: {
-        public_id: publicId,
-        seller_id: session.user.id,
-      },
-      select: { id: true },
-    });
-
-    if (!existing) {
-      res.status(404).json({ error: "Listing not found" });
-      return;
-    }
-
-    await prisma.marketplaceListing.delete({
-      where: { id: existing.id },
-    });
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting listing:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  },
+);
 
 partnerRouter.get("/orders", async (req: Request, res: Response) => {
   try {
@@ -328,21 +361,28 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
     });
 
     res.json(
-      orders.map((order) => ({
-        id: order.public_id,
-        buyer_name: order.buyer.name,
-        buyer_id: order.buyer.public_id,
-        total_price: order.total_price,
-        status: order.status,
-        delivery_type: toDeliveryType(order.delivery_type),
-        created_at: order.created_at,
-        items: order.items.map((item) => ({
-          id: String(item.id),
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      })),
+      orders.map(
+        (
+          order: MarketOrder & {
+            buyer: { public_id: string; name: string };
+            items: MarketOrderItem[];
+          },
+        ) => ({
+          id: order.public_id,
+          buyer_name: order.buyer.name,
+          buyer_id: order.buyer.public_id,
+          total_price: order.total_price,
+          status: order.status,
+          delivery_type: toDeliveryType(order.delivery_type),
+          created_at: order.created_at,
+          items: order.items.map((item: MarketOrderItem) => ({
+            id: String(item.id),
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching partner orders:", error);
@@ -350,50 +390,53 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
   }
 });
 
-partnerRouter.patch("/orders/:publicId/status", async (req: Request, res: Response) => {
-  try {
-    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
-    if (!session.ok) {
-      res.status(session.status).json({ error: session.message });
-      return;
+partnerRouter.patch(
+  "/orders/:publicId/status",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      const { publicId } = req.params;
+      const body = (req.body ?? {}) as { status?: unknown };
+      const nextStatus = parseOrderStatus(body.status);
+
+      if (!nextStatus) {
+        res.status(400).json({ error: "Некорректный статус заказа" });
+        return;
+      }
+
+      const existing = await prisma.marketOrder.findFirst({
+        where: {
+          public_id: String(publicId),
+          seller_id: session.user.id,
+        },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        res.status(404).json({ error: "Order not found" });
+        return;
+      }
+
+      const updated = await prisma.marketOrder.update({
+        where: { id: existing.id },
+        data: { status: nextStatus },
+      });
+
+      res.json({
+        success: true,
+        status: updated.status,
+      });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const { publicId } = req.params;
-    const body = (req.body ?? {}) as { status?: unknown };
-    const nextStatus = parseOrderStatus(body.status);
-
-    if (!nextStatus) {
-      res.status(400).json({ error: "Некорректный статус заказа" });
-      return;
-    }
-
-    const existing = await prisma.marketOrder.findFirst({
-      where: {
-        public_id: publicId,
-        seller_id: session.user.id,
-      },
-      select: { id: true },
-    });
-
-    if (!existing) {
-      res.status(404).json({ error: "Order not found" });
-      return;
-    }
-
-    const updated = await prisma.marketOrder.update({
-      where: { id: existing.id },
-      data: { status: nextStatus },
-    });
-
-    res.json({
-      success: true,
-      status: updated.status,
-    });
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  },
+);
 
 partnerRouter.get("/questions", async (req: Request, res: Response) => {
   try {
@@ -427,18 +470,25 @@ partnerRouter.get("/questions", async (req: Request, res: Response) => {
     });
 
     res.json(
-      questions.map((question) => ({
-        id: question.public_id,
-        listingId: question.listing.public_id,
-        listingTitle: question.listing.title,
-        buyerName: question.buyer.name,
-        buyerId: question.buyer.public_id,
-        question: question.question,
-        answer: question.answer,
-        status: toQuestionStatus(question.status),
-        createdAt: question.created_at,
-        answeredAt: question.answered_at,
-      })),
+      questions.map(
+        (
+          question: ListingQuestion & {
+            listing: { public_id: string; title: string };
+            buyer: { public_id: string; name: string };
+          },
+        ) => ({
+          id: question.public_id,
+          listingId: question.listing.public_id,
+          listingTitle: question.listing.title,
+          buyerName: question.buyer.name,
+          buyerId: question.buyer.public_id,
+          question: question.question,
+          answer: question.answer,
+          status: toQuestionStatus(question.status),
+          createdAt: question.created_at,
+          answeredAt: question.answered_at,
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching questions:", error);
@@ -446,58 +496,61 @@ partnerRouter.get("/questions", async (req: Request, res: Response) => {
   }
 });
 
-partnerRouter.post("/questions/:publicId/answer", async (req: Request, res: Response) => {
-  try {
-    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
-    if (!session.ok) {
-      res.status(session.status).json({ error: session.message });
-      return;
-    }
+partnerRouter.post(
+  "/questions/:publicId/answer",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
 
-    const { publicId } = req.params;
-    const body = (req.body ?? {}) as { answer?: unknown };
-    const answer = typeof body.answer === "string" ? body.answer.trim() : "";
+      const { publicId } = req.params;
+      const body = (req.body ?? {}) as { answer?: unknown };
+      const answer = typeof body.answer === "string" ? body.answer.trim() : "";
 
-    if (!answer) {
-      res.status(400).json({ error: "Ответ не может быть пустым" });
-      return;
-    }
+      if (!answer) {
+        res.status(400).json({ error: "Ответ не может быть пустым" });
+        return;
+      }
 
-    const existing = await prisma.listingQuestion.findFirst({
-      where: {
-        public_id: publicId,
-        listing: {
-          seller_id: session.user.id,
+      const existing = await prisma.listingQuestion.findFirst({
+        where: {
+          public_id: String(publicId),
+          listing: {
+            seller_id: session.user.id,
+          },
         },
-      },
-      select: { id: true },
-    });
+        select: { id: true },
+      });
 
-    if (!existing) {
-      res.status(404).json({ error: "Question not found" });
-      return;
+      if (!existing) {
+        res.status(404).json({ error: "Question not found" });
+        return;
+      }
+
+      const updated = await prisma.listingQuestion.update({
+        where: { id: existing.id },
+        data: {
+          answer,
+          status: "ANSWERED",
+          answered_at: new Date(),
+        },
+      });
+
+      res.json({
+        success: true,
+        id: updated.public_id,
+        answer: updated.answer,
+        answeredAt: updated.answered_at,
+        status: toQuestionStatus(updated.status),
+      });
+    } catch (error) {
+      console.error("Error answering question:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const updated = await prisma.listingQuestion.update({
-      where: { id: existing.id },
-      data: {
-        answer,
-        status: "ANSWERED",
-        answered_at: new Date(),
-      },
-    });
-
-    res.json({
-      success: true,
-      id: updated.public_id,
-      answer: updated.answer,
-      answeredAt: updated.answered_at,
-      status: toQuestionStatus(updated.status),
-    });
-  } catch (error) {
-    console.error("Error answering question:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  },
+);
 
 export { partnerRouter };

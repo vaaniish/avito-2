@@ -23,6 +23,13 @@ Optional frontend env (`frontend/.env`):
 - `VITE_API_BASE_URL` (default: `http://localhost:3001/api`)
 - `VITE_YANDEX_MAPS_API_KEY` (enables real Yandex map picker)
 
+Optional backend env (`.env`):
+
+- `YOOKASSA_SHOP_ID` - YooKassa shop id (test)
+- `YOOKASSA_SECRET_KEY` - YooKassa secret key (test)
+- `YOOKASSA_RETURN_URL` - return URL after payment (default: `http://127.0.0.1:3000`)
+- `YOOKASSA_API_URL` - API base URL (default: `https://api.yookassa.ru/v3`)
+
 Useful scripts:
 
 - `npm run dev:frontend` - run only frontend
@@ -44,3 +51,16 @@ Useful scripts:
 - `partner` - seller listings/orders/questions management
 - `admin` - transactions/complaints/KYC/listings/users/commission tiers/audit logs
 - `gamification` - partner XP sandbox (`/api/gamification/*`)
+
+## YooMoney / YooKassa (test mode)
+
+1. Create/get a YooKassa test shop in your YooKassa account.
+2. Put credentials into `.env`:
+   - `YOOKASSA_SHOP_ID=<your_test_shop_id>`
+   - `YOOKASSA_SECRET_KEY=<your_test_secret_key>`
+3. Restart backend (`npm run dev:backend` or `npm run dev`).
+4. In checkout choose `Оплата картой` and click `Перейти к оплате YooMoney`.
+5. Use a test card on YooKassa page, for example:
+   - Card: `5555 5555 5555 4477`
+   - Expiry: `01/30`
+   - CVC: `123`

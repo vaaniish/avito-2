@@ -93,7 +93,7 @@ export function Header({
           <div className="flex items-center justify-between h-24">
             <button
               onClick={handleLogoClick}
-              className="text-2xl lg:text-3xl tracking-tight hover:text-gray-600 transition-colors duration-300 text-[30px] text-[rgb(38,83,141)]"
+              className="text-[40px] leading-none tracking-tight hover:text-gray-600 transition-colors duration-300 text-[rgb(38,83,141)]"
             >
               Ecomm
             </button>
@@ -199,7 +199,7 @@ export function Header({
 
           <button
             onClick={handleLogoClick}
-            className="absolute left-1/2 -translate-x-1/2 text-xl tracking-tight hover:text-gray-600 transition-colors duration-300"
+            className="absolute left-1/2 -translate-x-1/2 text-2xl leading-none tracking-tight hover:text-gray-600 transition-colors duration-300 text-[rgb(38,83,141)]"
           >
             Ecomm
           </button>

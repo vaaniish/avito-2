@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, LayoutGrid, List } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import type { Product, CartItem } from "../types";
 
@@ -25,9 +25,6 @@ export function ProductGrid({
   viewMode,
 }: ProductGridProps) {
   const [sortOpen, setSortOpen] = useState(false);
-  const [displayMode, setDisplayMode] = useState<
-    "grid" | "list"
-  >("grid");
 
   const sortOptions = [
     { value: "popular", label: "Популярные" },
@@ -55,34 +52,6 @@ export function ProductGrid({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Display Mode Toggle - Hidden on mobile */}
-          <div className="hidden sm:flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-            <button
-              onClick={() => setDisplayMode("grid")}
-              className={`p-2 rounded-md transition-all duration-300 ${
-                displayMode === "grid"
-                  ? "bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] text-white"
-                  : // ? 'bg-gray-900 text-white'
-                    "text-gray-600 hover:bg-gray-100"
-              }`}
-              title="Сетка"
-            >
-              <LayoutGrid className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setDisplayMode("list")}
-              className={`p-2 rounded-md transition-all duration-300 ${
-                displayMode === "list"
-                  ? "bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] text-white"
-                  : // ? "bg-gray-900 text-white"
-                    "text-gray-600 hover:bg-gray-100"
-              }`}
-              title="Список"
-            >
-              <List className="w-5 h-5" />
-            </button>
-          </div>
-
           {/* Sort Dropdown */}
           <div className="relative flex-1 sm:flex-none">
             <button
@@ -126,11 +95,7 @@ export function ProductGrid({
 
       {/* Product Grid */}
       <div
-        className={
-          displayMode === "list"
-            ? "flex flex-col gap-3"
-            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
-        }
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
       >
         {products.map((product) => {
           const cartItem = cartItems.find(
@@ -149,7 +114,7 @@ export function ProductGrid({
               }
               cartQuantity={cartQuantity}
               viewMode={viewMode}
-              displayMode={displayMode}
+              displayMode="grid"
             />
           );
         })}

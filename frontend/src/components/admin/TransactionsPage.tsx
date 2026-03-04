@@ -114,13 +114,13 @@ export function TransactionsPage() {
       <div className="p-3 md:p-4 lg:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-gray-200">
         <div className="flex flex-col gap-3 md:gap-4">
           <div className="relative">
-            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Поиск по ID, покупателю, продавцу..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full pl-9 md:pl-12 pr-3 md:pr-4 py-2 md:py-3 rounded-xl border border-gray-300"
+              className="w-full pl-11 md:pl-12 pr-3 md:pr-4 py-2 md:py-3 rounded-xl border border-gray-300"
             />
           </div>
 

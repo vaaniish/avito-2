@@ -121,10 +121,7 @@ gamificationRouter.get("/partner-stats", async (_req, res) => {
             xp: partner.current_xp,
             max_deal: maxDealAgg._max.deal_amount ?? 0,
         };
-        const unlockedById = new Map(partner.partner_achievements.map((partnerAchievement) => [
-            partnerAchievement.achievement.id,
-            partnerAchievement.achieved_date,
-        ]));
+        const unlockedById = new Map(partner.partner_achievements.map((partnerAchievement) => [partnerAchievement.achievement.id, partnerAchievement.achieved_date]));
         const achievementsCatalog = achievements.map((achievement) => {
             const rule = ACHIEVEMENT_RULES[achievement.name] ?? {
                 metric: "orders",
@@ -222,9 +219,12 @@ gamificationRouter.get("/xp-history", async (_req, res) => {
 });
 gamificationRouter.post("/simulate-sale", async (req, res) => {
     try {
-        const rawDealAmount = req.body?.deal_amount;
+        const rawDealAmount = req.body
+            ?.deal_amount;
         let dealAmount;
-        if (rawDealAmount === undefined || rawDealAmount === null || rawDealAmount === "") {
+        if (rawDealAmount === undefined ||
+            rawDealAmount === null ||
+            rawDealAmount === "") {
             dealAmount = (0, crypto_1.randomInt)(MIN_DEAL_AMOUNT, MAX_DEAL_AMOUNT + 1);
         }
         else {
@@ -240,32 +240,34 @@ gamificationRouter.post("/simulate-sale", async (req, res) => {
             }
             dealAmount = parsed;
         }
-        const result = await prisma_1.prisma.$transaction(async (tx) => {
-            const partner = await tx.partner.findUnique({
+        const result = await prisma_1.prisma.$transaction(async () => {
+            const partner = await prisma_1.prisma.partner.findUnique({
                 where: { id: SANDBOX_PARTNER_ID },
             });
             if (!partner) {
                 throw new Error("PARTNER_NOT_FOUND");
             }
-            const levels = await tx.loyaltyLevel.findMany({
+            const levels = await prisma_1.prisma.loyaltyLevel.findMany({
                 orderBy: { xp_threshold: "asc" },
             });
             const previousLevel = getCurrentLevel(levels, partner.current_xp);
             const ratingMultiplier = getRatingMultiplier(partner.rating);
-            const rawSaleXp = Math.round((dealAmount / 100) * previousLevel.xp_coefficient * ratingMultiplier);
+            const rawSaleXp = Math.round((dealAmount / 100) *
+                previousLevel.xp_coefficient *
+                ratingMultiplier);
             const operationalFeeXp = Math.floor(rawSaleXp * 0.1);
             const lowCheckPenaltyXp = dealAmount <= 1000 ? 1 : 0;
             const lowRatingPenaltyXp = partner.rating < 4.5 ? Math.ceil(rawSaleXp * 0.15) : 0;
             const totalPenaltyXp = operationalFeeXp + lowCheckPenaltyXp + lowRatingPenaltyXp;
             const netSaleXp = Math.max(rawSaleXp - totalPenaltyXp, 1);
-            const order = await tx.order.create({
+            const order = await prisma_1.prisma.order.create({
                 data: {
                     partner_id: SANDBOX_PARTNER_ID,
                     loyalty_level_id: previousLevel.id,
                     deal_amount: dealAmount,
                 },
             });
-            await tx.xpAccrual.create({
+            await prisma_1.prisma.xpAccrual.create({
                 data: {
                     order_id: order.id,
                     xp_amount: rawSaleXp,
@@ -280,7 +282,7 @@ gamificationRouter.post("/simulate-sale", async (req, res) => {
                     penaltyParts.push(`мелкая сделка ${lowCheckPenaltyXp} XP`);
                 if (lowRatingPenaltyXp > 0)
                     penaltyParts.push(`низкий рейтинг ${lowRatingPenaltyXp} XP`);
-                await tx.xpAccrual.create({
+                await prisma_1.prisma.xpAccrual.create({
                     data: {
                         order_id: order.id,
                         xp_amount: -totalPenaltyXp,
@@ -289,18 +291,18 @@ gamificationRouter.post("/simulate-sale", async (req, res) => {
                 });
             }
             const xpAfterSale = Math.max(partner.current_xp + netSaleXp, 0);
-            const [existingPartnerAchievements, achievements, totalOrders, totalSales, maxDeal] = await Promise.all([
-                tx.partnerAchievement.findMany({
+            const [existingPartnerAchievements, achievements, totalOrders, totalSales, maxDeal,] = await Promise.all([
+                prisma_1.prisma.partnerAchievement.findMany({
                     where: { partner_id: SANDBOX_PARTNER_ID },
                     select: { achievement_id: true },
                 }),
-                tx.achievement.findMany({ orderBy: { id: "asc" } }),
-                tx.order.count({ where: { partner_id: SANDBOX_PARTNER_ID } }),
-                tx.order.aggregate({
+                prisma_1.prisma.achievement.findMany({ orderBy: { id: "asc" } }),
+                prisma_1.prisma.order.count({ where: { partner_id: SANDBOX_PARTNER_ID } }),
+                prisma_1.prisma.order.aggregate({
                     where: { partner_id: SANDBOX_PARTNER_ID },
                     _sum: { deal_amount: true },
                 }),
-                tx.order.aggregate({
+                prisma_1.prisma.order.aggregate({
                     where: { partner_id: SANDBOX_PARTNER_ID },
                     _max: { deal_amount: true },
                 }),
@@ -326,13 +328,13 @@ gamificationRouter.post("/simulate-sale", async (req, res) => {
                 if (progress < rule.target) {
                     continue;
                 }
-                await tx.partnerAchievement.create({
+                await prisma_1.prisma.partnerAchievement.create({
                     data: {
                         partner_id: SANDBOX_PARTNER_ID,
                         achievement_id: achievement.id,
                     },
                 });
-                await tx.xpAccrual.create({
+                await prisma_1.prisma.xpAccrual.create({
                     data: {
                         order_id: order.id,
                         xp_amount: achievement.xp_reward,
@@ -345,7 +347,7 @@ gamificationRouter.post("/simulate-sale", async (req, res) => {
                 newAchievements.push(mapAchievement(achievement));
             }
             const finalXp = Math.max(xpAfterSale + achievementBonusXp, 0);
-            const updatedPartner = await tx.partner.update({
+            const updatedPartner = await prisma_1.prisma.partner.update({
                 where: { id: SANDBOX_PARTNER_ID },
                 data: { current_xp: finalXp },
             });
@@ -406,21 +408,21 @@ gamificationRouter.post("/reset-sandbox", async (_req, res) => {
             res.status(404).json({ error: "Partner not found" });
             return;
         }
-        await prisma_1.prisma.$transaction(async (tx) => {
-            await tx.xpAccrual.deleteMany({
+        await prisma_1.prisma.$transaction(async () => {
+            await prisma_1.prisma.xpAccrual.deleteMany({
                 where: {
                     order: {
                         partner_id: SANDBOX_PARTNER_ID,
                     },
                 },
             });
-            await tx.partnerAchievement.deleteMany({
+            await prisma_1.prisma.partnerAchievement.deleteMany({
                 where: { partner_id: SANDBOX_PARTNER_ID },
             });
-            await tx.order.deleteMany({
+            await prisma_1.prisma.order.deleteMany({
                 where: { partner_id: SANDBOX_PARTNER_ID },
             });
-            await tx.partner.update({
+            await prisma_1.prisma.partner.update({
                 where: { id: SANDBOX_PARTNER_ID },
                 data: {
                     current_xp: 0,

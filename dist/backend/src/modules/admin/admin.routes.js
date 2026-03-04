@@ -182,7 +182,7 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
             return;
         }
         const existing = await prisma_1.prisma.complaint.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true },
         });
         if (!existing) {
@@ -198,7 +198,7 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
                 action_taken: typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint", publicId, "complaint", `Complaint status changed to ${parsedStatus}`, req);
+        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint", String(publicId), "complaint", `Статус жалобы изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -266,7 +266,7 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
             return;
         }
         const existing = await prisma_1.prisma.kycRequest.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true },
         });
         if (!existing) {
@@ -284,7 +284,7 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
                     : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc", publicId, "kyc_request", `KYC status changed to ${parsedStatus}`, req);
+        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc", String(publicId), "kyc_request", `Статус KYC изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -376,18 +376,14 @@ adminRouter.patch("/listings/:publicId/moderation", async (req, res) => {
             return;
         }
         const existing = await prisma_1.prisma.marketplaceListing.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true },
         });
         if (!existing) {
             res.status(404).json({ error: "Listing not found" });
             return;
         }
-        const nextListingStatus = parsedStatus === "APPROVED"
-            ? "ACTIVE"
-            : parsedStatus === "REJECTED"
-                ? "INACTIVE"
-                : "MODERATION";
+        const nextListingStatus = parsedStatus === "APPROVED" ? "ACTIVE" : parsedStatus === "REJECTED" ? "INACTIVE" : "MODERATION";
         const updated = await prisma_1.prisma.marketplaceListing.update({
             where: { id: existing.id },
             data: {
@@ -395,7 +391,7 @@ adminRouter.patch("/listings/:publicId/moderation", async (req, res) => {
                 status: nextListingStatus,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_listing" : "reject_listing", publicId, "listing", `Listing moderation changed to ${parsedStatus}`, req);
+        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_listing" : "reject_listing", String(publicId), "listing", `Статус модерации объявления изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: (0, format_1.toAdminListingStatus)(updated.moderation_status),
@@ -460,7 +456,7 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
             return;
         }
         const existing = await prisma_1.prisma.appUser.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: {
                 id: true,
                 role: true,
@@ -478,12 +474,10 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
             where: { id: existing.id },
             data: {
                 status: parsedStatus,
-                block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string"
-                    ? body.blockReason.trim()
-                    : null,
+                block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string" ? body.blockReason.trim() : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "BLOCKED" ? "block_user" : "unblock_user", publicId, "user", `User status changed to ${parsedStatus}`, req);
+        await writeAudit(access.user.id, parsedStatus === "BLOCKED" ? "block_user" : "unblock_user", String(publicId), "user", `Статус пользователя изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -525,7 +519,7 @@ adminRouter.patch("/commission-tiers/:publicId", async (req, res) => {
         const { publicId } = req.params;
         const body = (req.body ?? {});
         const existing = await prisma_1.prisma.commissionTier.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true },
         });
         if (!existing) {
@@ -547,7 +541,7 @@ adminRouter.patch("/commission-tiers/:publicId", async (req, res) => {
                 sellers_count: body.sellersCount === undefined ? undefined : Math.max(0, Number(body.sellersCount)),
             },
         });
-        await writeAudit(access.user.id, "update_commission_tier", publicId, "commission_tier", `Commission tier ${publicId} updated`, req);
+        await writeAudit(access.user.id, "update_commission_tier", String(publicId), "commission_tier", `Уровень комиссии ${publicId} обновлен`, req);
         res.json({
             success: true,
             tier: {

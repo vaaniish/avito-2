@@ -1,6 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient, AppUser, Achievement } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+const adapter = new PrismaPg({ connectionString: databaseUrl });
+const prisma = new PrismaClient({ adapter });
 
 function asJson(value: unknown): string {
   return JSON.stringify(value);
@@ -9,7 +17,6 @@ function asJson(value: unknown): string {
 function daysAgo(days: number, hours = 0): Date {
   return new Date(Date.now() - (days * 24 + hours) * 60 * 60 * 1000);
 }
-
 type CategorySeed = {
   id: string;
   name: string;
@@ -17,10 +24,8 @@ type CategorySeed = {
   subcategories: Array<{
     id: string;
     name: string;
-    items: string[];
   }>;
 };
-
 type ListingType = "PRODUCT" | "SERVICE";
 type ListingCondition = "NEW" | "USED";
 type ListingStatus = "ACTIVE" | "INACTIVE" | "MODERATION";
@@ -112,17 +117,17 @@ const productCategories: CategorySeed[] = [
       {
         id: "smartphones",
         name: "Смартфоны",
-        items: ["iPhone", "Samsung", "Xiaomi", "Google Pixel", "Другие бренды"],
+
       },
       {
         id: "wearables",
         name: "Умные часы и браслеты",
-        items: ["Apple Watch", "Galaxy Watch", "Фитнес-браслеты", "Аксессуары"],
+
       },
       {
         id: "tablets",
         name: "Планшеты",
-        items: ["iPad", "Android-планшеты", "Планшеты для рисования"],
+
       },
     ],
   },
@@ -134,17 +139,17 @@ const productCategories: CategorySeed[] = [
       {
         id: "laptops",
         name: "Ноутбуки",
-        items: ["MacBook", "Игровые ноутбуки", "Офисные ноутбуки", "Ультрабуки"],
+
       },
       {
         id: "desktops",
         name: "Системные блоки",
-        items: ["Игровые ПК", "Рабочие станции", "Мини-ПК"],
+
       },
       {
         id: "peripherals",
         name: "Периферия",
-        items: ["Мониторы", "Клавиатуры", "Мыши", "Веб-камеры"],
+
       },
     ],
   },
@@ -156,12 +161,12 @@ const productCategories: CategorySeed[] = [
       {
         id: "headphones",
         name: "Наушники",
-        items: ["TWS", "Накладные", "Студийные", "Игровые гарнитуры"],
+
       },
       {
         id: "speakers",
         name: "Колонки",
-        items: ["Портативные", "Умные колонки", "Саундбары"],
+
       },
     ],
   },
@@ -173,12 +178,12 @@ const productCategories: CategorySeed[] = [
       {
         id: "kitchen",
         name: "Кухонная техника",
-        items: ["Кофемашины", "Микроволновые печи", "Мультиварки", "Блендеры"],
+
       },
       {
         id: "cleaning",
         name: "Уборка",
-        items: ["Роботы-пылесосы", "Вертикальные пылесосы", "Парогенераторы"],
+
       },
     ],
   },
@@ -190,12 +195,12 @@ const productCategories: CategorySeed[] = [
       {
         id: "consoles",
         name: "Консоли",
-        items: ["PlayStation", "Xbox", "Nintendo"],
+
       },
       {
         id: "gaming-accessories",
         name: "Игровые аксессуары",
-        items: ["Геймпады", "Гарнитуры", "Игровые кресла"],
+
       },
     ],
   },
@@ -207,12 +212,12 @@ const productCategories: CategorySeed[] = [
       {
         id: "tv",
         name: "Телевизоры",
-        items: ["OLED", "QLED", "4K Smart TV"],
+
       },
       {
         id: "photo",
         name: "Фото и видео",
-        items: ["Беззеркальные камеры", "Объективы", "Экшн-камеры"],
+
       },
     ],
   },
@@ -224,12 +229,12 @@ const productCategories: CategorySeed[] = [
       {
         id: "security",
         name: "Безопасность",
-        items: ["Камеры", "Датчики", "Умные замки"],
+
       },
       {
         id: "automation",
         name: "Автоматизация",
-        items: ["Умные розетки", "Хабы", "Освещение"],
+
       },
     ],
   },
@@ -244,12 +249,12 @@ const serviceCategories: CategorySeed[] = [
       {
         id: "phone-repair",
         name: "Ремонт телефонов",
-        items: ["Замена экрана", "Замена аккумулятора", "Ремонт после воды"],
+
       },
       {
         id: "laptop-repair",
         name: "Ремонт ноутбуков",
-        items: ["Диагностика", "Чистка", "Замена SSD/ОЗУ"],
+
       },
     ],
   },
@@ -261,12 +266,12 @@ const serviceCategories: CategorySeed[] = [
       {
         id: "tv-installation",
         name: "Установка телевизоров",
-        items: ["Монтаж на стену", "Настройка Smart TV", "Прокладка кабелей"],
+
       },
       {
         id: "smart-home-setup",
         name: "Настройка умного дома",
-        items: ["Подключение датчиков", "Сценарии автоматизации", "Интеграция в приложение"],
+
       },
     ],
   },
@@ -278,7 +283,7 @@ const serviceCategories: CategorySeed[] = [
       {
         id: "express-delivery",
         name: "Экспресс доставка",
-        items: ["День-в-день", "Вечерняя доставка", "Срочная доставка"],
+
       },
     ],
   },
@@ -290,7 +295,7 @@ const serviceCategories: CategorySeed[] = [
       {
         id: "air-conditioners",
         name: "Обслуживание кондиционеров",
-        items: ["Заправка", "Чистка", "Диагностика"],
+
       },
     ],
   },
@@ -322,15 +327,7 @@ async function seedCategories(type: "PRODUCT" | "SERVICE", categories: CategoryS
         },
       });
 
-      for (const [itemIndex, item] of subcategory.items.entries()) {
-        await prisma.catalogSubcategoryItem.create({
-          data: {
-            subcategory_id: createdSubcategory.id,
-            name: item,
-            order_index: itemIndex,
-          },
-        });
-      }
+
     }
   }
 
@@ -355,8 +352,8 @@ async function main(): Promise<void> {
   await prisma.listingReview.deleteMany();
   await prisma.wishlistItem.deleteMany();
   await prisma.marketplaceListing.deleteMany();
-  await prisma.catalogSubcategoryItem.deleteMany();
-  await prisma.catalogSubcategory.deleteMany();
+
+
   await prisma.catalogCategory.deleteMany();
   await prisma.partnershipRequest.deleteMany();
   await prisma.commissionTier.deleteMany();
@@ -663,7 +660,7 @@ async function main(): Promise<void> {
     },
   });
 
-  const userIdByPublic = new Map(users.map((user) => [user.public_id, user.id]));
+  const userIdByPublic = new Map<string, number>(users.map((user: { public_id: string; id: number }) => [user.public_id, user.id]));
   const getUserId = (publicId: string): number => {
     const id = userIdByPublic.get(publicId);
     if (!id) {
@@ -2389,7 +2386,7 @@ async function main(): Promise<void> {
   ];
 
   await prisma.platformTransaction.createMany({
-    data: transactionsSeed.map((transaction) => {
+    data: transactionsSeed.map((transaction: TransactionSeed) => {
       const amount = orderTotalByPublic.get(transaction.order_public_id);
       if (amount === undefined) {
         throw new Error(`Missing order total for ${transaction.order_public_id}`);
@@ -2925,7 +2922,7 @@ async function main(): Promise<void> {
     },
   });
 
-  const achievementByName = new Map(achievements.map((achievement) => [achievement.name, achievement]));
+  const achievementByName = new Map<string, Achievement>(achievements.map((achievement: Achievement) => [achievement.name, achievement]));
 
   const achievementRules: Record<string, AchievementRule> = {
     "Первая продажа": { metric: "orders", target: 1 },
@@ -3019,7 +3016,7 @@ async function main(): Promise<void> {
     maxDeal = Math.max(maxDeal, sale.deal_amount);
 
     for (const [achievementName, rule] of Object.entries(achievementRules)) {
-      const achievement = achievementByName.get(achievementName);
+      const achievement: Achievement | undefined = achievementByName.get(achievementName);
       if (!achievement || unlockedAchievements.has(achievement.id)) {
         continue;
       }
@@ -3095,7 +3092,6 @@ async function main(): Promise<void> {
     prisma.userAddress.count(),
     prisma.catalogCategory.count(),
     prisma.catalogSubcategory.count(),
-    prisma.catalogSubcategoryItem.count(),
     prisma.marketplaceListing.count(),
     prisma.listingReview.count(),
     prisma.listingQuestion.count(),

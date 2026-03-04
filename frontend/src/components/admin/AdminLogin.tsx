@@ -35,9 +35,9 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
-        <button onClick={onBack} className="text-sm text-gray-600 hover:text-black mb-4">
+    <div className="min-h-screen app-shell flex items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+        <button onClick={onBack} className="back-link mb-4 text-sm">
           ← Назад
         </button>
 
@@ -50,7 +50,7 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
             value={formData.email}
             onChange={(event) => setFormData({ ...formData, email: event.target.value })}
             placeholder="Email"
-            className="w-full px-4 py-3 rounded-xl border border-gray-300"
+            className="field-control"
             required
           />
 
@@ -60,7 +60,7 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
               value={formData.password}
               onChange={(event) => setFormData({ ...formData, password: event.target.value })}
               placeholder="Пароль"
-              className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300"
+              className="field-control pr-12"
               required
             />
             <button
@@ -75,7 +75,7 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] disabled:bg-gray-400 text-white rounded-xl"
+            className="btn-primary w-full py-3 disabled:bg-gray-400"
           >
             {isLoading ? "Входим..." : "Войти"}
           </button>

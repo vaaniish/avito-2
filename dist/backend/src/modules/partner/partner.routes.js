@@ -139,7 +139,7 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
         const { publicId } = req.params;
         const existing = await prisma_1.prisma.marketplaceListing.findFirst({
             where: {
-                public_id: publicId,
+                public_id: String(publicId),
                 seller_id: session.user.id,
             },
         });
@@ -158,9 +158,15 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
             data: {
                 title: typeof body.title === "string" ? body.title.trim() : undefined,
                 price: price === undefined ? undefined : Math.round(price),
-                condition: body.condition === undefined ? undefined : parseCondition(body.condition),
-                description: typeof body.description === "string" ? body.description.trim() : undefined,
-                category_name: typeof body.category === "string" ? body.category.trim() : undefined,
+                condition: body.condition === undefined
+                    ? undefined
+                    : parseCondition(body.condition),
+                description: typeof body.description === "string"
+                    ? body.description.trim()
+                    : undefined,
+                category_name: typeof body.category === "string"
+                    ? body.category.trim()
+                    : undefined,
                 image: typeof body.image === "string" ? body.image.trim() : undefined,
                 city: typeof body.city === "string" ? body.city.trim() : undefined,
                 status: LISTING_MODERATION,
@@ -195,7 +201,7 @@ partnerRouter.post("/listings/:publicId/toggle-status", async (req, res) => {
         const { publicId } = req.params;
         const existing = await prisma_1.prisma.marketplaceListing.findFirst({
             where: {
-                public_id: publicId,
+                public_id: String(publicId),
                 seller_id: session.user.id,
             },
         });
@@ -214,7 +220,9 @@ partnerRouter.post("/listings/:publicId/toggle-status", async (req, res) => {
             where: { id: existing.id },
             data: {
                 status: nextStatus,
-                moderation_status: nextStatus === LISTING_MODERATION ? "PENDING" : existing.moderation_status,
+                moderation_status: nextStatus === LISTING_MODERATION
+                    ? "PENDING"
+                    : existing.moderation_status,
             },
         });
         res.json({
@@ -237,7 +245,7 @@ partnerRouter.delete("/listings/:publicId", async (req, res) => {
         const { publicId } = req.params;
         const existing = await prisma_1.prisma.marketplaceListing.findFirst({
             where: {
-                public_id: publicId,
+                public_id: String(publicId),
                 seller_id: session.user.id,
             },
             select: { id: true },
@@ -315,7 +323,7 @@ partnerRouter.patch("/orders/:publicId/status", async (req, res) => {
         }
         const existing = await prisma_1.prisma.marketOrder.findFirst({
             where: {
-                public_id: publicId,
+                public_id: String(publicId),
                 seller_id: session.user.id,
             },
             select: { id: true },
@@ -401,7 +409,7 @@ partnerRouter.post("/questions/:publicId/answer", async (req, res) => {
         }
         const existing = await prisma_1.prisma.listingQuestion.findFirst({
             where: {
-                public_id: publicId,
+                public_id: String(publicId),
                 listing: {
                     seller_id: session.user.id,
                 },

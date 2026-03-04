@@ -47,6 +47,18 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
+    await prisma.auditLog.create({
+      data: {
+        public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+        admin_id: user.id,
+        action: "user_login",
+        target_id: user.public_id,
+        target_type: "user",
+        details: `Пользователь ${user.email} успешно вошел в систему.`,
+        ip_address: req.ip || "127.0.0.1",
+      }
+    });
+
     res.json({
       user: {
         id: user.id,
@@ -112,6 +124,18 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
         email: true,
         name: true,
       },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+        admin_id: user.id,
+        action: "user_signup",
+        target_id: user.public_id,
+        target_type: "user",
+        details: `Новый пользователь ${user.email} зарегистрировался.`,
+        ip_address: req.ip || "127.0.0.1",
+      }
     });
 
     res.status(201).json({

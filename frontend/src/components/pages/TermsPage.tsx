@@ -7,27 +7,27 @@ interface TermsPageProps {
 
 export function TermsPage({ onBack }: TermsPageProps) {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-16">
+    <div className="min-h-screen app-shell">
+      <div className="page-container pb-12 pt-[calc(var(--header-height,84px)+1.1rem)] sm:pb-16">
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 text-lg transition-colors duration-300"
+          className="back-link mb-7 text-sm sm:text-base"
         >
           <ArrowLeft className="w-6 h-6" />
           Назад
         </button>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl text-gray-900 mb-6">Правила использования</h1>
-          <p className="text-xl text-gray-600 mb-12">Обновлено: 20 декабря 2025</p>
+        <div className="content-page">
+          <h1 className="mb-6 text-slate-900">Правила использования</h1>
+          <p className="text-base sm:text-lg text-gray-600 mb-10">Обновлено: 20 декабря 2025</p>
 
           <div className="space-y-10 text-gray-700">
             {/* Section 1 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">1. Общие условия</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">1. Общие условия</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Настоящие Правила использования (далее — «Правила») регулируют порядок использования платформы 
                   Ecom (далее — «Платформа») и применяются ко всем пользователям без исключения.
@@ -44,8 +44,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 2 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">2. Регистрация и аккаунт</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">2. Регистрация и аккаунт</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Для использования функций Платформы необходимо создать аккаунт. При регистрации вы обязуетесь:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Предоставлять достоверную и актуальную информацию</li>
@@ -62,8 +62,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 3 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">3. Покупки и оплата</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">3. Покупки и оплата</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>При совершении покупок на Платформе действуют следующие условия:</p>
                 
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 space-y-3">
@@ -90,8 +90,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 4 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">4. Доставка</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">4. Доставка</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Условия доставки:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Сроки доставки указаны приблизительно и зависят от региона и транспортной компании</li>
@@ -105,8 +105,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 5 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">5. Возврат и обмен</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">5. Возврат и обмен</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Вы можете вернуть или обменять товар в следующих случаях:</p>
                 
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 space-y-3">
@@ -138,8 +138,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 6 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">6. Правила для покупателей</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">6. Правила для покупателей</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Используя Платформу в качестве покупателя, вы обязуетесь:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Не размещать ложные отзывы или рейтинги</li>
@@ -154,8 +154,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 7 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">7. Правила для продавцов</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">7. Правила для продавцов</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>Продавцы на Платформе обязуются:</p>
                 <ul className="space-y-2 list-disc list-inside ml-4">
                   <li>Предоставлять точное описание товаров и услуг</li>
@@ -174,8 +174,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 8 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">8. Интеллектуальная собственность</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">8. Интеллектуальная собственность</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Все материалы Платформы (тексты, изображения, логотипы, дизайн, код) защищены авторским правом 
                   и принадлежат Ecom или её партнёрам.
@@ -192,8 +192,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 9 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">9. Ограничение ответственности</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">9. Ограничение ответственности</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Платформа является посредником между покупателями и продавцами. Мы прилагаем усилия для проверки 
                   продавцов, но не несём ответственности за:
@@ -213,8 +213,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 10 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">10. Изменения в Правилах</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">10. Изменения в Правилах</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   Мы оставляем за собой право изменять Правила в любое время. Существенные изменения вступают в силу 
                   через 7 дней после публикации на сайте.
@@ -227,8 +227,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 11 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">11. Разрешение споров</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">11. Разрешение споров</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   В случае возникновеия споров между пользователями или между пользователем и Платформой, стороны 
                   обязуются в первую очередь попытаться урегулировать спор путём переговоров.
@@ -242,8 +242,8 @@ export function TermsPage({ onBack }: TermsPageProps) {
 
             {/* Section 12 */}
             <section>
-              <h2 className="text-3xl text-gray-900 mb-4">12. Контакты</h2>
-              <div className="space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">12. Контакты</h2>
+              <div className="space-y-4 text-base sm:text-lg leading-relaxed">
                 <p>
                   По вопросам, связанным с Правилами использования, свяжитесь с нами:
                 </p>

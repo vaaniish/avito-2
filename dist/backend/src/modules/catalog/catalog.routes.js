@@ -17,7 +17,8 @@ function parseJsonArray(value) {
         return undefined;
     try {
         const parsed = JSON.parse(value);
-        if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+        if (Array.isArray(parsed) &&
+            parsed.every((item) => typeof item === "string")) {
             return parsed;
         }
     }
@@ -46,11 +47,6 @@ catalogRouter.get("/categories", async (req, res) => {
             include: {
                 subcategories: {
                     orderBy: { order_index: "asc" },
-                    include: {
-                        items: {
-                            orderBy: { order_index: "asc" },
-                        },
-                    },
                 },
             },
             orderBy: { order_index: "asc" },
@@ -62,7 +58,6 @@ catalogRouter.get("/categories", async (req, res) => {
             subcategories: category.subcategories.map((subcategory) => ({
                 id: subcategory.public_id,
                 name: subcategory.name,
-                items: subcategory.items.map((item) => item.name),
             })),
         })));
     }
@@ -139,7 +134,7 @@ catalogRouter.get("/cities", async (_req, res) => {
         });
         res.json(listings
             .map((listing) => listing.city)
-            .filter((city, index, list) => city && list.indexOf(city) === index)
+            .filter((city, index, list) => city !== null && list.indexOf(city) === index)
             .sort((left, right) => left.localeCompare(right, "ru-RU")));
     }
     catch (error) {
@@ -167,9 +162,7 @@ catalogRouter.get("/suggestions", async (req, res) => {
             }),
             prisma_1.prisma.catalogCategory.findMany({
                 include: {
-                    subcategories: {
-                        include: { items: true },
-                    },
+                    subcategories: true,
                 },
             }),
         ]);
@@ -202,16 +195,6 @@ catalogRouter.get("/suggestions", async (req, res) => {
                         query: subcategory.name,
                     });
                 }
-                for (const item of subcategory.items) {
-                    if (!item.name.toLowerCase().includes(normalized))
-                        continue;
-                    suggestions.push({
-                        type: "category",
-                        title: item.name,
-                        subtitle: subcategory.name,
-                        query: item.name,
-                    });
-                }
             }
         }
         const deduped = suggestions
@@ -222,7 +205,8 @@ catalogRouter.get("/suggestions", async (req, res) => {
                 return 0;
             return leftStarts ? -1 : 1;
         })
-            .filter((item, index, list) => index === list.findIndex((candidate) => candidate.title.toLowerCase() === item.title.toLowerCase()))
+            .filter((item, index, list) => index ===
+            list.findIndex((candidate) => candidate.title.toLowerCase() === item.title.toLowerCase()))
             .slice(0, 7);
         res.json(deduped);
     }
@@ -235,7 +219,7 @@ catalogRouter.get("/listings/:publicId/questions", async (req, res) => {
     try {
         const { publicId } = req.params;
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true, seller: { select: { name: true } } },
         });
         if (!listing) {
@@ -281,7 +265,7 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
             return;
         }
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
-            where: { public_id: publicId },
+            where: { public_id: String(publicId) },
             select: { id: true },
         });
         if (!listing) {
@@ -300,6 +284,17 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
                 buyer: {
                     select: { name: true },
                 },
+            },
+        });
+        await prisma_1.prisma.auditLog.create({
+            data: {
+                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                admin_id: sessionUser.id,
+                action: "create_question",
+                target_id: String(publicId),
+                target_type: "listing",
+                details: `Пользователь ${sessionUser.email} задал вопрос к товару ${publicId}: "${questionText}"`,
+                ip_address: req.ip || "127.0.0.1",
             },
         });
         res.status(201).json({

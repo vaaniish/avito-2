@@ -132,18 +132,18 @@ export function ProductDetail({
   };
 
   return (
-    <div className="bg-white">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4 md:py-6">
+    <div className="app-shell">
+      <div className="page-container py-4 md:py-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm md:text-base text-gray-600 hover:text-gray-900 transition-colors duration-300"
+          className="back-link text-sm md:text-base"
         >
           <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
           Назад к каталогу
         </button>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6 pb-8 md:pb-16 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+      <div className="page-container grid grid-cols-1 gap-8 pb-8 md:pb-16 lg:grid-cols-[1fr_400px]">
         <div>
           <h1 className="text-2xl md:text-4xl text-black mb-6">{product.title}</h1>
 
@@ -208,11 +208,11 @@ export function ProductDetail({
                   placeholder="Задайте вопрос продавцу"
                   value={newQuestion}
                   onChange={(event) => setNewQuestion(event.target.value)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[rgb(38,83,141)] text-sm"
+                  className="field-control text-sm"
                 />
                 <button
                   onClick={() => void handleSubmitQuestion()}
-                  className="px-6 py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2"
+                  className="btn-primary flex items-center justify-center gap-2 px-6 py-3 text-sm"
                 >
                   <Send className="w-4 h-4" /> Отправить
                 </button>
@@ -289,14 +289,14 @@ export function ProductDetail({
               <div className="flex flex-col w-full items-center gap-2 mb-4">
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2"
+                  className="btn-primary flex w-full items-center justify-center gap-2 py-3 text-sm"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   Добавить в корзину
                 </button>
                 <button
                   onClick={() => onBuyNow(product)}
-                  className="w-full py-3 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300 text-sm flex items-center justify-center gap-2"
+                  className="btn-primary flex w-full items-center justify-center gap-2 py-3 text-sm"
                 >
                   <Zap className="w-4 h-4" />
                   Купить сейчас
