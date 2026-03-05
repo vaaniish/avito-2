@@ -89,9 +89,14 @@ catalogRouter.get("/categories", async (req, res) => {
 catalogRouter.get("/listings", async (req, res) => {
     try {
         const type = resolveListingType(req.query.type);
+        const cityId = req.query.cityId ? Number(req.query.cityId) : undefined;
+        if (req.query.cityId && (isNaN(cityId) || cityId <= 0)) {
+            return res.status(400).json({ error: "Invalid city ID" });
+        }
         const listings = await prisma_1.prisma.marketplaceListing.findMany({
             where: {
                 type,
+                city_id: cityId,
                 status: "ACTIVE",
                 moderation_status: "APPROVED",
             },
@@ -129,11 +134,21 @@ catalogRouter.get("/listings", async (req, res) => {
                 attributes: {
                     orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                 },
-                reviews: true,
+                reviews: {
+                    orderBy: [{ created_at: "desc" }],
+                    include: {
+                        author: {
+                            select: {
+                                display_name: true,
+                                avatar: true,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
-        res.json(listings.map((listing) => {
+        return res.json(listings.map((listing) => {
             const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
             const salePrice = listing.sale_price !== null && listing.sale_price < listing.price
                 ? listing.sale_price
@@ -166,18 +181,18 @@ catalogRouter.get("/listings", async (req, res) => {
                 condition: (0, format_1.toClientCondition)(listing.condition),
                 reviews: listing.reviews.map((review) => ({
                     id: String(review.id),
-                    author: review.author_name,
+                    author: review.author.display_name ?? "Аноним",
                     rating: review.rating,
-                    date: review.date,
+                    date: formatPublishDate(review.created_at),
                     comment: review.comment,
-                    avatar: review.avatar,
+                    avatar: review.author.avatar,
                 })),
             };
         }));
     }
     catch (error) {
         console.error("Error fetching listings:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 });
 catalogRouter.get("/cities", async (_req, res) => {
@@ -359,14 +374,14 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
             res.status(400).json({ error: "Question is too short" });
             return;
         }
-        const sessionUser = await (0, session_1.getSessionUser)(req);
-        if (!sessionUser) {
-            res.status(401).json({ error: "Unauthorized" });
+        const session = await (0, session_1.requireAnyRole)(req, ["BUYER"]);
+        if (!session.ok) {
+            res.status(session.status).json({ error: session.message });
             return;
         }
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
             where: { public_id: String(publicId) },
-            select: { id: true },
+            select: { id: true, title: true, seller_id: true, public_id: true },
         });
         if (!listing) {
             res.status(404).json({ error: "Listing not found" });
@@ -376,7 +391,7 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
             data: {
                 public_id: `Q-${Date.now()}`,
                 listing_id: listing.id,
-                buyer_id: sessionUser.id,
+                buyer_id: session.user.id,
                 question: questionText,
                 status: "PENDING",
             },
@@ -384,6 +399,14 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
                 buyer: {
                     select: { name: true },
                 },
+            },
+        });
+        await prisma_1.prisma.notification.create({
+            data: {
+                user_id: listing.seller_id,
+                type: "NEW_QUESTION",
+                message: `Новый вопрос по вашему товару "${listing.title}"`,
+                target_url: `/products/${listing.public_id}`,
             },
         });
         res.status(201).json({

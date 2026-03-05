@@ -1,10 +1,14 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRouter = void 0;
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
 const format_1 = require("../../utils/format");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const authRouter = (0, express_1.Router)();
 exports.authRouter = authRouter;
 function normalizeEmail(email) {
@@ -29,9 +33,23 @@ authRouter.post("/login", async (req, res) => {
                 email: true,
                 name: true,
                 password: true,
+                wishlist_items: {
+                    select: {
+                        listing: {
+                            select: {
+                                public_id: true,
+                            },
+                        },
+                    },
+                },
             },
         });
-        if (!user || user.password !== password) {
+        if (!user) {
+            res.status(401).json({ error: "Неверный email или пароль" });
+            return;
+        }
+        const passwordMatch = await bcrypt_1.default.compare(password, user.password);
+        if (!passwordMatch) {
             res.status(401).json({ error: "Неверный email или пароль" });
             return;
         }
@@ -46,6 +64,9 @@ authRouter.post("/login", async (req, res) => {
                 role: (0, format_1.toClientRole)(user.role),
                 email: user.email,
                 name: user.name,
+            },
+            profile: {
+                wishlist: user.wishlist_items.map((item) => ({ id: item.listing.public_id })),
             },
         });
     }
@@ -76,13 +97,15 @@ authRouter.post("/signup", async (req, res) => {
             },
         });
         const publicId = `USR-${String(sequence + 1000).padStart(3, "0")}`;
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt_1.default.hash(password, saltRounds);
         const user = await prisma_1.prisma.appUser.create({
             data: {
                 public_id: publicId,
                 role: "BUYER",
                 status: "ACTIVE",
                 email,
-                password,
+                password: hashedPassword,
                 name,
                 display_name: name,
                 username: username || null,
@@ -102,6 +125,9 @@ authRouter.post("/signup", async (req, res) => {
                 role: (0, format_1.toClientRole)(user.role),
                 email: user.email,
                 name: user.name,
+            },
+            profile: {
+                wishlist: [],
             },
         });
     }

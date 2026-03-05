@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -60,6 +61,7 @@ async function main(): Promise<void> {
   await prisma.userAddress.deleteMany();
   await prisma.appUser.deleteMany();
   await prisma.city.deleteMany(); // Delete City records
+  await prisma.notification.deleteMany();
 
   // --- Seed Cities ---
   const initialCities: CityData[] = [
@@ -86,87 +88,97 @@ async function main(): Promise<void> {
   };
 
   // --- Seed AppUsers ---
+  const saltRounds = 10;
+  const usersData = [
+    {
+      public_id: "ADM-001",
+      role: "ADMIN",
+      status: "ACTIVE",
+      email: "admin@ecomm.ru",
+      password: "admin123",
+      name: "Администратор",
+      display_name: "Администратор",
+      city_id: cityId("Москва"),
+      joined_at: daysAgo(500),
+    },
+    {
+      public_id: "USR-001",
+      role: "BUYER",
+      status: "ACTIVE",
+      email: "demo@ecomm.ru",
+      password: "demo123",
+      name: "Демо Покупатель",
+      display_name: "Демо Покупатель",
+      city_id: cityId("Москва"),
+      joined_at: daysAgo(300),
+    },
+    {
+      public_id: "USR-101",
+      role: "BUYER",
+      status: "ACTIVE",
+      email: "ivan.petrov@example.com",
+      password: "buyer123",
+      name: "Иван Петров",
+      display_name: "Иван Петров",
+      city_id: cityId("Санкт-Петербург"),
+      joined_at: daysAgo(200),
+    },
+    {
+      public_id: "SLR-001",
+      role: "SELLER",
+      status: "ACTIVE",
+      email: "partner@ecomm.ru",
+      password: "partner123",
+      name: "Partner Demo",
+      display_name: "Partner Demo",
+      city_id: cityId("Москва"),
+      joined_at: daysAgo(400),
+    },
+    {
+      public_id: "SLR-201",
+      role: "SELLER",
+      status: "ACTIVE",
+      email: "techpoint@example.com",
+      password: "seller123",
+      name: "TechPoint Store",
+      display_name: "TechPoint Store",
+      city_id: cityId("Казань"),
+      joined_at: daysAgo(350),
+    },
+    {
+      public_id: "SLR-202",
+      role: "SELLER",
+      status: "ACTIVE",
+      email: "gadgethaven@example.com",
+      password: "seller123",
+      name: "Gadget Haven",
+      display_name: "Gadget Haven",
+      city_id: cityId("Екатеринбург"),
+      joined_at: daysAgo(150),
+    },
+    {
+      public_id: "SLR-999",
+      role: "SELLER",
+      status: "BLOCKED",
+      email: "seller.suspicious@example.com",
+      password: "seller123",
+      name: "Suspicious Seller",
+      display_name: "Suspicious Seller",
+      city_id: cityId("Москва"),
+      block_reason: "Мошеннические действия",
+      joined_at: daysAgo(100),
+    },
+  ];
+
+  const hashedUsersData = await Promise.all(
+    usersData.map(async (user) => {
+      const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+      return { ...user, password: hashedPassword };
+    }),
+  );
+
   await prisma.appUser.createMany({
-    data: [
-      {
-        public_id: "ADM-001",
-        role: "ADMIN",
-        status: "ACTIVE",
-        email: "admin@ecomm.ru",
-        password: "admin123",
-        name: "Администратор",
-        display_name: "Администратор",
-        city_id: cityId("Москва"),
-        joined_at: daysAgo(500),
-      },
-      {
-        public_id: "USR-001",
-        role: "BUYER",
-        status: "ACTIVE",
-        email: "demo@ecomm.ru",
-        password: "demo123",
-        name: "Демо Покупатель",
-        display_name: "Демо Покупатель",
-        city_id: cityId("Москва"),
-        joined_at: daysAgo(300),
-      },
-      {
-        public_id: "USR-101",
-        role: "BUYER",
-        status: "ACTIVE",
-        email: "ivan.petrov@example.com",
-        password: "buyer123",
-        name: "Иван Петров",
-        display_name: "Иван Петров",
-        city_id: cityId("Санкт-Петербург"),
-        joined_at: daysAgo(200),
-      },
-      {
-        public_id: "SLR-001",
-        role: "SELLER",
-        status: "ACTIVE",
-        email: "partner@ecomm.ru",
-        password: "partner123",
-        name: "Partner Demo",
-        display_name: "Partner Demo",
-        city_id: cityId("Москва"),
-        joined_at: daysAgo(400),
-      },
-      {
-        public_id: "SLR-201",
-        role: "SELLER",
-        status: "ACTIVE",
-        email: "techpoint@example.com",
-        password: "seller123",
-        name: "TechPoint Store",
-        display_name: "TechPoint Store",
-        city_id: cityId("Казань"),
-        joined_at: daysAgo(350),
-      },
-      {
-        public_id: "SLR-202",
-        role: "SELLER",
-        status: "ACTIVE",
-        email: "gadgethaven@example.com",
-        password: "seller123",
-        name: "Gadget Haven",
-        display_name: "Gadget Haven",
-        city_id: cityId("Екатеринбург"),
-        joined_at: daysAgo(150),
-      },
-      {
-        public_id: "SLR-999",
-        role: "SELLER",
-        status: "BLOCKED",
-        email: "seller.suspicious@example.com",
-        password: "seller123",
-        name: "Suspicious Seller",
-        display_name: "Suspicious Seller",
-        city_id: cityId("Москва"),
-        block_reason: "Мошеннические действия",
-        joined_at: daysAgo(100),
-      },
-    ],
+    data: hashedUsersData,
   });
 
   const users = await prisma.appUser.findMany({
@@ -514,6 +526,13 @@ async function main(): Promise<void> {
         comment: "Прекрасный телефон, быстрая доставка!",
         created_at: daysAgo(3),
       },
+      {
+        listing_id: listingId("LST-002"), // MacBook Air M3
+        author_id: userId("USR-001"),
+        rating: 5,
+        comment: "Отличный ноутбук для работы, очень быстрый и легкий.",
+        created_at: daysAgo(5),
+      },
     ],
   });
 
@@ -766,6 +785,30 @@ async function main(): Promise<void> {
     ],
   });
 
+  // --- Recalculate ratings based on reviews ---
+  console.log("Recalculating ratings for all listings...");
+  const allListings = await prisma.marketplaceListing.findMany({
+    select: { id: true },
+  });
+
+  for (const listing of allListings) {
+    const avgRatingResult = await prisma.listingReview.aggregate({
+      _avg: {
+        rating: true,
+      },
+      where: {
+        listing_id: listing.id,
+      },
+    });
+    const newRating = avgRatingResult._avg.rating ?? 0;
+    const roundedRating = Math.round(newRating * 10) / 10;
+    await prisma.marketplaceListing.update({
+      where: { id: listing.id },
+      data: { rating: roundedRating },
+    });
+  }
+  console.log("Ratings recalculated.");
+
   const [usersCount, listingsCount, ordersCount, transactionsCount, citiesCount] = await Promise.all([
     prisma.appUser.count(),
     prisma.marketplaceListing.count(),
@@ -781,3 +824,12 @@ async function main(): Promise<void> {
   console.log("partner -> partner@ecomm.ru / partner123");
   console.log("admin -> admin@ecomm.ru / admin123");
 }
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

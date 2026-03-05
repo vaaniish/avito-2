@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const adapter_pg_1 = require("@prisma/adapter-pg");
 const client_1 = require("@prisma/client");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set");
@@ -13,12 +17,6 @@ function daysAgo(days) {
     return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 async function main() {
-    await prisma.partnerAchievement.deleteMany();
-    await prisma.xpAccrual.deleteMany();
-    await prisma.order.deleteMany();
-    await prisma.achievement.deleteMany();
-    await prisma.loyaltyLevel.deleteMany();
-    await prisma.partner.deleteMany();
     await prisma.complaint.deleteMany();
     await prisma.kycRequest.deleteMany();
     await prisma.platformTransaction.deleteMany();
@@ -39,6 +37,7 @@ async function main() {
     await prisma.userAddress.deleteMany();
     await prisma.appUser.deleteMany();
     await prisma.city.deleteMany();
+    await prisma.notification.deleteMany();
     const initialCities = [
         { name: "Москва", region: "Москва" },
         { name: "Санкт-Петербург", region: "Ленинградская область" },
@@ -60,87 +59,93 @@ async function main() {
             throw new Error(`City ${name} not found`);
         return id;
     };
+    const saltRounds = 10;
+    const usersData = [
+        {
+            public_id: "ADM-001",
+            role: "ADMIN",
+            status: "ACTIVE",
+            email: "admin@ecomm.ru",
+            password: "admin123",
+            name: "Администратор",
+            display_name: "Администратор",
+            city_id: cityId("Москва"),
+            joined_at: daysAgo(500),
+        },
+        {
+            public_id: "USR-001",
+            role: "BUYER",
+            status: "ACTIVE",
+            email: "demo@ecomm.ru",
+            password: "demo123",
+            name: "Демо Покупатель",
+            display_name: "Демо Покупатель",
+            city_id: cityId("Москва"),
+            joined_at: daysAgo(300),
+        },
+        {
+            public_id: "USR-101",
+            role: "BUYER",
+            status: "ACTIVE",
+            email: "ivan.petrov@example.com",
+            password: "buyer123",
+            name: "Иван Петров",
+            display_name: "Иван Петров",
+            city_id: cityId("Санкт-Петербург"),
+            joined_at: daysAgo(200),
+        },
+        {
+            public_id: "SLR-001",
+            role: "SELLER",
+            status: "ACTIVE",
+            email: "partner@ecomm.ru",
+            password: "partner123",
+            name: "Partner Demo",
+            display_name: "Partner Demo",
+            city_id: cityId("Москва"),
+            joined_at: daysAgo(400),
+        },
+        {
+            public_id: "SLR-201",
+            role: "SELLER",
+            status: "ACTIVE",
+            email: "techpoint@example.com",
+            password: "seller123",
+            name: "TechPoint Store",
+            display_name: "TechPoint Store",
+            city_id: cityId("Казань"),
+            joined_at: daysAgo(350),
+        },
+        {
+            public_id: "SLR-202",
+            role: "SELLER",
+            status: "ACTIVE",
+            email: "gadgethaven@example.com",
+            password: "seller123",
+            name: "Gadget Haven",
+            display_name: "Gadget Haven",
+            city_id: cityId("Екатеринбург"),
+            joined_at: daysAgo(150),
+        },
+        {
+            public_id: "SLR-999",
+            role: "SELLER",
+            status: "BLOCKED",
+            email: "seller.suspicious@example.com",
+            password: "seller123",
+            name: "Suspicious Seller",
+            display_name: "Suspicious Seller",
+            city_id: cityId("Москва"),
+            block_reason: "Мошеннические действия",
+            joined_at: daysAgo(100),
+        },
+    ];
+    const hashedUsersData = await Promise.all(usersData.map(async (user) => {
+        const hashedPassword = await bcrypt_1.default.hash(user.password, saltRounds);
+        return { ...user, password: hashedPassword };
+    }));
     await prisma.appUser.createMany({
-        data: [
-            {
-                public_id: "ADM-001",
-                role: "ADMIN",
-                status: "ACTIVE",
-                email: "admin@ecomm.ru",
-                password: "admin123",
-                name: "Администратор",
-                display_name: "Администратор",
-                city_id: cityId("Москва"),
-                joined_at: daysAgo(500),
-            },
-            {
-                public_id: "USR-001",
-                role: "BUYER",
-                status: "ACTIVE",
-                email: "demo@ecomm.ru",
-                password: "demo123",
-                name: "Демо Покупатель",
-                display_name: "Демо Покупатель",
-                city_id: cityId("Москва"),
-                joined_at: daysAgo(300),
-            },
-            {
-                public_id: "USR-101",
-                role: "BUYER",
-                status: "ACTIVE",
-                email: "ivan.petrov@example.com",
-                password: "buyer123",
-                name: "Иван Петров",
-                display_name: "Иван Петров",
-                city_id: cityId("Санкт-Петербург"),
-                joined_at: daysAgo(200),
-            },
-            {
-                public_id: "SLR-001",
-                role: "SELLER",
-                status: "ACTIVE",
-                email: "partner@ecomm.ru",
-                password: "partner123",
-                name: "Partner Demo",
-                display_name: "Partner Demo",
-                city_id: cityId("Москва"),
-                joined_at: daysAgo(400),
-            },
-            {
-                public_id: "SLR-201",
-                role: "SELLER",
-                status: "ACTIVE",
-                email: "techpoint@example.com",
-                password: "seller123",
-                name: "TechPoint Store",
-                display_name: "TechPoint Store",
-                city_id: cityId("Казань"),
-                joined_at: daysAgo(350),
-            },
-            {
-                public_id: "SLR-202",
-                role: "SELLER",
-                status: "ACTIVE",
-                email: "gadgethaven@example.com",
-                password: "seller123",
-                name: "Gadget Haven",
-                display_name: "Gadget Haven",
-                city_id: cityId("Екатеринбург"),
-                joined_at: daysAgo(150),
-            },
-            {
-                public_id: "SLR-999",
-                role: "SELLER",
-                status: "BLOCKED",
-                email: "seller.suspicious@example.com",
-                password: "seller123",
-                name: "Suspicious Seller",
-                display_name: "Suspicious Seller",
-                city_id: cityId("Москва"),
-                block_reason: "Мошеннические действия",
-                joined_at: daysAgo(100),
-            },
-        ],
+        data: hashedUsersData,
     });
     const users = await prisma.appUser.findMany({
         select: { id: true, public_id: true, email: true, city_id: true },
@@ -452,24 +457,31 @@ async function main() {
         data: [
             {
                 listing_id: listingId("LST-001"),
-                author_name: "Анна",
+                author_id: userId("USR-101"),
                 rating: 5,
-                date: "2 дня назад",
                 comment: "Все отлично, рекомендую.",
+                created_at: daysAgo(2),
             },
             {
                 listing_id: listingId("LST-001"),
-                author_name: "Игорь",
+                author_id: userId("USR-001"),
                 rating: 4,
-                date: "Неделю назад",
                 comment: "Телефон отличный, но доставка заняла на день дольше.",
+                created_at: daysAgo(7),
             },
             {
                 listing_id: listingId("LST-201"),
-                author_name: "Ольга",
+                author_id: userId("USR-101"),
                 rating: 5,
-                date: "3 дня назад",
                 comment: "Прекрасный телефон, быстрая доставка!",
+                created_at: daysAgo(3),
+            },
+            {
+                listing_id: listingId("LST-002"),
+                author_id: userId("USR-001"),
+                rating: 5,
+                comment: "Отличный ноутбук для работы, очень быстрый и легкий.",
+                created_at: daysAgo(5),
             },
         ],
     });
@@ -705,76 +717,27 @@ async function main() {
             },
         ],
     });
-    await prisma.loyaltyLevel.createMany({
-        data: [
-            { level_name: "Новичок", xp_threshold: 0, xp_coefficient: 1 },
-            { level_name: "Бронза", xp_threshold: 500, xp_coefficient: 1.1 },
-            { level_name: "Серебро", xp_threshold: 1500, xp_coefficient: 1.25 },
-            { level_name: "Золото", xp_threshold: 5000, xp_coefficient: 1.5 },
-        ],
+    console.log("Recalculating ratings for all listings...");
+    const allListings = await prisma.marketplaceListing.findMany({
+        select: { id: true },
     });
-    const partner1 = await prisma.partner.create({
-        data: { name: "Test Partner One", current_xp: 750, rating: 4.9 },
-    });
-    const partner2 = await prisma.partner.create({
-        data: { name: "Test Partner Two", current_xp: 200, rating: 4.5 },
-    });
-    await prisma.achievement.createMany({
-        data: [
-            { name: "Первая продажа", description: "Совершите свою первую продажу.", icon: "star", xp_reward: 50 },
-            { name: "Три сделки", description: "Совершите три успешные сделки.", icon: "zap", xp_reward: 80 },
-            { name: "Легенда лиги", description: "Наберите 10 000 XP.", icon: "trophy", xp_reward: 600 },
-            { name: "Отличный сервис", description: "Получите 10 отзывов с оценкой 5 звезд.", icon: "heart", xp_reward: 120 },
-        ],
-    });
-    const beginnerLevel = await prisma.loyaltyLevel.findFirst({ where: { level_name: "Новичок" } });
-    const bronzeLevel = await prisma.loyaltyLevel.findFirst({ where: { level_name: "Бронза" } });
-    if (!beginnerLevel || !bronzeLevel)
-        throw new Error("Loyalty levels not found");
-    const sandboxOrder1 = await prisma.order.create({
-        data: {
-            partner_id: partner1.id,
-            loyalty_level_id: bronzeLevel.id,
-            deal_amount: 15000,
-            created_at: daysAgo(2),
-        },
-    });
-    const sandboxOrder2 = await prisma.order.create({
-        data: {
-            partner_id: partner2.id,
-            loyalty_level_id: beginnerLevel.id,
-            deal_amount: 5000,
-            created_at: daysAgo(1),
-        },
-    });
-    await prisma.xpAccrual.createMany({
-        data: [
-            {
-                order_id: sandboxOrder1.id,
-                xp_amount: Math.round(sandboxOrder1.deal_amount / 100 * bronzeLevel.xp_coefficient),
-                description: "XP за сделку ORD-Sandbox-1",
+    for (const listing of allListings) {
+        const avgRatingResult = await prisma.listingReview.aggregate({
+            _avg: {
+                rating: true,
             },
-            {
-                order_id: sandboxOrder2.id,
-                xp_amount: Math.round(sandboxOrder2.deal_amount / 100 * beginnerLevel.xp_coefficient),
-                description: "XP за сделку ORD-Sandbox-2",
-            },
-        ],
-    });
-    const firstSaleAchievement = await prisma.achievement.findFirst({ where: { name: "Первая продажа" } });
-    if (firstSaleAchievement) {
-        await prisma.partnerAchievement.create({
-            data: {
-                partner_id: partner1.id,
-                achievement_id: firstSaleAchievement.id,
-                achieved_date: daysAgo(10),
+            where: {
+                listing_id: listing.id,
             },
         });
+        const newRating = avgRatingResult._avg.rating ?? 0;
+        const roundedRating = Math.round(newRating * 10) / 10;
+        await prisma.marketplaceListing.update({
+            where: { id: listing.id },
+            data: { rating: roundedRating },
+        });
     }
-    await prisma.partner.update({
-        where: { id: partner1.id },
-        data: { current_xp: partner1.current_xp + (firstSaleAchievement?.xp_reward ?? 0) },
-    });
+    console.log("Ratings recalculated.");
     const [usersCount, listingsCount, ordersCount, transactionsCount, citiesCount] = await Promise.all([
         prisma.appUser.count(),
         prisma.marketplaceListing.count(),
@@ -790,8 +753,8 @@ async function main() {
     console.log("admin -> admin@ecomm.ru / admin123");
 }
 main()
-    .catch((error) => {
-    console.error(error);
+    .catch((e) => {
+    console.error(e);
     process.exit(1);
 })
     .finally(async () => {

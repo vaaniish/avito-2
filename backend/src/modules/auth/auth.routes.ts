@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { getSessionUser } from "../../lib/session";
 import { toClientRole } from "../../utils/format";
+import bcrypt from "bcrypt";
 
 const authRouter = Router();
 
@@ -33,7 +34,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         status: true,
         email: true,
         name: true,
-        password: false, // Don't return password
+        password: true,
         wishlist_items: {
           select: {
             listing: {
@@ -46,7 +47,13 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       },
     });
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      res.status(401).json({ error: "Неверный email или пароль" });
+      return;
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
       res.status(401).json({ error: "Неверный email или пароль" });
       return;
     }
@@ -106,13 +113,16 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
     });
     const publicId = `USR-${String(sequence + 1000).padStart(3, "0")}`;
 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const user = await prisma.appUser.create({
       data: {
         public_id: publicId,
         role: "BUYER",
         status: "ACTIVE",
         email,
-        password,
+        password: hashedPassword,
         name,
         display_name: name,
         username: username || null,

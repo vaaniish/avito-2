@@ -11,7 +11,6 @@ const catalog_routes_1 = require("./modules/catalog/catalog.routes");
 const profile_routes_1 = require("./modules/profile/profile.routes");
 const partner_routes_1 = require("./modules/partner/partner.routes");
 const admin_routes_1 = require("./modules/admin/admin.routes");
-const gamification_routes_1 = require("./modules/gamification/gamification.routes");
 const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const app = (0, express_1.default)();
 exports.app = app;
@@ -34,6 +33,4 @@ app.use("/api/catalog", catalog_routes_1.catalogRouter);
 app.use("/api/profile", profile_routes_1.profileRouter);
 app.use("/api/partner", partner_routes_1.partnerRouter);
 app.use("/api/admin", admin_routes_1.adminRouter);
-app.use("/api/gamification", gamification_routes_1.gamificationRouter);
-app.use("/api", gamification_routes_1.gamificationRouter);
 //# sourceMappingURL=app.js.map

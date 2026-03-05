@@ -203,7 +203,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
 
-    res.json(
+    return res.json(
       listings.map(
         (
           listing: MarketplaceListing & {
@@ -275,7 +275,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error("Error fetching listings:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

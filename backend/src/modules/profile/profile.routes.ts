@@ -314,42 +314,6 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
           addedDate: item.added_at.toISOString().split("T")[0],
         }),
       ),
-      wishlist: userWithRelations.wishlist_items.map(
-        (item) => ({
-          id: item.listing.public_id,
-          name: item.listing.title,
-          price: item.listing.sale_price ?? item.listing.price,
-          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-          location: item.listing.city.name, // Use item.listing.city.name
-          condition: toClientCondition(item.listing.condition),
-          seller: item.listing.seller.name,
-          addedDate: item.added_at.toISOString().split("T")[0],
-        }),
-      ),
-      wishlist: userWithRelations.wishlist_items.map(
-        (item) => ({
-          id: item.listing.public_id,
-          name: item.listing.title,
-          price: item.listing.sale_price ?? item.listing.price,
-          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-          location: item.listing.city.name, // Use item.listing.city.name
-          condition: toClientCondition(item.listing.condition),
-          seller: item.listing.seller.name,
-          addedDate: item.added_at.toISOString().split("T")[0],
-        }),
-      ),
-      wishlist: userWithRelations.wishlist_items.map(
-        (item) => ({
-          id: item.listing.public_id,
-          name: item.listing.title,
-          price: item.listing.sale_price ?? item.listing.price,
-          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-          location: item.listing.city.name, // Use item.listing.city.name
-          condition: toClientCondition(item.listing.condition),
-          seller: item.listing.seller.name,
-          addedDate: item.added_at.toISOString().split("T")[0],
-        }),
-      ),
     });
   } catch (error) {
     console.error("Error fetching profile data:", error);
@@ -1478,7 +1442,7 @@ profileRouter.get("/notifications", async (req: Request, res: Response) => {
       where: { user_id: session.user.id, is_read: false },
     });
 
-    res.json({
+    return res.json({
       notifications: notifications.map((n) => ({
         id: n.id,
         type: n.type,
@@ -1491,7 +1455,7 @@ profileRouter.get("/notifications", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1507,10 +1471,10 @@ profileRouter.patch("/notifications/mark-as-read", async (req: Request, res: Res
       data: { is_read: true },
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error("Error marking notifications as read:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
