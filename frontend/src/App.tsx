@@ -357,6 +357,7 @@ export default function App() {
         <div className="app-header-spacer" aria-hidden="true" />
 
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -395,6 +396,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -426,6 +428,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -452,6 +455,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -468,6 +472,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -484,6 +489,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -500,6 +506,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -516,6 +523,7 @@ export default function App() {
     return (
       <>
         <Header
+          isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
@@ -605,6 +613,7 @@ export default function App() {
       <div className="app-header-spacer" aria-hidden="true" />
 
       <Header
+        isAuthenticated={isAuthenticated}
         cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={handleCartClick}
         onSearchSubmit={handleSearchSubmit}

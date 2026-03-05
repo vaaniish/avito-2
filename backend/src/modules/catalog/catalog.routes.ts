@@ -13,7 +13,7 @@ import {
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
-import { getSessionUser } from "../../lib/session";
+import { getSessionUser, requireAnyRole } from "../../lib/session";
 import { toClientCondition } from "../../utils/format";
 
 const catalogRouter = Router();
@@ -181,7 +181,17 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
         attributes: {
           orderBy: [{ sort_order: "asc" }, { id: "asc" }],
         },
-        reviews: true,
+        reviews: {
+          orderBy: [{ created_at: "desc" }],
+          include: {
+            author: {
+              select: {
+                display_name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
@@ -205,7 +215,9 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             }) | null;
             images: ListingImage[];
             attributes: ListingAttribute[];
-            reviews: ListingReview[];
+            reviews: (ListingReview & {
+              author: { display_name: string | null; avatar: string | null };
+            })[];
           },
         ) => {
           const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
@@ -242,13 +254,13 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             specifications: listingSpecifications(listing.attributes),
             isPriceLower: salePrice !== null,
             condition: toClientCondition(listing.condition),
-            reviews: listing.reviews.map((review: ListingReview) => ({
+            reviews: listing.reviews.map((review) => ({
               id: String(review.id),
-              author: review.author_name,
+              author: review.author.display_name ?? "Аноним",
               rating: review.rating,
-              date: review.date,
+              date: formatPublishDate(review.created_at),
               comment: review.comment,
-              avatar: review.avatar,
+              avatar: review.author.avatar,
             })),
           };
         },
@@ -476,15 +488,15 @@ catalogRouter.post(
         return;
       }
 
-      const sessionUser = await getSessionUser(req);
-      if (!sessionUser) {
-        res.status(401).json({ error: "Unauthorized" });
+      const session = await requireAnyRole(req, ["BUYER"]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
         return;
       }
 
       const listing = await prisma.marketplaceListing.findUnique({
         where: { public_id: String(publicId) },
-        select: { id: true },
+        select: { id: true, title: true, seller_id: true, public_id: true },
       });
 
       if (!listing) {
@@ -496,7 +508,7 @@ catalogRouter.post(
         data: {
           public_id: `Q-${Date.now()}`,
           listing_id: listing.id,
-          buyer_id: sessionUser.id,
+          buyer_id: session.user.id,
           question: questionText,
           status: "PENDING",
         },
@@ -507,17 +519,15 @@ catalogRouter.post(
         },
       });
 
-      // await prisma.auditLog.create({ // Removed AuditLog
-      //   data: {
-      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-      //     admin_id: sessionUser.id,
-      //     action: "create_question",
-      //     target_id: String(publicId),
-      //     target_type: "listing",
-      //     details: `Пользователь ${sessionUser.email} задал вопрос к товаid ${publicId}: "${questionText}"`,
-      //     ip_address: req.ip || "127.0.0.1",
-      //   },
-      // });
+      // Create notification for the seller
+      await prisma.notification.create({
+        data: {
+          user_id: listing.seller_id,
+          type: "NEW_QUESTION",
+          message: `Новый вопрос по вашему товару "${listing.title}"`,
+          target_url: `/products/${listing.public_id}`, // Adjust URL as needed
+        },
+      });
 
       res.status(201).json({
         id: created.public_id,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
-import { apiGet } from "../lib/api";
+import { Search, ShoppingCart, User, Menu, X, Bell } from "lucide-react";
+import { apiGet, apiPatch } from "../lib/api";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -8,6 +8,7 @@ interface HeaderProps {
   onSearchSubmit: (query: string) => void;
   onLogoClick?: () => void;
   onProfileClick?: () => void;
+  isAuthenticated: boolean;
 }
 
 type SearchSuggestion = {
@@ -17,22 +18,55 @@ type SearchSuggestion = {
   query: string;
 };
 
+type Notification = {
+  id: number;
+  type: string;
+  message: string;
+  url: string;
+  isRead: boolean;
+  date: string;
+};
+
 export function Header({
   cartItemCount,
   onCartClick,
   onSearchSubmit,
   onLogoClick,
   onProfileClick,
+  isAuthenticated,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   const canQuerySuggestions = useMemo(
     () => searchQuery.trim().length >= 2,
     [searchQuery],
   );
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const data = await apiGet<{ notifications: Notification[]; unreadCount: number }>("/profile/notifications");
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    };
+
+    void fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!canQuerySuggestions) {
@@ -86,6 +120,19 @@ export function Header({
     onLogoClick?.();
   };
 
+  const handleToggleNotifications = async () => {
+    if (!showNotifications && unreadCount > 0) {
+      try {
+        await apiPatch("/profile/notifications/mark-as-read");
+        setUnreadCount(0);
+        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      } catch (error) {
+        console.error("Failed to mark notifications as read:", error);
+      }
+    }
+    setShowNotifications(!showNotifications);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white text-gray-900 shadow-sm border-b border-gray-200">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6">
@@ -133,13 +180,48 @@ export function Header({
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              {isAuthenticated && (
+                <div className="relative">
+                  <button
+                    onClick={handleToggleNotifications}
+                    className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-300"
+                  >
+                    <Bell className="w-6 h-6 lg:w-7 lg:h-7" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 lg:w-6 lg:h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs lg:text-sm">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  {showNotifications && (
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+                      <div className="p-4 font-semibold border-b">Уведомления</div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((n) => (
+                            <a
+                              key={n.id}
+                              href={n.url}
+                              className={`block px-4 py-3 hover:bg-gray-50 ${!n.isRead ? "bg-blue-50" : ""}`}
+                            >
+                              <p className="text-sm text-gray-800">{n.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{new Date(n.date).toLocaleString("ru-RU")}</p>
+                            </a>
+                          ))
+                        ) : (
+                          <p className="p-4 text-sm text-gray-500">Нет новых уведомлений.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <button
                 onClick={onProfileClick}
                 className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-300"
               >
                 <User className="w-6 h-6 lg:w-7 lg:h-7" />
               </button>
-
               <button
                 onClick={onCartClick}
                 className="relative p-3 rounded-xl hover:bg-gray-100 transition-all duration-300"

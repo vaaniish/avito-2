@@ -198,6 +198,50 @@ export function ProductDetail({
           )}
 
           <div className="mt-8 border-t border-gray-200 pt-6">
+            <h2 className="text-xl md:text-2xl text-gray-900 mb-2">Отзывы</h2>
+            <p className="text-sm text-gray-600 mb-4">Всего: {product.reviews?.length ?? 0}</p>
+            <div className="space-y-4">
+              {(product.reviews ?? []).map((review) => (
+                <div key={review.id} className="border border-gray-200 rounded-xl p-4 bg-white">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                      {review.avatar ? (
+                        <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          <User className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{review.author}</p>
+                          <p className="text-xs text-gray-500">{review.date}</p>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 mt-2">{review.comment}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(product.reviews?.length ?? 0) === 0 && (
+                <p className="text-sm text-gray-500">Отзывов пока нет.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-gray-200 pt-6">
             <h2 className="text-xl md:text-2xl text-gray-900 mb-2">Вопросы и ответы</h2>
             <p className="text-sm text-gray-600 mb-4">Всего: {questions.length}</p>
 

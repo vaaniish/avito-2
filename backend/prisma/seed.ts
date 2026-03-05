@@ -38,14 +38,6 @@ type ListingSeed = {
 
 async function main(): Promise<void> {
   // Clear all data - order matters due to foreign key constraints
-  await prisma.partnerAchievement.deleteMany();
-  await prisma.xpAccrual.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.achievement.deleteMany();
-  await prisma.loyaltyLevel.deleteMany();
-  await prisma.partner.deleteMany();
-
-  // await prisma.auditLog.deleteMany(); // Removed AuditLog
   await prisma.complaint.deleteMany();
   await prisma.kycRequest.deleteMany();
   await prisma.platformTransaction.deleteMany();
@@ -503,24 +495,24 @@ async function main(): Promise<void> {
     data: [
       {
         listing_id: listingId("LST-001"),
-        author_name: "Анна",
+        author_id: userId("USR-101"), // Link to a real user
         rating: 5,
-        date: "2 дня назад",
         comment: "Все отлично, рекомендую.",
+        created_at: daysAgo(2),
       },
       {
         listing_id: listingId("LST-001"),
-        author_name: "Игорь",
+        author_id: userId("USR-001"), // Link to a real user
         rating: 4,
-        date: "Неделю назад",
         comment: "Телефон отличный, но доставка заняла на день дольше.",
+        created_at: daysAgo(7),
       },
       {
         listing_id: listingId("LST-201"),
-        author_name: "Ольга",
+        author_id: userId("USR-101"), // Link to a real user
         rating: 5,
-        date: "3 дня назад",
         comment: "Прекрасный телефон, быстрая доставка!",
+        created_at: daysAgo(3),
       },
     ],
   });
@@ -774,85 +766,6 @@ async function main(): Promise<void> {
     ],
   });
 
-  // --- Gamification Sandbox Models ---
-  await prisma.loyaltyLevel.createMany({
-    data: [
-      { level_name: "Новичок", xp_threshold: 0, xp_coefficient: 1 },
-      { level_name: "Бронза", xp_threshold: 500, xp_coefficient: 1.1 },
-      { level_name: "Серебро", xp_threshold: 1500, xp_coefficient: 1.25 },
-      { level_name: "Золото", xp_threshold: 5000, xp_coefficient: 1.5 },
-    ],
-  });
-
-  const partner1 = await prisma.partner.create({
-    data: { name: "Test Partner One", current_xp: 750, rating: 4.9 },
-  });
-  const partner2 = await prisma.partner.create({
-    data: { name: "Test Partner Two", current_xp: 200, rating: 4.5 },
-  });
-
-  await prisma.achievement.createMany({
-    data: [
-      { name: "Первая продажа", description: "Совершите свою первую продажу.", icon: "star", xp_reward: 50 },
-      { name: "Три сделки", description: "Совершите три успешные сделки.", icon: "zap", xp_reward: 80 },
-      { name: "Легенда лиги", description: "Наберите 10 000 XP.", icon: "trophy", xp_reward: 600 },
-      { name: "Отличный сервис", description: "Получите 10 отзывов с оценкой 5 звезд.", icon: "heart", xp_reward: 120 },
-    ],
-  });
-
-  const beginnerLevel = await prisma.loyaltyLevel.findFirst({ where: { level_name: "Новичок" } });
-  const bronzeLevel = await prisma.loyaltyLevel.findFirst({ where: { level_name: "Бронза" } });
-  if (!beginnerLevel || !bronzeLevel) throw new Error("Loyalty levels not found");
-
-  const sandboxOrder1 = await prisma.order.create({
-    data: {
-      partner_id: partner1.id,
-      loyalty_level_id: bronzeLevel.id,
-      deal_amount: 15000,
-      created_at: daysAgo(2),
-    },
-  });
-  const sandboxOrder2 = await prisma.order.create({
-    data: {
-      partner_id: partner2.id,
-      loyalty_level_id: beginnerLevel.id,
-      deal_amount: 5000,
-      created_at: daysAgo(1),
-    },
-  });
-
-  await prisma.xpAccrual.createMany({
-    data: [
-      {
-        order_id: sandboxOrder1.id,
-        xp_amount: Math.round(sandboxOrder1.deal_amount / 100 * bronzeLevel.xp_coefficient),
-        description: "XP за сделку ORD-Sandbox-1",
-      },
-      {
-        order_id: sandboxOrder2.id,
-        xp_amount: Math.round(sandboxOrder2.deal_amount / 100 * beginnerLevel.xp_coefficient),
-        description: "XP за сделку ORD-Sandbox-2",
-      },
-    ],
-  });
-
-  const firstSaleAchievement = await prisma.achievement.findFirst({ where: { name: "Первая продажа" } });
-  if (firstSaleAchievement) {
-    await prisma.partnerAchievement.create({
-      data: {
-        partner_id: partner1.id,
-        achievement_id: firstSaleAchievement.id,
-        achieved_date: daysAgo(10),
-      },
-    });
-  }
-
-  await prisma.partner.update({
-    where: { id: partner1.id },
-    data: { current_xp: partner1.current_xp + (firstSaleAchievement?.xp_reward ?? 0) },
-  });
-
-
   const [usersCount, listingsCount, ordersCount, transactionsCount, citiesCount] = await Promise.all([
     prisma.appUser.count(),
     prisma.marketplaceListing.count(),
@@ -868,13 +781,3 @@ async function main(): Promise<void> {
   console.log("partner -> partner@ecomm.ru / partner123");
   console.log("admin -> admin@ecomm.ru / admin123");
 }
-
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
-

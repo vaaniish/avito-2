@@ -210,7 +210,15 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
         orders_as_buyer: {
           include: {
             seller: { include: { city: true } }, // Include City for seller in order
-            items: true,
+            items: {
+              include: {
+                listing: {
+                  select: {
+                    public_id: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: [{ created_at: "desc" }],
         },
@@ -228,7 +236,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
       addresses: (UserAddress & { city: City })[];
       orders_as_buyer: (MarketOrder & {
         seller: AppUser & { city: City | null };
-        items: MarketOrderItem[];
+        items: (MarketOrderItem & { listing: { public_id: string } | null })[];
       })[];
       wishlist_items: (WishlistItem & {
         listing: MarketplaceListing & {
@@ -283,8 +291,9 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
             address: `${order.seller.city?.name ?? "Город не указан"}`, // Use order.seller.city.name
             workingHours: "пн — вс: 9:00-21:00",
           },
-          items: order.items.map((item: MarketOrderItem) => ({
+          items: order.items.map((item) => ({
             id: String(item.id),
+            listingPublicId: item.listing?.public_id ?? "",
             name: item.name,
             image: item.image ?? "",
             price: item.price,
@@ -1297,5 +1306,175 @@ profileRouter.post(
     }
   },
 );
+
+profileRouter.post(
+  "/listings/:listingPublicId/review",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [ROLE_BUYER]);
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      const { listingPublicId } = req.params;
+      const body = (req.body ?? {}) as { rating?: unknown; comment?: unknown };
+      const rating = Number(body.rating);
+      const comment =
+        typeof body.comment === "string" ? body.comment.trim() : "";
+
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+        res.status(400).json({ error: "Rating must be an integer from 1 to 5" });
+        return;
+      }
+
+      if (comment.length < 3) {
+        res.status(400).json({ error: "Comment is too short" });
+        return;
+      }
+
+      const listing = await prisma.marketplaceListing.findUnique({
+        where: { public_id: String(listingPublicId) },
+        select: { id: true },
+      });
+
+      if (!listing) {
+        res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      // Verify the user has purchased this item
+      const orderCount = await prisma.marketOrder.count({
+        where: {
+          buyer_id: session.user.id,
+          status: "COMPLETED",
+          items: {
+            some: {
+              listing_id: listing.id,
+            },
+          },
+        },
+      });
+
+      if (orderCount === 0) {
+        res.status(403).json({ error: "You can only review items you have purchased." });
+        return;
+      }
+
+      // Verify the user has not already reviewed this item
+      const existingReview = await prisma.listingReview.findUnique({
+        where: {
+          listing_id_author_id: {
+            listing_id: listing.id,
+            author_id: session.user.id,
+          },
+        },
+      });
+
+      if (existingReview) {
+        res.status(409).json({ error: "You have already reviewed this item." });
+        return;
+      }
+
+      const newReview = await prisma.listingReview.create({
+        data: {
+          listing_id: listing.id,
+          author_id: session.user.id,
+          rating,
+          comment,
+        },
+        include: {
+          author: {
+            select: {
+              display_name: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+
+      // Recalculate average rating for the listing
+      const avgRating = await prisma.listingReview.aggregate({
+        _avg: {
+          rating: true,
+        },
+        where: {
+          listing_id: listing.id,
+        },
+      });
+
+      await prisma.marketplaceListing.update({
+        where: { id: listing.id },
+        data: {
+          rating: avgRating._avg.rating ?? 0,
+        },
+      });
+
+      res.status(201).json({
+        id: String(newReview.id),
+        author: newReview.author.display_name ?? "Аноним",
+        rating: newReview.rating,
+        date: newReview.created_at,
+        comment: newReview.comment,
+        avatar: newReview.author.avatar,
+      });
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+profileRouter.get("/notifications", async (req: Request, res: Response) => {
+  try {
+    const session = await requireAnyRole(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+    if (!session.ok) {
+      return res.status(session.status).json({ error: session.message });
+    }
+
+    const notifications = await prisma.notification.findMany({
+      where: { user_id: session.user.id },
+      orderBy: { created_at: "desc" },
+    });
+
+    const unreadCount = await prisma.notification.count({
+      where: { user_id: session.user.id, is_read: false },
+    });
+
+    res.json({
+      notifications: notifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        message: n.message,
+        url: n.target_url,
+        isRead: n.is_read,
+        date: n.created_at,
+      })),
+      unreadCount,
+    });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+profileRouter.patch("/notifications/mark-as-read", async (req: Request, res: Response) => {
+  try {
+    const session = await requireAnyRole(req, [ROLE_BUYER, ROLE_SELLER, ROLE_ADMIN]);
+    if (!session.ok) {
+      return res.status(session.status).json({ error: session.message });
+    }
+
+    await prisma.notification.updateMany({
+      where: { user_id: session.user.id, is_read: false },
+      data: { is_read: true },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 export { profileRouter };

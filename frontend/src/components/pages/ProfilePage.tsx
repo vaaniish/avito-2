@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { LogOut, MapPin, Package, Plus, Star, Store, User as UserIcon, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
-import { AchievementsPage } from "../partner/AchievementsPage";
 import { PartnerListingsPage } from "./PartnerListingsPage";
 import { PartnerOrdersPage } from "./PartnerOrdersPage";
 import { QuestionsPage } from "../partner/QuestionsPage";
-import { YandexMapPicker } from "../../components/YandexMapPicker"; // Corrected Import YandexMapPicker
+import { YandexMapPicker } from "../../components/YandexMapPicker";
 
 type UserType = "regular" | "partner";
 
@@ -17,8 +16,7 @@ type TabType =
   | "partnership"
   | "partner-listings"
   | "partner-questions"
-  | "partner-orders"
-  | "partner-achievements";
+  | "partner-orders";
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -27,7 +25,6 @@ interface ProfilePageProps {
   initialTab?: TabType;
 }
 
-// New type for City
 type City = {
   id: number;
   name: string;
@@ -44,18 +41,27 @@ type ProfileUser = {
   name: string;
   email: string;
   avatar?: string | null;
-  city?: City | null; // Updated to City object
+  city?: City | null;
   joinDate: string;
 };
 
 type Address = {
   id: string;
   name: string;
-  city: City; // Updated to City object
+  city: City;
   street: string;
   building: string;
   postalCode: string;
   isDefault: boolean;
+};
+
+type OrderItem = {
+  id: string;
+  listingPublicId: string;
+  name: string;
+  image: string;
+  price: number;
+  quantity: number;
 };
 
 type Order = {
@@ -75,13 +81,7 @@ type Order = {
     address?: string;
     workingHours?: string;
   };
-  items: Array<{
-    id: string;
-    name: string;
-    image: string;
-    price: number;
-    quantity: number;
-  }>;
+  items: OrderItem[];
 };
 
 type WishlistItem = {
@@ -118,7 +118,6 @@ const partnerBaseTabs: Array<{ id: TabType; label: string; icon: typeof UserIcon
 ];
 
 const partnerTabs: Array<{ id: TabType; label: string; icon: typeof Store }> = [
-  { id: "partner-achievements", label: "Геймификация", icon: Star },
   { id: "partner-listings", label: "Объявления", icon: Store },
   { id: "partner-questions", label: "Вопросы", icon: Package },
   { id: "partner-orders", label: "Заказы", icon: Package },
@@ -132,7 +131,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   const [orders, setOrders] = useState<Order[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [allCities, setAllCities] = useState<City[]>([]); // State to store all cities
+  const [allCities, setAllCities] = useState<City[]>([]);
 
   const [profileForm, setProfileForm] = useState({
     firstName: "",
@@ -146,11 +145,15 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressForm, setAddressForm] = useState({
     name: "",
-    cityId: null as number | null, // Changed from region and city
+    cityId: null as number | null,
     street: "",
     building: "",
     postalCode: "",
   });
+
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [itemToReview, setItemToReview] = useState<OrderItem | null>(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: "" });
 
   const [partnershipForm, setPartnershipForm] = useState({
     sellerType: "company" as "company" | "private",
@@ -173,7 +176,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
 
   useEffect(() => {
     if (!tabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(userType === "partner" ? "partner-achievements" : "profile");
+      setActiveTab(userType === "partner" ? "partner-listings" : "profile");
     }
   }, [activeTab, tabs, userType]);
 
@@ -191,7 +194,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     return city?.id;
   }, [allCities]);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await apiGet<ProfilePayload>("/profile/me");
@@ -217,12 +220,38 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void fetchCities(); // Fetch cities on mount
+    void fetchCities();
     void loadProfile();
-  }, [fetchCities]);
+  }, [fetchCities, loadProfile]);
+
+  const handlePostReview = async () => {
+    if (!itemToReview) return;
+    if (reviewForm.rating === 0) {
+      alert("Пожалуйста, поставьте оценку.");
+      return;
+    }
+    if (reviewForm.comment.trim().length < 3) {
+      alert("Комментарий слишком короткий.");
+      return;
+    }
+
+    try {
+      await apiPost(`/profile/listings/${itemToReview.listingPublicId}/review`, {
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+      });
+      alert("Спасибо за ваш отзыв!");
+      setReviewModalOpen(false);
+      setItemToReview(null);
+      setReviewForm({ rating: 0, comment: "" });
+      // Optionally, refetch orders or update state to show "review submitted"
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Не удалось отправить отзыв.");
+    }
+  };
 
   const saveProfile = async () => {
     setSaveLoading(true);
@@ -250,7 +279,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   };
 
   const createAddress = async () => {
-    if (!addressForm.name || !addressForm.cityId || !addressForm.street) { // Updated validation
+    if (!addressForm.name || !addressForm.cityId || !addressForm.street) {
       alert("Заполните обязательные поля адреса");
       return;
     }
@@ -258,14 +287,14 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     try {
       await apiPost<Address>("/profile/addresses", {
         name: addressForm.name,
-        cityId: addressForm.cityId, // Use cityId
+        cityId: addressForm.cityId,
         street: addressForm.street,
         building: addressForm.building,
         postalCode: addressForm.postalCode,
         isDefault: addresses.length === 0,
       });
       setAddressModalOpen(false);
-      setAddressForm({ name: "", cityId: null, street: "", building: "", postalCode: "" }); // Updated reset
+      setAddressForm({ name: "", cityId: null, street: "", building: "", postalCode: "" });
       await loadProfile();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось добавить адрес");
@@ -448,7 +477,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
               <input value={addressForm.street} onChange={(event) => setAddressForm((prev) => ({ ...prev, street: event.target.value }))} placeholder="Улица" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input value={addressForm.building} onChange={(event) => setAddressForm((prev) => ({ ...prev, building: event.target.value }))} placeholder="Дом / квартира" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input value={addressForm.postalCode} onChange={(event) => setAddressForm((prev) => ({ ...prev, postalCode: event.target.value }))} placeholder="Индекс" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              <div className="h-64 mt-3"> {/* Added a fixed height for the map picker */}
+              <div className="h-64 mt-3">
                 <YandexMapPicker onAddressSelect={handleAddressSelectFromMap} />
               </div>
             </div>
@@ -478,10 +507,72 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
               <div className="text-xs text-gray-500">Статус: {order.status}</div>
             </div>
           </div>
-          <div className="text-sm text-gray-700 mt-2">{order.items.map((item) => `${item.name} x${item.quantity}`).join(", ")}</div>
+          <div className="mt-4 space-y-3">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex items-center gap-3">
+                <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{item.name}</p>
+                  <p className="text-sm text-gray-600">{item.price.toLocaleString("ru-RU")} ₽ x {item.quantity}</p>
+                </div>
+                {order.status === "completed" && (
+                  <button
+                    onClick={() => {
+                      setItemToReview(item);
+                      setReviewModalOpen(true);
+                    }}
+                    className="text-xs px-2 py-1 border rounded-lg hover:bg-gray-100"
+                  >
+                    Оставить отзыв
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       ))}
       {orders.length === 0 && <div className="text-sm text-gray-500">Заказов пока нет</div>}
+
+      {reviewModalOpen && itemToReview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold">Отзыв о товаре</h4>
+              <button onClick={() => setReviewModalOpen(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm font-medium mb-2">{itemToReview.name}</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <p className="text-sm">Ваша оценка:</p>
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}>
+                      <Star
+                        className={`w-6 h-6 cursor-pointer ${
+                          star <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                placeholder="Напишите ваш комментарий..."
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => void handlePostReview()} className="flex-1 py-2 bg-[rgb(38,83,141)] text-white rounded-lg">Отправить отзыв</button>
+              <button onClick={() => setReviewModalOpen(false)} className="flex-1 py-2 border border-gray-300 rounded-lg">Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -529,7 +620,6 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   );
 
   const renderPartnerTab = () => {
-    if (activeTab === "partner-achievements") return <AchievementsPage />;
     if (activeTab === "partner-listings") return <PartnerListingsPage />;
     if (activeTab === "partner-questions") return <QuestionsPage />;
     if (activeTab === "partner-orders") return <PartnerOrdersPage />;
