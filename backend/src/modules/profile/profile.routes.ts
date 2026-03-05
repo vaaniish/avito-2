@@ -6,7 +6,8 @@ import {
   MarketplaceListing,
   UserAddress,
   WishlistItem,
-  City, // Added City import
+  City,
+  Prisma, // Added Prisma import
 } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Router, type Request, type Response } from "express";
@@ -299,6 +300,42 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
             price: item.price,
             quantity: item.quantity,
           })),
+        }),
+      ),
+      wishlist: userWithRelations.wishlist_items.map(
+        (item) => ({
+          id: item.listing.public_id,
+          name: item.listing.title,
+          price: item.listing.sale_price ?? item.listing.price,
+          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+          location: item.listing.city.name, // Use item.listing.city.name
+          condition: toClientCondition(item.listing.condition),
+          seller: item.listing.seller.name,
+          addedDate: item.added_at.toISOString().split("T")[0],
+        }),
+      ),
+      wishlist: userWithRelations.wishlist_items.map(
+        (item) => ({
+          id: item.listing.public_id,
+          name: item.listing.title,
+          price: item.listing.sale_price ?? item.listing.price,
+          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+          location: item.listing.city.name, // Use item.listing.city.name
+          condition: toClientCondition(item.listing.condition),
+          seller: item.listing.seller.name,
+          addedDate: item.added_at.toISOString().split("T")[0],
+        }),
+      ),
+      wishlist: userWithRelations.wishlist_items.map(
+        (item) => ({
+          id: item.listing.public_id,
+          name: item.listing.title,
+          price: item.listing.sale_price ?? item.listing.price,
+          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+          location: item.listing.city.name, // Use item.listing.city.name
+          condition: toClientCondition(item.listing.condition),
+          seller: item.listing.seller.name,
+          addedDate: item.added_at.toISOString().split("T")[0],
         }),
       ),
       wishlist: userWithRelations.wishlist_items.map(

@@ -19,8 +19,8 @@ import { ProfilePage } from "./components/pages/ProfilePage";
 import { AdminLogin } from "./components/admin/AdminLogin";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./components/ui/sheet";
-import type { CartItem, FilterState, Product } from "./types";
-import { apiGet, clearSessionUser, getSessionUser, saveSessionUser, type SessionRole, type SessionUser } from "./lib/api";
+import type { CartItem, CityClient, FilterState, Product } from "./types";
+import { apiGet, apiPost, apiDelete, clearSessionUser, getSessionUser, saveSessionUser, type SessionRole, type SessionUser } from "./lib/api";
 
 type AppView =
   | "home"
@@ -45,7 +45,7 @@ const DEFAULT_FILTERS: FilterState = {
   searchQuery: "",
   showOnlySale: false,
   condition: "all",
-  city: "",
+  cityId: undefined,
   includeWords: "",
   excludeWords: "",
 };
@@ -68,12 +68,36 @@ export default function App() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<string>("popular");
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [wishlistProductIds, setWishlistProductIds] = useState(new Set<string>());
 
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Product[]>([]);
   const [productCategories, setProductCategories] = useState<CatalogCategory[]>([]);
   const [serviceCategories, setServiceCategories] = useState<CatalogCategory[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [cities, setCities] = useState<CityClient[]>([]);
+
+  const handleWishlistToggle = async (productId: string, shouldAddToWishlist: boolean) => {
+    try {
+      if (shouldAddToWishlist) {
+        await apiPost<{ success: boolean }>(`/profile/wishlist/${productId}`);
+      } else {
+        await apiDelete<{ success: boolean }>(`/profile/wishlist/${productId}`);
+      }
+      
+      setWishlistProductIds((prev) => {
+        const next = new Set(prev);
+        if (shouldAddToWishlist) {
+          next.add(productId);
+        } else {
+          next.delete(productId);
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      alert('Не удалось обновить список избранного');
+    }
+  };
 
   useEffect(() => {
     const existingSession = getSessionUser();
@@ -87,14 +111,25 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      void loadCatalog();
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [filters]);
+
   const loadCatalog = async () => {
     try {
+      const cityQuery = filters.cityId ? `&cityId=${filters.cityId}` : "";
       const [productsData, servicesData, productCategoriesData, serviceCategoriesData, citiesData] = await Promise.all([
-        apiGet<Product[]>("/catalog/listings?type=products"),
-        apiGet<Product[]>("/catalog/listings?type=services"),
+        apiGet<Product[]>(`/catalog/listings?type=products${cityQuery}`),
+        apiGet<Product[]>(`/catalog/listings?type=services${cityQuery}`),
         apiGet<CatalogCategory[]>("/catalog/categories?type=products"),
         apiGet<CatalogCategory[]>("/catalog/categories?type=services"),
-        apiGet<string[]>("/catalog/cities"),
+        apiGet<CityClient[]>("/catalog/cities"),
       ]);
 
       setProducts(productsData);
@@ -107,10 +142,6 @@ export default function App() {
       alert("Не удалось загрузить каталог");
     }
   };
-
-  useEffect(() => {
-    void loadCatalog();
-  }, []);
 
   const currentItems = viewMode === "products" ? products : services;
   const currentCategories = viewMode === "products" ? productCategories : serviceCategories;
@@ -315,8 +346,6 @@ export default function App() {
         if (!item.condition || item.condition !== filters.condition) return false;
       }
 
-      if (filters.city && item.city !== filters.city) return false;
-
       if (filters.includeWords) {
         const words = filters.includeWords.toLowerCase().split(" ").filter(Boolean);
         if (words.some((word) => !item.title.toLowerCase().includes(word))) return false;
@@ -330,7 +359,7 @@ export default function App() {
       return true;
     });
   }, [currentItems, filters, categoryMap]);
-
+  
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((left, right) => {
       switch (sortBy) {
@@ -377,6 +406,8 @@ export default function App() {
                 item.id !== selectedProduct.id && item.category === selectedProduct.category
             )
             .slice(0, 4)}
+          initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
+          onWishlistToggle={handleWishlistToggle}
         />
         <Footer onNavigate={handleFooterNavigation} />
       </div>
@@ -541,12 +572,13 @@ export default function App() {
       <AuthPage
         onBack={handleLogoClick}
         onPartnershipClick={() => setCurrentView("partnership")}
-        onLoginSuccess={(role, user) => {
+        onLoginSuccess={(role, user, profile) => {
           if (!user) return;
           saveSessionUser(user);
           setCurrentUser(user);
           setIsAuthenticated(true);
           setUserType(role || "regular");
+          setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
 
           if (role === "admin") {
             setCurrentView("adminPanel");
@@ -572,6 +604,7 @@ export default function App() {
         }}
         userType={userType === "partner" ? "partner" : "regular"}
         initialTab={undefined}
+        onWishlistUpdate={handleWishlistToggle}
       />
     );
   }
@@ -683,6 +716,8 @@ export default function App() {
               sortBy={sortBy}
               onSortChange={setSortBy}
               viewMode={viewMode}
+              wishlistProductIds={wishlistProductIds}
+              onWishlistToggle={handleWishlistToggle}
             />
           </main>
         </div>

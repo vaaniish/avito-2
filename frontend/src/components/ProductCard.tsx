@@ -18,6 +18,8 @@ interface ProductCardProps {
   cartQuantity?: number;
   viewMode: "products" | "services";
   displayMode?: "grid" | "list";
+  isWishlisted?: boolean;
+  onWishlistToggle?: (productId: string, isWishlisted: boolean) => void;
 }
 
 export function ProductCard({
@@ -28,9 +30,9 @@ export function ProductCard({
   cartQuantity = 0,
   viewMode,
   displayMode = "grid",
+  isWishlisted = false,
+  onWishlistToggle,
 }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToCart();
@@ -48,7 +50,7 @@ export function ProductCard({
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted((s) => !s);
+    onWishlistToggle?.(product.id, !isWishlisted);
   };
 
   const displayPrice =

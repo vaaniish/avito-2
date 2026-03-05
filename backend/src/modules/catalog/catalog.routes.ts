@@ -9,8 +9,8 @@ import {
   ListingReview,
   MarketplaceListing,
   SellerProfile,
-  City, // Added City import
 } from "@prisma/client";
+import type { City } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { getSessionUser, requireAnyRole } from "../../lib/session";
@@ -141,9 +141,16 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
 catalogRouter.get("/listings", async (req: Request, res: Response) => {
   try {
     const type = resolveListingType(req.query.type);
+    const cityId = req.query.cityId ? Number(req.query.cityId) : undefined;
+
+    if (req.query.cityId && (isNaN(cityId!) || cityId! <= 0)) {
+      return res.status(400).json({ error: "Invalid city ID" });
+    }
+
     const listings = await prisma.marketplaceListing.findMany({
       where: {
         type,
+        city_id: cityId,
         status: "ACTIVE",
         moderation_status: "APPROVED",
       },

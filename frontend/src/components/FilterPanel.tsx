@@ -39,11 +39,6 @@ export function FilterPanel({
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
   const [priceOpen, setPriceOpen] = useState(true);
   const [ratingOpen, setRatingOpen] = useState(true);
-  const [tempFilters, setTempFilters] = useState<FilterState>(filters);
-
-  useEffect(() => {
-    setTempFilters(filters);
-  }, [filters]);
 
   const categoryTree = useMemo(() => categories, [categories]);
 
@@ -72,34 +67,22 @@ export function FilterPanel({
   };
 
   const toggleCategorySelection = (categoryName: string) => {
-    const nextCategories = tempFilters.categories.includes(categoryName)
-      ? tempFilters.categories.filter((category) => category !== categoryName)
-      : [...tempFilters.categories, categoryName];
-
-    setTempFilters({
-      ...tempFilters,
-      categories: nextCategories,
-    });
+    const nextCategories = filters.categories.includes(categoryName)
+      ? filters.categories.filter((category) => category !== categoryName)
+      : [...filters.categories, categoryName];
+    onFilterChange({ ...filters, categories: nextCategories });
   };
 
   const toggleSubCategorySelection = (subcategory: CatalogSubcategory) => {
     const subcategoryItems = subcategory.items;
-    const areAllSelected = subcategoryItems.every((item) => tempFilters.categories.includes(item));
+    const areAllSelected = subcategoryItems.every((item) => filters.categories.includes(item));
     let nextCategories: string[];
     if (areAllSelected) {
-      nextCategories = tempFilters.categories.filter((c) => !subcategoryItems.includes(c));
+      nextCategories = filters.categories.filter((c) => !subcategoryItems.includes(c));
     } else {
-      nextCategories = [...new Set([...tempFilters.categories, ...subcategoryItems])];
+      nextCategories = [...new Set([...filters.categories, ...subcategoryItems])];
     }
-    setTempFilters({ ...tempFilters, categories: nextCategories });
-  };
-
-  const updatePriceRange = (min: number, max: number) => {
-    setTempFilters({ ...tempFilters, priceRange: [min, max] });
-  };
-
-  const setMinRating = (rating: number) => {
-    setTempFilters({ ...tempFilters, minRating: rating });
+    onFilterChange({ ...filters, categories: nextCategories });
   };
 
   const handleResetFilters = () => {
@@ -110,20 +93,13 @@ export function FilterPanel({
       searchQuery: "",
       showOnlySale: false,
       condition: "all",
-      cityId: undefined, // Changed from city: ""
+      cityId: undefined,
       includeWords: "",
       excludeWords: "",
     };
-
-    setTempFilters(reset);
     onFilterChange(reset);
     setExpandedCategories(new Set());
     setExpandedSubcategories(new Set());
-    onApplyFilters?.();
-  };
-
-  const handleApplyFilters = () => {
-    onFilterChange(tempFilters);
     onApplyFilters?.();
   };
 
@@ -203,7 +179,7 @@ export function FilterPanel({
                       {category.subcategories.map((subcategory) => {
                         const isSubExpanded = expandedSubcategories.has(subcategory.id);
                         const areAllItemsSelected = subcategory.items.every((item) =>
-                          tempFilters.categories.includes(item),
+                          filters.categories.includes(item),
                         );
 
                         return (
@@ -238,7 +214,7 @@ export function FilterPanel({
                                   >
                                     <input
                                       type="checkbox"
-                                      checked={tempFilters.categories.includes(item)}
+                                      checked={filters.categories.includes(item)}
                                       onChange={() => toggleCategorySelection(item)}
                                       className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer flex-shrink-0"
                                     />
@@ -282,8 +258,8 @@ export function FilterPanel({
                 <label className="text-sm text-gray-600 mb-1 block">От</label>
                 <input
                   type="number"
-                  value={tempFilters.priceRange[0]}
-                  onChange={(event) => updatePriceRange(Number(event.target.value), tempFilters.priceRange[1])}
+                  value={filters.priceRange[0]}
+                  onChange={(event) => onFilterChange({ ...filters, priceRange: [Number(event.target.value), filters.priceRange[1]] })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
                 />
               </div>
@@ -291,8 +267,8 @@ export function FilterPanel({
                 <label className="text-sm text-gray-600 mb-1 block">До</label>
                 <input
                   type="number"
-                  value={tempFilters.priceRange[1]}
-                  onChange={(event) => updatePriceRange(tempFilters.priceRange[0], Number(event.target.value))}
+                  value={filters.priceRange[1]}
+                  onChange={(event) => onFilterChange({ ...filters, priceRange: [filters.priceRange[0], Number(event.target.value)] })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
                 />
               </div>
@@ -322,8 +298,8 @@ export function FilterPanel({
                 <input
                   type="radio"
                   name="rating"
-                  checked={tempFilters.minRating === rating}
-                  onChange={() => setMinRating(rating)}
+                  checked={filters.minRating === rating}
+                  onChange={() => onFilterChange({ ...filters, minRating: rating })}
                   className="w-5 h-5 text-gray-900 focus:ring-gray-900 cursor-pointer"
                 />
                 <div className="flex items-center gap-1">
@@ -338,8 +314,8 @@ export function FilterPanel({
               <input
                 type="radio"
                 name="rating"
-                checked={tempFilters.minRating === 0}
-                onChange={() => setMinRating(0)}
+                checked={filters.minRating === 0}
+                onChange={() => onFilterChange({ ...filters, minRating: 0 })}
                 className="w-5 h-5 text-gray-900 focus:ring-gray-900 cursor-pointer"
               />
               <span className="text-base text-gray-700 group-hover:text-gray-900 transition-colors duration-200">
@@ -358,8 +334,8 @@ export function FilterPanel({
               <input
                 type="radio"
                 name="condition"
-                checked={tempFilters.condition === "all"}
-                onChange={() => setTempFilters({ ...tempFilters, condition: "all" })}
+                checked={filters.condition === "all"}
+                onChange={() => onFilterChange({ ...filters, condition: "all" })}
                 className="w-5 h-5 text-gray-900 focus:ring-gray-900 cursor-pointer"
               />
               <span className="text-base text-gray-700">Все</span>
@@ -368,8 +344,8 @@ export function FilterPanel({
               <input
                 type="radio"
                 name="condition"
-                checked={tempFilters.condition === "new"}
-                onChange={() => setTempFilters({ ...tempFilters, condition: "new" })}
+                checked={filters.condition === "new"}
+                onChange={() => onFilterChange({ ...filters, condition: "new" })}
                 className="w-5 h-5 text-gray-900 focus:ring-gray-900 cursor-pointer"
               />
               <span className="text-base text-gray-700">Новое</span>
@@ -378,8 +354,8 @@ export function FilterPanel({
               <input
                 type="radio"
                 name="condition"
-                checked={tempFilters.condition === "used"}
-                onChange={() => setTempFilters({ ...tempFilters, condition: "used" })}
+                checked={filters.condition === "used"}
+                onChange={() => onFilterChange({ ...filters, condition: "used" })}
                 className="w-5 h-5 text-gray-900 focus:ring-gray-900 cursor-pointer"
               />
               <span className="text-base text-gray-700">Б/У</span>
@@ -391,8 +367,10 @@ export function FilterPanel({
       <div className="border-b border-gray-200 pb-6 mb-6">
         <label className="text-lg text-gray-900 mb-4 block">Город</label>
         <select
-          value={tempFilters.cityId ?? ""} // Use cityId
-          onChange={(event) => setTempFilters({ ...tempFilters, cityId: Number(event.target.value) })} // Update cityId
+          value={filters.cityId ?? ""}
+          onChange={(event) =>
+            onFilterChange({ ...filters, cityId: Number(event.target.value) || undefined })
+          }
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
         >
           <option value="">Все города</option>
@@ -411,8 +389,8 @@ export function FilterPanel({
             <label className="text-sm text-gray-600 mb-1.5 block">Разрешенные слова</label>
             <input
               type="text"
-              value={tempFilters.includeWords || ""}
-              onChange={(event) => setTempFilters({ ...tempFilters, includeWords: event.target.value })}
+              value={filters.includeWords || ""}
+              onChange={(event) => onFilterChange({ ...filters, includeWords: event.target.value })}
               placeholder="Слова через пробел"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
             />
@@ -421,8 +399,8 @@ export function FilterPanel({
             <label className="text-sm text-gray-600 mb-1.5 block">Запрещенные слова</label>
             <input
               type="text"
-              value={tempFilters.excludeWords || ""}
-              onChange={(event) => setTempFilters({ ...tempFilters, excludeWords: event.target.value })}
+              value={filters.excludeWords || ""}
+              onChange={(event) => onFilterChange({ ...filters, excludeWords: event.target.value })}
               placeholder="Слова через пробел"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
             />
@@ -436,14 +414,6 @@ export function FilterPanel({
         className="w-full py-3 text-base border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300"
       >
         Сбросить фильтры
-      </button>
-
-      <button
-        type="button"
-        onClick={handleApplyFilters}
-        className="w-full mt-3 py-3 text-base text-white bg-[rgb(38,83,141)] hover:bg-[rgb(58,103,161)] rounded-xl transition-all duration-300"
-      >
-        Применить фильтры
       </button>
     </div>
   );

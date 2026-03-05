@@ -23,6 +23,7 @@ interface ProfilePageProps {
   onLogout: () => void;
   userType: UserType;
   initialTab?: TabType;
+  onWishlistUpdate?: (productId: string, isWishlisted: boolean) => void;
 }
 
 type City = {
@@ -123,7 +124,7 @@ const partnerTabs: Array<{ id: TabType; label: string; icon: typeof Store }> = [
   { id: "partner-orders", label: "Заказы", icon: Package },
 ];
 
-export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfilePageProps) {
+export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlistUpdate }: ProfilePageProps) {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab ?? "profile");
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileUser | null>(null);
@@ -343,6 +344,8 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     try {
       await apiDelete<{ success: boolean }>(`/profile/wishlist/${id}`);
       setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+      // Обновляем глобальное состояние вишлиста
+      onWishlistUpdate?.(id, false);
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось удалить из избранного");
     }

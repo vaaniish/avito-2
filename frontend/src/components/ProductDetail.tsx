@@ -23,6 +23,8 @@ interface ProductDetailProps {
   onUpdateQuantity?: (productId: string, quantity: number) => void;
   cartQuantity?: number;
   relatedProducts: Product[];
+  initialIsWishlisted?: boolean;
+  onWishlistToggle?: (productId: string, isWishlisted: boolean) => void;
 }
 
 type QuestionItem = {
@@ -42,13 +44,19 @@ export function ProductDetail({
   onBuyNow,
   onUpdateQuantity,
   cartQuantity = 0,
+  initialIsWishlisted = false,
+  onWishlistToggle,
 }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [newQuestion, setNewQuestion] = useState("");
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsWishlisted(initialIsWishlisted);
+  }, [initialIsWishlisted]);
 
   const images = useMemo(() => product.images || [product.image], [product.images, product.image]);
   const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
@@ -126,6 +134,7 @@ export function ProductDetail({
         await apiPost<{ success: boolean }>(`/profile/wishlist/${product.id}`);
       }
       setIsWishlisted((prev) => !prev);
+      onWishlistToggle?.(product.id, !isWishlisted);
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось изменить избранное");
     }

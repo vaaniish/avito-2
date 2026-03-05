@@ -33,7 +33,16 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         status: true,
         email: true,
         name: true,
-        password: true,
+        password: false, // Don't return password
+        wishlist_items: {
+          select: {
+            listing: {
+              select: {
+                public_id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -47,18 +56,6 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
-    // await prisma.auditLog.create({ // Removed AuditLog
-    //   data: {
-    //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-    //     admin_id: user.id,
-    //     action: "user_login",
-    //     target_id: user.public_id,
-    //     target_type: "user",
-    //     details: `Пользователь ${user.email} успешно вошел в систему.`,
-    //     ip_address: req.ip || "127.0.0.1",
-    //   }
-    // });
-
     res.json({
       user: {
         id: user.id,
@@ -66,6 +63,9 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         role: toClientRole(user.role),
         email: user.email,
         name: user.name,
+      },
+      profile: {
+        wishlist: user.wishlist_items.map((item: { listing: { public_id: string } }) => ({ id: item.listing.public_id })),
       },
     });
   } catch (error) {
@@ -126,18 +126,6 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
       },
     });
 
-    // await prisma.auditLog.create({ // Removed AuditLog
-    //   data: {
-    //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-    //     admin_id: user.id,
-    //     action: "user_signup",
-    //     target_id: user.public_id,
-    //     target_type: "user",
-    //     details: `Новый пользователь ${user.email} зарегистрировался.`,
-    //     ip_address: req.ip || "127.0.0.1",
-    //   }
-    // });
-
     res.status(201).json({
       user: {
         id: user.id,
@@ -145,6 +133,9 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
         role: toClientRole(user.role),
         email: user.email,
         name: user.name,
+      },
+      profile: {
+        wishlist: [],
       },
     });
   } catch (error) {

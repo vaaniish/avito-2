@@ -5,11 +5,18 @@ import { apiPost, type SessionRole, type SessionUser } from "../../lib/api";
 interface AuthPageProps {
   onBack: () => void;
   onPartnershipClick: () => void;
-  onLoginSuccess?: (userType?: SessionRole, user?: SessionUser) => void;
+  onLoginSuccess?: (
+    userType: SessionRole,
+    user: SessionUser,
+    profile: { wishlist: Array<{ id: string }> },
+  ) => void;
 }
 
 type AuthResponse = {
   user: SessionUser;
+  profile: {
+    wishlist: Array<{ id: string }>;
+  };
 };
 
 const DEMO_CREDENTIALS = {
@@ -45,7 +52,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
         });
 
         alert("Регистрация успешна");
-        onLoginSuccess?.(response.user.role, response.user);
+        onLoginSuccess?.(response.user.role, response.user, response.profile);
         onBack();
       } else {
         const response = await apiPost<AuthResponse>("/auth/login", {
@@ -53,7 +60,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           password: formData.password,
         });
 
-        onLoginSuccess?.(response.user.role, response.user);
+        onLoginSuccess?.(response.user.role, response.user, response.profile);
         onBack();
       }
 
