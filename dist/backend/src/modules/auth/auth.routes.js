@@ -39,17 +39,6 @@ authRouter.post("/login", async (req, res) => {
             res.status(403).json({ error: "Пользователь заблокирован" });
             return;
         }
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: user.id,
-                action: "user_login",
-                target_id: user.public_id,
-                target_type: "user",
-                details: `Пользователь ${user.email} успешно вошел в систему.`,
-                ip_address: req.ip || "127.0.0.1",
-            }
-        });
         res.json({
             user: {
                 id: user.id,
@@ -105,17 +94,6 @@ authRouter.post("/signup", async (req, res) => {
                 email: true,
                 name: true,
             },
-        });
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: user.id,
-                action: "user_signup",
-                target_id: user.public_id,
-                target_type: "user",
-                details: `Новый пользователь ${user.email} зарегистрировался.`,
-                ip_address: req.ip || "127.0.0.1",
-            }
         });
         res.status(201).json({
             user: {

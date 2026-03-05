@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Edit2, Eye, EyeOff, Plus, Search, Trash2, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
+import { CityClient } from "../../types"; // Import CityClient
 
 type Listing = {
   id: string;
@@ -13,6 +14,7 @@ type Listing = {
   image: string;
   description?: string | null;
   category?: string;
+  city?: string; // Add city to Listing type
 };
 
 export function PartnerListingsPage() {
@@ -29,9 +31,24 @@ export function PartnerListingsPage() {
     description: "",
     category: "Электроника",
     image: "",
-    city: "Москва",
+    cityId: null as number | null, // Changed from city: string
     type: "products" as "products" | "services",
   });
+  const [allCities, setAllCities] = useState<CityClient[]>([]); // State to store all cities
+
+  const fetchCities = useCallback(async () => {
+    try {
+      const citiesData = await apiGet<CityClient[]>("/catalog/cities");
+      setAllCities(citiesData);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  }, []);
+
+  const resolveCityId = useCallback((cityName: string): number | undefined => {
+    const city = allCities.find(c => c.name === cityName);
+    return city?.id;
+  }, [allCities]);
 
   const loadListings = async () => {
     setIsLoading(true);
@@ -46,8 +63,9 @@ export function PartnerListingsPage() {
   };
 
   useEffect(() => {
+    void fetchCities(); // Fetch cities on mount
     void loadListings();
-  }, [formData.type]);
+  }, [formData.type, fetchCities]);
 
   const filteredListings = useMemo(
     () =>
@@ -72,8 +90,8 @@ export function PartnerListingsPage() {
       description: "",
       category: "Электроника",
       image: "",
-      city: "Москва",
-      type: formData.type,
+      cityId: resolveCityId("Москва") ?? null, // Resolve cityId for default "Москва"
+      type: "products",
     });
     setShowModal(true);
   };
@@ -87,40 +105,43 @@ export function PartnerListingsPage() {
       description: listing.description || "",
       category: listing.category || "Электроника",
       image: listing.image,
-      city: "Москва",
+      cityId: resolveCityId(listing.city ?? "") ?? null, // Resolve cityId from existing listing.city
       type: formData.type,
     });
     setShowModal(true);
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.price) {
-      alert("Заполните обязательные поля");
+    if (!formData.title || !formData.price || formData.cityId === null) {
+      alert("Заполните обязательные поля: название, цена и город");
       return;
     }
 
     try {
+      const payload: {
+        title: string;
+        price: number;
+        condition: "new" | "used";
+        description: string;
+        category: string;
+        image: string;
+        cityId: number; // Use cityId
+        type?: "products" | "services";
+      } = {
+        title: formData.title,
+        price: Number(formData.price),
+        condition: formData.condition,
+        description: formData.description,
+        category: formData.category,
+        image: formData.image,
+        cityId: formData.cityId,
+      };
+
       if (editingListing) {
-        await apiPatch<Listing>(`/partner/listings/${editingListing.id}`, {
-          title: formData.title,
-          price: Number(formData.price),
-          condition: formData.condition,
-          description: formData.description,
-          category: formData.category,
-          image: formData.image,
-          city: formData.city,
-        });
+        await apiPatch<Listing>(`/partner/listings/${editingListing.id}`, payload);
       } else {
-        await apiPost<Listing>("/partner/listings", {
-          title: formData.title,
-          price: Number(formData.price),
-          condition: formData.condition,
-          description: formData.description,
-          category: formData.category,
-          image: formData.image,
-          city: formData.city,
-          type: formData.type,
-        });
+        payload.type = formData.type;
+        await apiPost<Listing>("/partner/listings", payload);
       }
 
       setShowModal(false);
@@ -281,6 +302,18 @@ export function PartnerListingsPage() {
                 placeholder="URL изображения"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
+              <select
+                value={formData.cityId ?? ""}
+                onChange={(event) => setFormData((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">Выберите город</option>
+                {allCities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name} ({city.region})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex gap-2 mt-4">

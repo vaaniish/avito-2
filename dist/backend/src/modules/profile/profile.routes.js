@@ -11,6 +11,20 @@ exports.profileRouter = profileRouter;
 const ROLE_BUYER = "BUYER";
 const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
+const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+function isRetryableNetworkError(error) {
+    if (!(error instanceof TypeError))
+        return false;
+    const cause = error.cause;
+    const code = typeof cause?.code === "string" ? cause.code : "";
+    return (code === "ENOTFOUND" ||
+        code === "EAI_AGAIN" ||
+        code === "ECONNRESET" ||
+        code === "ETIMEDOUT");
+}
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 function toLocalizedDeliveryDate(date) {
     const deliveryDate = new Date(date.getTime());
     deliveryDate.setDate(deliveryDate.getDate() + 3);
@@ -35,27 +49,49 @@ function getYooKassaConfig() {
 async function createYooKassaPayment(params) {
     const config = getYooKassaConfig();
     const authToken = Buffer.from(`${config.shopId}:${config.secretKey}`, "utf8").toString("base64");
-    const response = await fetch(`${config.apiUrl}/payments`, {
-        method: "POST",
-        headers: {
-            Authorization: `Basic ${authToken}`,
-            "Content-Type": "application/json",
-            "Idempotence-Key": (0, crypto_1.randomUUID)(),
+    const payloadBody = JSON.stringify({
+        amount: {
+            value: params.amountRub.toFixed(2),
+            currency: "RUB",
         },
-        body: JSON.stringify({
-            amount: {
-                value: params.amountRub.toFixed(2),
-                currency: "RUB",
-            },
-            capture: true,
-            confirmation: {
-                type: "redirect",
-                return_url: config.returnUrl,
-            },
-            description: params.description,
-            metadata: params.metadata,
-        }),
+        capture: true,
+        confirmation: {
+            type: "redirect",
+            return_url: config.returnUrl,
+        },
+        description: params.description,
+        metadata: params.metadata,
     });
+    let response = null;
+    let lastError = null;
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+            response = await fetch(`${config.apiUrl}/payments`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Basic ${authToken}`,
+                    "Content-Type": "application/json",
+                    "Idempotence-Key": (0, crypto_1.randomUUID)(),
+                },
+                body: payloadBody,
+            });
+            break;
+        }
+        catch (error) {
+            lastError = error;
+            if (!isRetryableNetworkError(error) || attempt === maxAttempts) {
+                throw error;
+            }
+            await delay(300 * attempt);
+        }
+    }
+    if (!response) {
+        if (isRetryableNetworkError(lastError)) {
+            throw new Error("YooKassa is temporarily unavailable (DNS/network). Check internet, VPN/proxy, and DNS settings.");
+        }
+        throw new Error("YooKassa request failed");
+    }
     const rawBody = await response.text();
     const payload = rawBody ? JSON.parse(rawBody) : {};
     if (!response.ok) {
@@ -89,14 +125,20 @@ profileRouter.get("/me", async (req, res) => {
         const user = await prisma_1.prisma.appUser.findUnique({
             where: { id: session.user.id },
             include: {
+                city: true,
                 addresses: {
                     orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                    include: { city: true },
                 },
                 wishlist_items: {
                     include: {
                         listing: {
                             include: {
-                                seller: true,
+                                seller: { include: { city: true } },
+                                images: {
+                                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                                },
+                                city: true,
                             },
                         },
                     },
@@ -104,7 +146,7 @@ profileRouter.get("/me", async (req, res) => {
                 },
                 orders_as_buyer: {
                     include: {
-                        seller: true,
+                        seller: { include: { city: true } },
                         items: true,
                     },
                     orderBy: [{ created_at: "desc" }],
@@ -115,31 +157,32 @@ profileRouter.get("/me", async (req, res) => {
             res.status(404).json({ error: "User not found" });
             return;
         }
+        const userWithRelations = user;
         res.json({
             user: {
-                id: user.id,
-                public_id: user.public_id,
-                role: (0, format_1.toClientRole)(user.role),
-                firstName: user.first_name ?? "",
-                lastName: user.last_name ?? "",
-                displayName: user.display_name ?? user.name,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar,
-                city: user.city,
-                joinDate: user.joined_at.getFullYear().toString(),
+                id: userWithRelations.id,
+                public_id: userWithRelations.public_id,
+                role: (0, format_1.toClientRole)(userWithRelations.role),
+                firstName: userWithRelations.first_name ?? "",
+                lastName: userWithRelations.last_name ?? "",
+                displayName: userWithRelations.display_name ?? userWithRelations.name,
+                name: userWithRelations.name,
+                email: userWithRelations.email,
+                avatar: userWithRelations.avatar,
+                city: userWithRelations.city?.name ?? null,
+                joinDate: userWithRelations.joined_at.getFullYear().toString(),
             },
-            addresses: user.addresses.map((address) => ({
+            addresses: userWithRelations.addresses.map((address) => ({
                 id: String(address.id),
                 name: address.label,
-                region: address.region,
-                city: address.city,
+                region: address.city.region,
+                city: address.city.name,
                 street: address.street,
                 building: address.building,
                 postalCode: address.postal_code,
                 isDefault: address.is_default,
             })),
-            orders: user.orders_as_buyer.map((order) => ({
+            orders: userWithRelations.orders_as_buyer.map((order) => ({
                 id: String(order.id),
                 orderNumber: `#${order.public_id}`,
                 date: order.created_at,
@@ -153,7 +196,7 @@ profileRouter.get("/me", async (req, res) => {
                     name: order.seller.name,
                     avatar: order.seller.avatar,
                     phone: order.seller.phone ?? "",
-                    address: `${order.seller.city ?? "Город не указан"}`,
+                    address: `${order.seller.city?.name ?? "Город не указан"}`,
                     workingHours: "пн — вс: 9:00-21:00",
                 },
                 items: order.items.map((item) => ({
@@ -164,12 +207,12 @@ profileRouter.get("/me", async (req, res) => {
                     quantity: item.quantity,
                 })),
             })),
-            wishlist: user.wishlist_items.map((item) => ({
+            wishlist: userWithRelations.wishlist_items.map((item) => ({
                 id: item.listing.public_id,
                 name: item.listing.title,
                 price: item.listing.sale_price ?? item.listing.price,
-                image: item.listing.image,
-                location: item.listing.city,
+                image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+                location: item.listing.city.name,
                 condition: (0, format_1.toClientCondition)(item.listing.condition),
                 seller: item.listing.seller.name,
                 addedDate: item.added_at.toISOString().split("T")[0],
@@ -269,15 +312,16 @@ profileRouter.get("/addresses", async (req, res) => {
         }
         const addresses = await prisma_1.prisma.userAddress.findMany({
             where: { user_id: session.user.id },
+            include: { city: true },
             orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
         });
         res.json(addresses.map((address) => ({
             id: String(address.id),
             label: address.label,
-            fullAddress: `${address.region}, ${address.city}, ${address.street}, ${address.building}`,
+            fullAddress: `${address.city.region}, ${address.city.name}, ${address.street}, ${address.building}`,
             isDefault: address.is_default,
-            region: address.region,
-            city: address.city,
+            region: address.city.region,
+            city: address.city.name,
             street: address.street,
             building: address.building,
             postalCode: address.postal_code,
@@ -301,13 +345,12 @@ profileRouter.post("/addresses", async (req, res) => {
         }
         const body = (req.body ?? {});
         const label = typeof body.name === "string" ? body.name.trim() : "";
-        const region = typeof body.region === "string" ? body.region.trim() : "";
-        const city = typeof body.city === "string" ? body.city.trim() : "";
+        const cityId = typeof body.cityId === "number" ? body.cityId : 0;
         const street = typeof body.street === "string" ? body.street.trim() : "";
         const building = typeof body.building === "string" ? body.building.trim() : "";
         const postalCode = typeof body.postalCode === "string" ? body.postalCode.trim() : "";
         const isDefault = Boolean(body.isDefault);
-        if (!label || !city || !street) {
+        if (!label || !cityId || !street) {
             res.status(400).json({ error: "Missing required address fields" });
             return;
         }
@@ -321,19 +364,19 @@ profileRouter.post("/addresses", async (req, res) => {
             data: {
                 user_id: session.user.id,
                 label,
-                region,
-                city,
+                city_id: cityId,
                 street,
                 building,
                 postal_code: postalCode,
                 is_default: isDefault,
             },
+            include: { city: true },
         });
         res.status(201).json({
             id: String(created.id),
             name: created.label,
-            region: created.region,
-            city: created.city,
+            region: created.city.region,
+            city: created.city.name,
             street: created.street,
             building: created.building,
             postalCode: created.postal_code,
@@ -380,8 +423,7 @@ profileRouter.patch("/addresses/:id", async (req, res) => {
             where: { id: existing.id },
             data: {
                 label: typeof body.name === "string" ? body.name.trim() : undefined,
-                region: typeof body.region === "string" ? body.region.trim() : undefined,
-                city: typeof body.city === "string" ? body.city.trim() : undefined,
+                city_id: typeof body.cityId === "number" ? body.cityId : undefined,
                 street: typeof body.street === "string" ? body.street.trim() : undefined,
                 building: typeof body.building === "string" ? body.building.trim() : undefined,
                 postal_code: typeof body.postalCode === "string"
@@ -389,12 +431,13 @@ profileRouter.patch("/addresses/:id", async (req, res) => {
                     : undefined,
                 is_default: isDefault,
             },
+            include: { city: true },
         });
         res.json({
             id: String(updated.id),
             name: updated.label,
-            region: updated.region,
-            city: updated.city,
+            region: updated.city.region,
+            city: updated.city.name,
             street: updated.street,
             building: updated.building,
             postalCode: updated.postal_code,
@@ -516,13 +559,12 @@ profileRouter.post("/orders", async (req, res) => {
                 moderation_status: "APPROVED",
                 status: "ACTIVE",
             },
-            select: {
-                id: true,
-                public_id: true,
-                seller_id: true,
-                title: true,
-                image: true,
-                price: true,
+            include: {
+                images: {
+                    select: { url: true },
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                    take: 1,
+                },
             },
         });
         if (listings.length !== listingPublicIds.length) {
@@ -543,7 +585,7 @@ profileRouter.post("/orders", async (req, res) => {
             current.push({
                 listing_id: listing.id,
                 name: listing.title,
-                image: listing.image,
+                image: listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
                 price: listing.price,
                 quantity: item.quantity,
             });
@@ -560,9 +602,10 @@ profileRouter.post("/orders", async (req, res) => {
                     id: addressId,
                     user_id: session.user.id,
                 },
+                include: { city: true },
             });
             if (selectedAddress) {
-                deliveryAddress = `${selectedAddress.region}, ${selectedAddress.city}, ${selectedAddress.street}, ${selectedAddress.building}`;
+                deliveryAddress = `${selectedAddress.city.region}, ${selectedAddress.city.name}, ${selectedAddress.street}, ${selectedAddress.building}`;
             }
         }
         if (!deliveryAddress) {
@@ -571,9 +614,10 @@ profileRouter.post("/orders", async (req, res) => {
                     user_id: session.user.id,
                     is_default: true,
                 },
+                include: { city: true },
             });
             if (defaultAddress) {
-                deliveryAddress = `${defaultAddress.region}, ${defaultAddress.city}, ${defaultAddress.street}, ${defaultAddress.building}`;
+                deliveryAddress = `${defaultAddress.city.region}, ${defaultAddress.city.name}, ${defaultAddress.street}, ${defaultAddress.building}`;
             }
         }
         if (deliveryType === "DELIVERY" && !deliveryAddress) {
@@ -664,17 +708,6 @@ profileRouter.post("/orders", async (req, res) => {
             }
             return result;
         });
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: session.user.id,
-                action: "create_order",
-                target_id: createdOrders.map((o) => o.order_id).join(", "),
-                target_type: "order",
-                details: `Пользователь ${session.user.email} создал ${createdOrders.length} заказ(а/ов) на сумму ${createdOrders.reduce((sum, order) => sum + order.total_price, 0)}.`,
-                ip_address: req.ip || "127.0.0.1",
-            },
-        });
         res.status(201).json({
             success: true,
             orders: createdOrders,
@@ -691,6 +724,11 @@ profileRouter.post("/orders", async (req, res) => {
     }
     catch (error) {
         console.error("Error creating orders:", error);
+        const message = error instanceof Error ? error.message : "Internal server error";
+        if (message.includes("YooKassa") || message.includes("YooMoney")) {
+            res.status(502).json({ error: message });
+            return;
+        }
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -708,7 +746,7 @@ profileRouter.get("/orders", async (req, res) => {
         const orders = await prisma_1.prisma.marketOrder.findMany({
             where: { buyer_id: session.user.id },
             include: {
-                seller: true,
+                seller: { include: { city: true } },
                 items: true,
             },
             orderBy: [{ created_at: "desc" }],
@@ -727,7 +765,7 @@ profileRouter.get("/orders", async (req, res) => {
                 name: order.seller.name,
                 avatar: order.seller.avatar,
                 phone: order.seller.phone ?? "",
-                address: `${order.seller.city ?? "Город не указан"}`,
+                address: `${order.seller.city?.name ?? "Город не указан"}`,
                 workingHours: "пн — вс: 9:00-21:00",
             },
             items: order.items.map((item) => ({
@@ -759,7 +797,13 @@ profileRouter.get("/wishlist", async (req, res) => {
             where: { user_id: session.user.id },
             include: {
                 listing: {
-                    include: { seller: true },
+                    include: {
+                        seller: true,
+                        images: {
+                            orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                        },
+                        city: true,
+                    },
                 },
             },
             orderBy: [{ added_at: "desc" }],
@@ -768,8 +812,8 @@ profileRouter.get("/wishlist", async (req, res) => {
             id: item.listing.public_id,
             name: item.listing.title,
             price: item.listing.sale_price ?? item.listing.price,
-            image: item.listing.image,
-            location: item.listing.city,
+            image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+            location: item.listing.city.name,
             condition: (0, format_1.toClientCondition)(item.listing.condition),
             seller: item.listing.seller.name,
             addedDate: item.added_at.toISOString().split("T")[0],
@@ -813,17 +857,6 @@ profileRouter.post("/wishlist/:listingPublicId", async (req, res) => {
             },
             update: {},
         });
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: session.user.id,
-                action: "add_to_wishlist",
-                target_id: String(listingPublicId),
-                target_type: "listing",
-                details: `Пользователь ${session.user.email} добавил товар ${listingPublicId} в избранное.`,
-                ip_address: req.ip || "127.0.0.1",
-            },
-        });
         res.status(201).json({ success: true });
     }
     catch (error) {
@@ -855,17 +888,6 @@ profileRouter.delete("/wishlist/:listingPublicId", async (req, res) => {
             where: {
                 user_id: session.user.id,
                 listing_id: listing.id,
-            },
-        });
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: session.user.id,
-                action: "remove_from_wishlist",
-                target_id: String(listingPublicId),
-                target_type: "listing",
-                details: `Пользователь ${session.user.email} удалил товар ${listingPublicId} из избранного.`,
-                ip_address: req.ip || "127.0.0.1",
             },
         });
         res.json({ success: true });

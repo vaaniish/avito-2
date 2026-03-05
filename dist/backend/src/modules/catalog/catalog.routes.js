@@ -7,37 +7,51 @@ const session_1 = require("../../lib/session");
 const format_1 = require("../../utils/format");
 const catalogRouter = (0, express_1.Router)();
 exports.catalogRouter = catalogRouter;
+const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 function resolveListingType(rawType) {
     if (rawType === "services")
         return "SERVICE";
     return "PRODUCT";
 }
-function parseJsonArray(value) {
-    if (!value)
-        return undefined;
-    try {
-        const parsed = JSON.parse(value);
-        if (Array.isArray(parsed) &&
-            parsed.every((item) => typeof item === "string")) {
-            return parsed;
-        }
-    }
-    catch (_error) {
-        return undefined;
-    }
-    return undefined;
+function formatPublishDate(date) {
+    const formatted = new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date);
+    return formatted.replace(",", " в");
 }
-function parseJsonObject(value) {
-    if (!value)
+function formatResponseTime(minutes) {
+    if (!minutes || minutes <= 0)
+        return null;
+    if (minutes < 60)
+        return `около ${minutes} минут`;
+    if (minutes < 120)
+        return "около 1 часа";
+    return `около ${Math.round(minutes / 60)} часов`;
+}
+function listingCategoryName(listing) {
+    return listing.item?.name ?? "Без категории";
+}
+function listingBreadcrumbs(listing) {
+    if (!listing.item)
+        return ["Главная", "Без категории"];
+    return [
+        "Главная",
+        listing.item.subcategory.category.name,
+        listing.item.subcategory.name,
+        listing.item.name,
+    ];
+}
+function listingSpecifications(attributes) {
+    if (!attributes.length)
         return undefined;
-    try {
-        const parsed = JSON.parse(value);
-        const entries = Object.entries(parsed).filter((entry) => typeof entry[0] === "string" && typeof entry[1] === "string");
-        return Object.fromEntries(entries);
-    }
-    catch (_error) {
-        return undefined;
-    }
+    const object = Object.fromEntries(attributes.map((attribute) => [
+        attribute.key,
+        attribute.value,
+    ]));
+    return Object.keys(object).length ? object : undefined;
 }
 catalogRouter.get("/categories", async (req, res) => {
     try {
@@ -47,6 +61,11 @@ catalogRouter.get("/categories", async (req, res) => {
             include: {
                 subcategories: {
                     orderBy: { order_index: "asc" },
+                    include: {
+                        items: {
+                            orderBy: [{ order_index: "asc" }, { id: "asc" }],
+                        },
+                    },
                 },
             },
             orderBy: { order_index: "asc" },
@@ -58,6 +77,7 @@ catalogRouter.get("/categories", async (req, res) => {
             subcategories: category.subcategories.map((subcategory) => ({
                 id: subcategory.public_id,
                 name: subcategory.name,
+                items: subcategory.items.map((item) => item.name),
             })),
         })));
     }
@@ -72,49 +92,88 @@ catalogRouter.get("/listings", async (req, res) => {
         const listings = await prisma_1.prisma.marketplaceListing.findMany({
             where: {
                 type,
+                status: "ACTIVE",
                 moderation_status: "APPROVED",
             },
             include: {
-                seller: true,
+                city: true,
+                seller: {
+                    select: {
+                        name: true,
+                        avatar: true,
+                        _count: {
+                            select: {
+                                listings: true,
+                            },
+                        },
+                        seller_profile: {
+                            select: {
+                                is_verified: true,
+                                average_response_minutes: true,
+                            },
+                        },
+                    },
+                },
+                item: {
+                    include: {
+                        subcategory: {
+                            include: {
+                                category: true,
+                            },
+                        },
+                    },
+                },
+                images: {
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
+                attributes: {
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
                 reviews: true,
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
-        res.json(listings.map((listing) => ({
-            id: listing.public_id,
-            title: listing.title,
-            price: listing.price,
-            salePrice: listing.sale_price,
-            image: listing.image,
-            images: parseJsonArray(listing.images),
-            rating: listing.rating,
-            seller: listing.seller.name,
-            sellerAvatar: listing.seller.avatar,
-            category: listing.category_name,
-            sku: listing.sku,
-            isNew: listing.is_new,
-            isSale: listing.is_sale,
-            isVerified: listing.is_verified,
-            description: listing.description,
-            shippingBySeller: listing.shipping_by_seller,
-            city: listing.city,
-            publishDate: listing.publish_date,
-            views: listing.views,
-            sellerResponseTime: listing.seller_response_time,
-            sellerListings: listing.seller_listings,
-            breadcrumbs: parseJsonArray(listing.breadcrumbs),
-            specifications: parseJsonObject(listing.specifications),
-            isPriceLower: listing.is_price_lower,
-            condition: (0, format_1.toClientCondition)(listing.condition),
-            reviews: listing.reviews.map((review) => ({
-                id: String(review.id),
-                author: review.author_name,
-                rating: review.rating,
-                date: review.date,
-                comment: review.comment,
-                avatar: review.avatar,
-            })),
-        })));
+        res.json(listings.map((listing) => {
+            const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+            const salePrice = listing.sale_price !== null && listing.sale_price < listing.price
+                ? listing.sale_price
+                : null;
+            return {
+                id: listing.public_id,
+                title: listing.title,
+                price: listing.price,
+                salePrice,
+                image: primaryImage,
+                images: listing.images.map((image) => image.url),
+                rating: listing.rating,
+                seller: listing.seller.name,
+                sellerAvatar: listing.seller.avatar,
+                category: listingCategoryName(listing),
+                sku: listing.sku,
+                isNew: listing.condition === "NEW",
+                isSale: salePrice !== null,
+                isVerified: Boolean(listing.seller.seller_profile?.is_verified),
+                description: listing.description,
+                shippingBySeller: listing.shipping_by_seller,
+                city: listing.city.name,
+                publishDate: formatPublishDate(listing.created_at),
+                views: listing.views,
+                sellerResponseTime: formatResponseTime(listing.seller.seller_profile?.average_response_minutes),
+                sellerListings: listing.seller._count.listings,
+                breadcrumbs: listingBreadcrumbs(listing),
+                specifications: listingSpecifications(listing.attributes),
+                isPriceLower: salePrice !== null,
+                condition: (0, format_1.toClientCondition)(listing.condition),
+                reviews: listing.reviews.map((review) => ({
+                    id: String(review.id),
+                    author: review.author_name,
+                    rating: review.rating,
+                    date: review.date,
+                    comment: review.comment,
+                    avatar: review.avatar,
+                })),
+            };
+        }));
     }
     catch (error) {
         console.error("Error fetching listings:", error);
@@ -123,19 +182,28 @@ catalogRouter.get("/listings", async (req, res) => {
 });
 catalogRouter.get("/cities", async (_req, res) => {
     try {
-        const listings = await prisma_1.prisma.marketplaceListing.findMany({
+        const citiesFromListings = await prisma_1.prisma.marketplaceListing.findMany({
             where: {
+                status: "ACTIVE",
                 moderation_status: "APPROVED",
             },
             select: {
-                city: true,
+                city: {
+                    select: { id: true, name: true, region: true, created_at: true, updated_at: true }
+                },
             },
-            distinct: ["city"],
+            distinct: ["city_id"],
         });
-        res.json(listings
-            .map((listing) => listing.city)
-            .filter((city, index, list) => city !== null && list.indexOf(city) === index)
-            .sort((left, right) => left.localeCompare(right, "ru-RU")));
+        const uniqueCities = [];
+        const seenCityIds = new Set();
+        for (const listing of citiesFromListings) {
+            if (!seenCityIds.has(listing.city.id)) {
+                uniqueCities.push(listing.city);
+                seenCityIds.add(listing.city.id);
+            }
+        }
+        res.json(uniqueCities
+            .sort((left, right) => left.name.localeCompare(right.name, "ru-RU")));
     }
     catch (error) {
         console.error("Error fetching cities:", error);
@@ -152,17 +220,37 @@ catalogRouter.get("/suggestions", async (req, res) => {
         const normalized = query.toLowerCase();
         const [listings, categories] = await Promise.all([
             prisma_1.prisma.marketplaceListing.findMany({
-                where: { moderation_status: "APPROVED" },
+                where: {
+                    status: "ACTIVE",
+                    moderation_status: "APPROVED",
+                },
                 select: {
-                    public_id: true,
                     title: true,
                     type: true,
-                    category_name: true,
+                    item: {
+                        select: {
+                            name: true,
+                            subcategory: {
+                                select: {
+                                    name: true,
+                                    category: {
+                                        select: {
+                                            name: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
             }),
             prisma_1.prisma.catalogCategory.findMany({
                 include: {
-                    subcategories: true,
+                    subcategories: {
+                        include: {
+                            items: true,
+                        },
+                    },
                 },
             }),
         ]);
@@ -173,7 +261,9 @@ catalogRouter.get("/suggestions", async (req, res) => {
             suggestions.push({
                 type: listing.type === "SERVICE" ? "service" : "product",
                 title: listing.title,
-                subtitle: listing.category_name,
+                subtitle: listing.item?.subcategory.name ??
+                    listing.item?.subcategory.category.name ??
+                    "Категория",
                 query: listing.title,
             });
         }
@@ -193,6 +283,16 @@ catalogRouter.get("/suggestions", async (req, res) => {
                         title: subcategory.name,
                         subtitle: category.name,
                         query: subcategory.name,
+                    });
+                }
+                for (const item of subcategory.items) {
+                    if (!item.name.toLowerCase().includes(normalized))
+                        continue;
+                    suggestions.push({
+                        type: "category",
+                        title: item.name,
+                        subtitle: subcategory.name,
+                        query: item.name,
                     });
                 }
             }
@@ -284,17 +384,6 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
                 buyer: {
                     select: { name: true },
                 },
-            },
-        });
-        await prisma_1.prisma.auditLog.create({
-            data: {
-                public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                admin_id: sessionUser.id,
-                action: "create_question",
-                target_id: String(publicId),
-                target_type: "listing",
-                details: `Пользователь ${sessionUser.email} задал вопрос к товару ${publicId}: "${questionText}"`,
-                ip_address: req.ip || "127.0.0.1",
             },
         });
         res.status(201).json({

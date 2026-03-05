@@ -19,13 +19,15 @@ model AppUser {
   display_name         String?
   username             String?
   phone                String?
-  city                 String?
+  city_id              Int?
   avatar               String?
   block_reason         String?
   joined_at            DateTime              @default(now())
   created_at           DateTime              @default(now())
   updated_at           DateTime              @updatedAt
 
+  city                 City?                 @relation("UserCity", fields: [city_id], references: [id], onDelete: SetNull)
+  seller_profile       SellerProfile?
   addresses            UserAddress[]
   listings             MarketplaceListing[]  @relation("seller_listings")
   wishlist_items       WishlistItem[]
@@ -39,16 +41,29 @@ model AppUser {
   checked_complaints   Complaint[]           @relation("complaint_checker")
   kyc_requests         KycRequest[]          @relation("kyc_seller")
   reviewed_kyc         KycRequest[]          @relation("kyc_reviewer")
-  audit_logs           AuditLog[]            @relation("audit_admin")
   partnership_requests PartnershipRequest[]
+}
+
+model SellerProfile {
+  id                       Int             @id @default(autoincrement())
+  user_id                  Int             @unique
+  is_verified              Boolean         @default(false)
+  average_response_minutes Int?
+  commission_tier_id       Int?
+  created_at               DateTime        @default(now())
+  updated_at               DateTime        @updatedAt
+
+  user                     AppUser         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  commission_tier          CommissionTier? @relation(fields: [commission_tier_id], references: [id], onDelete: SetNull)
+
+  @@index([commission_tier_id])
 }
 
 model UserAddress {
   id          Int      @id @default(autoincrement())
   user_id     Int
   label       String
-  region      String
-  city        String
+  city_id     Int
   street      String
   building    String
   postal_code String
@@ -57,36 +72,65 @@ model UserAddress {
   updated_at  DateTime @updatedAt
 
   user        AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  city        City     @relation("AddressCity", fields: [city_id], references: [id], onDelete: Cascade)
 }
 
-model CatalogCategory {
-  id            Int                 @id @default(autoincrement())
-  public_id     String              @unique
-  type          String
-  name          String
-  icon_key      String
-  order_index   Int                 @default(0)
-  created_at    DateTime            @default(now())
-  updated_at    DateTime            @updatedAt
+model City {
+  id            Int                  @id @default(autoincrement())
+  name          String               @unique
+  region        String
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @updatedAt
 
-  subcategories CatalogSubcategory[]
+  users         AppUser[]            @relation("UserCity")
+  addresses     UserAddress[]        @relation("AddressCity")
   listings      MarketplaceListing[]
 }
 
-model CatalogSubcategory {
-  id             Int                   @id @default(autoincrement())
-  category_id    Int
-  public_id      String                @unique
-  name           String
-  order_index    Int                   @default(0)
-  created_at     DateTime              @default(now())
-  updated_at     DateTime              @updatedAt
+model CatalogCategory {
+  id            Int                  @id @default(autoincrement())
+  public_id     String               @unique
+  type          String
+  name          String
+  icon_key      String
+  order_index   Int                  @default(0)
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @updatedAt
 
-  category       CatalogCategory       @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  subcategories CatalogSubcategory[]
 
+  @@unique([type, name])
 }
 
+model CatalogSubcategory {
+  id             Int              @id @default(autoincrement())
+  category_id    Int
+  public_id      String           @unique
+  name           String
+  order_index    Int              @default(0)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
 
+  category       CatalogCategory  @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  items          CatalogItem[]
+
+  @@unique([category_id, name])
+}
+
+model CatalogItem {
+  id             Int                @id @default(autoincrement())
+  subcategory_id Int
+  public_id      String             @unique
+  name           String
+  order_index    Int                @default(0)
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
+
+  subcategory    CatalogSubcategory @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
+  listings       MarketplaceListing[]
+
+  @@unique([subcategory_id, name])
+}
 
 model MarketplaceListing {
   id                   Int               @id @default(autoincrement())
@@ -95,8 +139,7 @@ model MarketplaceListing {
   type                 String
   title                String
   description          String?
-  category_id          Int?
-  category_name        String
+  item_id              Int?
   price                Int
   sale_price           Int?
   rating               Float             @default(4.5)
@@ -104,54 +147,75 @@ model MarketplaceListing {
   status               String            @default("ACTIVE")
   moderation_status    String            @default("APPROVED")
   views                Int               @default(0)
-  city                 String
-  image                String
-  images               String?
-  is_new               Boolean           @default(false)
-  is_sale              Boolean           @default(false)
-  is_verified          Boolean           @default(false)
+  city_id              Int
   shipping_by_seller   Boolean           @default(true)
   sku                  String?
-  publish_date         String?
-  seller_response_time String?
-  seller_listings      Int?
-  breadcrumbs          String?
-  specifications       String?
-  is_price_lower       Boolean           @default(false)
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
 
   seller               AppUser           @relation("seller_listings", fields: [seller_id], references: [id], onDelete: Cascade)
-  category             CatalogCategory?  @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  item                 CatalogItem?      @relation(fields: [item_id], references: [id], onDelete: SetNull)
+  city                 City              @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  images               ListingImage[]
+  attributes           ListingAttribute[]
   reviews              ListingReview[]
   questions            ListingQuestion[]
   complaints           Complaint[]
   order_items          MarketOrderItem[]
   wishlist_items       WishlistItem[]
+
+  @@index([seller_id])
+  @@index([item_id])
+  @@index([city_id])
+  @@index([type, status, moderation_status])
+}
+
+model ListingImage {
+  id          Int                @id @default(autoincrement())
+  listing_id  Int
+  url         String
+  sort_order  Int                @default(0)
+  created_at  DateTime           @default(now())
+
+  listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@unique([listing_id, sort_order])
+}
+
+model ListingAttribute {
+  id          Int                @id @default(autoincrement())
+  listing_id  Int
+  key         String
+  value       String
+  sort_order  Int                @default(0)
+
+  listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@index([listing_id])
 }
 
 model ListingReview {
-  id          Int               @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   listing_id  Int
   author_name String
   rating      Int
   date        String
   comment     String
   avatar      String?
-  created_at  DateTime          @default(now())
+  created_at  DateTime           @default(now())
 
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 }
 
 model ListingQuestion {
-  id          Int               @id @default(autoincrement())
-  public_id   String            @unique
+  id          Int                @id @default(autoincrement())
+  public_id   String             @unique
   listing_id  Int
   buyer_id    Int
   question    String
   answer      String?
-  status      String            @default("PENDING")
-  created_at  DateTime          @default(now())
+  status      String             @default("PENDING")
+  created_at  DateTime           @default(now())
   answered_at DateTime?
 
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
@@ -159,39 +223,39 @@ model ListingQuestion {
 }
 
 model WishlistItem {
-  id          Int               @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   user_id     Int
   listing_id  Int
-  added_at    DateTime          @default(now())
+  added_at    DateTime           @default(now())
 
-  user        AppUser           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        AppUser            @relation(fields: [user_id], references: [id], onDelete: Cascade)
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, listing_id])
 }
 
 model MarketOrder {
-  id              Int               @id @default(autoincrement())
-  public_id       String            @unique
-  buyer_id        Int
-  seller_id       Int
-  status          String
-  delivery_type   String
+  id               Int                 @id @default(autoincrement())
+  public_id        String              @unique
+  buyer_id         Int
+  seller_id        Int
+  status           String
+  delivery_type    String
   delivery_address String?
-  total_price     Int
-  delivery_cost   Int               @default(0)
-  discount        Int               @default(0)
-  created_at      DateTime          @default(now())
-  updated_at      DateTime          @updatedAt
+  total_price      Int
+  delivery_cost    Int                 @default(0)
+  discount         Int                 @default(0)
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @updatedAt
 
-  buyer           AppUser           @relation("buyer_orders", fields: [buyer_id], references: [id], onDelete: Cascade)
-  seller          AppUser           @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
-  items           MarketOrderItem[]
-  transactions    PlatformTransaction[]
+  buyer            AppUser             @relation("buyer_orders", fields: [buyer_id], references: [id], onDelete: Cascade)
+  seller           AppUser             @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
+  items            MarketOrderItem[]
+  transactions     PlatformTransaction[]
 }
 
 model MarketOrderItem {
-  id          Int                @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   order_id    Int
   listing_id  Int?
   name        String
@@ -199,13 +263,13 @@ model MarketOrderItem {
   price       Int
   quantity    Int
 
-  order       MarketOrder        @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order       MarketOrder         @relation(fields: [order_id], references: [id], onDelete: Cascade)
   listing     MarketplaceListing? @relation(fields: [listing_id], references: [id], onDelete: SetNull)
 }
 
 model PlatformTransaction {
-  id                 Int               @id @default(autoincrement())
-  public_id          String            @unique
+  id                 Int         @id @default(autoincrement())
+  public_id          String      @unique
   order_id           Int
   buyer_id           Int
   seller_id          Int
@@ -215,23 +279,22 @@ model PlatformTransaction {
   commission         Int
   payment_provider   String
   payment_intent_id  String
-  created_at         DateTime          @default(now())
+  created_at         DateTime    @default(now())
 
-  order              MarketOrder       @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  buyer              AppUser           @relation("buyer_transactions", fields: [buyer_id], references: [id], onDelete: Cascade)
-  seller             AppUser           @relation("seller_transactions", fields: [seller_id], references: [id], onDelete: Cascade)
+  order              MarketOrder @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  buyer              AppUser     @relation("buyer_transactions", fields: [buyer_id], references: [id], onDelete: Cascade)
+  seller             AppUser     @relation("seller_transactions", fields: [seller_id], references: [id], onDelete: Cascade)
 }
 
 model Complaint {
-  id                    Int               @id @default(autoincrement())
-  public_id             String            @unique
-  created_at            DateTime          @default(now())
-  status                String            @default("NEW")
+  id                    Int                @id @default(autoincrement())
+  public_id             String             @unique
+  created_at            DateTime           @default(now())
+  status                String             @default("NEW")
   complaint_type        String
   listing_id            Int
   seller_id             Int
   reporter_id           Int
-  seller_violations_count Int             @default(0)
   description           String
   evidence              String?
   checked_at            DateTime?
@@ -245,56 +308,43 @@ model Complaint {
 }
 
 model KycRequest {
-  id              Int       @id @default(autoincrement())
-  public_id       String    @unique
-  created_at      DateTime  @default(now())
-  status          String   @default("PENDING")
-  seller_id       Int
-  email           String
-  phone           String
-  company_name    String
-  inn             String
-  address         String
-  documents       String?
-  notes           String?
-  reviewed_by_id  Int?
-  reviewed_at     DateTime?
+  id               Int       @id @default(autoincrement())
+  public_id        String    @unique
+  created_at       DateTime  @default(now())
+  status           String    @default("PENDING")
+  seller_id        Int
+  email            String
+  phone            String
+  company_name     String
+  inn              String
+  address          String
+  documents        String?
+  notes            String?
+  reviewed_by_id   Int?
+  reviewed_at      DateTime?
   rejection_reason String?
 
-  seller          AppUser   @relation("kyc_seller", fields: [seller_id], references: [id], onDelete: Cascade)
-  reviewed_by     AppUser?  @relation("kyc_reviewer", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+  seller           AppUser   @relation("kyc_seller", fields: [seller_id], references: [id], onDelete: Cascade)
+  reviewed_by      AppUser?  @relation("kyc_reviewer", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
 }
 
 model CommissionTier {
-  id              Int       @id @default(autoincrement())
-  public_id       String    @unique
+  id              Int            @id @default(autoincrement())
+  public_id       String         @unique
   name            String
   min_sales       Int
   max_sales       Int?
   commission_rate Float
   description     String
-  sellers_count   Int       @default(0)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-}
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
 
-model AuditLog {
-  id          Int      @id @default(autoincrement())
-  public_id   String   @unique
-  timestamp   DateTime @default(now())
-  admin_id    Int
-  action      String
-  target_id   String
-  target_type String
-  details     String
-  ip_address  String
-
-  admin       AppUser  @relation("audit_admin", fields: [admin_id], references: [id], onDelete: Cascade)
+  seller_profiles SellerProfile[]
 }
 
 model PartnershipRequest {
-  id              Int                   @id @default(autoincrement())
-  public_id       String                @unique
+  id              Int      @id @default(autoincrement())
+  public_id       String   @unique
   user_id         Int
   seller_type     String
   name            String
@@ -307,20 +357,20 @@ model PartnershipRequest {
   social_profile  String?
   credibility     String?
   why_us          String
-  created_at      DateTime              @default(now())
+  created_at      DateTime @default(now())
 
-  user            AppUser               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user            AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 // --- Gamification sandbox models ---
 
 model Partner {
-  id                    Int      @id @default(autoincrement())
-  name                  String   @default("Test Partner")
-  current_xp            Int      @default(0)
-  rating                Float    @default(5.0)
-  created_at            DateTime @default(now())
-  updated_at            DateTime @updatedAt
+  id                    Int                  @id @default(autoincrement())
+  name                  String               @default("Test Partner")
+  current_xp            Int                  @default(0)
+  rating                Float                @default(5.0)
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
 
   orders                Order[]
   partner_achievements  PartnerAchievement[]
@@ -337,10 +387,10 @@ model LoyaltyLevel {
 }
 
 model Order {
-  id               Int      @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   partner_id       Int
   deal_amount      Int
-  created_at       DateTime @default(now())
+  created_at       DateTime     @default(now())
   loyalty_level_id Int
 
   partner          Partner      @relation(fields: [partner_id], references: [id])
@@ -359,21 +409,21 @@ model XpAccrual {
 }
 
 model Achievement {
-  id                   Int      @id @default(autoincrement())
-  name                 String   @unique
+  id                   Int                  @id @default(autoincrement())
+  name                 String               @unique
   description          String
   icon                 String
   xp_reward            Int
-  created_at           DateTime @default(now())
+  created_at           DateTime             @default(now())
 
   partner_achievements PartnerAchievement[]
 }
 
 model PartnerAchievement {
-  id             Int      @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   partner_id     Int
   achievement_id Int
-  achieved_date  DateTime @default(now())
+  achieved_date  DateTime    @default(now())
 
   partner        Partner     @relation(fields: [partner_id], references: [id])
   achievement    Achievement @relation(fields: [achievement_id], references: [id])

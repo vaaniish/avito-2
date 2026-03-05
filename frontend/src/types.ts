@@ -25,7 +25,7 @@ export interface Product {
   sellerListings?: number; // Number of seller listings
   breadcrumbs?: string[]; // Category breadcrumbs
   condition?: "new" | "used"; // Condition: new or used
-  city?: string; // City where item is located
+  city?: string; // City name where item is located (from backend API which sends city.name)
 }
 
 export interface Review {
@@ -48,7 +48,14 @@ export interface FilterState {
   searchQuery: string;
   showOnlySale?: boolean; // New filter for sale items
   condition?: "all" | "new" | "used"; // Filter by condition
-  city?: string; // Filter by city
+  cityId?: number; // Filter by city ID
   includeWords?: string; // Words that MUST be present (разрешенные слова)
   excludeWords?: string; // Words that MUST NOT be present (запрещенные слова)
 }
+
+// New type for client-side representation of a City
+export type CityClient = {
+  id: number;
+  name: string;
+  region: string;
+};

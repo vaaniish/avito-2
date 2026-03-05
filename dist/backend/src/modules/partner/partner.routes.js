@@ -12,6 +12,7 @@ const ROLE_ADMIN = "ADMIN";
 const LISTING_ACTIVE = "ACTIVE";
 const LISTING_INACTIVE = "INACTIVE";
 const LISTING_MODERATION = "MODERATION";
+const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 function parseListingType(value) {
     return value === "services" ? "SERVICE" : "PRODUCT";
 }
@@ -37,6 +38,86 @@ function parseOrderStatus(value) {
     }
     return null;
 }
+function makePublicId(prefix) {
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+function normalizeCategory(category) {
+    const normalized = category.trim();
+    return normalized || "Без категории";
+}
+async function getOrCreateFallbackItem(type, itemName) {
+    const fallbackCategoryName = type === "SERVICE" ? "Услуги" : "Товары";
+    const fallbackCategoryPublicId = type === "SERVICE" ? "service-fallback" : "product-fallback";
+    const fallbackSubcategoryPublicId = type === "SERVICE" ? "service-fallback-other" : "product-fallback-other";
+    let category = await prisma_1.prisma.catalogCategory.findFirst({
+        where: {
+            type,
+            name: fallbackCategoryName,
+        },
+    });
+    if (!category) {
+        category = await prisma_1.prisma.catalogCategory.create({
+            data: {
+                public_id: fallbackCategoryPublicId,
+                type,
+                name: fallbackCategoryName,
+                icon_key: "box",
+                order_index: 9999,
+            },
+        });
+    }
+    let subcategory = await prisma_1.prisma.catalogSubcategory.findFirst({
+        where: {
+            category_id: category.id,
+            name: "Другое",
+        },
+    });
+    if (!subcategory) {
+        subcategory = await prisma_1.prisma.catalogSubcategory.create({
+            data: {
+                category_id: category.id,
+                public_id: fallbackSubcategoryPublicId,
+                name: "Другое",
+                order_index: 9999,
+            },
+        });
+    }
+    const item = await prisma_1.prisma.catalogItem.create({
+        data: {
+            subcategory_id: subcategory.id,
+            public_id: makePublicId("ITM"),
+            name: itemName,
+            order_index: 9999,
+        },
+    });
+    return item.id;
+}
+async function resolveCatalogItemId(type, rawCategory) {
+    const categoryName = normalizeCategory(rawCategory);
+    if (!categoryName || categoryName === "Без категории")
+        return null;
+    const existing = await prisma_1.prisma.catalogItem.findFirst({
+        where: {
+            name: {
+                equals: categoryName,
+                mode: "insensitive",
+            },
+            subcategory: {
+                category: {
+                    type,
+                },
+            },
+        },
+        select: { id: true },
+    });
+    if (existing) {
+        return existing.id;
+    }
+    return getOrCreateFallbackItem(type, categoryName);
+}
+function listingImageUrl(images) {
+    return images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+}
 partnerRouter.get("/listings", async (req, res) => {
     try {
         const session = await (0, session_1.requireAnyRole)(req, [ROLE_SELLER, ROLE_ADMIN]);
@@ -50,6 +131,12 @@ partnerRouter.get("/listings", async (req, res) => {
                 seller_id: session.user.id,
                 type,
             },
+            include: {
+                item: true,
+                images: {
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
+            },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
         res.json(listings.map((listing) => ({
@@ -60,9 +147,9 @@ partnerRouter.get("/listings", async (req, res) => {
             status: (0, format_1.toPartnerListingStatus)(listing.status),
             views: listing.views,
             created_at: listing.created_at,
-            image: listing.image,
+            image: listingImageUrl(listing.images),
             description: listing.description,
-            category: listing.category_name,
+            category: listing.item?.name ?? "Без категории",
         })));
     }
     catch (error) {
@@ -85,31 +172,43 @@ partnerRouter.post("/listings", async (req, res) => {
         const category = typeof body.category === "string" ? body.category.trim() : "Без категории";
         const image = typeof body.image === "string" ? body.image.trim() : "";
         const type = parseListingType(body.type);
-        const city = typeof body.city === "string" ? body.city.trim() : "Москва";
-        if (!title || !Number.isFinite(price) || price <= 0) {
-            res.status(400).json({ error: "Укажите корректные title и price" });
+        const cityId = typeof body.cityId === "number" ? body.cityId : undefined;
+        if (!title || !Number.isFinite(price) || price <= 0 || cityId === undefined) {
+            res.status(400).json({ error: "Укажите корректные title, price и city" });
             return;
         }
-        const sequence = await prisma_1.prisma.marketplaceListing.count();
-        const publicId = `LST-${String(sequence + 1).padStart(4, "0")}`;
-        const created = await prisma_1.prisma.marketplaceListing.create({
-            data: {
-                public_id: publicId,
-                seller_id: session.user.id,
-                type,
-                title,
-                description: description || null,
-                category_name: category,
-                price: Math.round(price),
-                condition,
-                status: LISTING_MODERATION,
-                moderation_status: "PENDING",
-                city,
-                image: image ||
-                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80",
-                images: image ? JSON.stringify([image]) : null,
-                is_new: condition === "NEW",
-            },
+        const itemId = await resolveCatalogItemId(type, category);
+        const lastListing = await prisma_1.prisma.marketplaceListing.findFirst({
+            orderBy: { id: 'desc' },
+            select: { public_id: true }
+        });
+        const currentMaxId = lastListing ? parseInt(lastListing.public_id.replace('LST-', '')) : 0;
+        const publicId = `LST-${String(currentMaxId + 1).padStart(4, "0")}`;
+        const imageUrl = image || FALLBACK_LISTING_IMAGE;
+        const created = await prisma_1.prisma.$transaction(async (tx) => {
+            const listing = await tx.marketplaceListing.create({
+                data: {
+                    public_id: publicId,
+                    seller_id: session.user.id,
+                    type,
+                    title,
+                    description: description || null,
+                    item_id: itemId,
+                    price: Math.round(price),
+                    condition,
+                    status: LISTING_MODERATION,
+                    moderation_status: "PENDING",
+                    city_id: cityId,
+                },
+            });
+            await tx.listingImage.create({
+                data: {
+                    listing_id: listing.id,
+                    url: imageUrl,
+                    sort_order: 0,
+                },
+            });
+            return listing;
         });
         res.status(201).json({
             id: created.public_id,
@@ -119,9 +218,9 @@ partnerRouter.post("/listings", async (req, res) => {
             status: (0, format_1.toPartnerListingStatus)(created.status),
             views: created.views,
             created_at: created.created_at,
-            image: created.image,
+            image: imageUrl,
             description: created.description,
-            category: created.category_name,
+            category: normalizeCategory(category),
         });
     }
     catch (error) {
@@ -142,6 +241,13 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
                 public_id: String(publicId),
                 seller_id: session.user.id,
             },
+            include: {
+                item: true,
+                images: {
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
+                city: true,
+            },
         });
         if (!existing) {
             res.status(404).json({ error: "Listing not found" });
@@ -153,37 +259,78 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
             res.status(400).json({ error: "Некорректная цена" });
             return;
         }
-        const updated = await prisma_1.prisma.marketplaceListing.update({
-            where: { id: existing.id },
-            data: {
-                title: typeof body.title === "string" ? body.title.trim() : undefined,
-                price: price === undefined ? undefined : Math.round(price),
-                condition: body.condition === undefined
-                    ? undefined
-                    : parseCondition(body.condition),
-                description: typeof body.description === "string"
-                    ? body.description.trim()
-                    : undefined,
-                category_name: typeof body.category === "string"
-                    ? body.category.trim()
-                    : undefined,
-                image: typeof body.image === "string" ? body.image.trim() : undefined,
-                city: typeof body.city === "string" ? body.city.trim() : undefined,
-                status: LISTING_MODERATION,
-                moderation_status: "PENDING",
+        const nextCategory = typeof body.category === "string" ? body.category.trim() : undefined;
+        const nextItemId = nextCategory === undefined
+            ? undefined
+            : await resolveCatalogItemId(existing.type, nextCategory);
+        const nextImage = typeof body.image === "string" ? body.image.trim() : undefined;
+        const updated = await prisma_1.prisma.$transaction(async (tx) => {
+            const listing = await tx.marketplaceListing.update({
+                where: { id: existing.id },
+                data: {
+                    title: typeof body.title === "string" ? body.title.trim() : undefined,
+                    price: price === undefined ? undefined : Math.round(price),
+                    condition: body.condition === undefined
+                        ? undefined
+                        : parseCondition(body.condition),
+                    description: typeof body.description === "string"
+                        ? body.description.trim()
+                        : undefined,
+                    item_id: nextItemId,
+                    city_id: typeof body.cityId === "number" ? body.cityId : undefined,
+                    status: LISTING_MODERATION,
+                    moderation_status: "PENDING",
+                },
+            });
+            if (nextImage !== undefined) {
+                const normalizedImage = nextImage || FALLBACK_LISTING_IMAGE;
+                const primaryImage = existing.images[0];
+                if (primaryImage) {
+                    await tx.listingImage.update({
+                        where: { id: primaryImage.id },
+                        data: {
+                            url: normalizedImage,
+                        },
+                    });
+                }
+                else {
+                    await tx.listingImage.create({
+                        data: {
+                            listing_id: listing.id,
+                            url: normalizedImage,
+                            sort_order: 0,
+                        },
+                    });
+                }
+            }
+            return listing;
+        });
+        const reloaded = await prisma_1.prisma.marketplaceListing.findUnique({
+            where: { id: updated.id },
+            include: {
+                item: true,
+                images: {
+                    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
+                city: true,
             },
         });
+        if (!reloaded) {
+            res.status(404).json({ error: "Listing not found after update" });
+            return;
+        }
         res.json({
-            id: updated.public_id,
-            title: updated.title,
-            price: updated.price,
-            condition: (0, format_1.toClientCondition)(updated.condition),
-            status: (0, format_1.toPartnerListingStatus)(updated.status),
-            views: updated.views,
-            created_at: updated.created_at,
-            image: updated.image,
-            description: updated.description,
-            category: updated.category_name,
+            id: reloaded.public_id,
+            title: reloaded.title,
+            price: reloaded.price,
+            condition: (0, format_1.toClientCondition)(reloaded.condition),
+            status: (0, format_1.toPartnerListingStatus)(reloaded.status),
+            views: reloaded.views,
+            created_at: reloaded.created_at,
+            image: listingImageUrl(reloaded.images),
+            description: reloaded.description,
+            category: reloaded.item?.name ?? "Без категории",
+            city: reloaded.city?.name ?? null,
         });
     }
     catch (error) {

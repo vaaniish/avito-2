@@ -5,16 +5,16 @@
   "main": "backend/src/server.ts",
   "scripts": {
     "dev": "npm run dev:all",
-    "dev:backend": "TSX_DISABLE_IPC=1 tsx watch backend/src/server.ts",
+    "dev:backend": "tsx watch backend/src/server.ts",
     "dev:frontend": "vite --config frontend/vite.config.ts --host 127.0.0.1 --port 3000 --strictPort",
     "dev:all": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "tsc -p backend/tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
-    "start": "TSX_DISABLE_IPC=1 tsx backend/src/server.ts",
+    "start": "tsx backend/src/server.ts",
     "db:generate": "prisma generate --schema backend/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
-    "db:seed": "TSX_DISABLE_IPC=1 tsx backend/prisma/seed.ts",
+    "db:seed": "tsx backend/prisma/seed.ts",
     "db:push": "prisma db push --schema backend/prisma/schema.prisma"
   },
   "dependencies": {

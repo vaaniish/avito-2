@@ -13,9 +13,11 @@ https://www.figma.com/design/KYlFzTyuyCYWUjG87GhT8H/My-product-Gamification
 
 1. Install dependencies:
    `npm i`
-2. Sync schema and seed demo data:
+2. Start PostgreSQL in Docker:
+   `docker compose up -d`
+3. Sync schema and seed demo data:
    `npm run db:push && npm run db:seed`
-3. Run frontend + backend in parallel:
+4. Run frontend + backend in parallel:
    `npm run dev`
 
 Optional frontend env (`frontend/.env`):
@@ -25,6 +27,7 @@ Optional frontend env (`frontend/.env`):
 
 Optional backend env (`.env`):
 
+- `DATABASE_URL` (default in this repo: `postgresql://user:password@localhost:5433/avito-db?schema=public`)
 - `YOOKASSA_SHOP_ID` - YooKassa shop id (test)
 - `YOOKASSA_SECRET_KEY` - YooKassa secret key (test)
 - `YOOKASSA_RETURN_URL` - return URL after payment (default: `http://127.0.0.1:3000`)
@@ -36,6 +39,12 @@ Useful scripts:
 - `npm run dev:backend` - run only backend
 - `npm run build` - build backend and frontend
 - `npm run db:generate` / `npm run db:migrate` / `npm run db:seed` / `npm run db:push`
+
+Legacy DB migration to normalized 3NF:
+
+- runbook: `backend/prisma/MIGRATION_3NF.md`
+- backfill SQL: `scripts/migrate_legacy_to_3nf.sql`
+- verification SQL: `scripts/verify_3nf.sql`
 
 ## Demo accounts
 

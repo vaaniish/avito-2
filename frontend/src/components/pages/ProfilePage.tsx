@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { LogOut, MapPin, Package, Plus, Star, Store, User as UserIcon, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { AchievementsPage } from "../partner/AchievementsPage";
 import { PartnerListingsPage } from "./PartnerListingsPage";
 import { PartnerOrdersPage } from "./PartnerOrdersPage";
 import { QuestionsPage } from "../partner/QuestionsPage";
+import { YandexMapPicker } from "../../components/YandexMapPicker"; // Corrected Import YandexMapPicker
 
 type UserType = "regular" | "partner";
 
@@ -26,6 +27,13 @@ interface ProfilePageProps {
   initialTab?: TabType;
 }
 
+// New type for City
+type City = {
+  id: number;
+  name: string;
+  region: string;
+};
+
 type ProfileUser = {
   id: number;
   public_id: string;
@@ -36,15 +44,14 @@ type ProfileUser = {
   name: string;
   email: string;
   avatar?: string | null;
-  city?: string | null;
+  city?: City | null; // Updated to City object
   joinDate: string;
 };
 
 type Address = {
   id: string;
   name: string;
-  region: string;
-  city: string;
+  city: City; // Updated to City object
   street: string;
   building: string;
   postalCode: string;
@@ -125,6 +132,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   const [orders, setOrders] = useState<Order[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [allCities, setAllCities] = useState<City[]>([]); // State to store all cities
 
   const [profileForm, setProfileForm] = useState({
     firstName: "",
@@ -138,8 +146,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressForm, setAddressForm] = useState({
     name: "",
-    region: "",
-    city: "",
+    cityId: null as number | null, // Changed from region and city
     street: "",
     building: "",
     postalCode: "",
@@ -170,6 +177,20 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     }
   }, [activeTab, tabs, userType]);
 
+  const fetchCities = useCallback(async () => {
+    try {
+      const citiesData = await apiGet<City[]>("/catalog/cities");
+      setAllCities(citiesData);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  }, []);
+
+  const resolveCityId = useCallback((cityName: string): number | undefined => {
+    const city = allCities.find(c => c.name === cityName);
+    return city?.id;
+  }, [allCities]);
+
   const loadProfile = async () => {
     setIsLoading(true);
     try {
@@ -199,8 +220,9 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   };
 
   useEffect(() => {
+    void fetchCities(); // Fetch cities on mount
     void loadProfile();
-  }, []);
+  }, [fetchCities]);
 
   const saveProfile = async () => {
     setSaveLoading(true);
@@ -228,7 +250,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
   };
 
   const createAddress = async () => {
-    if (!addressForm.name || !addressForm.city || !addressForm.street) {
+    if (!addressForm.name || !addressForm.cityId || !addressForm.street) { // Updated validation
       alert("Заполните обязательные поля адреса");
       return;
     }
@@ -236,15 +258,14 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     try {
       await apiPost<Address>("/profile/addresses", {
         name: addressForm.name,
-        region: addressForm.region,
-        city: addressForm.city,
+        cityId: addressForm.cityId, // Use cityId
         street: addressForm.street,
         building: addressForm.building,
         postalCode: addressForm.postalCode,
         isDefault: addresses.length === 0,
       });
       setAddressModalOpen(false);
-      setAddressForm({ name: "", region: "", city: "", street: "", building: "", postalCode: "" });
+      setAddressForm({ name: "", cityId: null, street: "", building: "", postalCode: "" }); // Updated reset
       await loadProfile();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось добавить адрес");
@@ -267,6 +288,26 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось установить адрес по умолчанию");
     }
+  };
+
+  const handleAddressSelectFromMap = (address: {
+    city: string;
+    street: string;
+    building: string;
+    postalCode: string;
+  }) => {
+    const cityId = resolveCityId(address.city);
+    if (cityId === undefined) {
+        alert(`Город "${address.city}" не найден в списке доступных городов. Пожалуйста, выберите город из списка или добавьте его.`);
+        return;
+    }
+    setAddressForm(prev => ({
+        ...prev,
+        cityId,
+        street: address.street,
+        building: address.building,
+        postalCode: address.postalCode,
+    }));
   };
 
   const removeWishlistItem = async (id: string) => {
@@ -366,7 +407,7 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
               <div>
                 <div className="font-semibold">{address.name} {address.isDefault && <span className="text-xs text-green-600">(по умолчанию)</span>}</div>
                 <div className="text-sm text-gray-600">
-                  {address.region}, {address.city}, {address.street}, {address.building}, {address.postalCode}
+                  {address.city.region}, {address.city.name}, {address.street}, {address.building}, {address.postalCode}
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -383,20 +424,33 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab }: ProfileP
 
       {addressModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg flex flex-col h-[90vh] md:h-auto">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold">Новый адрес</h4>
               <button onClick={() => setAddressModalOpen(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 flex-1 overflow-y-auto">
               <input value={addressForm.name} onChange={(event) => setAddressForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Название адреса" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              <input value={addressForm.region} onChange={(event) => setAddressForm((prev) => ({ ...prev, region: event.target.value }))} placeholder="Регион" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              <input value={addressForm.city} onChange={(event) => setAddressForm((prev) => ({ ...prev, city: event.target.value }))} placeholder="Город" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <select
+                value={addressForm.cityId ?? ""}
+                onChange={(event) => setAddressForm((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">Выберите город</option>
+                {allCities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name} ({city.region})
+                  </option>
+                ))}
+              </select>
               <input value={addressForm.street} onChange={(event) => setAddressForm((prev) => ({ ...prev, street: event.target.value }))} placeholder="Улица" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input value={addressForm.building} onChange={(event) => setAddressForm((prev) => ({ ...prev, building: event.target.value }))} placeholder="Дом / квартира" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input value={addressForm.postalCode} onChange={(event) => setAddressForm((prev) => ({ ...prev, postalCode: event.target.value }))} placeholder="Индекс" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <div className="h-64 mt-3"> {/* Added a fixed height for the map picker */}
+                <YandexMapPicker onAddressSelect={handleAddressSelectFromMap} />
+              </div>
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => void createAddress()} className="flex-1 py-2 bg-[rgb(38,83,141)] text-white rounded-lg">Сохранить</button>

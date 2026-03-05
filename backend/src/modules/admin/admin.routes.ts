@@ -1,12 +1,15 @@
 import {
   AppUser,
-  AuditLog,
+  CatalogCategory,
+  CatalogItem,
+  CatalogSubcategory,
   CommissionTier,
   Complaint,
   KycRequest,
   MarketplaceListing,
   MarketOrderItem,
   PlatformTransaction,
+  City, // Added City import if not already there, but AppUser has it
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
@@ -34,26 +37,7 @@ async function requireAdmin(
   };
 }
 
-async function writeAudit(
-  adminId: number,
-  action: string,
-  targetId: string,
-  targetType: string,
-  details: string,
-  req: Request,
-): Promise<void> {
-  await prisma.auditLog.create({
-    data: {
-      public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-      admin_id: adminId,
-      action,
-      target_id: targetId,
-      target_type: targetType,
-      details,
-      ip_address: req.ip || "127.0.0.1",
-    },
-  });
-}
+// Removed writeAudit function
 
 function parseComplaintStatus(status: unknown): string | null {
   if (status === "approved") return "APPROVED";
@@ -156,6 +140,11 @@ adminRouter.get("/complaints", async (req: Request, res: Response) => {
           select: {
             public_id: true,
             name: true,
+            _count: {
+              select: {
+                complaints_against: true,
+              },
+            },
           },
         },
         reporter: {
@@ -177,7 +166,11 @@ adminRouter.get("/complaints", async (req: Request, res: Response) => {
         (
           complaint: Complaint & {
             listing: { public_id: string; title: string };
-            seller: { public_id: string; name: string };
+            seller: {
+              public_id: string;
+              name: string;
+              _count: { complaints_against: number };
+            };
             reporter: { name: string };
             checked_by: { name: string } | null;
           },
@@ -191,7 +184,7 @@ adminRouter.get("/complaints", async (req: Request, res: Response) => {
           sellerId: complaint.seller.public_id,
           sellerName: complaint.seller.name,
           reporterName: complaint.reporter.name,
-          sellerViolationsCount: complaint.seller_violations_count,
+          sellerViolationsCount: complaint.seller._count.complaints_against,
           description: complaint.description,
           evidence: complaint.evidence,
           checkedAt: complaint.checked_at,
@@ -243,14 +236,14 @@ adminRouter.patch("/complaints/:publicId", async (req: Request, res: Response) =
       },
     });
 
-    await writeAudit(
-      access.user.id,
-      parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint",
-      String(publicId),
-      "complaint",
-      `Статус жалобы изменен на ${parsedStatus}`,
-      req,
-    );
+    // await writeAudit( // Removed writeAudit
+    //   access.user.id,
+    //   parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint",
+    //   String(publicId),
+    //   "complaint",
+    //   `Статус жалобы изменен на ${parsedStatus}`,
+    //   req,
+    // );
 
     res.json({
       success: true,
@@ -356,14 +349,14 @@ adminRouter.patch("/kyc-requests/:publicId", async (req: Request, res: Response)
       },
     });
 
-    await writeAudit(
-      access.user.id,
-      parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc",
-      String(publicId),
-      "kyc_request",
-      `Статус KYC изменен на ${parsedStatus}`,
-      req,
-    );
+    // await writeAudit( // Removed writeAudit
+    //   access.user.id,
+    //   parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc",
+    //   String(publicId),
+    //   "kyc_request",
+    //   `Статус KYC изменен на ${parsedStatus}`,
+    //   req,
+    // );
 
     res.json({
       success: true,
@@ -430,6 +423,15 @@ adminRouter.get("/listings", async (req: Request, res: Response) => {
             complaints: true,
           },
         },
+        item: {
+          include: {
+            subcategory: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
@@ -440,6 +442,11 @@ adminRouter.get("/listings", async (req: Request, res: Response) => {
           listing: MarketplaceListing & {
             seller: { public_id: string; name: string; joined_at: Date };
             _count: { complaints: number };
+            item: (CatalogItem & {
+              subcategory: CatalogSubcategory & {
+                category: CatalogCategory;
+              };
+            }) | null;
           },
         ) => ({
           id: listing.public_id,
@@ -448,7 +455,7 @@ adminRouter.get("/listings", async (req: Request, res: Response) => {
           sellerName: listing.seller.name,
           status: toAdminListingStatus(listing.moderation_status),
           createdAt: listing.created_at,
-          category: listing.category_name,
+          category: listing.item?.name ?? "Без категории",
           price: listing.price,
           complaintsCount: listing._count.complaints,
           autoFlags: buildAutoFlags({
@@ -500,14 +507,14 @@ adminRouter.patch("/listings/:publicId/moderation", async (req: Request, res: Re
       },
     });
 
-    await writeAudit(
-      access.user.id,
-      parsedStatus === "APPROVED" ? "approve_listing" : "reject_listing",
-      String(publicId),
-      "listing",
-      `Статус модерации объявления изменен на ${parsedStatus}`,
-      req,
-    );
+    // await writeAudit( // Removed writeAudit
+    //   access.user.id,
+    //   "approve_listing",
+    //   String(publicId),
+    //   "listing",
+    //   `Статус модерации объявления изменен на ${parsedStatus}`,
+    //   req,
+    // );
 
     res.json({
       success: true,
@@ -526,6 +533,7 @@ adminRouter.get("/users", async (req: Request, res: Response) => {
 
     const users = await prisma.appUser.findMany({
       include: {
+        city: true, // Include City for AppUser
         orders_as_buyer: {
           select: {
             total_price: true,
@@ -546,6 +554,7 @@ adminRouter.get("/users", async (req: Request, res: Response) => {
           user: AppUser & {
             orders_as_buyer: { total_price: number }[];
             orders_as_seller: { total_price: number }[];
+            city: City | null; // Include City in type definition
           },
         ) => ({
           id: user.public_id,
@@ -554,7 +563,7 @@ adminRouter.get("/users", async (req: Request, res: Response) => {
           role: toClientRole(user.role),
           status: user.status.toLowerCase(),
           joinedAt: user.joined_at,
-          city: user.city,
+          city: user.city?.name ?? null, // Use user.city.name
           phone: user.phone,
           blockReason: user.block_reason,
           buyerOrders: user.orders_as_buyer.length,
@@ -617,14 +626,14 @@ adminRouter.patch("/users/:publicId/status", async (req: Request, res: Response)
       },
     });
 
-    await writeAudit(
-      access.user.id,
-      parsedStatus === "BLOCKED" ? "block_user" : "unblock_user",
-      String(publicId),
-      "user",
-      `Статус пользователя изменен на ${parsedStatus}`,
-      req,
-    );
+    // await writeAudit( // Removed writeAudit
+    //   access.user.id,
+    //   "block_user",
+    //   String(publicId),
+    //   "user",
+    //   `Статус пользователя изменен на ${parsedStatus}`,
+    //   req,
+    // );
 
     res.json({
       success: true,
@@ -642,19 +651,32 @@ adminRouter.get("/commission-tiers", async (req: Request, res: Response) => {
     if (!access.ok) return;
 
     const tiers = await prisma.commissionTier.findMany({
+      include: {
+        _count: {
+          select: {
+            seller_profiles: true,
+          },
+        },
+      },
       orderBy: [{ min_sales: "asc" }, { id: "asc" }],
     });
 
     res.json(
-      tiers.map((tier: CommissionTier) => ({
-        id: tier.public_id,
-        name: tier.name,
-        minSales: tier.min_sales,
-        maxSales: tier.max_sales,
-        commissionRate: tier.commission_rate,
-        description: tier.description,
-        sellersCount: tier.sellers_count,
-      })),
+      tiers.map(
+        (
+          tier: CommissionTier & {
+            _count: { seller_profiles: number };
+          },
+        ) => ({
+          id: tier.public_id,
+          name: tier.name,
+          minSales: tier.min_sales,
+          maxSales: tier.max_sales,
+          commissionRate: tier.commission_rate,
+          description: tier.description,
+          sellersCount: tier._count.seller_profiles,
+        }),
+      ),
     );
   } catch (error) {
     console.error("Error fetching commission tiers:", error);
@@ -662,107 +684,7 @@ adminRouter.get("/commission-tiers", async (req: Request, res: Response) => {
   }
 });
 
-adminRouter.patch("/commission-tiers/:publicId", async (req: Request, res: Response) => {
-  try {
-    const access = await requireAdmin(req, res);
-    if (!access.ok) return;
-
-    const { publicId } = req.params;
-    const body = (req.body ?? {}) as {
-      name?: unknown;
-      minSales?: unknown;
-      maxSales?: unknown;
-      commissionRate?: unknown;
-      description?: unknown;
-      sellersCount?: unknown;
-    };
-
-    const existing = await prisma.commissionTier.findUnique({
-      where: { public_id: String(publicId) },
-      select: { id: true },
-    });
-
-    if (!existing) {
-      res.status(404).json({ error: "Tier not found" });
-      return;
-    }
-
-    const updated = await prisma.commissionTier.update({
-      where: { id: existing.id },
-      data: {
-        name: typeof body.name === "string" ? body.name.trim() : undefined,
-        min_sales: body.minSales === undefined ? undefined : Math.max(0, Number(body.minSales)),
-        max_sales:
-          body.maxSales === undefined
-            ? undefined
-            : body.maxSales === null
-            ? null
-            : Math.max(0, Number(body.maxSales)),
-        commission_rate: body.commissionRate === undefined ? undefined : Number(body.commissionRate),
-        description: typeof body.description === "string" ? body.description.trim() : undefined,
-        sellers_count: body.sellersCount === undefined ? undefined : Math.max(0, Number(body.sellersCount)),
-      },
-    });
-
-    await writeAudit(
-      access.user.id,
-      "update_commission_tier",
-      String(publicId),
-      "commission_tier",
-      `Уровень комиссии ${publicId} обновлен`,
-      req,
-    );
-
-    res.json({
-      success: true,
-      tier: {
-        id: updated.public_id,
-        name: updated.name,
-        minSales: updated.min_sales,
-        maxSales: updated.max_sales,
-        commissionRate: updated.commission_rate,
-        description: updated.description,
-        sellersCount: updated.sellers_count,
-      },
-    });
-  } catch (error) {
-    console.error("Error updating commission tier:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-adminRouter.get("/audit-logs", async (req: Request, res: Response) => {
-  try {
-    const access = await requireAdmin(req, res);
-    if (!access.ok) return;
-
-    const logs = await prisma.auditLog.findMany({
-      include: {
-        admin: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      orderBy: [{ timestamp: "desc" }, { id: "desc" }],
-    });
-
-    res.json(
-      logs.map((log: AuditLog & { admin: { name: string } }) => ({
-        id: log.public_id,
-        timestamp: log.timestamp,
-        admin: log.admin.name,
-        action: log.action,
-        targetId: log.target_id,
-        targetType: log.target_type,
-        details: log.details,
-        ipAddress: log.ip_address,
-      })),
-    );
-  } catch (error) {
-    console.error("Error fetching audit logs:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// Removed adminRouter.get("/audit-logs", ...)
+// Removed AuditLog import at the top
 
 export { adminRouter };

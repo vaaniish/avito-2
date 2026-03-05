@@ -21,19 +21,6 @@ async function requireAdmin(req, res) {
         },
     };
 }
-async function writeAudit(adminId, action, targetId, targetType, details, req) {
-    await prisma_1.prisma.auditLog.create({
-        data: {
-            public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            admin_id: adminId,
-            action,
-            target_id: targetId,
-            target_type: targetType,
-            details,
-            ip_address: req.ip || "127.0.0.1",
-        },
-    });
-}
 function parseComplaintStatus(status) {
     if (status === "approved")
         return "APPROVED";
@@ -131,6 +118,11 @@ adminRouter.get("/complaints", async (req, res) => {
                     select: {
                         public_id: true,
                         name: true,
+                        _count: {
+                            select: {
+                                complaints_against: true,
+                            },
+                        },
                     },
                 },
                 reporter: {
@@ -156,7 +148,7 @@ adminRouter.get("/complaints", async (req, res) => {
             sellerId: complaint.seller.public_id,
             sellerName: complaint.seller.name,
             reporterName: complaint.reporter.name,
-            sellerViolationsCount: complaint.seller_violations_count,
+            sellerViolationsCount: complaint.seller._count.complaints_against,
             description: complaint.description,
             evidence: complaint.evidence,
             checkedAt: complaint.checked_at,
@@ -198,7 +190,6 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
                 action_taken: typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_complaint" : "reject_complaint", String(publicId), "complaint", `Статус жалобы изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -284,7 +275,6 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
                     : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_kyc" : "reject_kyc", String(publicId), "kyc_request", `Статус KYC изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -338,6 +328,15 @@ adminRouter.get("/listings", async (req, res) => {
                         complaints: true,
                     },
                 },
+                item: {
+                    include: {
+                        subcategory: {
+                            include: {
+                                category: true,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
@@ -348,7 +347,7 @@ adminRouter.get("/listings", async (req, res) => {
             sellerName: listing.seller.name,
             status: (0, format_1.toAdminListingStatus)(listing.moderation_status),
             createdAt: listing.created_at,
-            category: listing.category_name,
+            category: listing.item?.name ?? "Без категории",
             price: listing.price,
             complaintsCount: listing._count.complaints,
             autoFlags: buildAutoFlags({
@@ -391,7 +390,6 @@ adminRouter.patch("/listings/:publicId/moderation", async (req, res) => {
                 status: nextListingStatus,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "APPROVED" ? "approve_listing" : "reject_listing", String(publicId), "listing", `Статус модерации объявления изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: (0, format_1.toAdminListingStatus)(updated.moderation_status),
@@ -409,6 +407,7 @@ adminRouter.get("/users", async (req, res) => {
             return;
         const users = await prisma_1.prisma.appUser.findMany({
             include: {
+                city: true,
                 orders_as_buyer: {
                     select: {
                         total_price: true,
@@ -429,7 +428,7 @@ adminRouter.get("/users", async (req, res) => {
             role: (0, format_1.toClientRole)(user.role),
             status: user.status.toLowerCase(),
             joinedAt: user.joined_at,
-            city: user.city,
+            city: user.city?.name ?? null,
             phone: user.phone,
             blockReason: user.block_reason,
             buyerOrders: user.orders_as_buyer.length,
@@ -477,7 +476,6 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
                 block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string" ? body.blockReason.trim() : null,
             },
         });
-        await writeAudit(access.user.id, parsedStatus === "BLOCKED" ? "block_user" : "unblock_user", String(publicId), "user", `Статус пользователя изменен на ${parsedStatus}`, req);
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -494,6 +492,13 @@ adminRouter.get("/commission-tiers", async (req, res) => {
         if (!access.ok)
             return;
         const tiers = await prisma_1.prisma.commissionTier.findMany({
+            include: {
+                _count: {
+                    select: {
+                        seller_profiles: true,
+                    },
+                },
+            },
             orderBy: [{ min_sales: "asc" }, { id: "asc" }],
         });
         res.json(tiers.map((tier) => ({
@@ -503,91 +508,11 @@ adminRouter.get("/commission-tiers", async (req, res) => {
             maxSales: tier.max_sales,
             commissionRate: tier.commission_rate,
             description: tier.description,
-            sellersCount: tier.sellers_count,
+            sellersCount: tier._count.seller_profiles,
         })));
     }
     catch (error) {
         console.error("Error fetching commission tiers:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-adminRouter.patch("/commission-tiers/:publicId", async (req, res) => {
-    try {
-        const access = await requireAdmin(req, res);
-        if (!access.ok)
-            return;
-        const { publicId } = req.params;
-        const body = (req.body ?? {});
-        const existing = await prisma_1.prisma.commissionTier.findUnique({
-            where: { public_id: String(publicId) },
-            select: { id: true },
-        });
-        if (!existing) {
-            res.status(404).json({ error: "Tier not found" });
-            return;
-        }
-        const updated = await prisma_1.prisma.commissionTier.update({
-            where: { id: existing.id },
-            data: {
-                name: typeof body.name === "string" ? body.name.trim() : undefined,
-                min_sales: body.minSales === undefined ? undefined : Math.max(0, Number(body.minSales)),
-                max_sales: body.maxSales === undefined
-                    ? undefined
-                    : body.maxSales === null
-                        ? null
-                        : Math.max(0, Number(body.maxSales)),
-                commission_rate: body.commissionRate === undefined ? undefined : Number(body.commissionRate),
-                description: typeof body.description === "string" ? body.description.trim() : undefined,
-                sellers_count: body.sellersCount === undefined ? undefined : Math.max(0, Number(body.sellersCount)),
-            },
-        });
-        await writeAudit(access.user.id, "update_commission_tier", String(publicId), "commission_tier", `Уровень комиссии ${publicId} обновлен`, req);
-        res.json({
-            success: true,
-            tier: {
-                id: updated.public_id,
-                name: updated.name,
-                minSales: updated.min_sales,
-                maxSales: updated.max_sales,
-                commissionRate: updated.commission_rate,
-                description: updated.description,
-                sellersCount: updated.sellers_count,
-            },
-        });
-    }
-    catch (error) {
-        console.error("Error updating commission tier:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-adminRouter.get("/audit-logs", async (req, res) => {
-    try {
-        const access = await requireAdmin(req, res);
-        if (!access.ok)
-            return;
-        const logs = await prisma_1.prisma.auditLog.findMany({
-            include: {
-                admin: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-            orderBy: [{ timestamp: "desc" }, { id: "desc" }],
-        });
-        res.json(logs.map((log) => ({
-            id: log.public_id,
-            timestamp: log.timestamp,
-            admin: log.admin.name,
-            action: log.action,
-            targetId: log.target_id,
-            targetType: log.target_type,
-            details: log.details,
-            ipAddress: log.ip_address,
-        })));
-    }
-    catch (error) {
-        console.error("Error fetching audit logs:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

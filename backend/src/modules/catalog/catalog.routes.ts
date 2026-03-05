@@ -1,10 +1,15 @@
 import {
   AppUser,
   CatalogCategory,
+  CatalogItem,
   CatalogSubcategory,
+  ListingAttribute,
+  ListingImage,
   ListingQuestion,
   ListingReview,
   MarketplaceListing,
+  SellerProfile,
+  City, // Added City import
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
@@ -13,41 +18,72 @@ import { toClientCondition } from "../../utils/format";
 
 const catalogRouter = Router();
 
+const FALLBACK_LISTING_IMAGE =
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+
 function resolveListingType(rawType: unknown): string {
   if (rawType === "services") return "SERVICE";
   return "PRODUCT";
 }
 
-function parseJsonArray(value: string | null): string[] | undefined {
-  if (!value) return undefined;
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    if (
-      Array.isArray(parsed) &&
-      parsed.every((item) => typeof item === "string")
-    ) {
-      return parsed;
-    }
-  } catch (_error) {
-    return undefined;
-  }
-  return undefined;
+function formatPublishDate(date: Date): string {
+  const formatted = new Intl.DateTimeFormat("ru-RU", {
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+  return formatted.replace(",", " в");
 }
 
-function parseJsonObject(
-  value: string | null,
+function formatResponseTime(minutes: number | null | undefined): string | null {
+  if (!minutes || minutes <= 0) return null;
+  if (minutes < 60) return `около ${minutes} минут`;
+  if (minutes < 120) return "около 1 часа";
+  return `около ${Math.round(minutes / 60)} часов`;
+}
+
+function listingCategoryName(
+  listing: MarketplaceListing & {
+    item: (CatalogItem & {
+      subcategory: CatalogSubcategory & {
+        category: CatalogCategory;
+      };
+    }) | null;
+  },
+): string {
+  return listing.item?.name ?? "Без категории";
+}
+
+function listingBreadcrumbs(
+  listing: MarketplaceListing & {
+    item: (CatalogItem & {
+      subcategory: CatalogSubcategory & {
+        category: CatalogCategory;
+      };
+    }) | null;
+  },
+): string[] {
+  if (!listing.item) return ["Главная", "Без категории"];
+  return [
+    "Главная",
+    listing.item.subcategory.category.name,
+    listing.item.subcategory.name,
+    listing.item.name,
+  ];
+}
+
+function listingSpecifications(
+  attributes: ListingAttribute[],
 ): Record<string, string> | undefined {
-  if (!value) return undefined;
-  try {
-    const parsed = JSON.parse(value) as Record<string, unknown>;
-    const entries = Object.entries(parsed).filter(
-      (entry): entry is [string, string] =>
-        typeof entry[0] === "string" && typeof entry[1] === "string",
-    );
-    return Object.fromEntries(entries);
-  } catch (_error) {
-    return undefined;
-  }
+  if (!attributes.length) return undefined;
+  const object = Object.fromEntries(
+    attributes.map((attribute: ListingAttribute) => [
+      attribute.key,
+      attribute.value,
+    ]),
+  );
+  return Object.keys(object).length ? object : undefined;
 }
 
 catalogRouter.get("/categories", async (req: Request, res: Response) => {
@@ -58,6 +94,11 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
       include: {
         subcategories: {
           orderBy: { order_index: "asc" },
+          include: {
+            items: {
+              orderBy: [{ order_index: "asc" }, { id: "asc" }],
+            },
+          },
         },
       },
       orderBy: { order_index: "asc" },
@@ -67,7 +108,11 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
       categories.map(
         (
           category: CatalogCategory & {
-            subcategories: CatalogSubcategory[];
+            subcategories: Array<
+              CatalogSubcategory & {
+                items: CatalogItem[];
+              }
+            >;
           },
         ) => ({
           id: category.public_id,
@@ -75,10 +120,13 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
           icon_key: category.icon_key,
           subcategories: category.subcategories.map(
             (
-              subcategory: CatalogSubcategory,
+              subcategory: CatalogSubcategory & {
+                items: CatalogItem[];
+              },
             ) => ({
               id: subcategory.public_id,
               name: subcategory.name,
+              items: subcategory.items.map((item: CatalogItem) => item.name),
             }),
           ),
         }),
@@ -100,7 +148,39 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
         moderation_status: "APPROVED",
       },
       include: {
-        seller: true,
+        city: true, // Include City for listing
+        seller: {
+          select: {
+            name: true,
+            avatar: true,
+            _count: {
+              select: {
+                listings: true,
+              },
+            },
+            seller_profile: {
+              select: {
+                is_verified: true,
+                average_response_minutes: true,
+              },
+            },
+          },
+        },
+        item: {
+          include: {
+            subcategory: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        },
+        images: {
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+        },
+        attributes: {
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+        },
         reviews: true,
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
@@ -110,44 +190,68 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
       listings.map(
         (
           listing: MarketplaceListing & {
-            seller: AppUser;
+            city: City; // Include City in type definition
+            seller: Pick<AppUser, "name" | "avatar"> & {
+              _count: { listings: number };
+              seller_profile: Pick<
+                SellerProfile,
+                "is_verified" | "average_response_minutes"
+              > | null;
+            };
+            item: (CatalogItem & {
+              subcategory: CatalogSubcategory & {
+                category: CatalogCategory;
+              };
+            }) | null;
+            images: ListingImage[];
+            attributes: ListingAttribute[];
             reviews: ListingReview[];
           },
-        ) => ({
-          id: listing.public_id,
-          title: listing.title,
-          price: listing.price,
-          salePrice: listing.sale_price,
-          image: listing.image,
-          images: parseJsonArray(listing.images),
-          rating: listing.rating,
-          seller: listing.seller.name,
-          sellerAvatar: listing.seller.avatar,
-          category: listing.category_name,
-          sku: listing.sku,
-          isNew: listing.is_new,
-          isSale: listing.is_sale,
-          isVerified: listing.is_verified,
-          description: listing.description,
-          shippingBySeller: listing.shipping_by_seller,
-          city: listing.city,
-          publishDate: listing.publish_date,
-          views: listing.views,
-          sellerResponseTime: listing.seller_response_time,
-          sellerListings: listing.seller_listings,
-          breadcrumbs: parseJsonArray(listing.breadcrumbs),
-          specifications: parseJsonObject(listing.specifications),
-          isPriceLower: listing.is_price_lower,
-          condition: toClientCondition(listing.condition),
-          reviews: listing.reviews.map((review: ListingReview) => ({
-            id: String(review.id),
-            author: review.author_name,
-            rating: review.rating,
-            date: review.date,
-            comment: review.comment,
-            avatar: review.avatar,
-          })),
-        }),
+        ) => {
+          const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+          const salePrice =
+            listing.sale_price !== null && listing.sale_price < listing.price
+              ? listing.sale_price
+              : null;
+
+          return {
+            id: listing.public_id,
+            title: listing.title,
+            price: listing.price,
+            salePrice,
+            image: primaryImage,
+            images: listing.images.map((image: ListingImage) => image.url),
+            rating: listing.rating,
+            seller: listing.seller.name,
+            sellerAvatar: listing.seller.avatar,
+            category: listingCategoryName(listing),
+            sku: listing.sku,
+            isNew: listing.condition === "NEW",
+            isSale: salePrice !== null,
+            isVerified: Boolean(listing.seller.seller_profile?.is_verified),
+            description: listing.description,
+            shippingBySeller: listing.shipping_by_seller,
+            city: listing.city.name, // Use city.name
+            publishDate: formatPublishDate(listing.created_at),
+            views: listing.views,
+            sellerResponseTime: formatResponseTime(
+              listing.seller.seller_profile?.average_response_minutes,
+            ),
+            sellerListings: listing.seller._count.listings,
+            breadcrumbs: listingBreadcrumbs(listing),
+            specifications: listingSpecifications(listing.attributes),
+            isPriceLower: salePrice !== null,
+            condition: toClientCondition(listing.condition),
+            reviews: listing.reviews.map((review: ListingReview) => ({
+              id: String(review.id),
+              author: review.author_name,
+              rating: review.rating,
+              date: review.date,
+              comment: review.comment,
+              avatar: review.avatar,
+            })),
+          };
+        },
       ),
     );
   } catch (error) {
@@ -158,28 +262,32 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
 
 catalogRouter.get("/cities", async (_req: Request, res: Response) => {
   try {
-    const listings = await prisma.marketplaceListing.findMany({
+    const citiesFromListings = await prisma.marketplaceListing.findMany({
       where: {
         status: "ACTIVE",
         moderation_status: "APPROVED",
       },
       select: {
-        city: true,
+        city: {
+            select: { id: true, name: true, region: true, created_at: true, updated_at: true } // Select all City properties
+        },
       },
-      distinct: ["city"],
+      distinct: ["city_id"],
     });
 
+    const uniqueCities: City[] = [];
+    const seenCityIds = new Set<number>();
+
+    for (const listing of citiesFromListings) {
+      if (!seenCityIds.has(listing.city.id)) {
+        uniqueCities.push(listing.city);
+        seenCityIds.add(listing.city.id);
+      }
+    }
+
     res.json(
-      listings
-        .map((listing: { city: string }) => listing.city)
-        .filter(
-          (
-            city: string,
-            index: number,
-            list: (string | null)[],
-          ): city is string => city !== null && list.indexOf(city) === index,
-        )
-        .sort((left: string, right: string) => left.localeCompare(right, "ru-RU")),
+      uniqueCities
+        .sort((left: City, right: City) => left.name.localeCompare(right.name, "ru-RU")),
     );
   } catch (error) {
     console.error("Error fetching cities:", error);
@@ -203,15 +311,32 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
           moderation_status: "APPROVED",
         },
         select: {
-          public_id: true,
           title: true,
           type: true,
-          category_name: true,
+          item: {
+            select: {
+              name: true,
+              subcategory: {
+                select: {
+                  name: true,
+                  category: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       }),
       prisma.catalogCategory.findMany({
         include: {
-          subcategories: true,
+          subcategories: {
+            include: {
+              items: true,
+            },
+          },
         },
       }),
     ]);
@@ -228,7 +353,10 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
       suggestions.push({
         type: listing.type === "SERVICE" ? "service" : "product",
         title: listing.title,
-        subtitle: listing.category_name,
+        subtitle:
+          listing.item?.subcategory.name ??
+          listing.item?.subcategory.category.name ??
+          "Категория",
         query: listing.title,
       });
     }
@@ -252,27 +380,28 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
             query: subcategory.name,
           });
         }
+
+        for (const item of subcategory.items) {
+          if (!item.name.toLowerCase().includes(normalized)) continue;
+          suggestions.push({
+            type: "category",
+            title: item.name,
+            subtitle: subcategory.name,
+            query: item.name,
+          });
+        }
       }
     }
 
     const deduped = suggestions
-      .sort(
-        (
-          left: { title: string },
-          right: { title: string },
-        ) => {
-          const leftStarts = left.title.toLowerCase().startsWith(normalized);
-          const rightStarts = right.title.toLowerCase().startsWith(normalized);
-          if (leftStarts === rightStarts) return 0;
-          return leftStarts ? -1 : 1;
-        },
-      )
+      .sort((left: { title: string }, right: { title: string }) => {
+        const leftStarts = left.title.toLowerCase().startsWith(normalized);
+        const rightStarts = right.title.toLowerCase().startsWith(normalized);
+        if (leftStarts === rightStarts) return 0;
+        return leftStarts ? -1 : 1;
+      })
       .filter(
-        (
-          item: { title: string },
-          index: number,
-          list: { title: string }[],
-        ) =>
+        (item: { title: string }, index: number, list: { title: string }[]) =>
           index ===
           list.findIndex(
             (candidate) =>
@@ -378,17 +507,17 @@ catalogRouter.post(
         },
       });
 
-      await prisma.auditLog.create({
-        data: {
-          public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-          admin_id: sessionUser.id,
-          action: "create_question",
-          target_id: String(publicId),
-          target_type: "listing",
-          details: `Пользователь ${sessionUser.email} задал вопрос к товару ${publicId}: "${questionText}"`,
-          ip_address: req.ip || "127.0.0.1",
-        },
-      });
+      // await prisma.auditLog.create({ // Removed AuditLog
+      //   data: {
+      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+      //     admin_id: sessionUser.id,
+      //     action: "create_question",
+      //     target_id: String(publicId),
+      //     target_type: "listing",
+      //     details: `Пользователь ${sessionUser.email} задал вопрос к товаid ${publicId}: "${questionText}"`,
+      //     ip_address: req.ip || "127.0.0.1",
+      //   },
+      // });
 
       res.status(201).json({
         id: created.public_id,

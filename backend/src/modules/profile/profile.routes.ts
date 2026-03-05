@@ -1,10 +1,12 @@
 import {
   AppUser,
+  ListingImage,
   MarketOrder,
   MarketOrderItem,
   MarketplaceListing,
   UserAddress,
   WishlistItem,
+  City, // Added City import
 } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Router, type Request, type Response } from "express";
@@ -20,6 +22,8 @@ const profileRouter = Router();
 const ROLE_BUYER = "BUYER";
 const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
+const FALLBACK_LISTING_IMAGE =
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 
 type YooKassaPayment = {
   id: string;
@@ -184,14 +188,20 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
     const user = await prisma.appUser.findUnique({
       where: { id: session.user.id },
       include: {
+        city: true, // Include City for AppUser
         addresses: {
           orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+          include: { city: true }, // Include City for UserAddress
         },
         wishlist_items: {
           include: {
             listing: {
               include: {
-                seller: true,
+                seller: { include: { city: true } }, // Include City for seller in listing
+                images: {
+                  orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+                },
+                city: true, // Include City for listing
               },
             },
           },
@@ -199,7 +209,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
         },
         orders_as_buyer: {
           include: {
-            seller: true,
+            seller: { include: { city: true } }, // Include City for seller in order
             items: true,
           },
           orderBy: [{ created_at: "desc" }],
@@ -212,34 +222,51 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
       return;
     }
 
+    // Type for AppUser with included relations
+    type UserWithRelations = AppUser & {
+      city: City | null;
+      addresses: (UserAddress & { city: City })[];
+      orders_as_buyer: (MarketOrder & {
+        seller: AppUser & { city: City | null };
+        items: MarketOrderItem[];
+      })[];
+      wishlist_items: (WishlistItem & {
+        listing: MarketplaceListing & {
+          seller: AppUser & { city: City | null };
+          images: ListingImage[];
+          city: City;
+        };
+      })[];
+    };
+
+    const userWithRelations = user as UserWithRelations;
+
     res.json({
       user: {
-        id: user.id,
-        public_id: user.public_id,
-        role: toClientRole(user.role),
-        firstName: user.first_name ?? "",
-        lastName: user.last_name ?? "",
-        displayName: user.display_name ?? user.name,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        city: user.city,
-        joinDate: user.joined_at.getFullYear().toString(),
+        id: userWithRelations.id,
+        public_id: userWithRelations.public_id,
+        role: toClientRole(userWithRelations.role),
+        firstName: userWithRelations.first_name ?? "",
+        lastName: userWithRelations.last_name ?? "",
+        displayName: userWithRelations.display_name ?? userWithRelations.name,
+        name: userWithRelations.name,
+        email: userWithRelations.email,
+        avatar: userWithRelations.avatar,
+        city: userWithRelations.city?.name ?? null, // Use city.name
+        joinDate: userWithRelations.joined_at.getFullYear().toString(),
       },
-      addresses: user.addresses.map((address: UserAddress) => ({
+      addresses: userWithRelations.addresses.map((address) => ({
         id: String(address.id),
         name: address.label,
-        region: address.region,
-        city: address.city,
+        region: address.city.region, // Use address.city.region
+        city: address.city.name, // Use address.city.name
         street: address.street,
         building: address.building,
         postalCode: address.postal_code,
         isDefault: address.is_default,
       })),
-      orders: user.orders_as_buyer.map(
-        (
-          order: MarketOrder & { seller: AppUser; items: MarketOrderItem[] },
-        ) => ({
+      orders: userWithRelations.orders_as_buyer.map(
+        (order) => ({
           id: String(order.id),
           orderNumber: `#${order.public_id}`,
           date: order.created_at,
@@ -253,7 +280,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
             name: order.seller.name,
             avatar: order.seller.avatar,
             phone: order.seller.phone ?? "",
-            address: `${order.seller.city ?? "Город не указан"}`,
+            address: `${order.seller.city?.name ?? "Город не указан"}`, // Use order.seller.city.name
             workingHours: "пн — вс: 9:00-21:00",
           },
           items: order.items.map((item: MarketOrderItem) => ({
@@ -265,17 +292,13 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
           })),
         }),
       ),
-      wishlist: user.wishlist_items.map(
-        (
-          item: WishlistItem & {
-            listing: MarketplaceListing & { seller: AppUser };
-          },
-        ) => ({
+      wishlist: userWithRelations.wishlist_items.map(
+        (item) => ({
           id: item.listing.public_id,
           name: item.listing.title,
           price: item.listing.sale_price ?? item.listing.price,
-          image: item.listing.image,
-          location: item.listing.city,
+          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+          location: item.listing.city.name, // Use item.listing.city.name
           condition: toClientCondition(item.listing.condition),
           seller: item.listing.seller.name,
           addedDate: item.added_at.toISOString().split("T")[0],
@@ -398,17 +421,18 @@ profileRouter.get("/addresses", async (req: Request, res: Response) => {
 
     const addresses = await prisma.userAddress.findMany({
       where: { user_id: session.user.id },
+      include: { city: true }, // Include City for UserAddress
       orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
     });
 
     res.json(
-      addresses.map((address: UserAddress) => ({
+      addresses.map((address: UserAddress & { city: City }) => ({
         id: String(address.id),
         label: address.label,
-        fullAddress: `${address.region}, ${address.city}, ${address.street}, ${address.building}`,
+        fullAddress: `${address.city.region}, ${address.city.name}, ${address.street}, ${address.building}`,
         isDefault: address.is_default,
-        region: address.region,
-        city: address.city,
+        region: address.city.region, // Use address.city.region
+        city: address.city.name, // Use address.city.name
         street: address.street,
         building: address.building,
         postalCode: address.postal_code,
@@ -434,8 +458,7 @@ profileRouter.post("/addresses", async (req: Request, res: Response) => {
 
     const body = (req.body ?? {}) as {
       name?: unknown;
-      region?: unknown;
-      city?: unknown;
+      cityId?: unknown; // Changed from city and region
       street?: unknown;
       building?: unknown;
       postalCode?: unknown;
@@ -443,8 +466,7 @@ profileRouter.post("/addresses", async (req: Request, res: Response) => {
     };
 
     const label = typeof body.name === "string" ? body.name.trim() : "";
-    const region = typeof body.region === "string" ? body.region.trim() : "";
-    const city = typeof body.city === "string" ? body.city.trim() : "";
+    const cityId = typeof body.cityId === "number" ? body.cityId : 0; // Changed from region and city
     const street = typeof body.street === "string" ? body.street.trim() : "";
     const building =
       typeof body.building === "string" ? body.building.trim() : "";
@@ -452,7 +474,7 @@ profileRouter.post("/addresses", async (req: Request, res: Response) => {
       typeof body.postalCode === "string" ? body.postalCode.trim() : "";
     const isDefault = Boolean(body.isDefault);
 
-    if (!label || !city || !street) {
+    if (!label || !cityId || !street) { // Updated validation
       res.status(400).json({ error: "Missing required address fields" });
       return;
     }
@@ -468,20 +490,20 @@ profileRouter.post("/addresses", async (req: Request, res: Response) => {
       data: {
         user_id: session.user.id,
         label,
-        region,
-        city,
+        city_id: cityId, // Use city_id
         street,
         building,
         postal_code: postalCode,
         is_default: isDefault,
       },
+      include: { city: true }, // Include City for response mapping
     });
 
     res.status(201).json({
       id: String(created.id),
       name: created.label,
-      region: created.region,
-      city: created.city,
+      region: created.city.region, // Use created.city.region
+      city: created.city.name, // Use created.city.name
       street: created.street,
       building: created.building,
       postalCode: created.postal_code,
@@ -521,8 +543,7 @@ profileRouter.patch("/addresses/:id", async (req: Request, res: Response) => {
 
     const body = (req.body ?? {}) as {
       name?: unknown;
-      region?: unknown;
-      city?: unknown;
+      cityId?: unknown; // Changed from city and region
       street?: unknown;
       building?: unknown;
       postalCode?: unknown;
@@ -541,9 +562,7 @@ profileRouter.patch("/addresses/:id", async (req: Request, res: Response) => {
       where: { id: existing.id },
       data: {
         label: typeof body.name === "string" ? body.name.trim() : undefined,
-        region:
-          typeof body.region === "string" ? body.region.trim() : undefined,
-        city: typeof body.city === "string" ? body.city.trim() : undefined,
+        city_id: typeof body.cityId === "number" ? body.cityId : undefined, // Use city_id
         street:
           typeof body.street === "string" ? body.street.trim() : undefined,
         building:
@@ -554,13 +573,14 @@ profileRouter.patch("/addresses/:id", async (req: Request, res: Response) => {
             : undefined,
         is_default: isDefault,
       },
+      include: { city: true }, // Add missing include here
     });
 
     res.json({
       id: String(updated.id),
       name: updated.label,
-      region: updated.region,
-      city: updated.city,
+      region: updated.city.region, // Use updated.city.region
+      city: updated.city.name, // Use updated.city.name
       street: updated.street,
       building: updated.building,
       postalCode: updated.postal_code,
@@ -708,13 +728,12 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
         moderation_status: "APPROVED",
         status: "ACTIVE",
       },
-      select: {
-        id: true,
-        public_id: true,
-        seller_id: true,
-        title: true,
-        image: true,
-        price: true,
+      include: {
+        images: {
+          select: { url: true },
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+          take: 1,
+        },
       },
     });
 
@@ -730,7 +749,7 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       public_id: string;
       seller_id: number;
       title: string;
-      image: string | null;
+      images: Array<{ url: string }>;
       price: number;
     }>(
       listings.map((listing: {
@@ -738,7 +757,7 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
         public_id: string;
         seller_id: number;
         title: string;
-        image: string | null;
+        images: Array<{ url: string }>;
         price: number;
       }) => [listing.public_id, listing]),
     );
@@ -764,7 +783,7 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       current.push({
         listing_id: listing.id,
         name: listing.title,
-        image: listing.image,
+        image: listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
         price: listing.price,
         quantity: item.quantity,
       });
@@ -786,9 +805,10 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
           id: addressId,
           user_id: session.user.id,
         },
+        include: { city: true }, // Add missing include here
       });
       if (selectedAddress) {
-        deliveryAddress = `${selectedAddress.region}, ${selectedAddress.city}, ${selectedAddress.street}, ${selectedAddress.building}`;
+        deliveryAddress = `${selectedAddress.city.region}, ${selectedAddress.city.name}, ${selectedAddress.street}, ${selectedAddress.building}`;
       }
     }
 
@@ -798,9 +818,10 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
           user_id: session.user.id,
           is_default: true,
         },
+        include: { city: true }, // Add missing include here
       });
       if (defaultAddress) {
-        deliveryAddress = `${defaultAddress.region}, ${defaultAddress.city}, ${defaultAddress.street}, ${defaultAddress.building}`;
+        deliveryAddress = `${defaultAddress.city.region}, ${defaultAddress.city.name}, ${defaultAddress.street}, ${defaultAddress.building}`;
       }
     }
 
@@ -922,22 +943,22 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       return result;
     });
 
-    await prisma.auditLog.create({
-      data: {
-        public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-        admin_id: session.user.id,
-        action: "create_order",
-        target_id: createdOrders.map((o: {order_id: string}) => o.order_id).join(", "),
-        target_type: "order",
-        details: `Пользователь ${
-          session.user.email
-        } создал ${createdOrders.length} заказ(а/ов) на сумму ${createdOrders.reduce(
-          (sum: number, order: { total_price: number }) => sum + order.total_price,
-          0,
-        )}.`,
-        ip_address: req.ip || "127.0.0.1",
-      },
-    });
+    // await prisma.auditLog.create({ // Removed AuditLog
+    //   data: {
+    //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+    //     admin_id: session.user.id,
+    //     action: "create_order",
+    //     target_id: createdOrders.map((o: {order_id: string}) => o.order_id).join(", "),
+    //     target_type: "order",
+    //     details: `Пользователь ${
+    //       session.user.email
+    //     } создал ${createdOrders.length} заказ(а/ов) на сумму ${createdOrders.reduce(
+    //       (sum: number, order: { total_price: number }) => sum + order.total_price,
+    //       0,
+    //     )}.`,
+    //     ip_address: req.ip || "127.0.0.1",
+    //   },
+    // });
 
     res.status(201).json({
       success: true,
@@ -984,7 +1005,7 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
     const orders = await prisma.marketOrder.findMany({
       where: { buyer_id: session.user.id },
       include: {
-        seller: true,
+        seller: { include: { city: true } }, // Include City for seller in order
         items: true,
       },
       orderBy: [{ created_at: "desc" }],
@@ -993,7 +1014,7 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
     res.json(
       orders.map(
         (
-          order: MarketOrder & { seller: AppUser; items: MarketOrderItem[] },
+          order: MarketOrder & { seller: AppUser & { city: City | null }; items: MarketOrderItem[] },
         ) => ({
           id: String(order.id),
           orderNumber: `#${order.public_id}`,
@@ -1008,7 +1029,7 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
             name: order.seller.name,
             avatar: order.seller.avatar,
             phone: order.seller.phone ?? "",
-            address: `${order.seller.city ?? "Город не указан"}`,
+            address: `${order.seller.city?.name ?? "Город не указан"}`, // Use order.seller.city.name
             workingHours: "пн — вс: 9:00-21:00",
           },
           items: order.items.map((item: MarketOrderItem) => ({
@@ -1043,7 +1064,13 @@ profileRouter.get("/wishlist", async (req: Request, res: Response) => {
       where: { user_id: session.user.id },
       include: {
         listing: {
-          include: { seller: true },
+          include: {
+            seller: true,
+            images: {
+              orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+            },
+            city: true, // Include City for listing
+          },
         },
       },
       orderBy: [{ added_at: "desc" }],
@@ -1053,14 +1080,18 @@ profileRouter.get("/wishlist", async (req: Request, res: Response) => {
       wishlist.map(
         (
           item: WishlistItem & {
-            listing: MarketplaceListing & { seller: AppUser };
+            listing: MarketplaceListing & {
+              seller: AppUser;
+              images: ListingImage[];
+              city: City; // Include City in type definition
+            };
           },
         ) => ({
           id: item.listing.public_id,
           name: item.listing.title,
           price: item.listing.sale_price ?? item.listing.price,
-          image: item.listing.image,
-          location: item.listing.city,
+          image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
+          location: item.listing.city.name, // Use item.listing.city.name
           condition: toClientCondition(item.listing.condition),
           seller: item.listing.seller.name,
           addedDate: item.added_at.toISOString().split("T")[0],
@@ -1111,19 +1142,19 @@ profileRouter.post(
         update: {},
       });
 
-      await prisma.auditLog.create({
-        data: {
-          public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-          admin_id: session.user.id,
-          action: "add_to_wishlist",
-          target_id: String(listingPublicId),
-          target_type: "listing",
-          details: `Пользователь ${
-            session.user.email
-          } добавил товар ${listingPublicId} в избранное.`,
-          ip_address: req.ip || "127.0.0.1",
-        },
-      });
+      // await prisma.auditLog.create({ // Removed AuditLog
+      //   data: {
+      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+      //     admin_id: session.user.id,
+      //     action: "add_to_wishlist",
+      //     target_id: String(listingPublicId),
+      //     target_type: "listing",
+      //     details: `Пользователь ${
+      //       session.user.email
+      //     } добавил товар ${listingPublicId} в избранное.`,
+      //     ip_address: req.ip || "127.0.0.1",
+      //   },
+      // });
 
       res.status(201).json({ success: true });
     } catch (error) {
@@ -1164,19 +1195,19 @@ profileRouter.delete(
         },
       });
 
-      await prisma.auditLog.create({
-        data: {
-          public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-          admin_id: session.user.id,
-          action: "remove_from_wishlist",
-          target_id: String(listingPublicId),
-          target_type: "listing",
-          details: `Пользователь ${
-            session.user.email
-          } удалил товар ${listingPublicId} из избранного.`,
-          ip_address: req.ip || "127.0.0.1",
-        },
-      });
+      // await prisma.auditLog.create({ // Removed AuditLog
+      //   data: {
+      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
+      //     admin_id: session.user.id,
+      //     action: "remove_from_wishlist",
+      //     target_id: String(listingPublicId),
+      //     target_type: "listing",
+      //     details: `Пользователь ${
+      //       session.user.email
+      //     } удалил товар ${listingPublicId} из избранного.`,
+      //     ip_address: req.ip || "127.0.0.1",
+      //   },
+      // });
 
       res.json({ success: true });
     } catch (error) {
