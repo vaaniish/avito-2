@@ -38,6 +38,24 @@ type YooKassaConfig = {
   apiUrl: string;
 };
 
+function isRetryableNetworkError(error: unknown): boolean {
+  if (!(error instanceof TypeError)) return false;
+  const cause = (error as { cause?: unknown }).cause as
+    | { code?: unknown }
+    | undefined;
+  const code = typeof cause?.code === "string" ? cause.code : "";
+  return (
+    code === "ENOTFOUND" ||
+    code === "EAI_AGAIN" ||
+    code === "ECONNRESET" ||
+    code === "ETIMEDOUT"
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function toLocalizedDeliveryDate(date: Date): string {
   const deliveryDate = new Date(date.getTime());
   deliveryDate.setDate(deliveryDate.getDate() + 3);
@@ -77,27 +95,53 @@ async function createYooKassaPayment(params: {
     "utf8",
   ).toString("base64");
 
-  const response = await fetch(`${config.apiUrl}/payments`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${authToken}`,
-      "Content-Type": "application/json",
-      "Idempotence-Key": randomUUID(),
+  const payloadBody = JSON.stringify({
+    amount: {
+      value: params.amountRub.toFixed(2),
+      currency: "RUB",
     },
-    body: JSON.stringify({
-      amount: {
-        value: params.amountRub.toFixed(2),
-        currency: "RUB",
-      },
-      capture: true,
-      confirmation: {
-        type: "redirect",
-        return_url: config.returnUrl,
-      },
-      description: params.description,
-      metadata: params.metadata,
-    }),
+    capture: true,
+    confirmation: {
+      type: "redirect",
+      return_url: config.returnUrl,
+    },
+    description: params.description,
+    metadata: params.metadata,
   });
+
+  let response: globalThis.Response | null = null;
+  let lastError: unknown = null;
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      response = await fetch(`${config.apiUrl}/payments`, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${authToken}`,
+          "Content-Type": "application/json",
+          "Idempotence-Key": randomUUID(),
+        },
+        body: payloadBody,
+      });
+      break;
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableNetworkError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+      await delay(300 * attempt);
+    }
+  }
+
+  if (!response) {
+    if (isRetryableNetworkError(lastError)) {
+      throw new Error(
+        "YooKassa is temporarily unavailable (DNS/network). Check internet, VPN/proxy, and DNS settings.",
+      );
+    }
+    throw new Error("YooKassa request failed");
+  }
 
   const rawBody = await response.text();
   const payload = rawBody ? (JSON.parse(rawBody) as unknown) : {};
