@@ -56,6 +56,8 @@ model Notification {
   created_at  DateTime @default(now())
 
   user        AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_read]) // Составной индекс для моментальной проверки новых сообщений
 }
 
 model SellerProfile {
@@ -267,6 +269,9 @@ model MarketOrder {
   seller           AppUser             @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
   items            MarketOrderItem[]
   transactions     PlatformTransaction[]
+
+  @@index([buyer_id])  // Для быстрого поиска "Мои покупки"
+  @@index([seller_id]) // Для быстрого поиска "Мои продажи"
 }
 
 model MarketOrderItem {
@@ -280,6 +285,8 @@ model MarketOrderItem {
 
   order       MarketOrder         @relation(fields: [order_id], references: [id], onDelete: Cascade)
   listing     MarketplaceListing? @relation(fields: [listing_id], references: [id], onDelete: SetNull)
+
+  @@index([order_id]) // Чтобы мгновенно найти все товары в одном заказе
 }
 
 model PlatformTransaction {
@@ -299,6 +306,10 @@ model PlatformTransaction {
   order              MarketOrder @relation(fields: [order_id], references: [id], onDelete: Cascade)
   buyer              AppUser     @relation("buyer_transactions", fields: [buyer_id], references: [id], onDelete: Cascade)
   seller             AppUser     @relation("seller_transactions", fields: [seller_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@index([buyer_id])
+  @@index([seller_id])
 }
 
 model Complaint {
@@ -320,6 +331,9 @@ model Complaint {
   seller                AppUser            @relation("complaint_seller", fields: [seller_id], references: [id], onDelete: Cascade)
   reporter              AppUser            @relation("complaint_reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
   checked_by            AppUser?           @relation("complaint_checker", fields: [checked_by_id], references: [id], onDelete: SetNull)
+
+  @@index([status])      // Чтобы модератор видел только "NEW" (новые) жалобы
+  @@index([listing_id])  // Чтобы видеть все жалобы на конкретный товар
 }
 
 model KycRequest {

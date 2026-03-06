@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "AppUser" (
     "id" SERIAL NOT NULL,
@@ -20,6 +23,19 @@ CREATE TABLE "AppUser" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "AppUser_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Notification" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "type" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "target_url" TEXT NOT NULL,
+    "is_read" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -153,11 +169,9 @@ CREATE TABLE "ListingAttribute" (
 CREATE TABLE "ListingReview" (
     "id" SERIAL NOT NULL,
     "listing_id" INTEGER NOT NULL,
-    "author_name" TEXT NOT NULL,
+    "author_id" INTEGER NOT NULL,
     "rating" INTEGER NOT NULL,
-    "date" TEXT NOT NULL,
     "comment" TEXT NOT NULL,
-    "avatar" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ListingReview_pkey" PRIMARY KEY ("id")
@@ -293,27 +307,12 @@ CREATE TABLE "CommissionTier" (
 );
 
 -- CreateTable
-CREATE TABLE "AuditLog" (
-    "id" SERIAL NOT NULL,
-    "public_id" TEXT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "admin_id" INTEGER NOT NULL,
-    "action" TEXT NOT NULL,
-    "target_id" TEXT NOT NULL,
-    "target_type" TEXT NOT NULL,
-    "details" TEXT NOT NULL,
-    "ip_address" TEXT NOT NULL,
-
-    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "PartnershipRequest" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "seller_type" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" TEXT TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "contact" TEXT NOT NULL,
     "link" TEXT NOT NULL,
@@ -328,78 +327,14 @@ CREATE TABLE "PartnershipRequest" (
     CONSTRAINT "PartnershipRequest_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Partner" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL DEFAULT 'Test Partner',
-    "current_xp" INTEGER NOT NULL DEFAULT 0,
-    "rating" DOUBLE PRECISION NOT NULL DEFAULT 5.0,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Partner_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "LoyaltyLevel" (
-    "id" SERIAL NOT NULL,
-    "level_name" TEXT NOT NULL,
-    "xp_threshold" INTEGER NOT NULL,
-    "xp_coefficient" DOUBLE PRECISION NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "LoyaltyLevel_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Order" (
-    "id" SERIAL NOT NULL,
-    "partner_id" INTEGER NOT NULL,
-    "deal_amount" INTEGER NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "loyalty_level_id" INTEGER NOT NULL,
-
-    CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "XpAccrual" (
-    "id" SERIAL NOT NULL,
-    "order_id" INTEGER NOT NULL,
-    "xp_amount" INTEGER NOT NULL,
-    "accrual_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "description" TEXT NOT NULL,
-
-    CONSTRAINT "XpAccrual_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Achievement" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "icon" TEXT NOT NULL,
-    "xp_reward" INTEGER NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Achievement_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PartnerAchievement" (
-    "id" SERIAL NOT NULL,
-    "partner_id" INTEGER NOT NULL,
-    "achievement_id" INTEGER NOT NULL,
-    "achieved_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "PartnerAchievement_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "AppUser_public_id_key" ON "AppUser"("public_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AppUser_email_key" ON "AppUser"("email");
+
+-- CreateIndex
+CREATE INDEX "Notification_user_id_is_read_idx" ON "Notification"("user_id", "is_read");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SellerProfile_user_id_key" ON "SellerProfile"("user_id");
@@ -420,7 +355,7 @@ CREATE UNIQUE INDEX "CatalogCategory_type_name_key" ON "CatalogCategory"("type",
 CREATE UNIQUE INDEX "CatalogSubcategory_public_id_key" ON "CatalogSubcategory"("public_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CatalogSubcategory_category_id_name_key" ON "CatalogSubcategory"("category_id", "name");
+CREATE UNIQUE INDEX "CatalogSubcategory_category_id_name_key" ON "CatalogSubcategory"("category_id", "name"); 
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CatalogItem_public_id_key" ON "CatalogItem"("public_id");
@@ -444,10 +379,13 @@ CREATE INDEX "MarketplaceListing_city_id_idx" ON "MarketplaceListing"("city_id")
 CREATE INDEX "MarketplaceListing_type_status_moderation_status_idx" ON "MarketplaceListing"("type", "status", "moderation_status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ListingImage_listing_id_sort_order_key" ON "ListingImage"("listing_id", "sort_order");
+CREATE UNIQUE INDEX "ListingImage_listing_id_sort_order_key" ON "ListingImage"("listing_id", "sort_order");   
 
 -- CreateIndex
 CREATE INDEX "ListingAttribute_listing_id_idx" ON "ListingAttribute"("listing_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ListingReview_listing_id_author_id_key" ON "ListingReview"("listing_id", "author_id");   
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ListingQuestion_public_id_key" ON "ListingQuestion"("public_id");
@@ -459,10 +397,34 @@ CREATE UNIQUE INDEX "WishlistItem_user_id_listing_id_key" ON "WishlistItem"("use
 CREATE UNIQUE INDEX "MarketOrder_public_id_key" ON "MarketOrder"("public_id");
 
 -- CreateIndex
+CREATE INDEX "MarketOrder_buyer_id_idx" ON "MarketOrder"("buyer_id");
+
+-- CreateIndex
+CREATE INDEX "MarketOrder_seller_id_idx" ON "MarketOrder"("seller_id");
+
+-- CreateIndex
+CREATE INDEX "MarketOrderItem_order_id_idx" ON "MarketOrderItem"("order_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PlatformTransaction_public_id_key" ON "PlatformTransaction"("public_id");
 
 -- CreateIndex
+CREATE INDEX "PlatformTransaction_order_id_idx" ON "PlatformTransaction"("order_id");
+
+-- CreateIndex
+CREATE INDEX "PlatformTransaction_buyer_id_idx" ON "PlatformTransaction"("buyer_id");
+
+-- CreateIndex
+CREATE INDEX "PlatformTransaction_seller_id_idx" ON "PlatformTransaction"("seller_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Complaint_public_id_key" ON "Complaint"("public_id");
+
+-- CreateIndex
+CREATE INDEX "Complaint_status_idx" ON "Complaint"("status");
+
+-- CreateIndex
+CREATE INDEX "Complaint_listing_id_idx" ON "Complaint"("listing_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "KycRequest_public_id_key" ON "KycRequest"("public_id");
@@ -471,25 +433,13 @@ CREATE UNIQUE INDEX "KycRequest_public_id_key" ON "KycRequest"("public_id");
 CREATE UNIQUE INDEX "CommissionTier_public_id_key" ON "CommissionTier"("public_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AuditLog_public_id_key" ON "AuditLog"("public_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "PartnershipRequest_public_id_key" ON "PartnershipRequest"("public_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "LoyaltyLevel_level_name_key" ON "LoyaltyLevel"("level_name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "LoyaltyLevel_xp_threshold_key" ON "LoyaltyLevel"("xp_threshold");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Achievement_name_key" ON "Achievement"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "PartnerAchievement_partner_id_achievement_id_key" ON "PartnerAchievement"("partner_id", "achievement_id");
 
 -- AddForeignKey
 ALTER TABLE "AppUser" ADD CONSTRAINT "AppUser_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SellerProfile" ADD CONSTRAINT "SellerProfile_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -526,6 +476,9 @@ ALTER TABLE "ListingAttribute" ADD CONSTRAINT "ListingAttribute_listing_id_fkey"
 
 -- AddForeignKey
 ALTER TABLE "ListingReview" ADD CONSTRAINT "ListingReview_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ListingReview" ADD CONSTRAINT "ListingReview_author_id_fkey" FOREIGN KEY ("author_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ListingQuestion" ADD CONSTRAINT "ListingQuestion_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -579,22 +532,4 @@ ALTER TABLE "KycRequest" ADD CONSTRAINT "KycRequest_seller_id_fkey" FOREIGN KEY 
 ALTER TABLE "KycRequest" ADD CONSTRAINT "KycRequest_reviewed_by_id_fkey" FOREIGN KEY ("reviewed_by_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "PartnershipRequest" ADD CONSTRAINT "PartnershipRequest_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_partner_id_fkey" FOREIGN KEY ("partner_id") REFERENCES "Partner"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_loyalty_level_id_fkey" FOREIGN KEY ("loyalty_level_id") REFERENCES "LoyaltyLevel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "XpAccrual" ADD CONSTRAINT "XpAccrual_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PartnerAchievement" ADD CONSTRAINT "PartnerAchievement_partner_id_fkey" FOREIGN KEY ("partner_id") REFERENCES "Partner"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PartnerAchievement" ADD CONSTRAINT "PartnerAchievement_achievement_id_fkey" FOREIGN KEY ("achievement_id") REFERENCES "Achievement"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
