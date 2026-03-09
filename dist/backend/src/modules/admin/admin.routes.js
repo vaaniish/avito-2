@@ -142,6 +142,111 @@ function buildAutoFlags(listing) {
     }
     return flags;
 }
+function buildListingPublicUrl(listingPublicId) {
+    return `/?listingId=${encodeURIComponent(listingPublicId)}`;
+}
+function splitEvidenceFiles(value) {
+    if (!value)
+        return [];
+    return value
+        .split(/[,\n;|]/g)
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+function toSearchText(input) {
+    if (input === null || input === undefined)
+        return "";
+    if (typeof input === "string")
+        return input.toLowerCase();
+    if (typeof input === "number" || typeof input === "boolean") {
+        return String(input).toLowerCase();
+    }
+    if (input instanceof Date)
+        return input.toISOString().toLowerCase();
+    if (Array.isArray(input)) {
+        return input.map((item) => toSearchText(item)).join(" ");
+    }
+    if (typeof input === "object") {
+        return Object.values(input)
+            .map((value) => toSearchText(value))
+            .join(" ");
+    }
+    return "";
+}
+function matchesFullText(input, query) {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized)
+        return true;
+    return toSearchText(input).includes(normalized);
+}
+function buildComplaintEvaluation(params) {
+    let score = 0;
+    const reasons = [];
+    if (params.evidenceCount > 0) {
+        score += 25;
+        reasons.push("evidence_attached");
+    }
+    else {
+        reasons.push("no_evidence");
+    }
+    if (params.sellerComplaintCount >= 5) {
+        score += 30;
+        reasons.push("seller_has_many_complaints");
+    }
+    else if (params.sellerComplaintCount >= 2) {
+        score += 15;
+        reasons.push("seller_has_repeat_complaints");
+    }
+    if (params.listingComplaintCount >= 3) {
+        score += 20;
+        reasons.push("listing_has_multiple_reports");
+    }
+    else if (params.listingComplaintCount >= 2) {
+        score += 10;
+        reasons.push("listing_has_repeat_reports");
+    }
+    const normalizedType = params.complaintType.toLowerCase();
+    if (normalizedType.includes("вне") ||
+        normalizedType.includes("platform") ||
+        normalizedType.includes("payment")) {
+        score += 20;
+        reasons.push("high_risk_type_payment_off_platform");
+    }
+    const recommendation = score >= 60 ? "approve" : score <= 20 ? "reject" : "manual_review";
+    return {
+        score,
+        recommendation,
+        reasons,
+    };
+}
+function buildKycEvaluation(params) {
+    const checklist = [
+        { key: "documents_attached", passed: params.documentsCount > 0 },
+        { key: "inn_provided", passed: params.hasInn },
+        { key: "address_provided", passed: params.hasAddress },
+        { key: "seller_not_blocked", passed: params.sellerStatus !== "BLOCKED" },
+    ];
+    const completenessScore = Math.round((checklist.filter((item) => item.passed).length / checklist.length) * 100);
+    const riskPoints = (params.sellerStatus === "BLOCKED" ? 40 : 0) +
+        (params.sellerComplaintsCount >= 5
+            ? 35
+            : params.sellerComplaintsCount >= 2
+                ? 20
+                : 5) +
+        (params.documentsCount === 0 ? 35 : params.documentsCount < 2 ? 15 : 0);
+    const riskLevel = riskPoints >= 65 ? "high" : riskPoints >= 35 ? "medium" : "low";
+    const recommendation = riskLevel === "high"
+        ? "reject"
+        : completenessScore < 75
+            ? "request_more_documents"
+            : "approve";
+    return {
+        completenessScore,
+        riskLevel,
+        recommendation,
+        checklist,
+    };
+}
 adminRouter.get("/transactions", async (req, res) => {
     try {
         const access = await requireAdmin(req, res);
@@ -151,18 +256,43 @@ adminRouter.get("/transactions", async (req, res) => {
             include: {
                 buyer: {
                     select: {
+                        public_id: true,
                         name: true,
+                        email: true,
                     },
                 },
                 seller: {
                     select: {
+                        public_id: true,
                         name: true,
+                        email: true,
                     },
                 },
                 order: {
                     include: {
+                        buyer: {
+                            select: {
+                                public_id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
+                        seller: {
+                            select: {
+                                public_id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
                         items: {
-                            orderBy: { id: "asc" },
+                            orderBy: [{ id: "asc" }],
+                            include: {
+                                listing: {
+                                    select: {
+                                        public_id: true,
+                                    },
+                                },
+                            },
                         },
                     },
                 },
@@ -172,14 +302,28 @@ adminRouter.get("/transactions", async (req, res) => {
         res.json(transactions.map((transaction) => ({
             id: transaction.public_id,
             orderId: transaction.order.public_id,
+            orderStatus: transaction.order.status.toLowerCase(),
+            buyerId: transaction.buyer.public_id,
             buyerName: transaction.buyer.name,
+            buyerEmail: transaction.buyer.email,
+            sellerId: transaction.seller.public_id,
             sellerName: transaction.seller.name,
+            sellerEmail: transaction.seller.email,
             listingTitle: transaction.order.items[0]?.name ?? "Unnamed item",
+            listingIds: transaction.order.items
+                .map((item) => item.listing?.public_id)
+                .filter((item) => Boolean(item)),
+            itemsCount: transaction.order.items.length,
+            itemsTotalQuantity: transaction.order.items.reduce((sum, item) => sum + item.quantity, 0),
+            deliveryType: transaction.order.delivery_type.toLowerCase(),
+            deliveryAddress: transaction.order.delivery_address,
             amount: transaction.amount,
             commission: transaction.commission,
             commissionRate: transaction.commission_rate,
+            sellerPayout: transaction.amount - transaction.commission,
             status: transaction.status.toLowerCase(),
-            paymentProvider: transaction.payment_provider,
+            paymentProvider: transaction.payment_provider.toLowerCase(),
+            paymentIntentId: transaction.payment_intent_id,
             createdAt: transaction.created_at,
         })));
     }
@@ -204,29 +348,7 @@ adminRouter.get("/audit-logs", async (req, res) => {
         if (entityType) {
             where.entity_type = entityType;
         }
-        if (q) {
-            where.OR = [
-                { public_id: { contains: q, mode: "insensitive" } },
-                { action: { contains: q, mode: "insensitive" } },
-                { entity_type: { contains: q, mode: "insensitive" } },
-                { entity_public_id: { contains: q, mode: "insensitive" } },
-                {
-                    actor: {
-                        is: {
-                            name: { contains: q, mode: "insensitive" },
-                        },
-                    },
-                },
-                {
-                    actor: {
-                        is: {
-                            email: { contains: q, mode: "insensitive" },
-                        },
-                    },
-                },
-            ];
-        }
-        const logs = await prisma_1.prisma.auditLog.findMany({
+        const fetchedLogs = await prisma_1.prisma.auditLog.findMany({
             where,
             include: {
                 actor: {
@@ -238,10 +360,29 @@ adminRouter.get("/audit-logs", async (req, res) => {
                 },
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
-            take: limit,
+            take: 1000,
         });
+        const normalizedQuery = q.trim().toLowerCase();
+        const logs = normalizedQuery
+            ? fetchedLogs.filter((log) => matchesFullText({
+                id: log.public_id,
+                action: log.action,
+                entityType: log.entity_type,
+                entityId: log.entity_public_id,
+                ipAddress: log.ip_address,
+                details: log.details,
+                createdAt: log.created_at.toISOString(),
+                actor: log.actor
+                    ? {
+                        id: log.actor.public_id,
+                        name: log.actor.name,
+                        email: log.actor.email,
+                    }
+                    : null,
+            }, normalizedQuery))
+            : fetchedLogs;
         res.json({
-            logs: logs.map((log) => ({
+            logs: logs.slice(0, limit).map((log) => ({
                 id: log.public_id,
                 createdAt: log.created_at,
                 action: log.action,
@@ -277,27 +418,58 @@ adminRouter.get("/complaints", async (req, res) => {
                     select: {
                         public_id: true,
                         title: true,
+                        price: true,
+                        created_at: true,
+                        status: true,
+                        moderation_status: true,
+                        city: {
+                            select: {
+                                name: true,
+                                region: true,
+                            },
+                        },
+                        _count: {
+                            select: {
+                                complaints: true,
+                            },
+                        },
                     },
                 },
                 seller: {
                     select: {
                         public_id: true,
                         name: true,
+                        email: true,
+                        phone: true,
+                        status: true,
+                        joined_at: true,
+                        seller_profile: {
+                            select: {
+                                is_verified: true,
+                                average_response_minutes: true,
+                            },
+                        },
                         _count: {
                             select: {
                                 complaints_against: true,
+                                listings: true,
+                                orders_as_seller: true,
                             },
                         },
                     },
                 },
                 reporter: {
                     select: {
+                        public_id: true,
                         name: true,
+                        email: true,
                     },
                 },
                 checked_by: {
                     select: {
+                        public_id: true,
                         name: true,
+                        email: true,
                     },
                 },
             },
@@ -307,18 +479,50 @@ adminRouter.get("/complaints", async (req, res) => {
             id: complaint.public_id,
             createdAt: complaint.created_at,
             status: complaint.status.toLowerCase(),
+            targetType: "listing",
             complaintType: complaint.complaint_type,
             listingId: complaint.listing.public_id,
+            listingUrl: buildListingPublicUrl(complaint.listing.public_id),
             listingTitle: complaint.listing.title,
+            listingPrice: complaint.listing.price,
+            listingCreatedAt: complaint.listing.created_at,
+            listingStatus: complaint.listing.status.toLowerCase(),
+            listingModerationStatus: complaint.listing.moderation_status.toLowerCase(),
+            listingCity: complaint.listing.city.name,
+            listingRegion: complaint.listing.city.region,
+            listingComplaintsCount: complaint.listing._count.complaints,
             sellerId: complaint.seller.public_id,
             sellerName: complaint.seller.name,
+            sellerEmail: complaint.seller.email,
+            sellerPhone: complaint.seller.phone,
+            sellerStatus: complaint.seller.status.toLowerCase(),
+            sellerJoinedAt: complaint.seller.joined_at,
+            sellerVerified: Boolean(complaint.seller.seller_profile?.is_verified),
+            sellerResponseMinutes: complaint.seller.seller_profile?.average_response_minutes ?? null,
+            reporterId: complaint.reporter.public_id,
             reporterName: complaint.reporter.name,
+            reporterEmail: complaint.reporter.email,
             sellerViolationsCount: complaint.seller._count.complaints_against,
+            sellerListingsCount: complaint.seller._count.listings,
+            sellerOrdersCount: complaint.seller._count.orders_as_seller,
             description: complaint.description,
             evidence: complaint.evidence,
+            evidenceFiles: splitEvidenceFiles(complaint.evidence),
             checkedAt: complaint.checked_at,
-            checkedBy: complaint.checked_by?.name ?? null,
+            checkedBy: complaint.checked_by
+                ? {
+                    id: complaint.checked_by.public_id,
+                    name: complaint.checked_by.name,
+                    email: complaint.checked_by.email,
+                }
+                : null,
             actionTaken: complaint.action_taken,
+            evaluation: buildComplaintEvaluation({
+                complaintType: complaint.complaint_type,
+                evidenceCount: splitEvidenceFiles(complaint.evidence).length,
+                listingComplaintCount: complaint.listing._count.complaints,
+                sellerComplaintCount: complaint.seller._count.complaints_against,
+            }),
         })));
     }
     catch (error) {
@@ -389,11 +593,37 @@ adminRouter.get("/kyc-requests", async (req, res) => {
                     select: {
                         public_id: true,
                         name: true,
+                        email: true,
+                        phone: true,
+                        status: true,
+                        joined_at: true,
+                        seller_profile: {
+                            select: {
+                                is_verified: true,
+                                average_response_minutes: true,
+                                commission_tier: {
+                                    select: {
+                                        public_id: true,
+                                        name: true,
+                                        commission_rate: true,
+                                    },
+                                },
+                            },
+                        },
+                        _count: {
+                            select: {
+                                listings: true,
+                                orders_as_seller: true,
+                                complaints_against: true,
+                            },
+                        },
                     },
                 },
                 reviewed_by: {
                     select: {
+                        public_id: true,
                         name: true,
+                        email: true,
                     },
                 },
             },
@@ -405,16 +635,46 @@ adminRouter.get("/kyc-requests", async (req, res) => {
             status: requestItem.status.toLowerCase(),
             sellerId: requestItem.seller.public_id,
             sellerName: requestItem.seller.name,
+            sellerEmail: requestItem.seller.email,
+            sellerPhone: requestItem.seller.phone,
+            sellerStatus: requestItem.seller.status.toLowerCase(),
+            sellerJoinedAt: requestItem.seller.joined_at,
+            sellerVerified: Boolean(requestItem.seller.seller_profile?.is_verified),
+            sellerResponseMinutes: requestItem.seller.seller_profile?.average_response_minutes ?? null,
+            sellerCommissionTier: requestItem.seller.seller_profile?.commission_tier
+                ? {
+                    id: requestItem.seller.seller_profile.commission_tier.public_id,
+                    name: requestItem.seller.seller_profile.commission_tier.name,
+                    rate: requestItem.seller.seller_profile.commission_tier.commission_rate,
+                }
+                : null,
+            sellerListingsCount: requestItem.seller._count.listings,
+            sellerOrdersCount: requestItem.seller._count.orders_as_seller,
+            sellerComplaintsCount: requestItem.seller._count.complaints_against,
             email: requestItem.email,
             phone: requestItem.phone,
             companyName: requestItem.company_name,
             inn: requestItem.inn,
             address: requestItem.address,
             documents: requestItem.documents,
+            documentFiles: splitEvidenceFiles(requestItem.documents),
             notes: requestItem.notes,
             reviewedAt: requestItem.reviewed_at,
-            reviewedBy: requestItem.reviewed_by?.name ?? null,
+            reviewedBy: requestItem.reviewed_by
+                ? {
+                    id: requestItem.reviewed_by.public_id,
+                    name: requestItem.reviewed_by.name,
+                    email: requestItem.reviewed_by.email,
+                }
+                : null,
             rejectionReason: requestItem.rejection_reason,
+            evaluation: buildKycEvaluation({
+                documentsCount: splitEvidenceFiles(requestItem.documents).length,
+                hasInn: requestItem.inn.trim().length > 0,
+                hasAddress: requestItem.address.trim().length > 0,
+                sellerComplaintsCount: requestItem.seller._count.complaints_against,
+                sellerStatus: requestItem.seller.status,
+            }),
         })));
     }
     catch (error) {
@@ -488,11 +748,21 @@ adminRouter.get("/listings", async (req, res) => {
                         public_id: true,
                         name: true,
                         joined_at: true,
+                        status: true,
+                    },
+                },
+                city: {
+                    select: {
+                        name: true,
+                        region: true,
                     },
                 },
                 _count: {
                     select: {
                         complaints: true,
+                        order_items: true,
+                        wishlist_items: true,
+                        questions: true,
                     },
                 },
                 item: {
@@ -509,14 +779,27 @@ adminRouter.get("/listings", async (req, res) => {
         });
         res.json(listings.map((listing) => ({
             id: listing.public_id,
+            listingUrl: buildListingPublicUrl(listing.public_id),
             title: listing.title,
+            description: listing.description,
             sellerId: listing.seller.public_id,
             sellerName: listing.seller.name,
+            sellerStatus: listing.seller.status.toLowerCase(),
+            sellerJoinedAt: listing.seller.joined_at,
             status: (0, format_1.toAdminListingStatus)(listing.moderation_status),
+            listingStatus: listing.status.toLowerCase(),
             createdAt: listing.created_at,
             category: listing.item?.name ?? "No category",
+            city: listing.city.name,
+            region: listing.city.region,
             price: listing.price,
+            salePrice: listing.sale_price,
+            views: listing.views,
+            rating: listing.rating,
             complaintsCount: listing._count.complaints,
+            ordersCount: listing._count.order_items,
+            wishlistCount: listing._count.wishlist_items,
+            questionsCount: listing._count.questions,
             autoFlags: buildAutoFlags({
                 description: listing.description,
                 seller: listing.seller,
@@ -592,34 +875,109 @@ adminRouter.get("/users", async (req, res) => {
         const users = await prisma_1.prisma.appUser.findMany({
             include: {
                 city: true,
-                orders_as_buyer: {
+                seller_profile: {
                     select: {
+                        is_verified: true,
+                        average_response_minutes: true,
+                    },
+                },
+                orders_as_buyer: {
+                    orderBy: [{ created_at: "desc" }],
+                    select: {
+                        public_id: true,
+                        status: true,
                         total_price: true,
+                        created_at: true,
                     },
                 },
                 orders_as_seller: {
+                    orderBy: [{ created_at: "desc" }],
                     select: {
+                        public_id: true,
+                        status: true,
                         total_price: true,
+                        created_at: true,
+                    },
+                },
+                listings: {
+                    select: {
+                        public_id: true,
+                        status: true,
+                        moderation_status: true,
+                        created_at: true,
+                    },
+                },
+                complaints_reported: {
+                    select: {
+                        id: true,
+                    },
+                },
+                complaints_against: {
+                    select: {
+                        id: true,
+                    },
+                },
+                kyc_requests: {
+                    orderBy: [{ created_at: "desc" }],
+                    take: 1,
+                    select: {
+                        public_id: true,
+                        status: true,
+                        created_at: true,
+                        reviewed_at: true,
                     },
                 },
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
-        res.json(users.map((user) => ({
-            id: user.public_id,
-            name: user.name,
-            email: user.email,
-            role: (0, format_1.toClientRole)(user.role),
-            status: user.status.toLowerCase(),
-            joinedAt: user.joined_at,
-            city: user.city?.name ?? null,
-            phone: user.phone,
-            blockReason: user.block_reason,
-            buyerOrders: user.orders_as_buyer.length,
-            sellerOrders: user.orders_as_seller.length,
-            buyerSpent: user.orders_as_buyer.reduce((sum, order) => sum + order.total_price, 0),
-            sellerRevenue: user.orders_as_seller.reduce((sum, order) => sum + order.total_price, 0),
-        })));
+        res.json(users.map((user) => {
+            const buyerSpent = user.orders_as_buyer.reduce((sum, order) => sum + order.total_price, 0);
+            const sellerRevenue = user.orders_as_seller.reduce((sum, order) => sum + order.total_price, 0);
+            const activeListings = user.listings.filter((listing) => listing.status === "ACTIVE" &&
+                listing.moderation_status === "APPROVED").length;
+            const pendingListings = user.listings.filter((listing) => listing.moderation_status === "PENDING").length;
+            const lastBuyerOrderDate = user.orders_as_buyer[0]?.created_at ?? null;
+            const lastSellerOrderDate = user.orders_as_seller[0]?.created_at ?? null;
+            const kycLatest = user.kyc_requests[0] ?? null;
+            return {
+                id: user.public_id,
+                name: user.name,
+                email: user.email,
+                role: (0, format_1.toClientRole)(user.role),
+                status: user.status.toLowerCase(),
+                joinedAt: user.joined_at,
+                city: user.city?.name ?? null,
+                phone: user.phone,
+                blockReason: user.block_reason,
+                buyerOrders: user.orders_as_buyer.length,
+                sellerOrders: user.orders_as_seller.length,
+                buyerSpent,
+                sellerRevenue,
+                avgBuyerCheck: user.orders_as_buyer.length > 0
+                    ? Math.round(buyerSpent / user.orders_as_buyer.length)
+                    : 0,
+                avgSellerCheck: user.orders_as_seller.length > 0
+                    ? Math.round(sellerRevenue / user.orders_as_seller.length)
+                    : 0,
+                activeListings,
+                pendingListings,
+                totalListings: user.listings.length,
+                complaintsMade: user.complaints_reported.length,
+                complaintsAgainst: user.complaints_against.length,
+                isSellerVerified: Boolean(user.seller_profile?.is_verified),
+                sellerResponseMinutes: user.seller_profile?.average_response_minutes ?? null,
+                lastBuyerOrderDate,
+                lastSellerOrderDate,
+                kycLatest: kycLatest
+                    ? {
+                        id: kycLatest.public_id,
+                        status: kycLatest.status.toLowerCase(),
+                        createdAt: kycLatest.created_at,
+                        reviewedAt: kycLatest.reviewed_at,
+                    }
+                    : null,
+            };
+        }));
     }
     catch (error) {
         console.error("Error fetching users:", error);

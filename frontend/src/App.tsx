@@ -21,6 +21,7 @@ import { AdminPanel } from "./components/admin/AdminPanel";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import type { CartItem, CityClient, FilterState, Product } from "./types";
 import { apiGet, apiPost, apiDelete, clearSessionUser, getSessionUser, saveSessionUser, type SessionRole, type SessionUser } from "./lib/api";
+import { matchesSearch } from "./lib/search";
 
 type AppView =
   | "home"
@@ -51,6 +52,11 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 export default function App() {
+  const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const listingId = params.get("listingId");
+    return listingId && listingId.trim() ? listingId.trim() : null;
+  });
   const [currentView, setCurrentView] = useState<AppView>("home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<SessionRole>("regular");
@@ -145,6 +151,19 @@ export default function App() {
 
   const currentItems = viewMode === "products" ? products : services;
   const currentCategories = viewMode === "products" ? productCategories : serviceCategories;
+
+  useEffect(() => {
+    if (!deepLinkListingId) return;
+
+    const allItems = [...products, ...services];
+    const target = allItems.find((item) => item.id === deepLinkListingId);
+    if (!target) return;
+
+    setSelectedProduct(target);
+    setCurrentView("product");
+    setDeepLinkListingId(null);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [deepLinkListingId, products, services]);
 
   const categoryMap = useMemo(() => {
     const newMap = new Map<string, Set<string>>();
@@ -336,8 +355,20 @@ export default function App() {
       if (item.rating < filters.minRating) return false;
 
       if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        if (!item.title.toLowerCase().includes(query)) return false;
+        const isMatch = matchesSearch(
+          {
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            category: item.category,
+            seller: item.seller,
+            city: item.city,
+            sku: item.sku,
+            specifications: item.specifications,
+          },
+          filters.searchQuery,
+        );
+        if (!isMatch) return false;
       }
 
       if (filters.showOnlySale && !item.isSale) return false;

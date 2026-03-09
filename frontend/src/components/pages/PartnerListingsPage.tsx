@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Edit2, Eye, EyeOff, Plus, Search, Trash2, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { CityClient } from "../../types"; // Import CityClient
+import { matchesSearch } from "../../lib/search";
 
 type Listing = {
   id: string;
@@ -71,12 +72,8 @@ export function PartnerListingsPage() {
     () =>
       listings.filter((listing) => {
         const matchesStatus = statusFilter === "all" || listing.status === statusFilter;
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          listing.title.toLowerCase().includes(query) ||
-          (listing.description || "").toLowerCase().includes(query) ||
-          (listing.category || "").toLowerCase().includes(query);
-        return matchesStatus && matchesSearch;
+        const matchesQuery = matchesSearch(listing, searchQuery);
+        return matchesStatus && matchesQuery;
       }),
     [listings, searchQuery, statusFilter],
   );

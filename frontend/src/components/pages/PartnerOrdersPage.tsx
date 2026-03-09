@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, Clock, PackageOpen, Search, Truck, XCircle } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { matchesSearch } from "../../lib/search";
 
 type OrderStatus =
   | "CREATED"
@@ -61,13 +62,9 @@ export function PartnerOrdersPage() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const query = searchQuery.toLowerCase();
       const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-      const matchesSearch =
-        order.buyer_name.toLowerCase().includes(query) ||
-        order.id.toLowerCase().includes(query) ||
-        order.items.some((item) => item.name.toLowerCase().includes(query));
-      return matchesStatus && matchesSearch;
+      const matchesQuery = matchesSearch(order, searchQuery);
+      return matchesStatus && matchesQuery;
     });
   }, [orders, searchQuery, statusFilter]);
 

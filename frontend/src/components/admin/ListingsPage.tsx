@@ -1,19 +1,32 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CheckCircle, Search, XCircle } from "lucide-react";
+import { CheckCircle, ExternalLink, Search, XCircle } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { matchesSearch } from "../../lib/search";
 
 type ListingStatus = "all" | "pending" | "approved" | "rejected";
 
 type AdminListing = {
   id: string;
+  listingUrl: string;
   title: string;
+  description: string | null;
   sellerId: string;
   sellerName: string;
+  sellerStatus: "active" | "blocked";
   status: "pending" | "approved" | "rejected";
+  listingStatus: "active" | "inactive" | "moderation";
   createdAt: string;
   category: string;
+  city: string;
+  region: string;
   price: number;
+  salePrice: number | null;
+  views: number;
+  rating: number;
   complaintsCount: number;
+  ordersCount: number;
+  wishlistCount: number;
+  questionsCount: number;
   autoFlags: string[];
 };
 
@@ -38,14 +51,10 @@ export function ListingsPage() {
   const filteredListings = useMemo(
     () =>
       listings.filter((listing) => {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          listing.id.toLowerCase().includes(query) ||
-          listing.title.toLowerCase().includes(query) ||
-          listing.sellerName.toLowerCase().includes(query);
-
-        const matchesStatus = statusFilter === "all" || listing.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        const matchesText = matchesSearch(listing, searchQuery);
+        const matchesStatus =
+          statusFilter === "all" || listing.status === statusFilter;
+        return matchesText && matchesStatus;
       }),
     [listings, searchQuery, statusFilter],
   );
@@ -70,12 +79,20 @@ export function ListingsPage() {
       rejected: "Отклонено",
     };
 
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>{labels[status]}</span>;
+    return (
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}
+      >
+        {labels[status]}
+      </span>
+    );
   };
 
   const moderate = async (listingId: string, status: "approved" | "rejected") => {
     try {
-      await apiPatch<{ success: boolean }>(`/admin/listings/${listingId}/moderation`, { status });
+      await apiPatch<{ success: boolean }>(`/admin/listings/${listingId}/moderation`, {
+        status,
+      });
       await loadListings();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось обновить модерацию");
@@ -86,7 +103,7 @@ export function ListingsPage() {
     <div className="space-y-4 md:space-y-6">
       <div>
         <h1 className="dashboard-title">Модерация объявлений</h1>
-        <p className="dashboard-subtitle">Контроль качества карточек и исключений</p>
+        <p className="dashboard-subtitle">Контроль качества карточек и быстрый переход к объявлению</p>
       </div>
 
       <div className="dashboard-grid-stats dashboard-grid-stats--5">
@@ -117,7 +134,7 @@ export function ListingsPage() {
           <Search className="dashboard-search__icon" />
           <input
             type="text"
-            placeholder="Поиск по ID, названию или продавцу..."
+            placeholder="Поиск по любому полю объявления"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="dashboard-search__input"
@@ -149,12 +166,39 @@ export function ListingsPage() {
           <div key={listing.id} className="dashboard-card">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-sm font-semibold break-words">{listing.id} • {listing.title}</div>
-                <div className="text-xs text-gray-500">{new Date(listing.createdAt).toLocaleString("ru-RU")}</div>
-                <div className="text-xs text-gray-600">Продавец: {listing.sellerName} ({listing.sellerId})</div>
-                <div className="text-xs text-gray-600 break-words">Категория: {listing.category} • {listing.price.toLocaleString("ru-RU")} ₽</div>
-                <div className="text-xs text-gray-600 break-words">Флаги: {listing.autoFlags.join(", ") || "нет"}</div>
-                <div className="text-xs text-gray-600">Жалоб: {listing.complaintsCount}</div>
+                <div className="text-sm font-semibold break-words">
+                  {listing.id} · {listing.title}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(listing.createdAt).toLocaleString("ru-RU")}
+                </div>
+                <div className="text-xs text-gray-600 break-words">
+                  Продавец: {listing.sellerName} ({listing.sellerId}) · {listing.sellerStatus}
+                </div>
+                <div className="text-xs text-gray-600 break-words">
+                  {listing.category} · {listing.city}, {listing.region}
+                </div>
+                <div className="text-xs text-gray-600 break-words">
+                  Цена: {listing.price.toLocaleString("ru-RU")} ₽
+                  {listing.salePrice ? ` → ${listing.salePrice.toLocaleString("ru-RU")} ₽` : ""}
+                  {" · "}Рейтинг: {listing.rating.toFixed(1)}
+                  {" · "}Просмотры: {listing.views}
+                </div>
+                <div className="text-xs text-gray-600 break-words">
+                  Жалобы: {listing.complaintsCount} · Заказы: {listing.ordersCount} · Избранное:{" "}
+                  {listing.wishlistCount} · Вопросы: {listing.questionsCount}
+                </div>
+                <div className="text-xs text-gray-600 break-words">
+                  Флаги: {listing.autoFlags.join(", ") || "нет"}
+                </div>
+                <a
+                  href={listing.listingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-[rgb(38,83,141)] hover:underline"
+                >
+                  Открыть объявление <ExternalLink className="h-3.5 w-3.5" />
+                </a>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -176,8 +220,11 @@ export function ListingsPage() {
           </div>
         ))}
 
-        {filteredListings.length === 0 && <div className="dashboard-empty">Объявления не найдены</div>}
+        {filteredListings.length === 0 && (
+          <div className="dashboard-empty">Объявления не найдены</div>
+        )}
       </div>
     </div>
   );
 }
+

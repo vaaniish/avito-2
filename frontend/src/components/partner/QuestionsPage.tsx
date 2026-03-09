@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, Clock, MessageCircle, Search, Send } from "lucide-react";
 import { apiGet, apiPost } from "../../lib/api";
+import { matchesSearch } from "../../lib/search";
 
 type Question = {
   id: string;
@@ -42,12 +43,8 @@ export function QuestionsPage() {
       questions
         .filter((question) => {
           const matchesStatus = statusFilter === "all" || question.status === statusFilter;
-          const query = searchQuery.toLowerCase();
-          const matchesSearch =
-            question.listingTitle.toLowerCase().includes(query) ||
-            question.buyerName.toLowerCase().includes(query) ||
-            question.question.toLowerCase().includes(query);
-          return matchesStatus && matchesSearch;
+          const matchesQuery = matchesSearch(question, searchQuery);
+          return matchesStatus && matchesQuery;
         })
         .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()),
     [questions, searchQuery, statusFilter],

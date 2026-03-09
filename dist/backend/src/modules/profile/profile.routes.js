@@ -12,6 +12,21 @@ const ROLE_BUYER = "BUYER";
 const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
 const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+const DELIVERY_PROVIDER_LABELS = {
+    cdek: "CDEK",
+    russian_post: "Почта России",
+    ozon: "Ozon Доставка",
+};
+const CITY_CENTER_COORDS = {
+    москва: [55.751244, 37.618423],
+    "санкт-петербург": [59.93428, 30.335099],
+    казань: [55.796127, 49.106414],
+    екатеринбург: [56.838011, 60.597465],
+    новосибирск: [55.028739, 82.906927],
+    краснодар: [45.03547, 38.975313],
+    сочи: [43.585472, 39.723098],
+    "нижний новгород": [56.326797, 44.006516],
+};
 function isRetryableNetworkError(error) {
     if (!(error instanceof TypeError))
         return false;
@@ -110,6 +125,105 @@ async function createYooKassaPayment(params) {
         throw new Error("Invalid YooKassa response");
     }
     return payload;
+}
+function normalizeCityForMap(city) {
+    return city.trim().toLowerCase();
+}
+function getCityCenter(city) {
+    return CITY_CENTER_COORDS[normalizeCityForMap(city)] ?? CITY_CENTER_COORDS["москва"];
+}
+function buildFallbackDeliveryPoints(city) {
+    const [lat, lng] = getCityCenter(city);
+    return [
+        {
+            id: `${normalizeCityForMap(city)}-cdek-1`,
+            provider: "cdek",
+            providerLabel: DELIVERY_PROVIDER_LABELS.cdek,
+            name: "CDEK ПВЗ №1",
+            address: `${city}, ул. Центральная, 12`,
+            city,
+            lat: lat + 0.008,
+            lng: lng + 0.006,
+            workHours: "09:00-21:00",
+            etaDays: 2,
+            cost: 280,
+        },
+        {
+            id: `${normalizeCityForMap(city)}-cdek-2`,
+            provider: "cdek",
+            providerLabel: DELIVERY_PROVIDER_LABELS.cdek,
+            name: "CDEK ПВЗ №2",
+            address: `${city}, пр-т Ленина, 54`,
+            city,
+            lat: lat - 0.006,
+            lng: lng + 0.01,
+            workHours: "10:00-20:00",
+            etaDays: 3,
+            cost: 260,
+        },
+        {
+            id: `${normalizeCityForMap(city)}-post-1`,
+            provider: "russian_post",
+            providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+            name: "Почтовое отделение",
+            address: `${city}, ул. Почтовая, 7`,
+            city,
+            lat: lat + 0.004,
+            lng: lng - 0.009,
+            workHours: "08:00-20:00",
+            etaDays: 4,
+            cost: 220,
+        },
+        {
+            id: `${normalizeCityForMap(city)}-post-2`,
+            provider: "russian_post",
+            providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+            name: "Почта России ПВЗ",
+            address: `${city}, ул. Советская, 18`,
+            city,
+            lat: lat - 0.01,
+            lng: lng - 0.004,
+            workHours: "09:00-19:00",
+            etaDays: 5,
+            cost: 190,
+        },
+        {
+            id: `${normalizeCityForMap(city)}-ozon-1`,
+            provider: "ozon",
+            providerLabel: DELIVERY_PROVIDER_LABELS.ozon,
+            name: "Ozon Пункт выдачи",
+            address: `${city}, ул. Торговая, 22`,
+            city,
+            lat: lat + 0.011,
+            lng: lng - 0.002,
+            workHours: "10:00-22:00",
+            etaDays: 2,
+            cost: 240,
+        },
+        {
+            id: `${normalizeCityForMap(city)}-ozon-2`,
+            provider: "ozon",
+            providerLabel: DELIVERY_PROVIDER_LABELS.ozon,
+            name: "Ozon Express ПВЗ",
+            address: `${city}, ул. Молодежная, 5`,
+            city,
+            lat: lat - 0.004,
+            lng: lng + 0.014,
+            workHours: "09:00-22:00",
+            etaDays: 1,
+            cost: 310,
+        },
+    ];
+}
+async function loadExternalDeliveryPoints(_city) {
+    return [];
+}
+async function getDeliveryPoints(city) {
+    const externalPoints = await loadExternalDeliveryPoints(city);
+    if (externalPoints.length > 0) {
+        return externalPoints;
+    }
+    return buildFallbackDeliveryPoints(city);
 }
 profileRouter.get("/me", async (req, res) => {
     try {
@@ -528,6 +642,34 @@ profileRouter.post("/addresses/:id/default", async (req, res) => {
     }
     catch (error) {
         console.error("Error changing default address:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+profileRouter.get("/delivery-points", async (req, res) => {
+    try {
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
+        if (!session.ok) {
+            res.status(session.status).json({ error: session.message });
+            return;
+        }
+        const cityRaw = typeof req.query.city === "string" ? req.query.city.trim() : "";
+        const city = cityRaw || "Москва";
+        const points = await getDeliveryPoints(city);
+        res.json({
+            city,
+            providers: Object.entries(DELIVERY_PROVIDER_LABELS).map(([code, label]) => ({
+                code,
+                label,
+            })),
+            points,
+        });
+    }
+    catch (error) {
+        console.error("Error loading delivery points:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

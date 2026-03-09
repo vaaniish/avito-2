@@ -1,19 +1,70 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Search, MapPin } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { MapPin, Search } from "lucide-react";
 
 declare global {
   interface Window {
-    ymaps: any;
+    ymaps: {
+      ready: (cb: () => void) => void;
+      Map: new (
+        container: HTMLElement,
+        options: Record<string, unknown>,
+      ) => {
+        events: {
+          add: (name: string, callback: (event: { get: (key: string) => number[] }) => void) => void;
+        };
+        setCenter: (coords: number[], zoom: number) => void;
+        geoObjects: {
+          add: (item: unknown) => void;
+          remove: (item: unknown) => void;
+        };
+        destroy: () => void;
+      };
+      Placemark: new (
+        coords: number[],
+        properties: Record<string, unknown>,
+        options: Record<string, unknown>,
+      ) => {
+        events: {
+          add: (name: string, callback: () => void) => void;
+        };
+      };
+      geocode: (query: string | number[]) => Promise<{
+        geoObjects: {
+          get: (index: number) => {
+            geometry: {
+              getCoordinates: () => number[];
+            };
+            properties: {
+              get: (key: string) => unknown;
+            };
+          } | undefined;
+        };
+      }>;
+    };
   }
 }
 
+interface AddressPayload {
+  city: string;
+  street: string;
+  building: string;
+  postalCode: string;
+}
+
+export type YandexMapMarker = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  provider?: string;
+  lat: number;
+  lng: number;
+};
+
 interface YandexMapPickerProps {
-  onAddressSelect: (address: {
-    city: string;
-    street: string;
-    building: string;
-    postalCode: string;
-  }) => void;
+  onAddressSelect: (address: AddressPayload) => void;
+  markers?: YandexMapMarker[];
+  selectedMarkerId?: string | null;
+  onMarkerSelect?: (marker: YandexMapMarker) => void;
 }
 
 type MapStatus = "loading" | "ready" | "unavailable";
@@ -21,7 +72,7 @@ type MapStatus = "loading" | "ready" | "unavailable";
 const YANDEX_MAPS_KEY =
   import.meta.env.VITE_YANDEX_MAPS_API_KEY?.toString().trim() ?? "";
 
-function parseAddressInput(rawValue: string) {
+function parseAddressInput(rawValue: string): AddressPayload {
   const normalized = rawValue.trim();
   if (!normalized) {
     return {
@@ -45,12 +96,32 @@ function parseAddressInput(rawValue: string) {
   };
 }
 
-export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
+function markerPreset(provider?: string, selected = false): string {
+  if (selected) return "islands#nightIcon";
+  if (provider === "cdek") return "islands#darkBlueIcon";
+  if (provider === "russian_post") return "islands#orangeIcon";
+  if (provider === "ozon") return "islands#violetIcon";
+  return "islands#blueIcon";
+}
+
+export function YandexMapPicker({
+  onAddressSelect,
+  markers = [],
+  selectedMarkerId = null,
+  onMarkerSelect,
+}: YandexMapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const placemarkRef = useRef<any>(null);
+  const selectedPlacemarkRef = useRef<any>(null);
+  const markerPlacemarksRef = useRef<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
+
+  const hasMarkers = markers.length > 0;
+  const selectedMarker = useMemo(
+    () => markers.find((marker) => marker.id === selectedMarkerId) ?? null,
+    [markers, selectedMarkerId],
+  );
 
   useEffect(() => {
     if (!YANDEX_MAPS_KEY) {
@@ -68,7 +139,7 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
           controls: ["zoomControl"],
         });
 
-        map.events.add("click", (event: any) => {
+        map.events.add("click", (event) => {
           const coords = event.get("coords");
           void getAddressByCoords(coords);
         });
@@ -86,15 +157,12 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
       script.id = "yandex-maps-script";
       script.src = `https://api-maps.yandex.ru/2.1/?apikey=${YANDEX_MAPS_KEY}&lang=ru_RU`;
       script.async = true;
-
       script.onload = () => {
         initMap();
       };
-
       script.onerror = () => {
         setMapStatus("unavailable");
       };
-
       document.body.appendChild(script);
     } else {
       setMapStatus("unavailable");
@@ -107,6 +175,37 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!window.ymaps || mapStatus !== "ready" || !mapInstanceRef.current) return;
+
+    for (const existing of markerPlacemarksRef.current) {
+      mapInstanceRef.current.geoObjects.remove(existing);
+    }
+    markerPlacemarksRef.current = [];
+
+    for (const marker of markers) {
+      const placemark = new window.ymaps.Placemark(
+        [marker.lat, marker.lng],
+        {
+          balloonContent: `<strong>${marker.title}</strong><br/>${marker.subtitle ?? ""}`,
+        },
+        {
+          preset: markerPreset(marker.provider, marker.id === selectedMarkerId),
+        },
+      );
+      placemark.events.add("click", () => {
+        onMarkerSelect?.(marker);
+      });
+      mapInstanceRef.current.geoObjects.add(placemark);
+      markerPlacemarksRef.current.push(placemark);
+    }
+  }, [mapStatus, markers, onMarkerSelect, selectedMarkerId]);
+
+  useEffect(() => {
+    if (!selectedMarker || !mapInstanceRef.current || mapStatus !== "ready") return;
+    mapInstanceRef.current.setCenter([selectedMarker.lat, selectedMarker.lng], 14);
+  }, [mapStatus, selectedMarker]);
+
   const getAddressByCoords = async (coords: number[]) => {
     if (!window.ymaps || !mapInstanceRef.current) return;
 
@@ -116,48 +215,31 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
 
     const addressComponents = firstGeoObject.properties.get(
       "metaDataProperty.GeocoderMetaData.Address.Components",
-    ) as Array<{ kind: string; name: string }>;
+    ) as Array<{ kind: string; name: string }> | undefined;
 
     let city = "";
     let street = "";
     let building = "";
     let postalCode = "";
 
-    addressComponents.forEach((component) => {
-      switch (component.kind) {
-        case "locality":
-          city = component.name;
-          break;
-        case "street":
-          street = component.name;
-          break;
-        case "house":
-          building = component.name;
-          break;
-        case "postal_code":
-          postalCode = component.name;
-          break;
-        default:
-          break;
+    for (const component of addressComponents ?? []) {
+      if (component.kind === "locality") city = component.name;
+      if (component.kind === "street") street = component.name;
+      if (component.kind === "house") building = component.name;
+      if (component.kind === "postal_code") postalCode = component.name;
+      if (!city && (component.kind === "province" || component.kind === "area")) {
+        city = component.name;
       }
-    });
-
-    if (!city) {
-      const province = addressComponents.find(
-        (component) =>
-          component.kind === "province" || component.kind === "area",
-      );
-      city = province?.name ?? "";
     }
 
-    if (placemarkRef.current) {
-      mapInstanceRef.current.geoObjects.remove(placemarkRef.current);
+    if (selectedPlacemarkRef.current) {
+      mapInstanceRef.current.geoObjects.remove(selectedPlacemarkRef.current);
     }
 
     const placemark = new window.ymaps.Placemark(
       coords,
       {
-        balloonContent: firstGeoObject.properties.get("text"),
+        balloonContent: String(firstGeoObject.properties.get("text") ?? ""),
       },
       {
         preset: "islands#redDotIcon",
@@ -165,7 +247,7 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
     );
 
     mapInstanceRef.current.geoObjects.add(placemark);
-    placemarkRef.current = placemark;
+    selectedPlacemarkRef.current = placemark;
 
     onAddressSelect({
       city,
@@ -223,7 +305,9 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
         </div>
         <p className="text-xs text-gray-500 mt-2">
           {mapStatus === "ready"
-            ? "Нажмите на карту или введите адрес для поиска"
+            ? hasMarkers
+              ? "На карте отображены доступные ПВЗ. Можно выбрать точку или указать адрес вручную."
+              : "Нажмите на карту или введите адрес для поиска."
             : "Введите адрес вручную в формате: город, улица, дом"}
         </p>
       </div>
@@ -244,7 +328,7 @@ export function YandexMapPicker({ onAddressSelect }: YandexMapPickerProps) {
             <h4 className="text-lg text-gray-700 mb-2">Карта недоступна</h4>
             <p className="text-sm text-gray-600 max-w-md">
               Добавьте `VITE_YANDEX_MAPS_API_KEY` в окружение фронтенда, чтобы
-              включить выбор адреса на карте.
+              включить выбор адреса и ПВЗ на карте.
             </p>
           </div>
         )}

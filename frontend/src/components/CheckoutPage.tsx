@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Check, CreditCard, MapPin } from "lucide-react";
 import type { CartItem, Product } from "../types";
 import { apiGet, apiPost } from "../lib/api";
-import { YandexMapPicker } from "./YandexMapPicker";
+import { YandexMapMarker, YandexMapPicker } from "./YandexMapPicker";
 
 interface CheckoutPageProps {
   items: CartItem[];
@@ -32,7 +32,32 @@ type CreateOrdersResponse = {
   } | null;
 };
 
-const DELIVERY_PVZ_STUB = "Тестовый ПВЗ (заглушка), Москва, ул. Тестовая, 1";
+type DeliveryProvider = {
+  code: "cdek" | "russian_post" | "ozon";
+  label: string;
+};
+
+type DeliveryPoint = {
+  id: string;
+  provider: DeliveryProvider["code"];
+  providerLabel: string;
+  name: string;
+  address: string;
+  city: string;
+  lat: number;
+  lng: number;
+  workHours: string;
+  etaDays: number;
+  cost: number;
+};
+
+type DeliveryPointsResponse = {
+  city: string;
+  providers: DeliveryProvider[];
+  points: DeliveryPoint[];
+};
+
+const DELIVERY_PVZ_STUB = "Тестовый ПВЗ, Москва, ул. Тестовая, 1";
 
 export function CheckoutPage({
   items,
@@ -42,6 +67,14 @@ export function CheckoutPage({
   onComplete,
 }: CheckoutPageProps) {
   const [pickupPoint, setPickupPoint] = useState("");
+  const [deliveryCity, setDeliveryCity] = useState("Москва");
+  const [providers, setProviders] = useState<DeliveryProvider[]>([]);
+  const [deliveryPoints, setDeliveryPoints] = useState<DeliveryPoint[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState<
+    "all" | DeliveryProvider["code"]
+  >("all");
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+  const [isPointsLoading, setIsPointsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,10 +85,63 @@ export function CheckoutPage({
   const shipping = deliveryType === "delivery" ? 500 : 0;
   const total = subtotal + shipping;
 
+  const selectedPoint = useMemo(
+    () => deliveryPoints.find((point) => point.id === selectedPointId) ?? null,
+    [deliveryPoints, selectedPointId],
+  );
+
+  const filteredPoints = useMemo(() => {
+    if (selectedProvider === "all") return deliveryPoints;
+    return deliveryPoints.filter((point) => point.provider === selectedProvider);
+  }, [deliveryPoints, selectedProvider]);
+
+  const mapMarkers = useMemo<YandexMapMarker[]>(
+    () =>
+      filteredPoints.map((point) => ({
+        id: point.id,
+        title: point.name,
+        subtitle: `${point.providerLabel} · ${point.address}`,
+        provider: point.provider,
+        lat: point.lat,
+        lng: point.lng,
+      })),
+    [filteredPoints],
+  );
+
+  const loadDeliveryPoints = async (city: string) => {
+    if (deliveryType !== "delivery") return;
+    setIsPointsLoading(true);
+    try {
+      const response = await apiGet<DeliveryPointsResponse>(
+        `/profile/delivery-points?city=${encodeURIComponent(city)}`,
+      );
+      setProviders(response.providers);
+      setDeliveryPoints(response.points);
+      if (response.points.length > 0) {
+        const first = response.points[0];
+        setSelectedPointId(first.id);
+        setPickupPoint(first.address);
+      }
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Не удалось загрузить точки доставки",
+      );
+    } finally {
+      setIsPointsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (deliveryType !== "delivery") return;
+    void loadDeliveryPoints(deliveryCity);
+  }, [deliveryCity, deliveryType]);
+
   const handlePlaceOrder = async () => {
     const effectivePickupPoint =
       deliveryType === "delivery"
-        ? pickupPoint.trim() || DELIVERY_PVZ_STUB
+        ? selectedPoint?.address || pickupPoint.trim() || DELIVERY_PVZ_STUB
         : "Самовывоз";
 
     setIsSubmitting(true);
@@ -100,7 +186,11 @@ export function CheckoutPage({
           throw new Error("Не удалось получить ссылку на оплату YooMoney");
         }
 
-        const paymentWindow = window.open(confirmationUrl, "_blank", "noopener,noreferrer");
+        const paymentWindow = window.open(
+          confirmationUrl,
+          "_blank",
+          "noopener,noreferrer",
+        );
 
         onComplete({
           orderIds,
@@ -131,7 +221,9 @@ export function CheckoutPage({
   return (
     <div className="min-h-screen app-shell pb-16 pt-[calc(var(--header-height,84px)+1rem)] md:pt-[calc(var(--header-height,84px)+1.4rem)]">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-        <h1 className="text-3xl md:text-5xl text-gray-900 mb-8 md:mb-12 text-center">Оформление заказа</h1>
+        <h1 className="text-3xl md:text-5xl text-gray-900 mb-8 md:mb-12 text-center">
+          Оформление заказа
+        </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 md:gap-8">
           <div className="space-y-6 md:space-y-8">
@@ -140,21 +232,106 @@ export function CheckoutPage({
                 <>
                   <h2 className="text-xl md:text-2xl text-gray-900 mb-4">Выберите ПВЗ</h2>
                   <p className="text-sm text-gray-600 mb-4">
-                    Выберите пункт выдачи на карте платформы.
+                    На карте показываются все доступные ПВЗ по провайдерам CDEK, Почта России и
+                    Ozon.
                   </p>
+
+                  <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,260px)_1fr]">
+                    <input
+                      value={deliveryCity}
+                      onChange={(event) => setDeliveryCity(event.target.value)}
+                      placeholder="Город для поиска ПВЗ"
+                      className="field-control"
+                    />
+                    <button
+                      onClick={() => {
+                        void loadDeliveryPoints(deliveryCity);
+                      }}
+                      className="btn-secondary py-2.5"
+                    >
+                      Обновить точки
+                    </button>
+                  </div>
+
+                  <div className="dashboard-chip-row mb-4">
+                    <button
+                      onClick={() => setSelectedProvider("all")}
+                      className={`dashboard-chip ${
+                        selectedProvider === "all" ? "dashboard-chip--active" : ""
+                      }`}
+                    >
+                      Все провайдеры
+                    </button>
+                    {providers.map((provider) => (
+                      <button
+                        key={provider.code}
+                        onClick={() => setSelectedProvider(provider.code)}
+                        className={`dashboard-chip ${
+                          selectedProvider === provider.code
+                            ? "dashboard-chip--active"
+                            : ""
+                        }`}
+                      >
+                        {provider.label}
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="h-[420px]">
                     <YandexMapPicker
+                      markers={mapMarkers}
+                      selectedMarkerId={selectedPointId}
+                      onMarkerSelect={(marker) => {
+                        const point = deliveryPoints.find((item) => item.id === marker.id);
+                        if (!point) return;
+                        setSelectedPointId(point.id);
+                        setPickupPoint(point.address);
+                      }}
                       onAddressSelect={(address) => {
                         const formatted = [address.city, address.street, address.building]
                           .filter(Boolean)
                           .join(", ");
+                        if (address.city) {
+                          setDeliveryCity(address.city);
+                        }
+                        setSelectedPointId(null);
                         setPickupPoint(formatted);
                       }}
                     />
                   </div>
+
+                  <div className="mt-4 space-y-2">
+                    {isPointsLoading && (
+                      <div className="text-sm text-gray-500">Загрузка ПВЗ...</div>
+                    )}
+                    {!isPointsLoading &&
+                      filteredPoints.slice(0, 6).map((point) => (
+                        <button
+                          key={point.id}
+                          onClick={() => {
+                            setSelectedPointId(point.id);
+                            setPickupPoint(point.address);
+                          }}
+                          className={`w-full rounded-lg border p-3 text-left text-sm transition-colors ${
+                            selectedPointId === point.id
+                              ? "border-[rgb(38,83,141)] bg-blue-50"
+                              : "border-gray-200 bg-white hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900">{point.name}</div>
+                          <div className="text-xs text-gray-600">
+                            {point.providerLabel} · {point.address}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {point.workHours} · {point.etaDays} дн. · {point.cost} ₽
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+
                   <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                     {pickupPoint
-                      ? `Выбранный ПВЗ: ${pickupPoint}`
+                      ? `Выбранный адрес/ПВЗ: ${pickupPoint}`
                       : `ПВЗ еще не выбран. Будет использована заглушка: ${DELIVERY_PVZ_STUB}`}
                   </div>
                 </>
@@ -167,7 +344,8 @@ export function CheckoutPage({
                       <span className="font-medium">Вы выбрали самовывоз</span>
                     </div>
                     <p className="text-sm text-gray-600">
-                      После оформления заказа продавец свяжется с вами для согласования точки и времени получения.
+                      После оформления заказа продавец свяжется с вами для согласования точки и
+                      времени получения.
                     </p>
                   </div>
                 </>
@@ -205,7 +383,9 @@ export function CheckoutPage({
                       : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
-                  <span className="text-sm md:text-base text-gray-900">Наличными при получении</span>
+                  <span className="text-sm md:text-base text-gray-900">
+                    Наличными при получении
+                  </span>
                   {paymentMethod === "cash" && (
                     <div className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center">
                       <Check className="w-3 h-3" />
@@ -217,9 +397,12 @@ export function CheckoutPage({
               {paymentMethod === "card" && (
                 <div className="space-y-4 pt-6 border-t border-gray-200">
                   <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                    <p className="font-medium text-gray-900 mb-2">Оплата через YooMoney (тестовый режим)</p>
+                    <p className="font-medium text-gray-900 mb-2">
+                      Оплата через YooMoney (тестовый режим)
+                    </p>
                     <p className="mb-2">
-                      После нажатия кнопки вы перейдете на защищенную страницу YooMoney для ввода данных карты.
+                      После нажатия кнопки вы перейдете на защищенную страницу YooMoney для
+                      ввода данных карты.
                     </p>
                     <p className="text-xs text-gray-600">
                       Тестовая карта: 5555 5555 5555 4477, срок 01/30, CVC 123.
@@ -238,7 +421,11 @@ export function CheckoutPage({
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 mb-1 truncate">{item.title}</p>
@@ -257,7 +444,9 @@ export function CheckoutPage({
                   <span className="text-gray-900">{subtotal.toLocaleString("ru-RU")} ₽</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">{deliveryType === "delivery" ? "Доставка до ПВЗ" : "Самовывоз"}</span>
+                  <span className="text-gray-600">
+                    {deliveryType === "delivery" ? "Доставка до ПВЗ" : "Самовывоз"}
+                  </span>
                   <span className={deliveryType === "delivery" ? "text-gray-900" : "text-green-600"}>
                     {shipping > 0 ? `${shipping.toLocaleString("ru-RU")} ₽` : "Бесплатно"}
                   </span>
@@ -295,3 +484,4 @@ export function CheckoutPage({
     </div>
   );
 }
+

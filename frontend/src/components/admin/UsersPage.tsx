@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Ban, Search, Shield, ShieldOff } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { matchesSearch } from "../../lib/search";
 
 type UserRoleFilter = "all" | "regular" | "partner" | "admin";
 type UserStatusFilter = "all" | "active" | "blocked";
@@ -19,6 +20,23 @@ type AdminUser = {
   sellerOrders: number;
   buyerSpent: number;
   sellerRevenue: number;
+  avgBuyerCheck: number;
+  avgSellerCheck: number;
+  activeListings: number;
+  pendingListings: number;
+  totalListings: number;
+  complaintsMade: number;
+  complaintsAgainst: number;
+  isSellerVerified: boolean;
+  sellerResponseMinutes: number | null;
+  lastBuyerOrderDate: string | null;
+  lastSellerOrderDate: string | null;
+  kycLatest: {
+    id: string;
+    status: "pending" | "approved" | "rejected";
+    createdAt: string;
+    reviewedAt: string | null;
+  } | null;
 };
 
 export function UsersPage() {
@@ -32,8 +50,11 @@ export function UsersPage() {
     try {
       const result = await apiGet<AdminUser[]>("/admin/users");
       setUsers(result);
+      setSelectedUser((prev) => prev ?? result[0]?.id ?? null);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить пользователей");
+      alert(
+        error instanceof Error ? error.message : "Не удалось загрузить пользователей",
+      );
     }
   };
 
@@ -44,15 +65,11 @@ export function UsersPage() {
   const filteredUsers = useMemo(
     () =>
       users.filter((user) => {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          user.id.toLowerCase().includes(query);
-
+        const matchesText = matchesSearch(user, searchQuery);
         const matchesRole = roleFilter === "all" || user.role === roleFilter;
-        const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-        return matchesSearch && matchesRole && matchesStatus;
+        const matchesStatus =
+          statusFilter === "all" || user.status === statusFilter;
+        return matchesText && matchesRole && matchesStatus;
       }),
     [roleFilter, searchQuery, statusFilter, users],
   );
@@ -65,7 +82,7 @@ export function UsersPage() {
     blocked: users.filter((user) => user.status === "blocked").length,
   };
 
-  const selectedUserData = users.find((user) => user.id === selectedUser);
+  const selectedUserData = users.find((user) => user.id === selectedUser) ?? null;
 
   const toggleUserStatus = async (user: AdminUser, shouldBlock: boolean) => {
     try {
@@ -75,24 +92,34 @@ export function UsersPage() {
       });
       await loadUsers();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось обновить статус пользователя");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Не удалось обновить статус пользователя",
+      );
     }
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", minimumFractionDigits: 0 }).format(amount);
+    new Intl.NumberFormat("ru-RU", {
+      style: "currency",
+      currency: "RUB",
+      minimumFractionDigits: 0,
+    }).format(amount);
 
   const roleLabel = (role: AdminUser["role"]) => {
     if (role === "regular") return "Покупатель";
     if (role === "partner") return "Продавец";
-    return "Админ";
+    return "Администратор";
   };
 
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
         <h1 className="dashboard-title">Пользователи</h1>
-        <p className="dashboard-subtitle">Управление аккаунтами</p>
+        <p className="dashboard-subtitle">
+          Управление аккаунтами, активностью, рисками и коммерческими метриками
+        </p>
       </div>
 
       <div className="dashboard-grid-stats dashboard-grid-stats--5">
@@ -123,7 +150,7 @@ export function UsersPage() {
           <Search className="dashboard-search__icon" />
           <input
             type="text"
-            placeholder="Поиск по имени, email или ID..."
+            placeholder="Поиск по любому полю пользователя"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="dashboard-search__input"
@@ -180,11 +207,15 @@ export function UsersPage() {
                 <div className="min-w-0">
                   <div className="text-sm font-semibold">{user.name}</div>
                   <div className="text-xs text-gray-500 break-words">{user.email}</div>
-                  <div className="text-xs text-gray-500 mt-1 break-words">{user.id} • {roleLabel(user.role)}</div>
+                  <div className="text-xs text-gray-500 mt-1 break-words">
+                    {user.id} · {roleLabel(user.role)}
+                  </div>
                 </div>
                 <span
                   className={`shrink-0 px-2 py-1 rounded-full text-xs ${
-                    user.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    user.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
                   }`}
                 >
                   {user.status === "active" ? "Активен" : "Заблокирован"}
@@ -192,7 +223,9 @@ export function UsersPage() {
               </div>
             </button>
           ))}
-          {filteredUsers.length === 0 && <div className="dashboard-empty">Пользователи не найдены</div>}
+          {filteredUsers.length === 0 && (
+            <div className="dashboard-empty">Пользователи не найдены</div>
+          )}
         </div>
 
         <div className="dashboard-card">
@@ -200,14 +233,40 @@ export function UsersPage() {
             <div className="text-sm text-gray-500">Выберите пользователя</div>
           ) : (
             <div className="space-y-3">
-              <div className="font-semibold">{selectedUserData.name}</div>
+              <div className="font-semibold break-words">{selectedUserData.name}</div>
               <div className="text-sm text-gray-600 break-words">{selectedUserData.email}</div>
               <div className="text-sm text-gray-600">Роль: {roleLabel(selectedUserData.role)}</div>
-              <div className="text-sm text-gray-600">Покупок: {selectedUserData.buyerOrders}</div>
-              <div className="text-sm text-gray-600">Заказов как продавец: {selectedUserData.sellerOrders}</div>
-              <div className="text-sm text-gray-600">Потрачено: {formatCurrency(selectedUserData.buyerSpent)}</div>
-              <div className="text-sm text-gray-600">Выручка: {formatCurrency(selectedUserData.sellerRevenue)}</div>
-              {selectedUserData.blockReason && <div className="text-sm text-red-600">Причина блокировки: {selectedUserData.blockReason}</div>}
+              <div className="text-sm text-gray-600">Город: {selectedUserData.city ?? "не указан"}</div>
+              <div className="text-sm text-gray-600">
+                Покупок: {selectedUserData.buyerOrders} · Потрачено:{" "}
+                {formatCurrency(selectedUserData.buyerSpent)} · Средний чек:{" "}
+                {formatCurrency(selectedUserData.avgBuyerCheck)}
+              </div>
+              <div className="text-sm text-gray-600">
+                Продаж: {selectedUserData.sellerOrders} · Выручка:{" "}
+                {formatCurrency(selectedUserData.sellerRevenue)} · Средний чек:{" "}
+                {formatCurrency(selectedUserData.avgSellerCheck)}
+              </div>
+              <div className="text-sm text-gray-600">
+                Объявления: {selectedUserData.totalListings} (активных:{" "}
+                {selectedUserData.activeListings}, на модерации:{" "}
+                {selectedUserData.pendingListings})
+              </div>
+              <div className="text-sm text-gray-600">
+                Жалобы: подал {selectedUserData.complaintsMade}, на него{" "}
+                {selectedUserData.complaintsAgainst}
+              </div>
+              <div className="text-sm text-gray-600">
+                KYC:{" "}
+                {selectedUserData.kycLatest
+                  ? `${selectedUserData.kycLatest.id} (${selectedUserData.kycLatest.status})`
+                  : "нет заявок"}
+              </div>
+              {selectedUserData.blockReason && (
+                <div className="text-sm text-red-600 break-words">
+                  Причина блокировки: {selectedUserData.blockReason}
+                </div>
+              )}
 
               {selectedUserData.status === "active" ? (
                 <button
@@ -227,7 +286,11 @@ export function UsersPage() {
               )}
 
               <div className="text-xs text-gray-500 flex items-center gap-1">
-                {selectedUserData.status === "active" ? <Shield className="w-3 h-3" /> : <ShieldOff className="w-3 h-3" />}
+                {selectedUserData.status === "active" ? (
+                  <Shield className="w-3 h-3" />
+                ) : (
+                  <ShieldOff className="w-3 h-3" />
+                )}
                 Статус обновляется в реальном времени
               </div>
             </div>
@@ -237,3 +300,4 @@ export function UsersPage() {
     </div>
   );
 }
+
