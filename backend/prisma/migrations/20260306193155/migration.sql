@@ -1,12 +1,57 @@
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('BUYER', 'SELLER', 'ADMIN');
+
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'BLOCKED');
+
+-- CreateEnum
+CREATE TYPE "NotificationType" AS ENUM ('NEW_QUESTION', 'ORDER_STATUS', 'SYSTEM', 'INFO');
+
+-- CreateEnum
+CREATE TYPE "ListingType" AS ENUM ('PRODUCT', 'SERVICE');
+
+-- CreateEnum
+CREATE TYPE "ListingCondition" AS ENUM ('NEW', 'USED');
+
+-- CreateEnum
+CREATE TYPE "ListingStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'MODERATION');
+
+-- CreateEnum
+CREATE TYPE "ModerationStatus" AS ENUM ('APPROVED', 'REJECTED', 'PENDING');
+
+-- CreateEnum
+CREATE TYPE "QuestionStatus" AS ENUM ('PENDING', 'ANSWERED');
+
+-- CreateEnum
+CREATE TYPE "OrderStatus" AS ENUM ('CREATED', 'PAID', 'PROCESSING', 'PREPARED', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "DeliveryType" AS ENUM ('PICKUP', 'DELIVERY');
+
+-- CreateEnum
+CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'HELD', 'SUCCESS', 'FAILED', 'CANCELLED', 'REFUNDED');
+
+-- CreateEnum
+CREATE TYPE "PaymentProvider" AS ENUM ('CASH', 'YOOMONEY', 'STRIPE', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "ComplaintStatus" AS ENUM ('NEW', 'PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "KycStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "SellerType" AS ENUM ('COMPANY', 'PRIVATE', 'INDIVIDUAL');
+
 -- CreateTable
 CREATE TABLE "AppUser" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+    "role" "UserRole" NOT NULL,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -29,7 +74,7 @@ CREATE TABLE "AppUser" (
 CREATE TABLE "Notification" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" "NotificationType" NOT NULL,
     "message" TEXT NOT NULL,
     "target_url" TEXT NOT NULL,
     "is_read" BOOLEAN NOT NULL DEFAULT false,
@@ -82,7 +127,7 @@ CREATE TABLE "City" (
 CREATE TABLE "CatalogCategory" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" "ListingType" NOT NULL,
     "name" TEXT NOT NULL,
     "icon_key" TEXT NOT NULL,
     "order_index" INTEGER NOT NULL DEFAULT 0,
@@ -123,16 +168,16 @@ CREATE TABLE "MarketplaceListing" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "seller_id" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" "ListingType" NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "item_id" INTEGER,
     "price" INTEGER NOT NULL,
     "sale_price" INTEGER,
     "rating" DOUBLE PRECISION NOT NULL DEFAULT 4.5,
-    "condition" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-    "moderation_status" TEXT NOT NULL DEFAULT 'APPROVED',
+    "condition" "ListingCondition" NOT NULL,
+    "status" "ListingStatus" NOT NULL DEFAULT 'ACTIVE',
+    "moderation_status" "ModerationStatus" NOT NULL DEFAULT 'APPROVED',
     "views" INTEGER NOT NULL DEFAULT 0,
     "city_id" INTEGER NOT NULL,
     "shipping_by_seller" BOOLEAN NOT NULL DEFAULT true,
@@ -185,7 +230,7 @@ CREATE TABLE "ListingQuestion" (
     "buyer_id" INTEGER NOT NULL,
     "question" TEXT NOT NULL,
     "answer" TEXT,
-    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "status" "QuestionStatus" NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "answered_at" TIMESTAMP(3),
 
@@ -208,8 +253,8 @@ CREATE TABLE "MarketOrder" (
     "public_id" TEXT NOT NULL,
     "buyer_id" INTEGER NOT NULL,
     "seller_id" INTEGER NOT NULL,
-    "status" TEXT NOT NULL,
-    "delivery_type" TEXT NOT NULL,
+    "status" "OrderStatus" NOT NULL DEFAULT 'CREATED',
+    "delivery_type" "DeliveryType" NOT NULL,
     "delivery_address" TEXT,
     "total_price" INTEGER NOT NULL,
     "delivery_cost" INTEGER NOT NULL DEFAULT 0,
@@ -241,10 +286,10 @@ CREATE TABLE "PlatformTransaction" (
     "buyer_id" INTEGER NOT NULL,
     "seller_id" INTEGER NOT NULL,
     "amount" INTEGER NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "TransactionStatus" NOT NULL,
     "commission_rate" DOUBLE PRECISION NOT NULL,
     "commission" INTEGER NOT NULL,
-    "payment_provider" TEXT NOT NULL,
+    "payment_provider" "PaymentProvider" NOT NULL,
     "payment_intent_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -256,7 +301,7 @@ CREATE TABLE "Complaint" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "status" TEXT NOT NULL DEFAULT 'NEW',
+    "status" "ComplaintStatus" NOT NULL DEFAULT 'NEW',
     "complaint_type" TEXT NOT NULL,
     "listing_id" INTEGER NOT NULL,
     "seller_id" INTEGER NOT NULL,
@@ -275,7 +320,7 @@ CREATE TABLE "KycRequest" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "status" "KycStatus" NOT NULL DEFAULT 'PENDING',
     "seller_id" INTEGER NOT NULL,
     "email" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
@@ -311,8 +356,8 @@ CREATE TABLE "PartnershipRequest" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "seller_type" TEXT NOT NULL,
-    "name" TEXT TEXT NOT NULL,
+    "seller_type" "SellerType" NOT NULL,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "contact" TEXT NOT NULL,
     "link" TEXT NOT NULL,
@@ -327,11 +372,48 @@ CREATE TABLE "PartnershipRequest" (
     CONSTRAINT "PartnershipRequest_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "OrderStatusHistory" (
+    "id" SERIAL NOT NULL,
+    "order_id" INTEGER NOT NULL,
+    "from_status" "OrderStatus",
+    "to_status" "OrderStatus" NOT NULL,
+    "changed_by_id" INTEGER,
+    "reason" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "OrderStatusHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AuditLog" (
+    "id" SERIAL NOT NULL,
+    "public_id" TEXT NOT NULL,
+    "actor_user_id" INTEGER,
+    "action" TEXT NOT NULL,
+    "entity_type" TEXT NOT NULL,
+    "entity_public_id" TEXT,
+    "details" JSONB,
+    "ip_address" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "AppUser_public_id_key" ON "AppUser"("public_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AppUser_email_key" ON "AppUser"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AppUser_username_key" ON "AppUser"("username");
+
+-- CreateIndex
+CREATE INDEX "AppUser_role_status_idx" ON "AppUser"("role", "status");
+
+-- CreateIndex
+CREATE INDEX "AppUser_created_at_idx" ON "AppUser"("created_at");
 
 -- CreateIndex
 CREATE INDEX "Notification_user_id_is_read_idx" ON "Notification"("user_id", "is_read");
@@ -343,7 +425,16 @@ CREATE UNIQUE INDEX "SellerProfile_user_id_key" ON "SellerProfile"("user_id");
 CREATE INDEX "SellerProfile_commission_tier_id_idx" ON "SellerProfile"("commission_tier_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "City_name_key" ON "City"("name");
+CREATE INDEX "UserAddress_user_id_is_default_idx" ON "UserAddress"("user_id", "is_default");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserAddress_user_id_label_key" ON "UserAddress"("user_id", "label");
+
+-- CreateIndex
+CREATE INDEX "City_region_name_idx" ON "City"("region", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "City_name_region_key" ON "City"("name", "region");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CatalogCategory_public_id_key" ON "CatalogCategory"("public_id");
@@ -355,7 +446,7 @@ CREATE UNIQUE INDEX "CatalogCategory_type_name_key" ON "CatalogCategory"("type",
 CREATE UNIQUE INDEX "CatalogSubcategory_public_id_key" ON "CatalogSubcategory"("public_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CatalogSubcategory_category_id_name_key" ON "CatalogSubcategory"("category_id", "name"); 
+CREATE UNIQUE INDEX "CatalogSubcategory_category_id_name_key" ON "CatalogSubcategory"("category_id", "name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CatalogItem_public_id_key" ON "CatalogItem"("public_id");
@@ -379,16 +470,28 @@ CREATE INDEX "MarketplaceListing_city_id_idx" ON "MarketplaceListing"("city_id")
 CREATE INDEX "MarketplaceListing_type_status_moderation_status_idx" ON "MarketplaceListing"("type", "status", "moderation_status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ListingImage_listing_id_sort_order_key" ON "ListingImage"("listing_id", "sort_order");   
+CREATE INDEX "MarketplaceListing_status_moderation_status_created_at_idx" ON "MarketplaceListing"("status", "moderation_status", "created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ListingImage_listing_id_sort_order_key" ON "ListingImage"("listing_id", "sort_order");
 
 -- CreateIndex
 CREATE INDEX "ListingAttribute_listing_id_idx" ON "ListingAttribute"("listing_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ListingReview_listing_id_author_id_key" ON "ListingReview"("listing_id", "author_id");   
+CREATE UNIQUE INDEX "ListingAttribute_listing_id_attr_key" ON "ListingAttribute"("listing_id", "key");
+
+-- CreateIndex
+CREATE INDEX "ListingReview_listing_id_created_at_idx" ON "ListingReview"("listing_id", "created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ListingReview_listing_id_author_id_key" ON "ListingReview"("listing_id", "author_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ListingQuestion_public_id_key" ON "ListingQuestion"("public_id");
+
+-- CreateIndex
+CREATE INDEX "ListingQuestion_listing_id_created_at_idx" ON "ListingQuestion"("listing_id", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WishlistItem_user_id_listing_id_key" ON "WishlistItem"("user_id", "listing_id");
@@ -403,10 +506,19 @@ CREATE INDEX "MarketOrder_buyer_id_idx" ON "MarketOrder"("buyer_id");
 CREATE INDEX "MarketOrder_seller_id_idx" ON "MarketOrder"("seller_id");
 
 -- CreateIndex
+CREATE INDEX "MarketOrder_status_created_at_idx" ON "MarketOrder"("status", "created_at");
+
+-- CreateIndex
 CREATE INDEX "MarketOrderItem_order_id_idx" ON "MarketOrderItem"("order_id");
 
 -- CreateIndex
+CREATE INDEX "MarketOrderItem_listing_id_idx" ON "MarketOrderItem"("listing_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PlatformTransaction_public_id_key" ON "PlatformTransaction"("public_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PlatformTransaction_payment_intent_id_key" ON "PlatformTransaction"("payment_intent_id");
 
 -- CreateIndex
 CREATE INDEX "PlatformTransaction_order_id_idx" ON "PlatformTransaction"("order_id");
@@ -416,6 +528,9 @@ CREATE INDEX "PlatformTransaction_buyer_id_idx" ON "PlatformTransaction"("buyer_
 
 -- CreateIndex
 CREATE INDEX "PlatformTransaction_seller_id_idx" ON "PlatformTransaction"("seller_id");
+
+-- CreateIndex
+CREATE INDEX "PlatformTransaction_status_created_at_idx" ON "PlatformTransaction"("status", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Complaint_public_id_key" ON "Complaint"("public_id");
@@ -430,10 +545,37 @@ CREATE INDEX "Complaint_listing_id_idx" ON "Complaint"("listing_id");
 CREATE UNIQUE INDEX "KycRequest_public_id_key" ON "KycRequest"("public_id");
 
 -- CreateIndex
+CREATE INDEX "KycRequest_status_created_at_idx" ON "KycRequest"("status", "created_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CommissionTier_public_id_key" ON "CommissionTier"("public_id");
 
 -- CreateIndex
+CREATE INDEX "CommissionTier_min_sales_max_sales_idx" ON "CommissionTier"("min_sales", "max_sales");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PartnershipRequest_public_id_key" ON "PartnershipRequest"("public_id");
+
+-- CreateIndex
+CREATE INDEX "PartnershipRequest_created_at_idx" ON "PartnershipRequest"("created_at");
+
+-- CreateIndex
+CREATE INDEX "OrderStatusHistory_order_id_created_at_idx" ON "OrderStatusHistory"("order_id", "created_at");
+
+-- CreateIndex
+CREATE INDEX "OrderStatusHistory_changed_by_id_idx" ON "OrderStatusHistory"("changed_by_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AuditLog_public_id_key" ON "AuditLog"("public_id");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_actor_user_id_created_at_idx" ON "AuditLog"("actor_user_id", "created_at");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_entity_type_entity_public_id_idx" ON "AuditLog"("entity_type", "entity_public_id");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_action_created_at_idx" ON "AuditLog"("action", "created_at");
 
 -- AddForeignKey
 ALTER TABLE "AppUser" ADD CONSTRAINT "AppUser_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -533,3 +675,74 @@ ALTER TABLE "KycRequest" ADD CONSTRAINT "KycRequest_reviewed_by_id_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "PartnershipRequest" ADD CONSTRAINT "PartnershipRequest_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OrderStatusHistory" ADD CONSTRAINT "OrderStatusHistory_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "MarketOrder"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OrderStatusHistory" ADD CONSTRAINT "OrderStatusHistory_changed_by_id_fkey" FOREIGN KEY ("changed_by_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddCheckConstraints
+ALTER TABLE "SellerProfile"
+ADD CONSTRAINT "SellerProfile_average_response_minutes_chk"
+CHECK ("average_response_minutes" IS NULL OR "average_response_minutes" >= 0);
+
+ALTER TABLE "MarketplaceListing"
+ADD CONSTRAINT "MarketplaceListing_price_chk"
+CHECK ("price" > 0),
+ADD CONSTRAINT "MarketplaceListing_sale_price_chk"
+CHECK ("sale_price" IS NULL OR ("sale_price" >= 0 AND "sale_price" <= "price")),
+ADD CONSTRAINT "MarketplaceListing_rating_chk"
+CHECK ("rating" >= 0 AND "rating" <= 5),
+ADD CONSTRAINT "MarketplaceListing_views_chk"
+CHECK ("views" >= 0);
+
+ALTER TABLE "ListingImage"
+ADD CONSTRAINT "ListingImage_sort_order_chk"
+CHECK ("sort_order" >= 0);
+
+ALTER TABLE "ListingAttribute"
+ADD CONSTRAINT "ListingAttribute_sort_order_chk"
+CHECK ("sort_order" >= 0);
+
+ALTER TABLE "ListingReview"
+ADD CONSTRAINT "ListingReview_rating_chk"
+CHECK ("rating" >= 1 AND "rating" <= 5);
+
+ALTER TABLE "MarketOrder"
+ADD CONSTRAINT "MarketOrder_total_price_chk"
+CHECK ("total_price" >= 0),
+ADD CONSTRAINT "MarketOrder_delivery_cost_chk"
+CHECK ("delivery_cost" >= 0),
+ADD CONSTRAINT "MarketOrder_discount_chk"
+CHECK ("discount" >= 0);
+
+ALTER TABLE "MarketOrderItem"
+ADD CONSTRAINT "MarketOrderItem_price_chk"
+CHECK ("price" >= 0),
+ADD CONSTRAINT "MarketOrderItem_quantity_chk"
+CHECK ("quantity" > 0);
+
+ALTER TABLE "PlatformTransaction"
+ADD CONSTRAINT "PlatformTransaction_amount_chk"
+CHECK ("amount" >= 0),
+ADD CONSTRAINT "PlatformTransaction_commission_chk"
+CHECK ("commission" >= 0),
+ADD CONSTRAINT "PlatformTransaction_commission_rate_chk"
+CHECK ("commission_rate" >= 0 AND "commission_rate" <= 100);
+
+ALTER TABLE "CommissionTier"
+ADD CONSTRAINT "CommissionTier_min_sales_chk"
+CHECK ("min_sales" >= 0),
+ADD CONSTRAINT "CommissionTier_max_sales_chk"
+CHECK ("max_sales" IS NULL OR "max_sales" >= "min_sales"),
+ADD CONSTRAINT "CommissionTier_commission_rate_chk"
+CHECK ("commission_rate" >= 0 AND "commission_rate" <= 100);
+
+-- One default address per user
+CREATE UNIQUE INDEX "UserAddress_one_default_per_user_idx"
+ON "UserAddress" ("user_id")
+WHERE "is_default" = true;

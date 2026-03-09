@@ -17,11 +17,12 @@ import { getSessionUser, requireAnyRole } from "../../lib/session";
 import { toClientCondition } from "../../utils/format";
 
 const catalogRouter = Router();
+type ListingTypeValue = "PRODUCT" | "SERVICE";
 
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 
-function resolveListingType(rawType: unknown): string {
+function resolveListingType(rawType: unknown): ListingTypeValue {
   if (rawType === "services") return "SERVICE";
   return "PRODUCT";
 }
@@ -33,14 +34,14 @@ function formatPublishDate(date: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
-  return formatted.replace(",", " в");
+  return formatted.replace(",", " РІ");
 }
 
 function formatResponseTime(minutes: number | null | undefined): string | null {
   if (!minutes || minutes <= 0) return null;
-  if (minutes < 60) return `около ${minutes} минут`;
-  if (minutes < 120) return "около 1 часа";
-  return `около ${Math.round(minutes / 60)} часов`;
+  if (minutes < 60) return `РѕРєРѕР»Рѕ ${minutes} РјРёРЅСѓС‚`;
+  if (minutes < 120) return "РѕРєРѕР»Рѕ 1 С‡Р°СЃР°";
+  return `РѕРєРѕР»Рѕ ${Math.round(minutes / 60)} С‡Р°СЃРѕРІ`;
 }
 
 function listingCategoryName(
@@ -52,7 +53,7 @@ function listingCategoryName(
     }) | null;
   },
 ): string {
-  return listing.item?.name ?? "Без категории";
+  return listing.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
 }
 
 function listingBreadcrumbs(
@@ -64,9 +65,9 @@ function listingBreadcrumbs(
     }) | null;
   },
 ): string[] {
-  if (!listing.item) return ["Главная", "Без категории"];
+  if (!listing.item) return ["Р“Р»Р°РІРЅР°СЏ", "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё"];
   return [
-    "Главная",
+    "Р“Р»Р°РІРЅР°СЏ",
     listing.item.subcategory.category.name,
     listing.item.subcategory.name,
     listing.item.name,
@@ -105,28 +106,14 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
     });
 
     res.json(
-      categories.map(
-        (
-          category: CatalogCategory & {
-            subcategories: Array<
-              CatalogSubcategory & {
-                items: CatalogItem[];
-              }
-            >;
-          },
-        ) => ({
+      categories.map((category) => ({
           id: category.public_id,
           name: category.name,
           icon_key: category.icon_key,
-          subcategories: category.subcategories.map(
-            (
-              subcategory: CatalogSubcategory & {
-                items: CatalogItem[];
-              },
-            ) => ({
+          subcategories: category.subcategories.map((subcategory) => ({
               id: subcategory.public_id,
               name: subcategory.name,
-              items: subcategory.items.map((item: CatalogItem) => item.name),
+              items: subcategory.items.map((item) => item.name),
             }),
           ),
         }),
@@ -204,29 +191,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
     });
 
     return res.json(
-      listings.map(
-        (
-          listing: MarketplaceListing & {
-            city: City; // Include City in type definition
-            seller: Pick<AppUser, "name" | "avatar"> & {
-              _count: { listings: number };
-              seller_profile: Pick<
-                SellerProfile,
-                "is_verified" | "average_response_minutes"
-              > | null;
-            };
-            item: (CatalogItem & {
-              subcategory: CatalogSubcategory & {
-                category: CatalogCategory;
-              };
-            }) | null;
-            images: ListingImage[];
-            attributes: ListingAttribute[];
-            reviews: (ListingReview & {
-              author: { display_name: string | null; avatar: string | null };
-            })[];
-          },
-        ) => {
+      listings.map((listing) => {
           const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
           const salePrice =
             listing.sale_price !== null && listing.sale_price < listing.price
@@ -239,7 +204,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             price: listing.price,
             salePrice,
             image: primaryImage,
-            images: listing.images.map((image: ListingImage) => image.url),
+            images: listing.images.map((image) => image.url),
             rating: listing.rating,
             seller: listing.seller.name,
             sellerAvatar: listing.seller.avatar,
@@ -263,7 +228,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             condition: toClientCondition(listing.condition),
             reviews: listing.reviews.map((review) => ({
               id: String(review.id),
-              author: review.author.display_name ?? "Аноним",
+              author: review.author.display_name ?? "РђРЅРѕРЅРёРј",
               rating: review.rating,
               date: formatPublishDate(review.created_at),
               comment: review.comment,
@@ -375,7 +340,7 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
         subtitle:
           listing.item?.subcategory.name ??
           listing.item?.subcategory.category.name ??
-          "Категория",
+          "РљР°С‚РµРіРѕСЂРёСЏ",
         query: listing.title,
       });
     }
@@ -385,7 +350,7 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
         suggestions.push({
           type: "category",
           title: category.name,
-          subtitle: "Категория",
+          subtitle: "РљР°С‚РµРіРѕСЂРёСЏ",
           query: category.name,
         });
       }
@@ -462,8 +427,7 @@ catalogRouter.get(
       });
 
       res.json(
-        questions.map(
-          (question: ListingQuestion & { buyer: { name: string } }) => ({
+        questions.map((question) => ({
             id: question.public_id,
             user: question.buyer.name,
             date: question.created_at,
@@ -531,7 +495,7 @@ catalogRouter.post(
         data: {
           user_id: listing.seller_id,
           type: "NEW_QUESTION",
-          message: `Новый вопрос по вашему товару "${listing.title}"`,
+          message: `РќРѕРІС‹Р№ РІРѕРїСЂРѕСЃ РїРѕ РІР°С€РµРјСѓ С‚РѕРІР°СЂСѓ "${listing.title}"`,
           target_url: `/products/${listing.public_id}`, // Adjust URL as needed
         },
       });

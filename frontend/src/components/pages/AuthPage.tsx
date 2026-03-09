@@ -19,12 +19,6 @@ type AuthResponse = {
   };
 };
 
-const DEMO_CREDENTIALS = {
-  regular: { email: "demo@ecomm.ru", password: "demo123" },
-  partner: { email: "partner@ecomm.ru", password: "partner123" },
-  admin: { email: "admin@ecomm.ru", password: "admin123" },
-};
-
 export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -173,13 +167,13 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           <div className="mt-6 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
             <p className="font-semibold text-center">Тестовые данные для входа</p>
             <p>
-              Пользователь: <code>{DEMO_CREDENTIALS.regular.email}</code> / <code>{DEMO_CREDENTIALS.regular.password}</code>
+              Пользователь: <code>buyer1@ecomm.local</code> / <code>buyer123</code>
             </p>
             <p>
-              Партнер: <code>{DEMO_CREDENTIALS.partner.email}</code> / <code>{DEMO_CREDENTIALS.partner.password}</code>
+              Партнер: <code>seller1@ecomm.local</code> / <code>seller123</code>
             </p>
             <p>
-              Админ: <code>{DEMO_CREDENTIALS.admin.email}</code> / <code>{DEMO_CREDENTIALS.admin.password}</code>
+              Админ: <code>admin@ecomm.local</code>, <code>admin123</code>
             </p>
           </div>
         )}

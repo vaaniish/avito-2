@@ -81,6 +81,16 @@ export function PartnerListingsPage() {
     [listings, searchQuery, statusFilter],
   );
 
+  const stats = useMemo(
+    () => ({
+      total: listings.length,
+      active: listings.filter((item) => item.status === "active").length,
+      moderation: listings.filter((item) => item.status === "moderation").length,
+      inactive: listings.filter((item) => item.status === "inactive").length,
+    }),
+    [listings],
+  );
+
   const handleCreateNew = () => {
     setEditingListing(null);
     setFormData({
@@ -181,49 +191,73 @@ export function PartnerListingsPage() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6 md:mb-8 gap-3">
-        <h2 className="text-2xl md:text-3xl text-gray-900">Мои объявления</h2>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <h2 className="dashboard-title">Мои объявления</h2>
+          <p className="dashboard-subtitle">Управляйте карточками, статусами и видимостью</p>
+        </div>
         <button
           onClick={handleCreateNew}
-          className="flex items-center gap-2 px-4 py-2 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] transition-all duration-300"
+          className="btn-primary inline-flex items-center gap-2 px-4 py-2.5"
         >
           <Plus className="w-4 h-4" /> Создать
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-xl border border-gray-200 mb-4 flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="dashboard-grid-stats">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
+        </div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Активные</div>
+          <div className="dashboard-stat__value">{stats.active}</div>
+        </div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">На модерации</div>
+          <div className="dashboard-stat__value">{stats.moderation}</div>
+        </div>
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Неактивные</div>
+          <div className="dashboard-stat__value">{stats.inactive}</div>
+        </div>
+      </div>
+
+      <div className="dashboard-toolbar space-y-3">
+        <div className="dashboard-search">
+          <Search className="dashboard-search__icon" />
           <input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Поиск объявлений"
-            className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Поиск по названию, описанию и категории..."
+            className="dashboard-search__input"
           />
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-          className="px-3 py-2 border border-gray-300 rounded-lg"
-        >
-          <option value="all">Все</option>
-          <option value="active">Активные</option>
-          <option value="inactive">Неактивные</option>
-          <option value="moderation">На модерации</option>
-        </select>
+        <div className="grid gap-2 md:grid-cols-2">
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+            className="dashboard-select"
+          >
+            <option value="all">Все статусы</option>
+            <option value="active">Активные</option>
+            <option value="inactive">Неактивные</option>
+            <option value="moderation">На модерации</option>
+          </select>
 
-        <select
-          value={formData.type}
-          onChange={(event) =>
-            setFormData((prev) => ({ ...prev, type: event.target.value as "products" | "services" }))
-          }
-          className="px-3 py-2 border border-gray-300 rounded-lg"
-        >
-          <option value="products">Товары</option>
-          <option value="services">Услуги</option>
-        </select>
+          <select
+            value={formData.type}
+            onChange={(event) =>
+              setFormData((prev) => ({ ...prev, type: event.target.value as "products" | "services" }))
+            }
+            className="dashboard-select"
+          >
+            <option value="products">Товары</option>
+            <option value="services">Услуги</option>
+          </select>
+        </div>
       </div>
 
       {isLoading ? (
@@ -233,35 +267,39 @@ export function PartnerListingsPage() {
           {filteredListings.map((listing) => {
             const status = getStatusLabel(listing.status);
             return (
-              <div key={listing.id} className="bg-white rounded-xl p-4 border border-gray-200 flex items-center gap-4">
-                <img src={listing.image} alt={listing.title} className="w-16 h-16 rounded-lg object-cover" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-gray-900 truncate">{listing.title}</div>
-                  <div className="text-sm text-gray-600">{listing.price.toLocaleString("ru-RU")} ₽</div>
-                  <div className="text-xs text-gray-500">Просмотры: {listing.views}</div>
+              <article key={listing.id} className="dashboard-card">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <img src={listing.image} alt={listing.title} className="h-16 w-16 rounded-lg object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-gray-900 md:text-base">{listing.title}</div>
+                    <div className="text-sm text-gray-600">{listing.price.toLocaleString("ru-RU")} ₽</div>
+                    <div className="text-xs text-gray-500">Просмотры: {listing.views}</div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 sm:justify-end">
+                    <span className={`px-2 py-1 rounded-full text-xs ${status.color}`}>{status.label}</span>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => void handleToggleStatus(listing.id)} className="rounded-lg p-2 hover:bg-gray-100">
+                        {listing.status === "active" ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button onClick={() => handleEdit(listing)} className="rounded-lg p-2 hover:bg-gray-100">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => void handleDelete(listing.id)} className="rounded-lg p-2 text-red-600 hover:bg-red-50">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs ${status.color}`}>{status.label}</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => void handleToggleStatus(listing.id)} className="p-2 rounded-lg hover:bg-gray-100">
-                    {listing.status === "active" ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  <button onClick={() => handleEdit(listing)} className="p-2 rounded-lg hover:bg-gray-100">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => void handleDelete(listing.id)} className="p-2 rounded-lg hover:bg-red-50 text-red-600">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              </article>
             );
           })}
-          {filteredListings.length === 0 && <div className="text-sm text-gray-500">Объявления не найдены</div>}
+          {filteredListings.length === 0 && <div className="dashboard-empty">Объявления не найдены</div>}
         </div>
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="app-modal-panel app-modal-panel--md p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold">{editingListing ? "Редактировать" : "Создать"}</h3>
               <button onClick={() => setShowModal(false)}>
@@ -274,38 +312,38 @@ export function PartnerListingsPage() {
                 value={formData.title}
                 onChange={(event) => setFormData((prev) => ({ ...prev, title: event.target.value }))}
                 placeholder="Название"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
               />
               <input
                 type="number"
                 value={formData.price}
                 onChange={(event) => setFormData((prev) => ({ ...prev, price: event.target.value }))}
                 placeholder="Цена"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
               />
               <textarea
                 value={formData.description}
                 onChange={(event) => setFormData((prev) => ({ ...prev, description: event.target.value }))}
                 placeholder="Описание"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
                 rows={3}
               />
               <input
                 value={formData.category}
                 onChange={(event) => setFormData((prev) => ({ ...prev, category: event.target.value }))}
                 placeholder="Категория"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
               />
               <input
                 value={formData.image}
                 onChange={(event) => setFormData((prev) => ({ ...prev, image: event.target.value }))}
                 placeholder="URL изображения"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
               />
               <select
                 value={formData.cityId ?? ""}
                 onChange={(event) => setFormData((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="field-control"
               >
                 <option value="">Выберите город</option>
                 {allCities.map((city) => (
@@ -317,10 +355,10 @@ export function PartnerListingsPage() {
             </div>
 
             <div className="flex gap-2 mt-4">
-              <button onClick={() => void handleSave()} className="flex-1 py-2 bg-[rgb(38,83,141)] text-white rounded-lg">
+              <button onClick={() => void handleSave()} className="btn-primary flex-1 py-2.5">
                 Сохранить
               </button>
-              <button onClick={() => setShowModal(false)} className="flex-1 py-2 border border-gray-300 rounded-lg">
+              <button onClick={() => setShowModal(false)} className="btn-secondary flex-1 py-2.5">
                 Отмена
               </button>
             </div>

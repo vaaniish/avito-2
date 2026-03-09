@@ -101,42 +101,42 @@ export function ComplaintsPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">Жалобы</h1>
-        <p className="text-xs md:text-sm lg:text-base text-gray-600">Жалобы на объявления и продавцов</p>
+        <h1 className="dashboard-title">Жалобы</h1>
+        <p className="dashboard-subtitle">Жалобы на объявления и продавцов</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-        <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-gray-200">
-          <div className="text-xs md:text-sm text-gray-600 mb-1">Всего жалоб</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold">{stats.total}</div>
+      <div className="dashboard-grid-stats">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего жалоб</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
         </div>
-        <div className="p-3 md:p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-          <div className="text-xs md:text-sm text-orange-700 mb-1">Новые</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-orange-700">{stats.new}</div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">Новые</div>
+          <div className="dashboard-stat__value">{stats.new}</div>
         </div>
-        <div className="p-3 md:p-4 bg-red-50 rounded-xl border-2 border-red-200">
-          <div className="text-xs md:text-sm text-red-700 mb-1">Одобрены</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-red-700">{stats.approved}</div>
+        <div className="dashboard-stat dashboard-stat--danger">
+          <div className="dashboard-stat__label">Одобрены</div>
+          <div className="dashboard-stat__value">{stats.approved}</div>
         </div>
-        <div className="p-3 md:p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-xs md:text-sm text-green-700 mb-1">Отклонены</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-700">{stats.rejected}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Отклонены</div>
+          <div className="dashboard-stat__value">{stats.rejected}</div>
         </div>
       </div>
 
-      <div className="p-3 md:p-4 lg:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-gray-200 space-y-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="dashboard-toolbar space-y-3">
+        <div className="dashboard-search">
+          <Search className="dashboard-search__icon" />
           <input
             type="text"
             placeholder="Поиск по ID, товару, продавцу..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300"
+            className="dashboard-search__input"
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="dashboard-chip-row">
           {[
             { value: "all", label: "Все" },
             { value: "new", label: "Новые" },
@@ -146,10 +146,10 @@ export function ComplaintsPage() {
             <button
               key={option.value}
               onClick={() => setStatusFilter(option.value as ComplaintStatus)}
-              className={`px-3 py-2 rounded-xl text-sm whitespace-nowrap ${
+              className={`dashboard-chip ${
                 statusFilter === option.value
-                  ? "bg-[rgb(38,83,141)] text-white"
-                  : "bg-gray-100 text-gray-700"
+                  ? "dashboard-chip--active"
+                  : ""
               }`}
             >
               {option.label}
@@ -164,7 +164,7 @@ export function ComplaintsPage() {
             <button
               key={complaint.id}
               onClick={() => setSelectedComplaint(complaint.id)}
-              className={`w-full text-left bg-white rounded-xl p-4 border transition-colors ${
+              className={`w-full text-left dashboard-card transition-colors ${
                 selectedComplaint === complaint.id ? "border-[rgb(38,83,141)]" : "border-gray-200"
               }`}
             >
@@ -179,10 +179,10 @@ export function ComplaintsPage() {
               </div>
             </button>
           ))}
-          {filteredComplaints.length === 0 && <div className="text-sm text-gray-500">Жалобы не найдены</div>}
+          {filteredComplaints.length === 0 && <div className="dashboard-empty">Жалобы не найдены</div>}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="dashboard-card">
           {!selectedComplaintData ? (
             <div className="text-sm text-gray-500">Выберите жалобу для просмотра деталей</div>
           ) : (
@@ -195,16 +195,16 @@ export function ComplaintsPage() {
               <div className="text-xs text-gray-600">Репортер: {selectedComplaintData.reporterName}</div>
               <div className="text-xs text-gray-600">Нарушений у продавца: {selectedComplaintData.sellerViolationsCount}</div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                 <button
                   onClick={() => void updateComplaintStatus("approved")}
-                  className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center justify-center gap-1"
+                  className="btn-danger-soft flex items-center justify-center gap-1 py-2 text-sm sm:flex-1"
                 >
                   <CheckCircle className="w-4 h-4" /> Подтвердить
                 </button>
                 <button
                   onClick={() => void updateComplaintStatus("rejected")}
-                  className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center justify-center gap-1"
+                  className="btn-success-soft flex items-center justify-center gap-1 py-2 text-sm sm:flex-1"
                 >
                   <XCircle className="w-4 h-4" /> Отклонить
                 </button>

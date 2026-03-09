@@ -2,7 +2,7 @@
   "name": "gamification-sandbox",
   "version": "1.0.0",
   "description": "Gamification sandbox (frontend + backend)",
-  "main": "backend/src/server.ts",
+  "main": "dist/backend/src/server.js",
   "scripts": {
     "dev": "npm run dev:all",
     "dev:backend": "tsx watch backend/src/server.ts",
@@ -11,11 +11,13 @@
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "tsc -p backend/tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
-    "start": "tsx backend/src/server.ts",
+    "start": "node dist/backend/src/server.js",
+    "start:dev": "tsx backend/src/server.ts",
     "db:generate": "prisma generate --schema backend/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
     "db:seed": "tsx backend/prisma/seed.ts",
-    "db:push": "prisma db push --schema backend/prisma/schema.prisma"
+    "db:push": "prisma db push --schema backend/prisma/schema.prisma",
+    "db:migrate:deploy": "prisma migrate deploy --schema backend/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
@@ -28,7 +30,7 @@
     "express": "^5.2.1",
     "lucide-react": "^0.577.0",
     "motion": "^12.35.0",
-    "pg": "^8.19.0",
+    "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0"
@@ -37,7 +39,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.5",
     "@types/pg": "^8.18.0",
     "@types/react": "^19.2.14",
     "@vitejs/plugin-react-swc": "^4.2.3",

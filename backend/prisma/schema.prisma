@@ -6,18 +6,114 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum NotificationType {
+  NEW_QUESTION
+  ORDER_STATUS
+  SYSTEM
+  INFO
+}
+
+enum ListingType {
+  PRODUCT
+  SERVICE
+}
+
+enum ListingCondition {
+  NEW
+  USED
+}
+
+enum ListingStatus {
+  ACTIVE
+  INACTIVE
+  MODERATION
+}
+
+enum ModerationStatus {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+enum QuestionStatus {
+  PENDING
+  ANSWERED
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  PROCESSING
+  PREPARED
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryType {
+  PICKUP
+  DELIVERY
+}
+
+enum TransactionStatus {
+  PENDING
+  HELD
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  CASH
+  YOOMONEY
+  STRIPE
+  OTHER
+}
+
+enum ComplaintStatus {
+  NEW
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SellerType {
+  COMPANY
+  PRIVATE
+  INDIVIDUAL
+}
+
 model AppUser {
   id                   Int                   @id @default(autoincrement())
   public_id            String                @unique
-  role                 String
-  status               String                @default("ACTIVE")
+  role                 UserRole
+  status               UserStatus            @default(ACTIVE)
   email                String                @unique
   password             String
   name                 String
   first_name           String?
   last_name            String?
   display_name         String?
-  username             String?
+  username             String?               @unique
   phone                String?
   city_id              Int?
   avatar               String?
@@ -44,20 +140,25 @@ model AppUser {
   partnership_requests PartnershipRequest[]
   reviews              ListingReview[]       @relation("user_reviews")
   notifications        Notification[]
+  audit_logs           AuditLog[]            @relation("audit_actor")
+  order_status_changes OrderStatusHistory[]  @relation("order_status_actor")
+
+  @@index([role, status])
+  @@index([created_at])
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   user_id     Int
-  type        String
+  type        NotificationType
   message     String
   target_url  String
-  is_read     Boolean  @default(false)
-  created_at  DateTime @default(now())
+  is_read     Boolean          @default(false)
+  created_at  DateTime         @default(now())
 
-  user        AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        AppUser          @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id, is_read]) // Составной индекс для моментальной проверки новых сообщений
+  @@index([user_id, is_read])
 }
 
 model SellerProfile {
@@ -89,11 +190,14 @@ model UserAddress {
 
   user        AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   city        City     @relation("AddressCity", fields: [city_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, label])
+  @@index([user_id, is_default])
 }
 
 model City {
   id            Int                  @id @default(autoincrement())
-  name          String               @unique
+  name          String
   region        String
   created_at    DateTime             @default(now())
   updated_at    DateTime             @updatedAt
@@ -101,12 +205,15 @@ model City {
   users         AppUser[]            @relation("UserCity")
   addresses     UserAddress[]        @relation("AddressCity")
   listings      MarketplaceListing[]
+
+  @@unique([name, region])
+  @@index([region, name])
 }
 
 model CatalogCategory {
   id            Int                  @id @default(autoincrement())
   public_id     String               @unique
-  type          String
+  type          ListingType
   name          String
   icon_key      String
   order_index   Int                  @default(0)
@@ -152,16 +259,16 @@ model MarketplaceListing {
   id                   Int               @id @default(autoincrement())
   public_id            String            @unique
   seller_id            Int
-  type                 String
+  type                 ListingType
   title                String
   description          String?
   item_id              Int?
   price                Int
   sale_price           Int?
   rating               Float             @default(4.5)
-  condition            String
-  status               String            @default("ACTIVE")
-  moderation_status    String            @default("APPROVED")
+  condition            ListingCondition
+  status               ListingStatus     @default(ACTIVE)
+  moderation_status    ModerationStatus  @default(APPROVED)
   views                Int               @default(0)
   city_id              Int
   shipping_by_seller   Boolean           @default(true)
@@ -184,6 +291,7 @@ model MarketplaceListing {
   @@index([item_id])
   @@index([city_id])
   @@index([type, status, moderation_status])
+  @@index([status, moderation_status, created_at])
 }
 
 model ListingImage {
@@ -207,6 +315,7 @@ model ListingAttribute {
 
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
+  @@unique([listing_id, key], map: "ListingAttribute_listing_id_attr_key")
   @@index([listing_id])
 }
 
@@ -222,6 +331,7 @@ model ListingReview {
   author     AppUser            @relation("user_reviews", fields: [author_id], references: [id], onDelete: Cascade)
 
   @@unique([listing_id, author_id])
+  @@index([listing_id, created_at])
 }
 
 model ListingQuestion {
@@ -231,12 +341,14 @@ model ListingQuestion {
   buyer_id    Int
   question    String
   answer      String?
-  status      String             @default("PENDING")
+  status      QuestionStatus     @default(PENDING)
   created_at  DateTime           @default(now())
   answered_at DateTime?
 
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
   buyer       AppUser            @relation("question_author", fields: [buyer_id], references: [id], onDelete: Cascade)
+
+  @@index([listing_id, created_at])
 }
 
 model WishlistItem {
@@ -252,26 +364,28 @@ model WishlistItem {
 }
 
 model MarketOrder {
-  id               Int                 @id @default(autoincrement())
-  public_id        String              @unique
-  buyer_id         Int
-  seller_id        Int
-  status           String
-  delivery_type    String
-  delivery_address String?
-  total_price      Int
-  delivery_cost    Int                 @default(0)
-  discount         Int                 @default(0)
-  created_at       DateTime            @default(now())
-  updated_at       DateTime            @updatedAt
+  id                    Int                  @id @default(autoincrement())
+  public_id             String               @unique
+  buyer_id              Int
+  seller_id             Int
+  status                OrderStatus          @default(CREATED)
+  delivery_type         DeliveryType
+  delivery_address      String?
+  total_price           Int
+  delivery_cost         Int                  @default(0)
+  discount              Int                  @default(0)
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
 
-  buyer            AppUser             @relation("buyer_orders", fields: [buyer_id], references: [id], onDelete: Cascade)
-  seller           AppUser             @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
-  items            MarketOrderItem[]
-  transactions     PlatformTransaction[]
+  buyer                 AppUser              @relation("buyer_orders", fields: [buyer_id], references: [id], onDelete: Cascade)
+  seller                AppUser              @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
+  items                 MarketOrderItem[]
+  transactions          PlatformTransaction[]
+  status_history        OrderStatusHistory[]
 
-  @@index([buyer_id])  // Для быстрого поиска "Мои покупки"
-  @@index([seller_id]) // Для быстрого поиска "Мои продажи"
+  @@index([buyer_id])
+  @@index([seller_id])
+  @@index([status, created_at])
 }
 
 model MarketOrderItem {
@@ -286,37 +400,39 @@ model MarketOrderItem {
   order       MarketOrder         @relation(fields: [order_id], references: [id], onDelete: Cascade)
   listing     MarketplaceListing? @relation(fields: [listing_id], references: [id], onDelete: SetNull)
 
-  @@index([order_id]) // Чтобы мгновенно найти все товары в одном заказе
+  @@index([order_id])
+  @@index([listing_id])
 }
 
 model PlatformTransaction {
-  id                 Int         @id @default(autoincrement())
-  public_id          String      @unique
+  id                 Int               @id @default(autoincrement())
+  public_id          String            @unique
   order_id           Int
   buyer_id           Int
   seller_id          Int
   amount             Int
-  status             String
+  status             TransactionStatus
   commission_rate    Float
   commission         Int
-  payment_provider   String
-  payment_intent_id  String
-  created_at         DateTime    @default(now())
+  payment_provider   PaymentProvider
+  payment_intent_id  String            @unique
+  created_at         DateTime          @default(now())
 
-  order              MarketOrder @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  buyer              AppUser     @relation("buyer_transactions", fields: [buyer_id], references: [id], onDelete: Cascade)
-  seller             AppUser     @relation("seller_transactions", fields: [seller_id], references: [id], onDelete: Cascade)
+  order              MarketOrder       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  buyer              AppUser           @relation("buyer_transactions", fields: [buyer_id], references: [id], onDelete: Cascade)
+  seller             AppUser           @relation("seller_transactions", fields: [seller_id], references: [id], onDelete: Cascade)
 
   @@index([order_id])
   @@index([buyer_id])
   @@index([seller_id])
+  @@index([status, created_at])
 }
 
 model Complaint {
   id                    Int                @id @default(autoincrement())
   public_id             String             @unique
   created_at            DateTime           @default(now())
-  status                String             @default("NEW")
+  status                ComplaintStatus    @default(NEW)
   complaint_type        String
   listing_id            Int
   seller_id             Int
@@ -332,15 +448,15 @@ model Complaint {
   reporter              AppUser            @relation("complaint_reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
   checked_by            AppUser?           @relation("complaint_checker", fields: [checked_by_id], references: [id], onDelete: SetNull)
 
-  @@index([status])      // Чтобы модератор видел только "NEW" (новые) жалобы
-  @@index([listing_id])  // Чтобы видеть все жалобы на конкретный товар
+  @@index([status])
+  @@index([listing_id])
 }
 
 model KycRequest {
   id               Int       @id @default(autoincrement())
   public_id        String    @unique
   created_at       DateTime  @default(now())
-  status           String    @default("PENDING")
+  status           KycStatus @default(PENDING)
   seller_id        Int
   email            String
   phone            String
@@ -355,6 +471,8 @@ model KycRequest {
 
   seller           AppUser   @relation("kyc_seller", fields: [seller_id], references: [id], onDelete: Cascade)
   reviewed_by      AppUser?  @relation("kyc_reviewer", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+
+  @@index([status, created_at])
 }
 
 model CommissionTier {
@@ -369,13 +487,15 @@ model CommissionTier {
   updated_at      DateTime       @updatedAt
 
   seller_profiles SellerProfile[]
+
+  @@index([min_sales, max_sales])
 }
 
 model PartnershipRequest {
-  id              Int      @id @default(autoincrement())
-  public_id       String   @unique
+  id              Int         @id @default(autoincrement())
+  public_id       String      @unique
   user_id         Int
-  seller_type     String
+  seller_type     SellerType
   name            String
   email           String
   contact         String
@@ -386,7 +506,43 @@ model PartnershipRequest {
   social_profile  String?
   credibility     String?
   why_us          String
-  created_at      DateTime @default(now())
+  created_at      DateTime    @default(now())
 
-  user            AppUser  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user            AppUser     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at])
+}
+
+model OrderStatusHistory {
+  id               Int         @id @default(autoincrement())
+  order_id         Int
+  from_status      OrderStatus?
+  to_status        OrderStatus
+  changed_by_id    Int?
+  reason           String?
+  created_at       DateTime    @default(now())
+
+  order            MarketOrder @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  changed_by       AppUser?    @relation("order_status_actor", fields: [changed_by_id], references: [id], onDelete: SetNull)
+
+  @@index([order_id, created_at])
+  @@index([changed_by_id])
+}
+
+model AuditLog {
+  id               Int       @id @default(autoincrement())
+  public_id        String    @unique
+  actor_user_id    Int?
+  action           String
+  entity_type      String
+  entity_public_id String?
+  details          Json?
+  ip_address       String?
+  created_at       DateTime  @default(now())
+
+  actor            AppUser?  @relation("audit_actor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([actor_user_id, created_at])
+  @@index([entity_type, entity_public_id])
+  @@index([action, created_at])
 }

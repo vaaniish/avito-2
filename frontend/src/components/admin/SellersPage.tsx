@@ -98,42 +98,42 @@ export function SellersPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">Продавцы и KYC</h1>
-        <p className="text-xs md:text-sm lg:text-base text-gray-600">Проверка документов и допуск к продажам</p>
+        <h1 className="dashboard-title">Продавцы и KYC</h1>
+        <p className="dashboard-subtitle">Проверка документов и допуск к продажам</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-        <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-gray-200">
-          <div className="text-xs md:text-sm text-gray-600 mb-1">Всего заявок</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold">{stats.total}</div>
+      <div className="dashboard-grid-stats">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего заявок</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
         </div>
-        <div className="p-3 md:p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
-          <div className="text-xs md:text-sm text-yellow-700 mb-1">Ожидают проверки</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-yellow-700">{stats.pending}</div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">Ожидают проверки</div>
+          <div className="dashboard-stat__value">{stats.pending}</div>
         </div>
-        <div className="p-3 md:p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-xs md:text-sm text-green-700 mb-1">Одобрено</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-700">{stats.approved}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Одобрено</div>
+          <div className="dashboard-stat__value">{stats.approved}</div>
         </div>
-        <div className="p-3 md:p-4 bg-red-50 rounded-xl border-2 border-red-200">
-          <div className="text-xs md:text-sm text-red-700 mb-1">Отклонено</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-red-700">{stats.rejected}</div>
+        <div className="dashboard-stat dashboard-stat--danger">
+          <div className="dashboard-stat__label">Отклонено</div>
+          <div className="dashboard-stat__value">{stats.rejected}</div>
         </div>
       </div>
 
-      <div className="p-4 md:p-6 bg-white rounded-2xl border-2 border-gray-200 space-y-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="dashboard-toolbar space-y-3">
+        <div className="dashboard-search">
+          <Search className="dashboard-search__icon" />
           <input
             type="text"
             placeholder="Поиск по ID, названию, компании, email, ИНН..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300"
+            className="dashboard-search__input"
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="dashboard-chip-row">
           {[
             { value: "all", label: "Все" },
             { value: "pending", label: "Ожидают" },
@@ -143,8 +143,8 @@ export function SellersPage() {
             <button
               key={option.value}
               onClick={() => setStatusFilter(option.value as KYCStatus)}
-              className={`px-3 py-2 rounded-xl text-sm whitespace-nowrap ${
-                statusFilter === option.value ? "bg-[rgb(38,83,141)] text-white" : "bg-gray-100 text-gray-700"
+              className={`dashboard-chip ${
+                statusFilter === option.value ? "dashboard-chip--active" : ""
               }`}
             >
               {option.label}
@@ -159,7 +159,7 @@ export function SellersPage() {
             <button
               key={request.id}
               onClick={() => setSelectedRequest(request.id)}
-              className={`w-full text-left bg-white rounded-xl p-4 border transition-colors ${
+              className={`w-full text-left dashboard-card transition-colors ${
                 selectedRequest === request.id ? "border-[rgb(38,83,141)]" : "border-gray-200"
               }`}
             >
@@ -175,10 +175,10 @@ export function SellersPage() {
             </button>
           ))}
 
-          {filteredRequests.length === 0 && <div className="text-sm text-gray-500">Заявки не найдены</div>}
+          {filteredRequests.length === 0 && <div className="dashboard-empty">Заявки не найдены</div>}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="dashboard-card">
           {!selectedRequestData ? (
             <div className="text-sm text-gray-500">Выберите заявку для просмотра деталей</div>
           ) : (
@@ -194,16 +194,16 @@ export function SellersPage() {
                 <div className="text-sm text-red-600">Причина отклонения: {selectedRequestData.rejectionReason}</div>
               )}
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                 <button
                   onClick={() => void updateStatus("approved")}
-                  className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center justify-center gap-1"
+                  className="btn-success-soft flex items-center justify-center gap-1 py-2 text-sm sm:flex-1"
                 >
                   <CheckCircle className="w-4 h-4" /> Одобрить
                 </button>
                 <button
                   onClick={() => void updateStatus("rejected")}
-                  className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center justify-center gap-1"
+                  className="btn-danger-soft flex items-center justify-center gap-1 py-2 text-sm sm:flex-1"
                 >
                   <XCircle className="w-4 h-4" /> Отклонить
                 </button>

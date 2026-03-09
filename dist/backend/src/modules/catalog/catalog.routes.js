@@ -20,25 +20,25 @@ function formatPublishDate(date) {
         hour: "2-digit",
         minute: "2-digit",
     }).format(date);
-    return formatted.replace(",", " в");
+    return formatted.replace(",", " РІ");
 }
 function formatResponseTime(minutes) {
     if (!minutes || minutes <= 0)
         return null;
     if (minutes < 60)
-        return `около ${minutes} минут`;
+        return `РѕРєРѕР»Рѕ ${minutes} РјРёРЅСѓС‚`;
     if (minutes < 120)
-        return "около 1 часа";
-    return `около ${Math.round(minutes / 60)} часов`;
+        return "РѕРєРѕР»Рѕ 1 С‡Р°СЃР°";
+    return `РѕРєРѕР»Рѕ ${Math.round(minutes / 60)} С‡Р°СЃРѕРІ`;
 }
 function listingCategoryName(listing) {
-    return listing.item?.name ?? "Без категории";
+    return listing.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
 }
 function listingBreadcrumbs(listing) {
     if (!listing.item)
-        return ["Главная", "Без категории"];
+        return ["Р“Р»Р°РІРЅР°СЏ", "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё"];
     return [
-        "Главная",
+        "Р“Р»Р°РІРЅР°СЏ",
         listing.item.subcategory.category.name,
         listing.item.subcategory.name,
         listing.item.name,
@@ -181,7 +181,7 @@ catalogRouter.get("/listings", async (req, res) => {
                 condition: (0, format_1.toClientCondition)(listing.condition),
                 reviews: listing.reviews.map((review) => ({
                     id: String(review.id),
-                    author: review.author.display_name ?? "Аноним",
+                    author: review.author.display_name ?? "РђРЅРѕРЅРёРј",
                     rating: review.rating,
                     date: formatPublishDate(review.created_at),
                     comment: review.comment,
@@ -278,7 +278,7 @@ catalogRouter.get("/suggestions", async (req, res) => {
                 title: listing.title,
                 subtitle: listing.item?.subcategory.name ??
                     listing.item?.subcategory.category.name ??
-                    "Категория",
+                    "РљР°С‚РµРіРѕСЂРёСЏ",
                 query: listing.title,
             });
         }
@@ -287,7 +287,7 @@ catalogRouter.get("/suggestions", async (req, res) => {
                 suggestions.push({
                     type: "category",
                     title: category.name,
-                    subtitle: "Категория",
+                    subtitle: "РљР°С‚РµРіРѕСЂРёСЏ",
                     query: category.name,
                 });
             }
@@ -405,7 +405,7 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
             data: {
                 user_id: listing.seller_id,
                 type: "NEW_QUESTION",
-                message: `Новый вопрос по вашему товару "${listing.title}"`,
+                message: `РќРѕРІС‹Р№ РІРѕРїСЂРѕСЃ РїРѕ РІР°С€РµРјСѓ С‚РѕРІР°СЂСѓ "${listing.title}"`,
                 target_url: `/products/${listing.public_id}`,
             },
         });

@@ -117,43 +117,43 @@ export function QuestionsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Вопросы покупателей</h1>
-        <p className="text-gray-600">Отвечайте быстро, чтобы повышать доверие и продажи</p>
+        <h1 className="dashboard-title">Вопросы покупателей</h1>
+        <p className="dashboard-subtitle">Отвечайте быстро, чтобы повышать доверие и продажи</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded-xl border-2 border-gray-200">
-          <div className="text-sm text-gray-600 mb-1">Всего вопросов</div>
-          <div className="text-2xl font-bold">{stats.total}</div>
+      <div className="dashboard-grid-stats dashboard-grid-stats--3">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего вопросов</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
         </div>
-        <div className="p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-          <div className="text-sm text-orange-700 mb-1">Ожидают ответа</div>
-          <div className="text-2xl font-bold text-orange-700">{stats.pending}</div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">Ожидают ответа</div>
+          <div className="dashboard-stat__value">{stats.pending}</div>
         </div>
-        <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-sm text-green-700 mb-1">Отвечено</div>
-          <div className="text-2xl font-bold text-green-700">{stats.answered}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Отвечено</div>
+          <div className="dashboard-stat__value">{stats.answered}</div>
         </div>
       </div>
 
-      <div className="p-6 bg-white rounded-2xl border-2 border-gray-200">
+      <div className="dashboard-toolbar">
         <div className="flex flex-col gap-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <div className="dashboard-search">
+            <Search className="dashboard-search__icon" />
             <input
               type="text"
               placeholder="Поиск по товару, покупателю или вопросу..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300"
+              className="dashboard-search__input"
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium">Статус:</span>
-            <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <span className="text-sm font-medium text-gray-700">Статус:</span>
+            <div className="dashboard-chip-row">
               {[
                 { value: "all", label: "Все" },
                 { value: "pending", label: "Ожидают ответа" },
@@ -162,10 +162,10 @@ export function QuestionsPage() {
                 <button
                   key={option.value}
                   onClick={() => setStatusFilter(option.value as StatusFilter)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                  className={`dashboard-chip ${
                     statusFilter === option.value
-                      ? "bg-black text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "dashboard-chip--active"
+                      : ""
                   }`}
                 >
                   {option.label}
@@ -178,12 +178,12 @@ export function QuestionsPage() {
 
       <div className="space-y-4">
         {filteredQuestions.map((question) => (
-          <div key={question.id} className="bg-white rounded-2xl border-2 border-gray-200 p-4 md:p-6">
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
+          <article key={question.id} className="dashboard-card md:p-5">
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                   <MessageCircle className="w-4 h-4" />
-                  <span>{question.listingTitle}</span>
+                  <span className="truncate">{question.listingTitle}</span>
                 </div>
                 <div className="text-sm text-gray-500">{question.buyerName} • {formatDate(question.createdAt)}</div>
               </div>
@@ -217,11 +217,11 @@ export function QuestionsPage() {
                       }
                       rows={4}
                       placeholder="Введите ответ покупателю"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300"
+                      className="field-control"
                     />
                     <button
                       onClick={() => void handleSubmitAnswer(question.id)}
-                      className="px-4 py-2 bg-[rgb(38,83,141)] text-white rounded-xl hover:bg-[rgb(58,103,161)] flex items-center gap-2"
+                      className="btn-primary inline-flex items-center gap-2 px-4 py-2"
                     >
                       <Send className="w-4 h-4" /> Отправить ответ
                     </button>
@@ -229,10 +229,10 @@ export function QuestionsPage() {
                 )}
               </div>
             )}
-          </div>
+          </article>
         ))}
 
-        {filteredQuestions.length === 0 && <div className="text-sm text-gray-500">Вопросы не найдены</div>}
+        {filteredQuestions.length === 0 && <div className="dashboard-empty">Вопросы не найдены</div>}
       </div>
     </div>
   );

@@ -19,15 +19,27 @@ import {
 } from "../../utils/format";
 
 const partnerRouter = Router();
+type ListingTypeValue = "PRODUCT" | "SERVICE";
+type ListingConditionValue = "NEW" | "USED";
+type ListingStatusValue = "ACTIVE" | "INACTIVE" | "MODERATION";
+type OrderStatusValue =
+  | "CREATED"
+  | "PAID"
+  | "PROCESSING"
+  | "PREPARED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "COMPLETED"
+  | "CANCELLED";
 const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
-const LISTING_ACTIVE = "ACTIVE";
-const LISTING_INACTIVE = "INACTIVE";
-const LISTING_MODERATION = "MODERATION";
+const LISTING_ACTIVE: ListingStatusValue = "ACTIVE";
+const LISTING_INACTIVE: ListingStatusValue = "INACTIVE";
+const LISTING_MODERATION: ListingStatusValue = "MODERATION";
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 
-function parseListingType(value: unknown): string {
+function parseListingType(value: unknown): ListingTypeValue {
   return value === "services" ? "SERVICE" : "PRODUCT";
 }
 
@@ -35,26 +47,20 @@ function toDeliveryType(value: string): "pickup" | "delivery" {
   return value === "PICKUP" ? "pickup" : "delivery";
 }
 
-function parseCondition(value: unknown): string {
+function parseCondition(value: unknown): ListingConditionValue {
   return value === "used" ? "USED" : "NEW";
 }
 
-function parseOrderStatus(value: unknown): string | null {
+function parseOrderStatus(value: unknown): OrderStatusValue | null {
   const raw = typeof value === "string" ? value.toUpperCase() : "";
-  const allowed = [
-    "CREATED",
-    "PAID",
-    "PREPARED",
-    "SHIPPED",
-    "DELIVERED",
-    "COMPLETED",
-    "CANCELLED",
-  ];
-
-  if (allowed.includes(raw)) {
-    return raw;
-  }
-
+  if (raw === "CREATED") return "CREATED";
+  if (raw === "PAID") return "PAID";
+  if (raw === "PROCESSING") return "PROCESSING";
+  if (raw === "PREPARED") return "PREPARED";
+  if (raw === "SHIPPED") return "SHIPPED";
+  if (raw === "DELIVERED") return "DELIVERED";
+  if (raw === "COMPLETED") return "COMPLETED";
+  if (raw === "CANCELLED") return "CANCELLED";
   return null;
 }
 
@@ -64,14 +70,14 @@ function makePublicId(prefix: string): string {
 
 function normalizeCategory(category: string): string {
   const normalized = category.trim();
-  return normalized || "Без категории";
+  return normalized || "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
 }
 
 async function getOrCreateFallbackItem(
-  type: string,
+  type: ListingTypeValue,
   itemName: string,
 ): Promise<number> {
-  const fallbackCategoryName = type === "SERVICE" ? "Услуги" : "Товары";
+  const fallbackCategoryName = type === "SERVICE" ? "РЈСЃР»СѓРіРё" : "РўРѕРІР°СЂС‹";
   const fallbackCategoryPublicId = type === "SERVICE" ? "service-fallback" : "product-fallback";
   const fallbackSubcategoryPublicId =
     type === "SERVICE" ? "service-fallback-other" : "product-fallback-other";
@@ -98,7 +104,7 @@ async function getOrCreateFallbackItem(
   let subcategory = await prisma.catalogSubcategory.findFirst({
     where: {
       category_id: category.id,
-      name: "Другое",
+      name: "Р”СЂСѓРіРѕРµ",
     },
   });
 
@@ -107,7 +113,7 @@ async function getOrCreateFallbackItem(
       data: {
         category_id: category.id,
         public_id: fallbackSubcategoryPublicId,
-        name: "Другое",
+        name: "Р”СЂСѓРіРѕРµ",
         order_index: 9_999,
       },
     });
@@ -126,11 +132,11 @@ async function getOrCreateFallbackItem(
 }
 
 async function resolveCatalogItemId(
-  type: string,
+  type: ListingTypeValue,
   rawCategory: string,
 ): Promise<number | null> {
   const categoryName = normalizeCategory(rawCategory);
-  if (!categoryName || categoryName === "Без категории") return null;
+  if (!categoryName || categoryName === "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё") return null;
 
   const existing = await prisma.catalogItem.findFirst({
     where: {
@@ -183,13 +189,7 @@ partnerRouter.get("/listings", async (req: Request, res: Response) => {
     });
 
     res.json(
-      listings.map(
-        (
-          listing: MarketplaceListing & {
-            item: CatalogItem | null;
-            images: ListingImage[];
-          },
-        ) => ({
+      listings.map((listing) => ({
           id: listing.public_id,
           title: listing.title,
           price: listing.price,
@@ -199,7 +199,7 @@ partnerRouter.get("/listings", async (req: Request, res: Response) => {
           created_at: listing.created_at,
           image: listingImageUrl(listing.images),
           description: listing.description,
-          category: listing.item?.name ?? "Без категории",
+          category: listing.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё",
         }),
       ),
     );
@@ -234,13 +234,13 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
     const description =
       typeof body.description === "string" ? body.description.trim() : "";
     const category =
-      typeof body.category === "string" ? body.category.trim() : "Без категории";
+      typeof body.category === "string" ? body.category.trim() : "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
     const image = typeof body.image === "string" ? body.image.trim() : "";
     const type = parseListingType(body.type);
     const cityId = typeof body.cityId === "number" ? body.cityId : undefined; // Changed from city
 
     if (!title || !Number.isFinite(price) || price <= 0 || cityId === undefined) { // Added cityId validation
-      res.status(400).json({ error: "Укажите корректные title, price и city" });
+      res.status(400).json({ error: "РЈРєР°Р¶РёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Рµ title, price Рё city" });
       return;
     }
 
@@ -343,7 +343,7 @@ partnerRouter.patch(
 
       const price = body.price === undefined ? undefined : Number(body.price);
       if (price !== undefined && (!Number.isFinite(price) || price <= 0)) {
-        res.status(400).json({ error: "Некорректная цена" });
+        res.status(400).json({ error: "РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ С†РµРЅР°" });
         return;
       }
 
@@ -352,7 +352,7 @@ partnerRouter.patch(
       const nextItemId =
         nextCategory === undefined
           ? undefined
-          : await resolveCatalogItemId(existing.type, nextCategory);
+          : await resolveCatalogItemId(existing.type as ListingTypeValue, nextCategory);
       const nextImage =
         typeof body.image === "string" ? body.image.trim() : undefined;
 
@@ -428,7 +428,7 @@ partnerRouter.patch(
         created_at: reloaded.created_at,
         image: listingImageUrl(reloaded.images),
         description: reloaded.description,
-        category: reloaded.item?.name ?? "Без категории",
+        category: reloaded.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё",
         city: reloaded.city?.name ?? null, // Added city to response
       });
     } catch (error) {
@@ -461,7 +461,7 @@ partnerRouter.post(
         return;
       }
 
-      let nextStatus: string = existing.status;
+      let nextStatus: ListingStatusValue = existing.status as ListingStatusValue;
       if (existing.status === LISTING_ACTIVE) {
         nextStatus = LISTING_INACTIVE;
       } else if (existing.status === LISTING_INACTIVE) {
@@ -551,13 +551,7 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
     });
 
     res.json(
-      orders.map(
-        (
-          order: MarketOrder & {
-            buyer: { public_id: string; name: string };
-            items: MarketOrderItem[];
-          },
-        ) => ({
+      orders.map((order) => ({
           id: order.public_id,
           buyer_name: order.buyer.name,
           buyer_id: order.buyer.public_id,
@@ -595,7 +589,7 @@ partnerRouter.patch(
       const nextStatus = parseOrderStatus(body.status);
 
       if (!nextStatus) {
-        res.status(400).json({ error: "Некорректный статус заказа" });
+        res.status(400).json({ error: "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р°" });
         return;
       }
 
@@ -660,13 +654,7 @@ partnerRouter.get("/questions", async (req: Request, res: Response) => {
     });
 
     res.json(
-      questions.map(
-        (
-          question: ListingQuestion & {
-            listing: { public_id: string; title: string };
-            buyer: { public_id: string; name: string };
-          },
-        ) => ({
+      questions.map((question) => ({
           id: question.public_id,
           listingId: question.listing.public_id,
           listingTitle: question.listing.title,
@@ -701,7 +689,7 @@ partnerRouter.post(
       const answer = typeof body.answer === "string" ? body.answer.trim() : "";
 
       if (!answer) {
-        res.status(400).json({ error: "Ответ не может быть пустым" });
+        res.status(400).json({ error: "РћС‚РІРµС‚ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј" });
         return;
       }
 

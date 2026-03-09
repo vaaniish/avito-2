@@ -936,7 +936,7 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
             status: paymentMethod === "cash" ? "SUCCESS" : "HELD",
             commission_rate: commissionRate,
             commission,
-            payment_provider: paymentMethod === "cash" ? "Cash" : "YooMoney",
+            payment_provider: paymentMethod === "cash" ? "CASH" : "YOOMONEY",
             payment_intent_id:
               paymentMethod === "cash"
                 ? `pay_${Date.now()}_${sequence}`

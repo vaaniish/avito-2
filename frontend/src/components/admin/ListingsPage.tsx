@@ -85,46 +85,46 @@ export function ListingsPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">Модерация объявлений</h1>
-        <p className="text-xs md:text-sm lg:text-base text-gray-600">Контроль качества карточек и исключений</p>
+        <h1 className="dashboard-title">Модерация объявлений</h1>
+        <p className="dashboard-subtitle">Контроль качества карточек и исключений</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
-        <div className="p-3 md:p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
-          <div className="text-xs md:text-sm text-yellow-700 mb-1">На проверке</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-yellow-700">{stats.pending}</div>
+      <div className="dashboard-grid-stats dashboard-grid-stats--5">
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">На проверке</div>
+          <div className="dashboard-stat__value">{stats.pending}</div>
         </div>
-        <div className="p-3 md:p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-xs md:text-sm text-green-700 mb-1">Опубликовано</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-700">{stats.approved}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Опубликовано</div>
+          <div className="dashboard-stat__value">{stats.approved}</div>
         </div>
-        <div className="p-3 md:p-4 bg-red-50 rounded-xl border-2 border-red-200">
-          <div className="text-xs md:text-sm text-red-700 mb-1">Отклонено</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-red-700">{stats.rejected}</div>
+        <div className="dashboard-stat dashboard-stat--danger">
+          <div className="dashboard-stat__label">Отклонено</div>
+          <div className="dashboard-stat__value">{stats.rejected}</div>
         </div>
-        <div className="p-3 md:p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-          <div className="text-xs md:text-sm text-blue-700 mb-1">Новых продавцов</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-blue-700">{stats.newSellers}</div>
+        <div className="dashboard-stat dashboard-stat--info">
+          <div className="dashboard-stat__label">Новых продавцов</div>
+          <div className="dashboard-stat__value">{stats.newSellers}</div>
         </div>
-        <div className="p-3 md:p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-          <div className="text-xs md:text-sm text-orange-700 mb-1">С жалобами</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-orange-700">{stats.withComplaints}</div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">С жалобами</div>
+          <div className="dashboard-stat__value">{stats.withComplaints}</div>
         </div>
       </div>
 
-      <div className="p-3 md:p-4 lg:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-gray-200 space-y-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+      <div className="dashboard-toolbar space-y-3">
+        <div className="dashboard-search">
+          <Search className="dashboard-search__icon" />
           <input
             type="text"
             placeholder="Поиск по ID, названию или продавцу..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full pl-11 md:pl-12 pr-3 md:pr-4 py-2 md:py-3 rounded-xl border border-gray-300"
+            className="dashboard-search__input"
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="dashboard-chip-row">
           {[
             { value: "pending", label: "На проверке" },
             { value: "approved", label: "Опубликовано" },
@@ -134,8 +134,8 @@ export function ListingsPage() {
             <button
               key={option.value}
               onClick={() => setStatusFilter(option.value as ListingStatus)}
-              className={`px-3 py-2 rounded-xl text-sm whitespace-nowrap ${
-                statusFilter === option.value ? "bg-[rgb(38,83,141)] text-white" : "bg-gray-100 text-gray-700"
+              className={`dashboard-chip ${
+                statusFilter === option.value ? "dashboard-chip--active" : ""
               }`}
             >
               {option.label}
@@ -146,28 +146,28 @@ export function ListingsPage() {
 
       <div className="space-y-3">
         {filteredListings.map((listing) => (
-          <div key={listing.id} className="bg-white border border-gray-200 rounded-xl p-4">
+          <div key={listing.id} className="dashboard-card">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div>
-                <div className="text-sm font-semibold">{listing.id} • {listing.title}</div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold break-words">{listing.id} • {listing.title}</div>
                 <div className="text-xs text-gray-500">{new Date(listing.createdAt).toLocaleString("ru-RU")}</div>
                 <div className="text-xs text-gray-600">Продавец: {listing.sellerName} ({listing.sellerId})</div>
-                <div className="text-xs text-gray-600">Категория: {listing.category} • {listing.price.toLocaleString("ru-RU")} ₽</div>
-                <div className="text-xs text-gray-600">Флаги: {listing.autoFlags.join(", ") || "нет"}</div>
+                <div className="text-xs text-gray-600 break-words">Категория: {listing.category} • {listing.price.toLocaleString("ru-RU")} ₽</div>
+                <div className="text-xs text-gray-600 break-words">Флаги: {listing.autoFlags.join(", ") || "нет"}</div>
                 <div className="text-xs text-gray-600">Жалоб: {listing.complaintsCount}</div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {getStatusBadge(listing.status)}
                 <button
                   onClick={() => void moderate(listing.id, "approved")}
-                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-1"
+                  className="btn-success-soft flex items-center gap-1 px-3 py-2 text-sm"
                 >
                   <CheckCircle className="w-4 h-4" /> Одобрить
                 </button>
                 <button
                   onClick={() => void moderate(listing.id, "rejected")}
-                  className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-1"
+                  className="btn-danger-soft flex items-center gap-1 px-3 py-2 text-sm"
                 >
                   <XCircle className="w-4 h-4" /> Отклонить
                 </button>
@@ -176,7 +176,7 @@ export function ListingsPage() {
           </div>
         ))}
 
-        {filteredListings.length === 0 && <div className="text-sm text-gray-500">Объявления не найдены</div>}
+        {filteredListings.length === 0 && <div className="dashboard-empty">Объявления не найдены</div>}
       </div>
     </div>
   );

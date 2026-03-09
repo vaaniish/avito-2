@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 import {
-  CreditCard,
   AlertTriangle,
-  UserCheck,
+  ClipboardList,
+  CreditCard,
   FileText,
-  Users,
-  TrendingUp,
-  HelpCircle,
   LogOut,
   Menu,
+  TrendingUp,
+  UserCheck,
+  Users,
   X,
 } from "lucide-react";
-import { TransactionsPage } from "./TransactionsPage";
-import { ComplaintsPage } from "./ComplaintsPage";
-import { SellersPage } from "./SellersPage";
-import { ListingsPage } from "./ListingsPage";
-import { UsersPage } from "./UsersPage";
+import { AuditLogsPage } from "./AuditLogsPage";
 import { CommissionsPage } from "./CommissionsPage";
-import { HelpPage } from "./HelpPage";
+import { ComplaintsPage } from "./ComplaintsPage";
+import { ListingsPage } from "./ListingsPage";
+import { SellersPage } from "./SellersPage";
+import { TransactionsPage } from "./TransactionsPage";
+import { UsersPage } from "./UsersPage";
 
 type AdminPage =
   | "transactions"
@@ -26,60 +26,58 @@ type AdminPage =
   | "listings"
   | "users"
   | "commissions"
-  | "help";
+  | "audit";
 
 interface AdminPanelProps {
   onLogout: () => void;
 }
 
 export function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [currentPage, setCurrentPage] =
-    useState<AdminPage>("transactions");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] =
-    useState(false);
+  const [currentPage, setCurrentPage] = useState<AdminPage>("transactions");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
     {
       id: "transactions" as AdminPage,
       name: "Сделки",
       icon: CreditCard,
-      description: "Комиссионный доход",
+      description: "Финансы и статусы",
     },
     {
       id: "complaints" as AdminPage,
       name: "Жалобы",
       icon: AlertTriangle,
-      description: "Контроль нарушений",
+      description: "Проверка нарушений",
     },
     {
       id: "sellers" as AdminPage,
       name: "Продавцы / KYC",
       icon: UserCheck,
-      description: "Заявки продавцов",
+      description: "Верификация продавцов",
     },
     {
       id: "listings" as AdminPage,
       name: "Объявления",
       icon: FileText,
-      description: "Модерация",
+      description: "Модерация карточек",
     },
     {
       id: "users" as AdminPage,
       name: "Пользователи",
       icon: Users,
-      description: "Управление аккаунтами",
+      description: "Статусы аккаунтов",
     },
     {
       id: "commissions" as AdminPage,
       name: "Комиссии",
       icon: TrendingUp,
-      description: "Пирамида уровней",
+      description: "Уровни и ставки",
     },
     {
-      id: "help" as AdminPage,
-      name: "Помощь",
-      icon: HelpCircle,
-      description: "Документация",
+      id: "audit" as AdminPage,
+      name: "Аудит",
+      icon: ClipboardList,
+      description: "Логи действий админа",
     },
   ];
 
@@ -97,8 +95,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         return <UsersPage />;
       case "commissions":
         return <CommissionsPage />;
-      case "help":
-        return <HelpPage />;
+      case "audit":
+        return <AuditLogsPage />;
       default:
         return <TransactionsPage />;
     }
@@ -107,34 +105,25 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   return (
     <div className="min-h-screen app-shell">
       <header className="sticky top-0 z-50 border-b border-slate-300 bg-[rgb(38,83,141)] text-white shadow-sm">
-        <div className="px-3 md:px-6 py-3 md:py-4 flex items-center justify-between">
+        <div className="flex items-center justify-between px-3 py-3 md:px-6 md:py-4">
           <div className="flex items-center gap-2 md:gap-4">
             <button
-              onClick={() =>
-                setIsMobileMenuOpen(!isMobileMenuOpen)
-              }
-              className="lg:hidden p-1.5 md:p-2 hover:bg-white/10 rounded-lg md:rounded-xl transition-all"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="rounded-lg p-1.5 transition-all hover:bg-white/10 md:p-2 lg:hidden"
+              aria-label="Открыть меню"
             >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5 md:w-6 md:h-6" />
-              ) : (
-                <Menu className="w-5 h-5 md:w-6 md:h-6" />
-              )}
+              {isMobileMenuOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <Menu className="h-5 w-5 md:h-6 md:w-6" />}
             </button>
             <div>
-              <h1 className="text-base md:text-xl font-bold">
-                Ecom Admin Panel
-              </h1>
-              <p className="text-xs text-gray-400 hidden sm:block">
-                Панель управления маркетплейсом
-              </p>
+              <h1 className="text-base font-bold md:text-xl">Панель администратора</h1>
+              <p className="hidden text-xs text-white/70 sm:block">Управление маркетплейсом</p>
             </div>
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 bg-white/10 hover:bg-white/20 rounded-lg md:rounded-xl transition-all text-sm md:text-base"
+            className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1.5 text-sm transition-all hover:bg-white/20 md:gap-2 md:px-4 md:py-2 md:text-base"
           >
-            <LogOut className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <LogOut className="h-3.5 w-3.5 md:h-4 md:w-4" />
             <span className="hidden sm:inline">Выход</span>
           </button>
         </div>
@@ -142,13 +131,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
       <div className="flex">
         <aside
-          className={`${
-            isMobileMenuOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
-          } fixed left-0 top-[56px] z-40 h-[calc(100vh-56px)] w-72 overflow-y-auto border-r border-slate-200 bg-white transition-transform duration-300 md:top-[73px] md:h-[calc(100vh-73px)] md:w-80 lg:sticky lg:translate-x-0`}
+          className={`fixed left-0 top-[56px] z-40 h-[calc(100vh-56px)] w-72 overflow-y-auto border-r border-slate-200 bg-white px-2 py-2 transition-transform duration-300 md:top-[72px] md:h-[calc(100vh-72px)] md:w-80 lg:sticky lg:translate-x-0 ${
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
-          <nav className="p-3 md:p-4 space-y-1.5 md:space-y-2">
+          <nav className="space-y-1.5 p-2 md:space-y-2 md:p-3">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
@@ -160,26 +147,12 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     setCurrentPage(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl transition-all text-left ${
-                    isActive
-                      ? "bg-[rgb(38,83,141)] text-white"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
+                  className={`dashboard-nav-btn ${isActive ? "dashboard-nav-btn--active" : ""}`}
                 >
-                  <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm md:text-base">
-                      {item.name}
-                    </div>
-                    <div
-                      className={`text-xs ${
-                        isActive
-                          ? "text-white/70"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {item.description}
-                    </div>
+                  <Icon className="h-4 w-4 flex-shrink-0 md:h-5 md:w-5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium md:text-base">{item.name}</div>
+                    <div className={`truncate text-xs ${isActive ? "text-white/70" : "text-gray-500"}`}>{item.description}</div>
                   </div>
                 </button>
               );
@@ -190,13 +163,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         {isMobileMenuOpen && (
           <div
             onClick={() => setIsMobileMenuOpen(false)}
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden top-[56px] md:top-[73px]"
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           />
         )}
 
-        <main className="w-full min-w-0 flex-1 p-3 md:p-6 lg:p-8">
-          {renderPage()}
-        </main>
+        <main className="w-full min-w-0 flex-1 p-3 md:p-6 lg:p-8">{renderPage()}</main>
       </div>
     </div>
   );

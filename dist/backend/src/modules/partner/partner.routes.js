@@ -24,18 +24,22 @@ function parseCondition(value) {
 }
 function parseOrderStatus(value) {
     const raw = typeof value === "string" ? value.toUpperCase() : "";
-    const allowed = [
-        "CREATED",
-        "PAID",
-        "PREPARED",
-        "SHIPPED",
-        "DELIVERED",
-        "COMPLETED",
-        "CANCELLED",
-    ];
-    if (allowed.includes(raw)) {
-        return raw;
-    }
+    if (raw === "CREATED")
+        return "CREATED";
+    if (raw === "PAID")
+        return "PAID";
+    if (raw === "PROCESSING")
+        return "PROCESSING";
+    if (raw === "PREPARED")
+        return "PREPARED";
+    if (raw === "SHIPPED")
+        return "SHIPPED";
+    if (raw === "DELIVERED")
+        return "DELIVERED";
+    if (raw === "COMPLETED")
+        return "COMPLETED";
+    if (raw === "CANCELLED")
+        return "CANCELLED";
     return null;
 }
 function makePublicId(prefix) {
@@ -43,10 +47,10 @@ function makePublicId(prefix) {
 }
 function normalizeCategory(category) {
     const normalized = category.trim();
-    return normalized || "Без категории";
+    return normalized || "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
 }
 async function getOrCreateFallbackItem(type, itemName) {
-    const fallbackCategoryName = type === "SERVICE" ? "Услуги" : "Товары";
+    const fallbackCategoryName = type === "SERVICE" ? "РЈСЃР»СѓРіРё" : "РўРѕРІР°СЂС‹";
     const fallbackCategoryPublicId = type === "SERVICE" ? "service-fallback" : "product-fallback";
     const fallbackSubcategoryPublicId = type === "SERVICE" ? "service-fallback-other" : "product-fallback-other";
     let category = await prisma_1.prisma.catalogCategory.findFirst({
@@ -69,7 +73,7 @@ async function getOrCreateFallbackItem(type, itemName) {
     let subcategory = await prisma_1.prisma.catalogSubcategory.findFirst({
         where: {
             category_id: category.id,
-            name: "Другое",
+            name: "Р”СЂСѓРіРѕРµ",
         },
     });
     if (!subcategory) {
@@ -77,7 +81,7 @@ async function getOrCreateFallbackItem(type, itemName) {
             data: {
                 category_id: category.id,
                 public_id: fallbackSubcategoryPublicId,
-                name: "Другое",
+                name: "Р”СЂСѓРіРѕРµ",
                 order_index: 9999,
             },
         });
@@ -94,7 +98,7 @@ async function getOrCreateFallbackItem(type, itemName) {
 }
 async function resolveCatalogItemId(type, rawCategory) {
     const categoryName = normalizeCategory(rawCategory);
-    if (!categoryName || categoryName === "Без категории")
+    if (!categoryName || categoryName === "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё")
         return null;
     const existing = await prisma_1.prisma.catalogItem.findFirst({
         where: {
@@ -149,7 +153,7 @@ partnerRouter.get("/listings", async (req, res) => {
             created_at: listing.created_at,
             image: listingImageUrl(listing.images),
             description: listing.description,
-            category: listing.item?.name ?? "Без категории",
+            category: listing.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё",
         })));
     }
     catch (error) {
@@ -169,12 +173,12 @@ partnerRouter.post("/listings", async (req, res) => {
         const price = Number(body.price ?? 0);
         const condition = parseCondition(body.condition);
         const description = typeof body.description === "string" ? body.description.trim() : "";
-        const category = typeof body.category === "string" ? body.category.trim() : "Без категории";
+        const category = typeof body.category === "string" ? body.category.trim() : "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
         const image = typeof body.image === "string" ? body.image.trim() : "";
         const type = parseListingType(body.type);
         const cityId = typeof body.cityId === "number" ? body.cityId : undefined;
         if (!title || !Number.isFinite(price) || price <= 0 || cityId === undefined) {
-            res.status(400).json({ error: "Укажите корректные title, price и city" });
+            res.status(400).json({ error: "РЈРєР°Р¶РёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Рµ title, price Рё city" });
             return;
         }
         const itemId = await resolveCatalogItemId(type, category);
@@ -256,7 +260,7 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
         const body = (req.body ?? {});
         const price = body.price === undefined ? undefined : Number(body.price);
         if (price !== undefined && (!Number.isFinite(price) || price <= 0)) {
-            res.status(400).json({ error: "Некорректная цена" });
+            res.status(400).json({ error: "РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ С†РµРЅР°" });
             return;
         }
         const nextCategory = typeof body.category === "string" ? body.category.trim() : undefined;
@@ -329,7 +333,7 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
             created_at: reloaded.created_at,
             image: listingImageUrl(reloaded.images),
             description: reloaded.description,
-            category: reloaded.item?.name ?? "Без категории",
+            category: reloaded.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё",
             city: reloaded.city?.name ?? null,
         });
     }
@@ -465,7 +469,7 @@ partnerRouter.patch("/orders/:publicId/status", async (req, res) => {
         const body = (req.body ?? {});
         const nextStatus = parseOrderStatus(body.status);
         if (!nextStatus) {
-            res.status(400).json({ error: "Некорректный статус заказа" });
+            res.status(400).json({ error: "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р°" });
             return;
         }
         const existing = await prisma_1.prisma.marketOrder.findFirst({
@@ -551,7 +555,7 @@ partnerRouter.post("/questions/:publicId/answer", async (req, res) => {
         const body = (req.body ?? {});
         const answer = typeof body.answer === "string" ? body.answer.trim() : "";
         if (!answer) {
-            res.status(400).json({ error: "Ответ не может быть пустым" });
+            res.status(400).json({ error: "РћС‚РІРµС‚ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј" });
             return;
         }
         const existing = await prisma_1.prisma.listingQuestion.findFirst({

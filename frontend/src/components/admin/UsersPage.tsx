@@ -91,46 +91,46 @@ export function UsersPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">Пользователи</h1>
-        <p className="text-xs md:text-sm lg:text-base text-gray-600">Управление аккаунтами</p>
+        <h1 className="dashboard-title">Пользователи</h1>
+        <p className="dashboard-subtitle">Управление аккаунтами</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
-        <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-gray-200">
-          <div className="text-xs md:text-sm text-gray-600 mb-1">Всего</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold">{stats.total}</div>
+      <div className="dashboard-grid-stats dashboard-grid-stats--5">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
         </div>
-        <div className="p-3 md:p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-          <div className="text-xs md:text-sm text-blue-700 mb-1">Покупатели</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-blue-700">{stats.buyers}</div>
+        <div className="dashboard-stat dashboard-stat--info">
+          <div className="dashboard-stat__label">Покупатели</div>
+          <div className="dashboard-stat__value">{stats.buyers}</div>
         </div>
-        <div className="p-3 md:p-4 bg-purple-50 rounded-xl border-2 border-purple-200">
-          <div className="text-xs md:text-sm text-purple-700 mb-1">Продавцы</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-purple-700">{stats.sellers}</div>
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Продавцы</div>
+          <div className="dashboard-stat__value">{stats.sellers}</div>
         </div>
-        <div className="p-3 md:p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-xs md:text-sm text-green-700 mb-1">Активные</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-700">{stats.active}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Активные</div>
+          <div className="dashboard-stat__value">{stats.active}</div>
         </div>
-        <div className="p-3 md:p-4 bg-red-50 rounded-xl border-2 border-red-200">
-          <div className="text-xs md:text-sm text-red-700 mb-1">Заблокированы</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-red-700">{stats.blocked}</div>
+        <div className="dashboard-stat dashboard-stat--danger">
+          <div className="dashboard-stat__label">Заблокированы</div>
+          <div className="dashboard-stat__value">{stats.blocked}</div>
         </div>
       </div>
 
-      <div className="p-3 md:p-4 lg:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-gray-200 space-y-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="dashboard-toolbar space-y-3">
+        <div className="dashboard-search">
+          <Search className="dashboard-search__icon" />
           <input
             type="text"
             placeholder="Поиск по имени, email или ID..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300"
+            className="dashboard-search__input"
           />
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="dashboard-chip-row">
           {[
             { value: "all", label: "Все роли" },
             { value: "regular", label: "Покупатели" },
@@ -140,8 +140,8 @@ export function UsersPage() {
             <button
               key={option.value}
               onClick={() => setRoleFilter(option.value as UserRoleFilter)}
-              className={`px-3 py-2 rounded-xl text-sm ${
-                roleFilter === option.value ? "bg-[rgb(38,83,141)] text-white" : "bg-gray-100 text-gray-700"
+              className={`dashboard-chip ${
+                roleFilter === option.value ? "dashboard-chip--active" : ""
               }`}
             >
               {option.label}
@@ -156,8 +156,8 @@ export function UsersPage() {
             <button
               key={option.value}
               onClick={() => setStatusFilter(option.value as UserStatusFilter)}
-              className={`px-3 py-2 rounded-xl text-sm ${
-                statusFilter === option.value ? "bg-black text-white" : "bg-gray-100 text-gray-700"
+              className={`dashboard-chip ${
+                statusFilter === option.value ? "dashboard-chip--active" : ""
               }`}
             >
               {option.label}
@@ -172,18 +172,18 @@ export function UsersPage() {
             <button
               key={user.id}
               onClick={() => setSelectedUser(user.id)}
-              className={`w-full text-left bg-white rounded-xl p-4 border ${
+              className={`w-full text-left dashboard-card ${
                 selectedUser === user.id ? "border-[rgb(38,83,141)]" : "border-gray-200"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-semibold">{user.name}</div>
-                  <div className="text-xs text-gray-500">{user.email}</div>
-                  <div className="text-xs text-gray-500 mt-1">{user.id} • {roleLabel(user.role)}</div>
+                  <div className="text-xs text-gray-500 break-words">{user.email}</div>
+                  <div className="text-xs text-gray-500 mt-1 break-words">{user.id} • {roleLabel(user.role)}</div>
                 </div>
                 <span
-                  className={`px-2 py-1 rounded-full text-xs ${
+                  className={`shrink-0 px-2 py-1 rounded-full text-xs ${
                     user.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                   }`}
                 >
@@ -192,16 +192,16 @@ export function UsersPage() {
               </div>
             </button>
           ))}
-          {filteredUsers.length === 0 && <div className="text-sm text-gray-500">Пользователи не найдены</div>}
+          {filteredUsers.length === 0 && <div className="dashboard-empty">Пользователи не найдены</div>}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="dashboard-card">
           {!selectedUserData ? (
             <div className="text-sm text-gray-500">Выберите пользователя</div>
           ) : (
             <div className="space-y-3">
               <div className="font-semibold">{selectedUserData.name}</div>
-              <div className="text-sm text-gray-600">{selectedUserData.email}</div>
+              <div className="text-sm text-gray-600 break-words">{selectedUserData.email}</div>
               <div className="text-sm text-gray-600">Роль: {roleLabel(selectedUserData.role)}</div>
               <div className="text-sm text-gray-600">Покупок: {selectedUserData.buyerOrders}</div>
               <div className="text-sm text-gray-600">Заказов как продавец: {selectedUserData.sellerOrders}</div>
@@ -212,7 +212,7 @@ export function UsersPage() {
               {selectedUserData.status === "active" ? (
                 <button
                   onClick={() => void toggleUserStatus(selectedUserData, true)}
-                  className="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
+                  className="btn-danger-soft flex w-full items-center justify-center gap-2 py-2"
                   disabled={selectedUserData.role === "admin"}
                 >
                   <Ban className="w-4 h-4" /> Заблокировать
@@ -220,7 +220,7 @@ export function UsersPage() {
               ) : (
                 <button
                   onClick={() => void toggleUserStatus(selectedUserData, false)}
-                  className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
+                  className="btn-success-soft flex w-full items-center justify-center gap-2 py-2"
                 >
                   <Shield className="w-4 h-4" /> Разблокировать
                 </button>

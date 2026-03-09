@@ -8,6 +8,20 @@ const format_1 = require("../../utils/format");
 const adminRouter = (0, express_1.Router)();
 exports.adminRouter = adminRouter;
 const ROLE_ADMIN = "ADMIN";
+const AUDIT_ENTITY_TYPES = [
+    "complaint",
+    "kyc_request",
+    "listing",
+    "user",
+    "commission_tier",
+];
+const AUDIT_ACTIONS = [
+    "complaint.status_changed",
+    "kyc.status_changed",
+    "listing.moderation_changed",
+    "user.status_changed",
+    "commission_tier.rate_changed",
+];
 async function requireAdmin(req, res) {
     const session = await (0, session_1.requireRole)(req, ROLE_ADMIN);
     if (!session.ok) {
@@ -26,6 +40,8 @@ function parseComplaintStatus(status) {
         return "APPROVED";
     if (status === "rejected")
         return "REJECTED";
+    if (status === "pending")
+        return "PENDING";
     if (status === "new")
         return "NEW";
     return null;
@@ -54,6 +70,77 @@ function parseUserStatus(status) {
     if (status === "blocked")
         return "BLOCKED";
     return null;
+}
+function parseAuditAction(value) {
+    if (typeof value !== "string")
+        return undefined;
+    return AUDIT_ACTIONS.find((action) => action === value);
+}
+function parseAuditEntityType(value) {
+    if (typeof value !== "string")
+        return undefined;
+    return AUDIT_ENTITY_TYPES.find((entity) => entity === value);
+}
+function parseLimit(value, defaultValue = 200) {
+    if (typeof value !== "string")
+        return defaultValue;
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0)
+        return defaultValue;
+    return Math.min(parsed, 500);
+}
+function getRequestIp(req) {
+    const forwarded = req.header("x-forwarded-for");
+    if (forwarded && forwarded.trim()) {
+        return forwarded.split(",")[0]?.trim() ?? null;
+    }
+    return req.ip || null;
+}
+function makeAuditPublicId() {
+    return `AUD-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+}
+async function writeAudit(params) {
+    try {
+        await prisma_1.prisma.auditLog.create({
+            data: {
+                public_id: makeAuditPublicId(),
+                actor_user_id: params.actorUserId,
+                action: params.action,
+                entity_type: params.entityType,
+                entity_public_id: params.entityPublicId ?? null,
+                details: params.details,
+                ip_address: getRequestIp(params.req),
+            },
+        });
+    }
+    catch (error) {
+        console.error("Failed to write audit log:", error);
+    }
+}
+function buildAutoFlags(listing) {
+    const flags = [];
+    const joinedDays = Math.floor((Date.now() - listing.seller.joined_at.getTime()) / (1000 * 60 * 60 * 24));
+    if (joinedDays <= 30) {
+        flags.push("new_seller");
+    }
+    const description = (listing.description ?? "").toLowerCase();
+    if (/\b(telegram|whatsapp|prepayment|transfer)\b/.test(description)) {
+        flags.push("forbidden_words");
+    }
+    if (/\+\d|@|\.ru|\.com/.test(description)) {
+        flags.push("contacts_in_description");
+    }
+    if ((listing.description ?? "").length > 200 &&
+        /(!!!|\bcheap\b|\burgent\b)/i.test(listing.description ?? "")) {
+        flags.push("spam_text");
+    }
+    if (listing.complaints_count > 0) {
+        flags.push("seller_with_complaints");
+    }
+    if (listing.complaints_count > 1) {
+        flags.push("multiple_reports");
+    }
+    return flags;
 }
 adminRouter.get("/transactions", async (req, res) => {
     try {
@@ -87,7 +174,7 @@ adminRouter.get("/transactions", async (req, res) => {
             orderId: transaction.order.public_id,
             buyerName: transaction.buyer.name,
             sellerName: transaction.seller.name,
-            listingTitle: transaction.order.items[0]?.name ?? "Позиция без названия",
+            listingTitle: transaction.order.items[0]?.name ?? "Unnamed item",
             amount: transaction.amount,
             commission: transaction.commission,
             commissionRate: transaction.commission_rate,
@@ -98,6 +185,84 @@ adminRouter.get("/transactions", async (req, res) => {
     }
     catch (error) {
         console.error("Error fetching transactions:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.get("/audit-logs", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+        const action = parseAuditAction(req.query.action);
+        const entityType = parseAuditEntityType(req.query.entityType);
+        const limit = parseLimit(req.query.limit, 200);
+        const where = {};
+        if (action) {
+            where.action = action;
+        }
+        if (entityType) {
+            where.entity_type = entityType;
+        }
+        if (q) {
+            where.OR = [
+                { public_id: { contains: q, mode: "insensitive" } },
+                { action: { contains: q, mode: "insensitive" } },
+                { entity_type: { contains: q, mode: "insensitive" } },
+                { entity_public_id: { contains: q, mode: "insensitive" } },
+                {
+                    actor: {
+                        is: {
+                            name: { contains: q, mode: "insensitive" },
+                        },
+                    },
+                },
+                {
+                    actor: {
+                        is: {
+                            email: { contains: q, mode: "insensitive" },
+                        },
+                    },
+                },
+            ];
+        }
+        const logs = await prisma_1.prisma.auditLog.findMany({
+            where,
+            include: {
+                actor: {
+                    select: {
+                        public_id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+            orderBy: [{ created_at: "desc" }, { id: "desc" }],
+            take: limit,
+        });
+        res.json({
+            logs: logs.map((log) => ({
+                id: log.public_id,
+                createdAt: log.created_at,
+                action: log.action,
+                entityType: log.entity_type,
+                entityId: log.entity_public_id,
+                ipAddress: log.ip_address,
+                details: log.details,
+                actor: log.actor
+                    ? {
+                        id: log.actor.public_id,
+                        name: log.actor.name,
+                        email: log.actor.email,
+                    }
+                    : null,
+            })),
+            availableActions: AUDIT_ACTIONS,
+            availableEntities: AUDIT_ENTITY_TYPES,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching audit logs:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -170,12 +335,12 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
         const body = (req.body ?? {});
         const parsedStatus = parseComplaintStatus(body.status);
         if (!parsedStatus) {
-            res.status(400).json({ error: "Некорректный статус жалобы" });
+            res.status(400).json({ error: "Invalid complaint status" });
             return;
         }
         const existing = await prisma_1.prisma.complaint.findUnique({
             where: { public_id: String(publicId) },
-            select: { id: true },
+            select: { id: true, status: true, action_taken: true },
         });
         if (!existing) {
             res.status(404).json({ error: "Complaint not found" });
@@ -188,6 +353,19 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
                 checked_at: new Date(),
                 checked_by_id: access.user.id,
                 action_taken: typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
+            },
+        });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "complaint.status_changed",
+            entityType: "complaint",
+            entityPublicId: String(publicId),
+            details: {
+                beforeStatus: existing.status,
+                afterStatus: updated.status,
+                beforeActionTaken: existing.action_taken,
+                afterActionTaken: updated.action_taken,
             },
         });
         res.json({
@@ -253,12 +431,12 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
         const body = (req.body ?? {});
         const parsedStatus = parseKycStatus(body.status);
         if (!parsedStatus) {
-            res.status(400).json({ error: "Некорректный статус KYC" });
+            res.status(400).json({ error: "Invalid KYC status" });
             return;
         }
         const existing = await prisma_1.prisma.kycRequest.findUnique({
             where: { public_id: String(publicId) },
-            select: { id: true },
+            select: { id: true, status: true, rejection_reason: true },
         });
         if (!existing) {
             res.status(404).json({ error: "KYC request not found" });
@@ -275,6 +453,19 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
                     : null,
             },
         });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "kyc.status_changed",
+            entityType: "kyc_request",
+            entityPublicId: String(publicId),
+            details: {
+                beforeStatus: existing.status,
+                afterStatus: updated.status,
+                beforeRejectionReason: existing.rejection_reason,
+                afterRejectionReason: updated.rejection_reason,
+            },
+        });
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
@@ -285,30 +476,6 @@ adminRouter.patch("/kyc-requests/:publicId", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
-function buildAutoFlags(listing) {
-    const flags = [];
-    const joinedDays = Math.floor((Date.now() - listing.seller.joined_at.getTime()) / (1000 * 60 * 60 * 24));
-    if (joinedDays <= 30) {
-        flags.push("new_seller");
-    }
-    const description = (listing.description ?? "").toLowerCase();
-    if (/\b(telegram|whatsapp|перевод|предоплата)\b/.test(description)) {
-        flags.push("forbidden_words");
-    }
-    if (/\+\d|@|\.ru|\.com/.test(description)) {
-        flags.push("contacts_in_description");
-    }
-    if ((listing.description ?? "").length > 200 && /(!!!|\bдешево\b|\bсрочно\b)/i.test(listing.description ?? "")) {
-        flags.push("spam_text");
-    }
-    if (listing.complaints_count > 0) {
-        flags.push("seller_with_complaints");
-    }
-    if (listing.complaints_count > 1) {
-        flags.push("multiple_reports");
-    }
-    return flags;
-}
 adminRouter.get("/listings", async (req, res) => {
     try {
         const access = await requireAdmin(req, res);
@@ -347,7 +514,7 @@ adminRouter.get("/listings", async (req, res) => {
             sellerName: listing.seller.name,
             status: (0, format_1.toAdminListingStatus)(listing.moderation_status),
             createdAt: listing.created_at,
-            category: listing.item?.name ?? "Без категории",
+            category: listing.item?.name ?? "No category",
             price: listing.price,
             complaintsCount: listing._count.complaints,
             autoFlags: buildAutoFlags({
@@ -371,23 +538,40 @@ adminRouter.patch("/listings/:publicId/moderation", async (req, res) => {
         const body = (req.body ?? {});
         const parsedStatus = parseModerationStatus(body.status);
         if (!parsedStatus) {
-            res.status(400).json({ error: "Некорректный статус модерации" });
+            res.status(400).json({ error: "Invalid moderation status" });
             return;
         }
         const existing = await prisma_1.prisma.marketplaceListing.findUnique({
             where: { public_id: String(publicId) },
-            select: { id: true },
+            select: { id: true, moderation_status: true, status: true },
         });
         if (!existing) {
             res.status(404).json({ error: "Listing not found" });
             return;
         }
-        const nextListingStatus = parsedStatus === "APPROVED" ? "ACTIVE" : parsedStatus === "REJECTED" ? "INACTIVE" : "MODERATION";
+        const nextListingStatus = parsedStatus === "APPROVED"
+            ? "ACTIVE"
+            : parsedStatus === "REJECTED"
+                ? "INACTIVE"
+                : "MODERATION";
         const updated = await prisma_1.prisma.marketplaceListing.update({
             where: { id: existing.id },
             data: {
                 moderation_status: parsedStatus,
                 status: nextListingStatus,
+            },
+        });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "listing.moderation_changed",
+            entityType: "listing",
+            entityPublicId: String(publicId),
+            details: {
+                beforeModerationStatus: existing.moderation_status,
+                afterModerationStatus: updated.moderation_status,
+                beforeListingStatus: existing.status,
+                afterListingStatus: updated.status,
             },
         });
         res.json({
@@ -451,7 +635,7 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
         const body = (req.body ?? {});
         const parsedStatus = parseUserStatus(body.status);
         if (!parsedStatus) {
-            res.status(400).json({ error: "Некорректный статус пользователя" });
+            res.status(400).json({ error: "Invalid user status" });
             return;
         }
         const existing = await prisma_1.prisma.appUser.findUnique({
@@ -459,6 +643,8 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
             select: {
                 id: true,
                 role: true,
+                status: true,
+                block_reason: true,
             },
         });
         if (!existing) {
@@ -466,14 +652,29 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
             return;
         }
         if (existing.role === "ADMIN") {
-            res.status(400).json({ error: "Нельзя менять статус администратора" });
+            res.status(400).json({ error: "Cannot update admin status" });
             return;
         }
         const updated = await prisma_1.prisma.appUser.update({
             where: { id: existing.id },
             data: {
                 status: parsedStatus,
-                block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string" ? body.blockReason.trim() : null,
+                block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string"
+                    ? body.blockReason.trim()
+                    : null,
+            },
+        });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "user.status_changed",
+            entityType: "user",
+            entityPublicId: String(publicId),
+            details: {
+                beforeStatus: existing.status,
+                afterStatus: updated.status,
+                beforeBlockReason: existing.block_reason,
+                afterBlockReason: updated.block_reason,
             },
         });
         res.json({
@@ -513,6 +714,51 @@ adminRouter.get("/commission-tiers", async (req, res) => {
     }
     catch (error) {
         console.error("Error fetching commission tiers:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.patch("/commission-tiers/:publicId", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const { publicId } = req.params;
+        const body = (req.body ?? {});
+        const nextRate = Number(body.commissionRate);
+        if (!Number.isFinite(nextRate) || nextRate <= 0 || nextRate > 100) {
+            res.status(400).json({ error: "Invalid commission rate" });
+            return;
+        }
+        const existing = await prisma_1.prisma.commissionTier.findUnique({
+            where: { public_id: String(publicId) },
+            select: { id: true, commission_rate: true },
+        });
+        if (!existing) {
+            res.status(404).json({ error: "Commission tier not found" });
+            return;
+        }
+        const updated = await prisma_1.prisma.commissionTier.update({
+            where: { id: existing.id },
+            data: { commission_rate: nextRate },
+        });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "commission_tier.rate_changed",
+            entityType: "commission_tier",
+            entityPublicId: String(publicId),
+            details: {
+                beforeCommissionRate: existing.commission_rate,
+                afterCommissionRate: updated.commission_rate,
+            },
+        });
+        res.json({
+            success: true,
+            commissionRate: updated.commission_rate,
+        });
+    }
+    catch (error) {
+        console.error("Error updating commission tier:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

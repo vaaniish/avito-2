@@ -14,8 +14,9 @@ For existing databases that still run the legacy schema, use this runbook.
 
 1. Run legacy-to-3NF SQL backfill:
    - `psql "$DATABASE_URL" -f scripts/migrate_legacy_to_3nf.sql`
-2. Apply new Prisma schema:
-   - `npm run db:push`
+2. Apply Prisma migrations (recommended, deterministic):
+   - Local/dev: `npm run db:migrate`
+   - CI/prod: `npx prisma migrate deploy --schema backend/prisma/schema.prisma`
 3. Generate Prisma client:
    - `npm run db:generate`
 4. Run verification queries:
@@ -37,4 +38,10 @@ Rollback is restore-from-backup. This migration changes structure and data shape
   - `catalog_item`
   - `listing_image`
   - `listing_attribute`
+- Additional consistency hardening:
+  - enum-based statuses/roles/types
+  - composite city uniqueness (`name + region`)
+  - `audit_log` and `order_status_history`
+  - DB-level `CHECK` constraints for prices/ratings/quantities
+  - partial unique index for single default address per user
 - Old denormalized listing columns should be treated as deprecated after cutover.

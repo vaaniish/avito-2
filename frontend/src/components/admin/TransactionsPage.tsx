@@ -82,49 +82,49 @@ export function TransactionsPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">Сделки</h1>
-          <p className="text-xs md:text-sm lg:text-base text-gray-600">
+          <h1 className="dashboard-title">Сделки</h1>
+          <p className="dashboard-subtitle">
             Учёт сделок между продавцами и покупателями и комиссии платформы
           </p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-[rgb(38,83,141)] text-white rounded-lg md:rounded-xl hover:bg-[rgb(28,63,111)] transition-all text-sm md:text-base whitespace-nowrap">
+        <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-[rgb(38,83,141)] px-4 py-2 text-sm text-white transition-all hover:bg-[rgb(28,63,111)] md:rounded-xl md:px-6 md:py-3 md:text-base sm:w-auto whitespace-nowrap">
           <Download className="w-4 h-4 md:w-5 md:h-5" /> Экспорт
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-        <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-gray-200">
-          <div className="text-xs md:text-sm text-gray-600 mb-1">Всего</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold">{stats.total}</div>
+      <div className="dashboard-grid-stats">
+        <div className="dashboard-stat">
+          <div className="dashboard-stat__label">Всего</div>
+          <div className="dashboard-stat__value">{stats.total}</div>
         </div>
-        <div className="p-3 md:p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
-          <div className="text-xs md:text-sm text-yellow-700 mb-1">На удержании</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-yellow-700">{stats.held}</div>
+        <div className="dashboard-stat dashboard-stat--warn">
+          <div className="dashboard-stat__label">На удержании</div>
+          <div className="dashboard-stat__value">{stats.held}</div>
         </div>
-        <div className="p-3 md:p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          <div className="text-xs md:text-sm text-green-700 mb-1">Успешные</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-700">{stats.success}</div>
+        <div className="dashboard-stat dashboard-stat--ok">
+          <div className="dashboard-stat__label">Успешные</div>
+          <div className="dashboard-stat__value">{stats.success}</div>
         </div>
-        <div className="p-3 md:p-4 bg-red-50 rounded-xl border-2 border-red-200">
-          <div className="text-xs md:text-sm text-red-700 mb-1">Отмененные</div>
-          <div className="text-lg md:text-xl lg:text-2xl font-bold text-red-700">{stats.cancelled}</div>
+        <div className="dashboard-stat dashboard-stat--danger">
+          <div className="dashboard-stat__label">Отмененные</div>
+          <div className="dashboard-stat__value">{stats.cancelled}</div>
         </div>
       </div>
 
-      <div className="p-3 md:p-4 lg:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-gray-200">
+      <div className="dashboard-toolbar">
         <div className="flex flex-col gap-3 md:gap-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+          <div className="dashboard-search">
+            <Search className="dashboard-search__icon" />
             <input
               type="text"
               placeholder="Поиск по ID, покупателю, продавцу..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full pl-11 md:pl-12 pr-3 md:pr-4 py-2 md:py-3 rounded-xl border border-gray-300"
+              className="dashboard-search__input"
             />
           </div>
 
-          <div className="flex gap-1.5 md:gap-2 overflow-x-auto">
+          <div className="dashboard-chip-row">
             {[
               { value: "all", label: "Все" },
               { value: "held", label: "На удержании" },
@@ -134,10 +134,10 @@ export function TransactionsPage() {
               <button
                 key={option.value}
                 onClick={() => setStatusFilter(option.value as TransactionStatus)}
-                className={`px-2.5 md:px-3 lg:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-medium transition-all whitespace-nowrap text-xs md:text-sm ${
+                className={`dashboard-chip ${
                   statusFilter === option.value
-                    ? "bg-[rgb(38,83,141)] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "dashboard-chip--active"
+                    : ""
                 }`}
               >
                 {option.label}
@@ -149,7 +149,7 @@ export function TransactionsPage() {
 
       <div className="space-y-3">
         {filteredTransactions.map((transaction) => (
-          <div key={transaction.id} className="bg-white border border-gray-200 rounded-xl p-4">
+          <div key={transaction.id} className="dashboard-card">
             <div className="flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
               <div>
                 <div className="text-sm font-semibold">{transaction.id}</div>
@@ -160,9 +160,9 @@ export function TransactionsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
                 {getStatusBadge(transaction.status)}
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <div className="text-sm font-semibold">{formatCurrency(transaction.amount)}</div>
                   <div className="text-xs text-gray-500">Комиссия {formatCurrency(transaction.commission)} ({transaction.commissionRate}%)</div>
                 </div>
@@ -171,7 +171,7 @@ export function TransactionsPage() {
           </div>
         ))}
 
-        {filteredTransactions.length === 0 && <div className="text-sm text-gray-500">Сделки не найдены</div>}
+        {filteredTransactions.length === 0 && <div className="dashboard-empty">Сделки не найдены</div>}
       </div>
     </div>
   );
