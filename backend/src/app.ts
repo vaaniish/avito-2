@@ -23,7 +23,12 @@ app.use(
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   }),
 );
-app.use(express.json());
+app.use(
+  express.json({
+    // Listing images can be sent as data URLs from the partner form.
+    limit: "12mb",
+  }),
+);
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });

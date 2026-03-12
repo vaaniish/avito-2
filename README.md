@@ -32,6 +32,18 @@ Optional backend env (`.env`):
 - `YOOKASSA_SECRET_KEY` - YooKassa secret key (test)
 - `YOOKASSA_RETURN_URL` - return URL after payment (default: `http://127.0.0.1:3000`)
 - `YOOKASSA_API_URL` - API base URL (default: `https://api.yookassa.ru/v3`)
+- `MODERATION_AI_PROVIDER` - `ollama` or `none` (default in this repo: `ollama`)
+- `MODERATION_AI_BASE_URL` - Ollama URL (default: `http://127.0.0.1:11434`)
+- `MODERATION_AI_TEXT_MODEL` - text moderation model (default: `qwen2.5:3b-instruct`)
+- `MODERATION_AI_VISION_MODEL` - image moderation model (default: `llava:7b`)
+- `MODERATION_AI_IMAGE_ENABLED` - enable/disable image AI check (`true` / `false`)
+- `MODERATION_AI_MAX_IMAGE_BYTES` - max downloaded image size for moderation (bytes)
+- `MODERATION_AI_FLAG_RISK_THRESHOLD` - AI risk threshold (0..100) to auto-flag into manual moderation (default: `60`)
+- `RUSSIAN_POST_API_BASE_URL` - base URL Почты России API (default: `https://www.pochta.ru`)
+- `RUSSIAN_POST_API_PATH` - path to tracking endpoint (default: `/tracking-api/v1/trackings/by-barcodes`)
+- `RUSSIAN_POST_ACCESS_TOKEN` - AccessToken for Почта России API
+- `RUSSIAN_POST_USER_AUTH` - base64 login:password for header `X-User-Authorization`
+- `RUSSIAN_POST_API_TIMEOUT_MS` - timeout for calls to Почта России API (default: `8000`)
 
 Useful scripts:
 
@@ -73,3 +85,24 @@ Legacy DB migration to normalized 3NF:
    - Card: `5555 5555 5555 4477`
    - Expiry: `01/30`
    - CVC: `123`
+
+## Free AI moderation (local, no paid API)
+
+This project uses a hybrid moderation pipeline for partner listings:
+- strict rule-based checks (always on),
+- optional free AI moderation via local Ollama (text + image).
+
+Setup:
+1. Start services (DB + Ollama): `docker compose up -d`
+2. Pull models once (if not already pulled): `docker compose run --rm ollama-init`
+3. Start backend/frontend: `npm run dev`
+
+If Ollama is unavailable, moderation automatically falls back to rule-based checks.
+
+## Delivery tracking (Russian Post)
+
+Partner order flow supports tracking via Почта России:
+- when seller applies a valid tracking number, order status becomes `Отправлен` automatically;
+- further status updates (`Доставлен` / `Выдан`) are synchronized from tracking API.
+
+If Russian Post credentials are not configured or API is unavailable, the backend uses fallback validation for Russian Post-like tracking numbers and keeps synchronization on best-effort basis.

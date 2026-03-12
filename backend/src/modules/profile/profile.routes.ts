@@ -139,6 +139,10 @@ async function createYooKassaPayment(params: {
       currency: "RUB",
     },
     capture: true,
+    payment_method_data: {
+      type: "bank_card",
+    },
+    save_payment_method: false,
     confirmation: {
       type: "redirect",
       return_url: config.returnUrl,
@@ -1078,7 +1082,7 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
             public_id: preparedOrder.publicId,
             buyer_id: session.user.id,
             seller_id: preparedOrder.sellerId,
-            status: "PAID",
+            status: "CREATED",
             delivery_type: deliveryType,
             delivery_address:
               deliveryType === "DELIVERY" ? deliveryAddress : "Самовывоз",

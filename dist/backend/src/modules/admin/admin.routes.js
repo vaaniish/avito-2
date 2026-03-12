@@ -5,6 +5,7 @@ const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
 const format_1 = require("../../utils/format");
+const complaint_sanctions_1 = require("./complaint-sanctions");
 const adminRouter = (0, express_1.Router)();
 exports.adminRouter = adminRouter;
 const ROLE_ADMIN = "ADMIN";
@@ -70,6 +71,9 @@ function parseUserStatus(status) {
     if (status === "blocked")
         return "BLOCKED";
     return null;
+}
+function toClientComplaintSanctionStatus(status) {
+    return status === "ACTIVE" ? "active" : "completed";
 }
 function parseAuditAction(value) {
     if (typeof value !== "string")
@@ -442,6 +446,8 @@ adminRouter.get("/complaints", async (req, res) => {
                         email: true,
                         phone: true,
                         status: true,
+                        block_reason: true,
+                        blocked_until: true,
                         joined_at: true,
                         seller_profile: {
                             select: {
@@ -475,6 +481,72 @@ adminRouter.get("/complaints", async (req, res) => {
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
+        const sellerIds = Array.from(new Set(complaints.map((complaint) => complaint.seller_id)));
+        const complaintIds = complaints.map((complaint) => complaint.id);
+        const [approvedBySellerRaw, sanctionsByComplaintRaw, activeSanctionsRaw] = await Promise.all([
+            sellerIds.length > 0
+                ? prisma_1.prisma.complaint.groupBy({
+                    by: ["seller_id"],
+                    where: {
+                        seller_id: { in: sellerIds },
+                        status: "APPROVED",
+                    },
+                    _count: {
+                        _all: true,
+                    },
+                })
+                : Promise.resolve([]),
+            complaintIds.length > 0
+                ? prisma_1.prisma.complaintSanction.findMany({
+                    where: {
+                        complaint_id: { in: complaintIds },
+                    },
+                    select: {
+                        complaint_id: true,
+                        public_id: true,
+                        level: true,
+                        status: true,
+                        starts_at: true,
+                        ends_at: true,
+                        reason: true,
+                        created_at: true,
+                    },
+                })
+                : Promise.resolve([]),
+            sellerIds.length > 0
+                ? prisma_1.prisma.complaintSanction.findMany({
+                    where: {
+                        seller_id: { in: sellerIds },
+                        status: "ACTIVE",
+                    },
+                    select: {
+                        seller_id: true,
+                        public_id: true,
+                        level: true,
+                        status: true,
+                        starts_at: true,
+                        ends_at: true,
+                        reason: true,
+                        created_at: true,
+                    },
+                    orderBy: [{ created_at: "desc" }, { id: "desc" }],
+                })
+                : Promise.resolve([]),
+        ]);
+        const approvedBySeller = new Map();
+        for (const item of approvedBySellerRaw) {
+            approvedBySeller.set(item.seller_id, item._count._all);
+        }
+        const sanctionByComplaint = new Map();
+        for (const sanction of sanctionsByComplaintRaw) {
+            sanctionByComplaint.set(sanction.complaint_id, sanction);
+        }
+        const activeSanctionBySeller = new Map();
+        for (const sanction of activeSanctionsRaw) {
+            if (!activeSanctionBySeller.has(sanction.seller_id)) {
+                activeSanctionBySeller.set(sanction.seller_id, sanction);
+            }
+        }
         res.json(complaints.map((complaint) => ({
             id: complaint.public_id,
             createdAt: complaint.created_at,
@@ -496,13 +568,15 @@ adminRouter.get("/complaints", async (req, res) => {
             sellerEmail: complaint.seller.email,
             sellerPhone: complaint.seller.phone,
             sellerStatus: complaint.seller.status.toLowerCase(),
+            sellerBlockedUntil: complaint.seller.blocked_until,
+            sellerBlockReason: complaint.seller.block_reason,
             sellerJoinedAt: complaint.seller.joined_at,
             sellerVerified: Boolean(complaint.seller.seller_profile?.is_verified),
             sellerResponseMinutes: complaint.seller.seller_profile?.average_response_minutes ?? null,
             reporterId: complaint.reporter.public_id,
             reporterName: complaint.reporter.name,
             reporterEmail: complaint.reporter.email,
-            sellerViolationsCount: complaint.seller._count.complaints_against,
+            sellerViolationsCount: approvedBySeller.get(complaint.seller_id) ?? 0,
             sellerListingsCount: complaint.seller._count.listings,
             sellerOrdersCount: complaint.seller._count.orders_as_seller,
             description: complaint.description,
@@ -517,6 +591,28 @@ adminRouter.get("/complaints", async (req, res) => {
                 }
                 : null,
             actionTaken: complaint.action_taken,
+            sanction: sanctionByComplaint.get(complaint.id)
+                ? {
+                    id: sanctionByComplaint.get(complaint.id)?.public_id,
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(sanctionByComplaint.get(complaint.id)?.level ?? "WARNING"),
+                    status: toClientComplaintSanctionStatus(sanctionByComplaint.get(complaint.id)?.status ?? "COMPLETED"),
+                    startsAt: sanctionByComplaint.get(complaint.id)?.starts_at ?? null,
+                    endsAt: sanctionByComplaint.get(complaint.id)?.ends_at ?? null,
+                    reason: sanctionByComplaint.get(complaint.id)?.reason ?? null,
+                    createdAt: sanctionByComplaint.get(complaint.id)?.created_at ?? null,
+                }
+                : null,
+            activeSellerSanction: activeSanctionBySeller.get(complaint.seller_id)
+                ? {
+                    id: activeSanctionBySeller.get(complaint.seller_id)?.public_id,
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(activeSanctionBySeller.get(complaint.seller_id)?.level ?? "WARNING"),
+                    status: toClientComplaintSanctionStatus(activeSanctionBySeller.get(complaint.seller_id)?.status ?? "ACTIVE"),
+                    startsAt: activeSanctionBySeller.get(complaint.seller_id)?.starts_at ?? null,
+                    endsAt: activeSanctionBySeller.get(complaint.seller_id)?.ends_at ?? null,
+                    reason: activeSanctionBySeller.get(complaint.seller_id)?.reason ?? null,
+                    createdAt: activeSanctionBySeller.get(complaint.seller_id)?.created_at ?? null,
+                }
+                : null,
             evaluation: buildComplaintEvaluation({
                 complaintType: complaint.complaint_type,
                 evidenceCount: splitEvidenceFiles(complaint.evidence).length,
@@ -544,21 +640,82 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
         }
         const existing = await prisma_1.prisma.complaint.findUnique({
             where: { public_id: String(publicId) },
-            select: { id: true, status: true, action_taken: true },
+            select: {
+                id: true,
+                public_id: true,
+                status: true,
+                action_taken: true,
+                complaint_type: true,
+                seller_id: true,
+                listing_id: true,
+                seller: {
+                    select: {
+                        public_id: true,
+                        status: true,
+                        block_reason: true,
+                        blocked_until: true,
+                    },
+                },
+                listing: {
+                    select: {
+                        public_id: true,
+                        status: true,
+                        moderation_status: true,
+                    },
+                },
+            },
         });
         if (!existing) {
             res.status(404).json({ error: "Complaint not found" });
             return;
         }
-        const updated = await prisma_1.prisma.complaint.update({
-            where: { id: existing.id },
-            data: {
-                status: parsedStatus,
-                checked_at: new Date(),
-                checked_by_id: access.user.id,
-                action_taken: typeof body.actionTaken === "string" ? body.actionTaken.trim() : null,
-            },
+        if (existing.status === "APPROVED" && parsedStatus !== "APPROVED") {
+            res.status(400).json({
+                error: "Approved complaint cannot be moved back. Create a separate compensating admin action.",
+            });
+            return;
+        }
+        const actionTaken = typeof body.actionTaken === "string" ? body.actionTaken.trim() : null;
+        const txResult = await prisma_1.prisma.$transaction(async (tx) => {
+            let enforcement = null;
+            const next = await tx.complaint.update({
+                where: { id: existing.id },
+                data: {
+                    status: parsedStatus,
+                    checked_at: new Date(),
+                    checked_by_id: access.user.id,
+                    action_taken: actionTaken,
+                },
+            });
+            if (parsedStatus === "APPROVED" && existing.status !== "APPROVED") {
+                const enforcementResult = await (0, complaint_sanctions_1.applyApprovedComplaintConsequences)(tx, {
+                    complaintId: existing.id,
+                    complaintPublicId: existing.public_id,
+                    complaintType: existing.complaint_type,
+                    sellerId: existing.seller_id,
+                    listingId: existing.listing_id,
+                    adminUserId: access.user.id,
+                    actionTaken,
+                });
+                enforcement = {
+                    applied: true,
+                    approvedViolationsCount: enforcementResult.approvedViolationsCount,
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(enforcementResult.level),
+                    sanctionId: enforcementResult.sanctionPublicId,
+                    sellerStatus: enforcementResult.sellerStatus.toLowerCase(),
+                    blockedUntil: enforcementResult.blockedUntil,
+                    listingStatus: enforcementResult.listingStatus.toLowerCase(),
+                    listingModerationStatus: enforcementResult.listingModerationStatus.toLowerCase(),
+                    message: enforcementResult.message,
+                };
+            }
+            return {
+                updated: next,
+                enforcement,
+            };
         });
+        const updated = txResult.updated;
+        const enforcement = txResult.enforcement;
         await writeAudit({
             req,
             actorUserId: access.user.id,
@@ -572,9 +729,45 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
                 afterActionTaken: updated.action_taken,
             },
         });
+        if (enforcement) {
+            await writeAudit({
+                req,
+                actorUserId: access.user.id,
+                action: "listing.moderation_changed",
+                entityType: "listing",
+                entityPublicId: existing.listing.public_id,
+                details: {
+                    source: "complaint_approved_auto_enforcement",
+                    complaintId: existing.public_id,
+                    beforeModerationStatus: existing.listing.moderation_status,
+                    afterModerationStatus: "REJECTED",
+                    beforeListingStatus: existing.listing.status,
+                    afterListingStatus: "INACTIVE",
+                },
+            });
+            await writeAudit({
+                req,
+                actorUserId: access.user.id,
+                action: "user.status_changed",
+                entityType: "user",
+                entityPublicId: existing.seller.public_id,
+                details: {
+                    source: "complaint_approved_auto_enforcement",
+                    complaintId: existing.public_id,
+                    sanctionLevel: enforcement.level,
+                    beforeStatus: existing.seller.status,
+                    afterStatus: enforcement.sellerStatus.toUpperCase(),
+                    beforeBlockReason: existing.seller.block_reason,
+                    afterBlockReason: actionTaken && actionTaken.length > 0 ? actionTaken : existing.seller.block_reason,
+                    beforeBlockedUntil: existing.seller.blocked_until,
+                    afterBlockedUntil: enforcement.blockedUntil,
+                },
+            });
+        }
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
+            enforcement,
         });
     }
     catch (error) {
@@ -930,6 +1123,74 @@ adminRouter.get("/users", async (req, res) => {
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
+        const userIds = users.map((user) => user.id);
+        const [approvedViolationsRaw, sanctionsTotalRaw, activeSanctionsRaw, latestSanctionsRaw,] = await Promise.all([
+            userIds.length > 0
+                ? prisma_1.prisma.complaint.groupBy({
+                    by: ["seller_id"],
+                    where: {
+                        seller_id: { in: userIds },
+                        status: "APPROVED",
+                    },
+                    _count: { _all: true },
+                })
+                : Promise.resolve([]),
+            userIds.length > 0
+                ? prisma_1.prisma.complaintSanction.groupBy({
+                    by: ["seller_id"],
+                    where: {
+                        seller_id: { in: userIds },
+                    },
+                    _count: { _all: true },
+                })
+                : Promise.resolve([]),
+            userIds.length > 0
+                ? prisma_1.prisma.complaintSanction.groupBy({
+                    by: ["seller_id"],
+                    where: {
+                        seller_id: { in: userIds },
+                        status: "ACTIVE",
+                    },
+                    _count: { _all: true },
+                })
+                : Promise.resolve([]),
+            userIds.length > 0
+                ? prisma_1.prisma.complaintSanction.findMany({
+                    where: {
+                        seller_id: { in: userIds },
+                    },
+                    select: {
+                        seller_id: true,
+                        public_id: true,
+                        level: true,
+                        status: true,
+                        starts_at: true,
+                        ends_at: true,
+                        reason: true,
+                        created_at: true,
+                    },
+                    orderBy: [{ created_at: "desc" }, { id: "desc" }],
+                })
+                : Promise.resolve([]),
+        ]);
+        const approvedViolationsByUser = new Map();
+        for (const item of approvedViolationsRaw) {
+            approvedViolationsByUser.set(item.seller_id, item._count._all);
+        }
+        const sanctionsTotalByUser = new Map();
+        for (const item of sanctionsTotalRaw) {
+            sanctionsTotalByUser.set(item.seller_id, item._count._all);
+        }
+        const activeSanctionsByUser = new Map();
+        for (const item of activeSanctionsRaw) {
+            activeSanctionsByUser.set(item.seller_id, item._count._all);
+        }
+        const latestSanctionByUser = new Map();
+        for (const sanction of latestSanctionsRaw) {
+            if (!latestSanctionByUser.has(sanction.seller_id)) {
+                latestSanctionByUser.set(sanction.seller_id, sanction);
+            }
+        }
         res.json(users.map((user) => {
             const buyerSpent = user.orders_as_buyer.reduce((sum, order) => sum + order.total_price, 0);
             const sellerRevenue = user.orders_as_seller.reduce((sum, order) => sum + order.total_price, 0);
@@ -939,6 +1200,7 @@ adminRouter.get("/users", async (req, res) => {
             const lastBuyerOrderDate = user.orders_as_buyer[0]?.created_at ?? null;
             const lastSellerOrderDate = user.orders_as_seller[0]?.created_at ?? null;
             const kycLatest = user.kyc_requests[0] ?? null;
+            const latestSanction = latestSanctionByUser.get(user.id) ?? null;
             return {
                 id: user.public_id,
                 name: user.name,
@@ -949,6 +1211,7 @@ adminRouter.get("/users", async (req, res) => {
                 city: user.city?.name ?? null,
                 phone: user.phone,
                 blockReason: user.block_reason,
+                blockedUntil: user.blocked_until,
                 buyerOrders: user.orders_as_buyer.length,
                 sellerOrders: user.orders_as_seller.length,
                 buyerSpent,
@@ -964,6 +1227,20 @@ adminRouter.get("/users", async (req, res) => {
                 totalListings: user.listings.length,
                 complaintsMade: user.complaints_reported.length,
                 complaintsAgainst: user.complaints_against.length,
+                approvedViolations: approvedViolationsByUser.get(user.id) ?? 0,
+                sanctionsTotal: sanctionsTotalByUser.get(user.id) ?? 0,
+                sanctionsActive: activeSanctionsByUser.get(user.id) ?? 0,
+                latestSanction: latestSanction
+                    ? {
+                        id: latestSanction.public_id,
+                        level: (0, complaint_sanctions_1.toClientSanctionLevel)(latestSanction.level),
+                        status: toClientComplaintSanctionStatus(latestSanction.status),
+                        startsAt: latestSanction.starts_at,
+                        endsAt: latestSanction.ends_at,
+                        reason: latestSanction.reason,
+                        createdAt: latestSanction.created_at,
+                    }
+                    : null,
                 isSellerVerified: Boolean(user.seller_profile?.is_verified),
                 sellerResponseMinutes: user.seller_profile?.average_response_minutes ?? null,
                 lastBuyerOrderDate,
@@ -1003,6 +1280,7 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
                 role: true,
                 status: true,
                 block_reason: true,
+                blocked_until: true,
             },
         });
         if (!existing) {
@@ -1020,6 +1298,7 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
                 block_reason: parsedStatus === "BLOCKED" && typeof body.blockReason === "string"
                     ? body.blockReason.trim()
                     : null,
+                blocked_until: null,
             },
         });
         await writeAudit({
@@ -1033,11 +1312,14 @@ adminRouter.patch("/users/:publicId/status", async (req, res) => {
                 afterStatus: updated.status,
                 beforeBlockReason: existing.block_reason,
                 afterBlockReason: updated.block_reason,
+                beforeBlockedUntil: existing.blocked_until,
+                afterBlockedUntil: updated.blocked_until,
             },
         });
         res.json({
             success: true,
             status: updated.status.toLowerCase(),
+            blockedUntil: updated.blocked_until,
         });
     }
     catch (error) {

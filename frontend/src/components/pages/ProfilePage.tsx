@@ -103,6 +103,9 @@ type ProfilePayload = {
   wishlist: WishlistItem[];
 };
 
+const YANDEX_GEOSUGGEST_API_KEY =
+  import.meta.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.toString().trim() ?? "";
+
 const regularTabs: Array<{ id: TabType; label: string; icon: typeof UserIcon }> = [
   { id: "profile", label: "Профиль", icon: UserIcon },
   { id: "addresses", label: "Адреса", icon: MapPin },
@@ -146,11 +149,17 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressForm, setAddressForm] = useState({
     name: "",
-    cityId: null as number | null,
+    fullAddress: "",
+    city: "",
     street: "",
-    building: "",
+    house: "",
+    apartment: "",
     postalCode: "",
   });
+  const [addressMapHint, setAddressMapHint] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
+  const [isAddressInputFocused, setIsAddressInputFocused] = useState(false);
+  const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [itemToReview, setItemToReview] = useState<OrderItem | null>(null);
@@ -190,10 +199,28 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
     }
   }, []);
 
-  const resolveCityId = useCallback((cityName: string): number | undefined => {
-    const city = allCities.find(c => c.name === cityName);
-    return city?.id;
-  }, [allCities]);
+  const resolveCityId = useCallback(
+    (cityName: string): number | undefined => {
+      const raw = cityName.trim().toLowerCase();
+      if (!raw) return undefined;
+
+      const normalized = raw.replace(/\s*\(.+\)\s*/g, "").split(",")[0]?.trim() ?? raw;
+
+      const exact = allCities.find((city) => city.name.trim().toLowerCase() === normalized);
+      if (exact) return exact.id;
+
+      const startsWith = allCities.find((city) =>
+        city.name.trim().toLowerCase().startsWith(normalized),
+      );
+      if (startsWith) return startsWith.id;
+
+      const includes = allCities.find((city) =>
+        normalized.includes(city.name.trim().toLowerCase()),
+      );
+      return includes?.id;
+    },
+    [allCities],
+  );
 
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
@@ -279,29 +306,183 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
     }
   };
 
+  const composeFullAddress = useCallback((parts: {
+    city?: string;
+    street?: string;
+    house?: string;
+    apartment?: string;
+    postalCode?: string;
+  }) => {
+    const apartmentPart = parts.apartment?.trim() ? `кв. ${parts.apartment.trim()}` : "";
+    const housePart = parts.house?.trim() ? `д. ${parts.house.trim()}` : "";
+    return [parts.city, parts.street, housePart, apartmentPart]
+      .map((part) => String(part ?? "").trim())
+      .filter(Boolean)
+      .join(", ");
+  }, []);
+
+  const mergeAddressSuggestionWithContext = useCallback((currentInput: string, suggestion: string) => {
+    const current = currentInput.trim();
+    const selected = suggestion.trim();
+    if (!current || !selected) return selected || current;
+
+    const lastCommaIndex = current.lastIndexOf(",");
+    if (lastCommaIndex < 0) return selected;
+
+    const contextPrefix = current.slice(0, lastCommaIndex).trim();
+    if (!contextPrefix) return selected;
+
+    if (selected.toLowerCase().includes(contextPrefix.toLowerCase())) return selected;
+
+    const mainSelected = selected.split(",")[0]?.trim() || selected;
+    return `${contextPrefix}, ${mainSelected}`.replace(/\s+,/g, ",");
+  }, []);
+
+  const geocodeAddress = useCallback(async (query: string) => {
+    const rawQuery = query.trim();
+    if (!rawQuery) return null;
+
+    const ymaps = (window as unknown as { ymaps?: any }).ymaps;
+    if (!ymaps?.geocode) return null;
+
+    try {
+      const geocodeResult = await ymaps.geocode(rawQuery);
+      const firstGeoObject = geocodeResult?.geoObjects?.get?.(0);
+      if (!firstGeoObject) return null;
+
+      const components = firstGeoObject.properties?.get?.(
+        "metaDataProperty.GeocoderMetaData.Address.Components",
+      ) as Array<{ kind: string; name: string }> | undefined;
+
+      let city = "";
+      let street = "";
+      let house = "";
+      let postalCode = "";
+
+      for (const component of components ?? []) {
+        if (component.kind === "locality") city = component.name;
+        if (!city && (component.kind === "province" || component.kind === "area")) city = component.name;
+        if (component.kind === "street") street = component.name;
+        if (component.kind === "house") house = component.name;
+        if (component.kind === "postal_code") postalCode = component.name;
+      }
+
+      const formatted = String(firstGeoObject.properties?.get?.("text") ?? "").trim();
+      return { city, street, house, postalCode, formatted };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const applyFullAddressValue = async (inputValue: string, contextSource?: string) => {
+    const raw = inputValue.trim();
+    if (!raw) return;
+
+    const merged = contextSource
+      ? mergeAddressSuggestionWithContext(contextSource, raw)
+      : raw;
+
+    const parsed = await geocodeAddress(merged);
+    setAddressForm((prev) => ({
+      ...prev,
+      fullAddress: parsed?.formatted || merged,
+      city: parsed?.city || prev.city,
+      street: parsed?.street || prev.street,
+      house: parsed?.house || prev.house,
+      postalCode: parsed?.postalCode || prev.postalCode,
+    }));
+    setAddressMapHint("");
+    setMapCenterQuery(parsed?.formatted || merged);
+  };
   const createAddress = async () => {
-    if (!addressForm.name || !addressForm.cityId || !addressForm.street) {
-      alert("Заполните обязательные поля адреса");
+    const name = addressForm.name.trim();
+    const fullAddress = addressForm.fullAddress.trim();
+
+    if (!name || !fullAddress) {
+      setAddressMapHint("Заполните обязательные поля: название и полный адрес.");
       return;
     }
 
+    let city = addressForm.city.trim();
+    let street = addressForm.street.trim();
+    let house = addressForm.house.trim();
+    let postalCode = addressForm.postalCode.trim();
+    let apartment = addressForm.apartment.trim();
+
+    const parsed = await geocodeAddress(fullAddress);
+    if (parsed) {
+      city = parsed.city || city;
+      street = parsed.street || street;
+      house = parsed.house || house;
+      postalCode = parsed.postalCode || postalCode;
+    }
+
+    if (!house) {
+      const houseMatch = fullAddress.match(/(?:д\.?|дом)\s*([0-9a-zа-я-]+)/i);
+      if (houseMatch?.[1]) {
+        house = houseMatch[1];
+      }
+    }
+
+    if (!apartment) {
+      const apartmentMatch = fullAddress.match(/(?:кв\.?|квартира)\s*([0-9a-zа-я-]+)/i);
+      if (apartmentMatch?.[1]) {
+        apartment = apartmentMatch[1];
+      }
+    }
+
+    if (!postalCode) {
+      const postalMatch = fullAddress.match(/(?:индекс\s*)?(\d{6})/i);
+      if (postalMatch?.[1]) {
+        postalCode = postalMatch[1];
+      }
+    }
+
+    if (!city || !street || !house) {
+      setAddressMapHint("Укажите полный адрес с городом, улицей и номером дома.");
+      return;
+    }
+
+    const cityId = resolveCityId(city);
+    if (!cityId) {
+      setAddressMapHint(
+        `Город "${city}" не найден в каталоге платформы. Уточните адрес через подсказки Яндекс Карт или выберите точку на карте.`,
+      );
+      return;
+    }
+
+    const building = [house ? `д. ${house}` : "", apartment ? `кв. ${apartment}` : ""]
+      .filter(Boolean)
+      .join(", ");
+
     try {
       await apiPost<Address>("/profile/addresses", {
-        name: addressForm.name,
-        cityId: addressForm.cityId,
-        street: addressForm.street,
-        building: addressForm.building,
-        postalCode: addressForm.postalCode,
+        name,
+        cityId,
+        street,
+        building,
+        postalCode,
         isDefault: addresses.length === 0,
       });
       setAddressModalOpen(false);
-      setAddressForm({ name: "", cityId: null, street: "", building: "", postalCode: "" });
+      setAddressForm({
+        name: "",
+        fullAddress: "",
+        city: "",
+        street: "",
+        house: "",
+        apartment: "",
+        postalCode: "",
+      });
+      setAddressMapHint("");
+      setAddressSuggestions([]);
+      setIsAddressInputFocused(false);
+      setMapCenterQuery(null);
       await loadProfile();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Не удалось добавить адрес");
     }
   };
-
   const deleteAddress = async (id: string) => {
     try {
       await apiDelete<{ success: boolean }>(`/profile/addresses/${id}`);
@@ -326,19 +507,154 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
     building: string;
     postalCode: string;
   }) => {
-    const cityId = resolveCityId(address.city);
-    if (cityId === undefined) {
-        alert(`Город "${address.city}" не найден в списке доступных городов. Пожалуйста, выберите город из списка или добавьте его.`);
-        return;
-    }
-    setAddressForm(prev => ({
+    const resolvedCity = address.city && resolveCityId(address.city);
+
+    setAddressForm((prev) => {
+      const nextCity = resolvedCity ? address.city : prev.city;
+      const nextStreet = address.street || prev.street;
+      const nextHouse = address.building || prev.house;
+      const nextPostalCode = address.postalCode || prev.postalCode;
+
+      const nextFullAddress = composeFullAddress({
+        city: nextCity,
+        street: nextStreet,
+        house: nextHouse,
+        apartment: prev.apartment,
+      }) || prev.fullAddress;
+
+      return {
         ...prev,
-        cityId,
-        street: address.street,
-        building: address.building,
-        postalCode: address.postalCode,
-    }));
+        name: prev.name || [nextStreet, nextHouse].filter(Boolean).join(", ") || prev.name,
+        city: nextCity,
+        street: nextStreet,
+        house: nextHouse,
+        postalCode: nextPostalCode,
+        fullAddress: nextFullAddress,
+      };
+    });
+
+    if (!resolvedCity) {
+      setAddressMapHint("Город из выбранной точки не найден в каталоге платформы. Уточните адрес вручную.");
+    } else {
+      setAddressMapHint("");
+    }
+
+    const centerCandidate = composeFullAddress({
+      city: address.city,
+      street: address.street,
+      house: address.building,
+    });
+    setMapCenterQuery(centerCandidate || null);
   };
+  const handleAddressSuggestionSelect = async (value: string) => {
+    setAddressSuggestions([]);
+    setIsAddressInputFocused(false);
+    await applyFullAddressValue(value, addressForm.fullAddress);
+  };
+  const fetchYandexSuggestions = useCallback(async (
+    query: string,
+    results = 8,
+    mode: "address" | "city" = "address",
+  ): Promise<string[]> => {
+    const text = query.trim();
+    if (text.length < 2) return [];
+
+    const ymaps = (window as unknown as { ymaps?: any }).ymaps;
+    if (ymaps?.suggest) {
+      try {
+        const suggestions = await ymaps.suggest(text, { results });
+        const values = (Array.isArray(suggestions) ? suggestions : [])
+          .map((item: any) =>
+            String(item?.value || item?.displayName || item?.title?.text || "").trim(),
+          )
+          .filter(Boolean);
+        return Array.from(new Set(values)).slice(0, results);
+      } catch {
+        // fallback below
+      }
+    }
+
+    if (ymaps?.geocode) {
+      try {
+        const geocodeResult = await ymaps.geocode(text, {
+          results,
+          ...(mode === "city" ? { kind: "locality" } : {}),
+        });
+        const geoObjects = geocodeResult?.geoObjects;
+        const length = Number(geoObjects?.getLength?.() ?? 0);
+        const values: string[] = [];
+
+        for (let i = 0; i < length; i += 1) {
+          const obj = geoObjects?.get?.(i);
+          if (!obj) continue;
+          const name = String(obj?.properties?.get?.("name") || "").trim();
+          const description = String(obj?.properties?.get?.("description") || "").trim();
+          const textValue = String(obj?.properties?.get?.("text") || "").trim();
+          const assembled = [name, description].filter(Boolean).join(", ");
+          const candidate = assembled || textValue;
+          if (candidate) values.push(candidate);
+        }
+
+        if (values.length > 0) {
+          return Array.from(new Set(values)).slice(0, results);
+        }
+      } catch {
+        // fallback below
+      }
+    }
+
+    if (!YANDEX_GEOSUGGEST_API_KEY) return [];
+
+    try {
+      const url = new URL("https://suggest-maps.yandex.ru/v1/suggest");
+      url.searchParams.set("apikey", YANDEX_GEOSUGGEST_API_KEY);
+      url.searchParams.set("text", text);
+      url.searchParams.set("lang", "ru_RU");
+      url.searchParams.set("results", String(results));
+      if (mode === "city") {
+        url.searchParams.set("types", "locality");
+      }
+
+      const response = await fetch(url.toString());
+      if (!response.ok) return [];
+      const payload = await response.json() as any;
+      const list = Array.isArray(payload?.results) ? payload.results : [];
+
+      const values = list
+        .map((item: any) => {
+          const title = String(item?.title?.text || item?.title || item?.text || "").trim();
+          const subtitle = String(item?.subtitle?.text || item?.subtitle || "").trim();
+          return [title, subtitle].filter(Boolean).join(", ");
+        })
+        .filter(Boolean);
+
+      return Array.from(new Set(values)).slice(0, results);
+    } catch {
+      return [];
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!addressModalOpen || !isAddressInputFocused) return;
+
+    const rawAddress = addressForm.fullAddress.trim();
+    if (rawAddress.length < 2) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      const suggestions = await fetchYandexSuggestions(rawAddress, 8, "address");
+      const normalized = suggestions
+        .map((suggestion) => suggestion.trim())
+        .filter(Boolean)
+        .filter((value, index, list) => list.indexOf(value) === index)
+        .filter((value) => value !== rawAddress);
+      setAddressSuggestions(normalized);
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [addressModalOpen, isAddressInputFocused, addressForm.fullAddress, fetchYandexSuggestions]);
 
   const removeWishlistItem = async (id: string) => {
     try {
@@ -373,6 +689,22 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
       cancelled: { label: "Отменен", className: "bg-red-50 text-red-700 border-red-200" },
     };
     return map[status];
+  };
+
+  const resetAddressModalState = () => {
+    setAddressMapHint("");
+    setAddressSuggestions([]);
+    setIsAddressInputFocused(false);
+    setMapCenterQuery(null);
+    setAddressForm({
+      name: "",
+      fullAddress: "",
+      city: "",
+      street: "",
+      house: "",
+      apartment: "",
+      postalCode: "",
+    });
   };
 
   const renderProfileTab = () => (
@@ -435,7 +767,10 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold md:text-xl">Адреса доставки</h3>
         <button
-          onClick={() => setAddressModalOpen(true)}
+          onClick={() => {
+            resetAddressModalState();
+            setAddressModalOpen(true);
+          }}
           className="btn-primary px-3 py-2 flex items-center gap-1.5 text-sm"
         >
           <Plus className="w-4 h-4" /> Добавить
@@ -468,37 +803,96 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
 
       {addressModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="app-modal-panel app-modal-panel--md flex h-[90vh] flex-col p-6 md:h-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex w-[min(1580px,98vw)] max-h-[92vh] flex-col overflow-hidden rounded-2xl border border-[#d7e1ec] bg-white shadow-[0_30px_80px_-40px_rgba(15,23,42,0.65)]">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h4 className="text-lg font-semibold">Новый адрес</h4>
-              <button onClick={() => setAddressModalOpen(false)}>
+              <button
+                onClick={() => {
+                  resetAddressModalState();
+                  setAddressModalOpen(false);
+                }}
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3 flex-1 overflow-y-auto">
-              <input value={addressForm.name} onChange={(event) => setAddressForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Название адреса" className="field-control" />
-              <select
-                value={addressForm.cityId ?? ""}
-                onChange={(event) => setAddressForm((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
-                className="field-control"
-              >
-                <option value="">Выберите город</option>
-                {allCities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name} ({city.region})
-                  </option>
-                ))}
-              </select>
-              <input value={addressForm.street} onChange={(event) => setAddressForm((prev) => ({ ...prev, street: event.target.value }))} placeholder="Улица" className="field-control" />
-              <input value={addressForm.building} onChange={(event) => setAddressForm((prev) => ({ ...prev, building: event.target.value }))} placeholder="Дом / квартира" className="field-control" />
-              <input value={addressForm.postalCode} onChange={(event) => setAddressForm((prev) => ({ ...prev, postalCode: event.target.value }))} placeholder="Индекс" className="field-control" />
-              <div className="h-64 mt-3">
-                <YandexMapPicker onAddressSelect={handleAddressSelectFromMap} />
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4">
+              <div className="grid gap-4 md:grid-cols-[minmax(420px,1fr)_minmax(520px,1.25fr)]">
+                <div className="space-y-3 overflow-visible">
+                  <input
+                    value={addressForm.name}
+                    onChange={(event) => setAddressForm((prev) => ({ ...prev, name: event.target.value }))}
+                    placeholder="Название адреса"
+                    className="field-control"
+                  />
+
+                  <div className="relative z-30">
+                    <input
+                      value={addressForm.fullAddress}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        setAddressMapHint("");
+                        setAddressForm((prev) => ({ ...prev, fullAddress: nextValue }));
+                      }}
+                      onFocus={() => setIsAddressInputFocused(true)}
+                      onBlur={() => {
+                        window.setTimeout(() => setIsAddressInputFocused(false), 120);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter") return;
+                        event.preventDefault();
+                        const topSuggestion = addressSuggestions[0];
+                        if (topSuggestion) {
+                          void handleAddressSuggestionSelect(topSuggestion);
+                        } else {
+                          void applyFullAddressValue(addressForm.fullAddress);
+                          setAddressSuggestions([]);
+                          setIsAddressInputFocused(false);
+                        }
+                      }}
+                      placeholder="Полный адрес: Кировская область, Киров, Октябрьский пр-кт, д. 117, кв. 220"
+                      className="field-control"
+                    />
+                    {isAddressInputFocused && addressSuggestions.length > 0 && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+6px)] max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                        {addressSuggestions.map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            onClick={() => void handleAddressSuggestionSelect(suggestion)}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Укажите адрес одной строкой. Индекс, если найден, подставится автоматически.
+                  </p>
+                  {addressMapHint && <p className="text-xs text-amber-700">{addressMapHint}</p>}
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <YandexMapPicker
+                    onAddressSelect={handleAddressSelectFromMap}
+                    height={560}
+                    centerQuery={mapCenterQuery}
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 border-t border-gray-100 px-6 py-4">
               <button onClick={() => void createAddress()} className="btn-primary flex-1 py-2.5">Сохранить</button>
-              <button onClick={() => setAddressModalOpen(false)} className="btn-secondary flex-1 py-2.5">Отмена</button>
+              <button
+                onClick={() => {
+                  resetAddressModalState();
+                  setAddressModalOpen(false);
+                }}
+                className="btn-secondary flex-1 py-2.5"
+              >
+                Отмена
+              </button>
             </div>
           </div>
         </div>
@@ -776,3 +1170,9 @@ export function ProfilePage({ onBack, onLogout, userType, initialTab, onWishlist
     </div>
   );
 }
+
+
+
+
+
+

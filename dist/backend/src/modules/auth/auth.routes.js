@@ -30,6 +30,7 @@ authRouter.post("/login", async (req, res) => {
                 public_id: true,
                 role: true,
                 status: true,
+                blocked_until: true,
                 email: true,
                 name: true,
                 password: true,
@@ -54,8 +55,23 @@ authRouter.post("/login", async (req, res) => {
             return;
         }
         if (user.status === "BLOCKED") {
-            res.status(403).json({ error: "Пользователь заблокирован" });
-            return;
+            if (user.blocked_until && user.blocked_until.getTime() <= Date.now()) {
+                await prisma_1.prisma.appUser.update({
+                    where: { id: user.id },
+                    data: {
+                        status: "ACTIVE",
+                        block_reason: null,
+                        blocked_until: null,
+                    },
+                });
+            }
+            else {
+                const blockMessage = user.blocked_until
+                    ? `Пользователь временно заблокирован до ${user.blocked_until.toISOString()}`
+                    : "Пользователь заблокирован";
+                res.status(403).json({ error: blockMessage });
+                return;
+            }
         }
         res.json({
             user: {

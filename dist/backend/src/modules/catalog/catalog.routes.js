@@ -8,6 +8,126 @@ const format_1 = require("../../utils/format");
 const catalogRouter = (0, express_1.Router)();
 exports.catalogRouter = catalogRouter;
 const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+const CP1251_SPECIAL_CHAR_TO_BYTE = {
+    0x0402: 0x80,
+    0x0403: 0x81,
+    0x201a: 0x82,
+    0x0453: 0x83,
+    0x201e: 0x84,
+    0x2026: 0x85,
+    0x2020: 0x86,
+    0x2021: 0x87,
+    0x20ac: 0x88,
+    0x2030: 0x89,
+    0x0409: 0x8a,
+    0x2039: 0x8b,
+    0x040a: 0x8c,
+    0x040c: 0x8d,
+    0x040b: 0x8e,
+    0x040f: 0x8f,
+    0x0452: 0x90,
+    0x2018: 0x91,
+    0x2019: 0x92,
+    0x201c: 0x93,
+    0x201d: 0x94,
+    0x2022: 0x95,
+    0x2013: 0x96,
+    0x2014: 0x97,
+    0x2122: 0x99,
+    0x0459: 0x9a,
+    0x203a: 0x9b,
+    0x045a: 0x9c,
+    0x045c: 0x9d,
+    0x045b: 0x9e,
+    0x045f: 0x9f,
+    0x040e: 0xa1,
+    0x045e: 0xa2,
+    0x0408: 0xa3,
+    0x00a4: 0xa4,
+    0x0490: 0xa5,
+    0x00a6: 0xa6,
+    0x00a7: 0xa7,
+    0x0401: 0xa8,
+    0x00a9: 0xa9,
+    0x0404: 0xaa,
+    0x00ab: 0xab,
+    0x00ac: 0xac,
+    0x00ad: 0xad,
+    0x00ae: 0xae,
+    0x0407: 0xaf,
+    0x00b0: 0xb0,
+    0x00b1: 0xb1,
+    0x0406: 0xb2,
+    0x0456: 0xb3,
+    0x0491: 0xb4,
+    0x00b5: 0xb5,
+    0x00b6: 0xb6,
+    0x00b7: 0xb7,
+    0x0451: 0xb8,
+    0x2116: 0xb9,
+    0x0454: 0xba,
+    0x00bb: 0xbb,
+    0x0458: 0xbc,
+    0x0405: 0xbd,
+    0x0455: 0xbe,
+    0x0457: 0xbf,
+};
+const MOJIBAKE_WEIRD_RE = /[ЃЉЊЋЌЎЏђѓ‚„…†‡€‰™љњћќўџ]/u;
+function looksLikeMojibake(value) {
+    const text = value.trim();
+    if (!text)
+        return false;
+    if (/^\?{3,}$/.test(text.replace(/\s+/g, "")))
+        return true;
+    if (MOJIBAKE_WEIRD_RE.test(text))
+        return true;
+    if (text.length >= 8) {
+        const rsCount = (text.match(/[РС]/g) ?? []).length;
+        return rsCount / text.length > 0.28;
+    }
+    return false;
+}
+function decodeCp1251Mojibake(value) {
+    const bytes = [];
+    for (const char of value) {
+        const codePoint = char.codePointAt(0);
+        if (!codePoint)
+            return null;
+        if (codePoint <= 0x7f) {
+            bytes.push(codePoint);
+            continue;
+        }
+        if (codePoint >= 0x0410 && codePoint <= 0x044f) {
+            bytes.push(codePoint - 0x0350);
+            continue;
+        }
+        const special = CP1251_SPECIAL_CHAR_TO_BYTE[codePoint];
+        if (special !== undefined) {
+            bytes.push(special);
+            continue;
+        }
+        return null;
+    }
+    const decoded = Buffer.from(bytes).toString("utf8");
+    if (!decoded || decoded.includes("�"))
+        return null;
+    return decoded;
+}
+function normalizeDisplayText(value, fallback = "") {
+    const raw = String(value ?? "").trim();
+    if (!raw)
+        return fallback;
+    if (/^\?{3,}$/.test(raw.replace(/\s+/g, "")))
+        return fallback || "Без названия";
+    if (!looksLikeMojibake(raw))
+        return raw;
+    const decoded = decodeCp1251Mojibake(raw)?.trim();
+    if (!decoded)
+        return raw;
+    if (/^\?{3,}$/.test(decoded.replace(/\s+/g, "")))
+        return fallback || "Без названия";
+    return decoded;
+}
 function resolveListingType(rawType) {
     if (rawType === "services")
         return "SERVICE";
@@ -20,28 +140,28 @@ function formatPublishDate(date) {
         hour: "2-digit",
         minute: "2-digit",
     }).format(date);
-    return formatted.replace(",", " РІ");
+    return formatted.replace(",", " в");
 }
 function formatResponseTime(minutes) {
     if (!minutes || minutes <= 0)
         return null;
     if (minutes < 60)
-        return `РѕРєРѕР»Рѕ ${minutes} РјРёРЅСѓС‚`;
+        return `около ${minutes} минут`;
     if (minutes < 120)
-        return "РѕРєРѕР»Рѕ 1 С‡Р°СЃР°";
-    return `РѕРєРѕР»Рѕ ${Math.round(minutes / 60)} С‡Р°СЃРѕРІ`;
+        return "около 1 часа";
+    return `около ${Math.round(minutes / 60)} часов`;
 }
 function listingCategoryName(listing) {
-    return listing.item?.name ?? "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
+    return normalizeDisplayText(listing.item?.name, "Без категории");
 }
 function listingBreadcrumbs(listing) {
     if (!listing.item)
-        return ["Р“Р»Р°РІРЅР°СЏ", "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё"];
+        return ["Главная", "Без категории"];
     return [
-        "Р“Р»Р°РІРЅР°СЏ",
-        listing.item.subcategory.category.name,
-        listing.item.subcategory.name,
-        listing.item.name,
+        "Главная",
+        normalizeDisplayText(listing.item.subcategory.category.name, "Без категории"),
+        normalizeDisplayText(listing.item.subcategory.name, "Без категории"),
+        normalizeDisplayText(listing.item.name, "Без категории"),
     ];
 }
 function listingSpecifications(attributes) {
@@ -72,12 +192,12 @@ catalogRouter.get("/categories", async (req, res) => {
         });
         res.json(categories.map((category) => ({
             id: category.public_id,
-            name: category.name,
+            name: normalizeDisplayText(category.name, "Без названия"),
             icon_key: category.icon_key,
             subcategories: category.subcategories.map((subcategory) => ({
                 id: subcategory.public_id,
-                name: subcategory.name,
-                items: subcategory.items.map((item) => item.name),
+                name: normalizeDisplayText(subcategory.name, "Без названия"),
+                items: subcategory.items.map((item) => normalizeDisplayText(item.name, "Без названия")),
             })),
         })));
     }
@@ -155,22 +275,22 @@ catalogRouter.get("/listings", async (req, res) => {
                 : null;
             return {
                 id: listing.public_id,
-                title: listing.title,
+                title: normalizeDisplayText(listing.title, "Без названия"),
                 price: listing.price,
                 salePrice,
                 image: primaryImage,
                 images: listing.images.map((image) => image.url),
                 rating: listing.rating,
-                seller: listing.seller.name,
+                seller: normalizeDisplayText(listing.seller.name, "Продавец"),
                 sellerAvatar: listing.seller.avatar,
                 category: listingCategoryName(listing),
                 sku: listing.sku,
                 isNew: listing.condition === "NEW",
                 isSale: salePrice !== null,
                 isVerified: Boolean(listing.seller.seller_profile?.is_verified),
-                description: listing.description,
+                description: normalizeDisplayText(listing.description ?? "", ""),
                 shippingBySeller: listing.shipping_by_seller,
-                city: listing.city.name,
+                city: normalizeDisplayText(listing.city.name, "Город"),
                 publishDate: formatPublishDate(listing.created_at),
                 views: listing.views,
                 sellerResponseTime: formatResponseTime(listing.seller.seller_profile?.average_response_minutes),
@@ -181,10 +301,10 @@ catalogRouter.get("/listings", async (req, res) => {
                 condition: (0, format_1.toClientCondition)(listing.condition),
                 reviews: listing.reviews.map((review) => ({
                     id: String(review.id),
-                    author: review.author.display_name ?? "РђРЅРѕРЅРёРј",
+                    author: normalizeDisplayText(review.author.display_name, "Аноним"),
                     rating: review.rating,
                     date: formatPublishDate(review.created_at),
-                    comment: review.comment,
+                    comment: normalizeDisplayText(review.comment, review.comment),
                     avatar: review.author.avatar,
                 })),
             };
@@ -271,43 +391,48 @@ catalogRouter.get("/suggestions", async (req, res) => {
         ]);
         const suggestions = [];
         for (const listing of listings) {
-            if (!listing.title.toLowerCase().includes(normalized))
+            const listingTitle = normalizeDisplayText(listing.title, "");
+            if (!listingTitle.toLowerCase().includes(normalized))
                 continue;
+            const suggestionSubtitle = normalizeDisplayText(listing.item?.subcategory.name ??
+                listing.item?.subcategory.category.name ??
+                "Категория", "Категория");
             suggestions.push({
                 type: listing.type === "SERVICE" ? "service" : "product",
-                title: listing.title,
-                subtitle: listing.item?.subcategory.name ??
-                    listing.item?.subcategory.category.name ??
-                    "РљР°С‚РµРіРѕСЂРёСЏ",
-                query: listing.title,
+                title: listingTitle,
+                subtitle: suggestionSubtitle,
+                query: listingTitle,
             });
         }
         for (const category of categories) {
-            if (category.name.toLowerCase().includes(normalized)) {
+            const categoryName = normalizeDisplayText(category.name, "Категория");
+            if (categoryName.toLowerCase().includes(normalized)) {
                 suggestions.push({
                     type: "category",
-                    title: category.name,
-                    subtitle: "РљР°С‚РµРіРѕСЂРёСЏ",
-                    query: category.name,
+                    title: categoryName,
+                    subtitle: "Категория",
+                    query: categoryName,
                 });
             }
             for (const subcategory of category.subcategories) {
-                if (subcategory.name.toLowerCase().includes(normalized)) {
+                const subcategoryName = normalizeDisplayText(subcategory.name, "Категория");
+                if (subcategoryName.toLowerCase().includes(normalized)) {
                     suggestions.push({
                         type: "category",
-                        title: subcategory.name,
-                        subtitle: category.name,
-                        query: subcategory.name,
+                        title: subcategoryName,
+                        subtitle: categoryName,
+                        query: subcategoryName,
                     });
                 }
                 for (const item of subcategory.items) {
-                    if (!item.name.toLowerCase().includes(normalized))
+                    const itemName = normalizeDisplayText(item.name, "Без названия");
+                    if (!itemName.toLowerCase().includes(normalized))
                         continue;
                     suggestions.push({
                         type: "category",
-                        title: item.name,
-                        subtitle: subcategory.name,
-                        query: item.name,
+                        title: itemName,
+                        subtitle: subcategoryName,
+                        query: itemName,
                     });
                 }
             }
@@ -405,7 +530,7 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
             data: {
                 user_id: listing.seller_id,
                 type: "NEW_QUESTION",
-                message: `РќРѕРІС‹Р№ РІРѕРїСЂРѕСЃ РїРѕ РІР°С€РµРјСѓ С‚РѕРІР°СЂСѓ "${listing.title}"`,
+                message: `Новый вопрос по вашему товару "${listing.title}"`,
                 target_url: `/products/${listing.public_id}`,
             },
         });

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { Ban, Search, Shield, ShieldOff } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
@@ -16,6 +16,7 @@ type AdminUser = {
   city?: string | null;
   phone?: string | null;
   blockReason?: string | null;
+  blockedUntil?: string | null;
   buyerOrders: number;
   sellerOrders: number;
   buyerSpent: number;
@@ -27,6 +28,18 @@ type AdminUser = {
   totalListings: number;
   complaintsMade: number;
   complaintsAgainst: number;
+  approvedViolations: number;
+  sanctionsTotal: number;
+  sanctionsActive: number;
+  latestSanction: {
+    id: string;
+    level: "warning" | "temp_3_days" | "temp_30_days" | "permanent";
+    status: "active" | "completed";
+    startsAt: string;
+    endsAt: string | null;
+    reason: string;
+    createdAt: string;
+  } | null;
   isSellerVerified: boolean;
   sellerResponseMinutes: number | null;
   lastBuyerOrderDate: string | null;
@@ -52,9 +65,7 @@ export function UsersPage() {
       setUsers(result);
       setSelectedUser((prev) => prev ?? result[0]?.id ?? null);
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Не удалось загрузить пользователей",
-      );
+      alert(error instanceof Error ? error.message : "Не удалось загрузить пользователей");
     }
   };
 
@@ -67,8 +78,7 @@ export function UsersPage() {
       users.filter((user) => {
         const matchesText = matchesSearch(user, searchQuery);
         const matchesRole = roleFilter === "all" || user.role === roleFilter;
-        const matchesStatus =
-          statusFilter === "all" || user.status === statusFilter;
+        const matchesStatus = statusFilter === "all" || user.status === statusFilter;
         return matchesText && matchesRole && matchesStatus;
       }),
     [roleFilter, searchQuery, statusFilter, users],
@@ -92,11 +102,7 @@ export function UsersPage() {
       });
       await loadUsers();
     } catch (error) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Не удалось обновить статус пользователя",
-      );
+      alert(error instanceof Error ? error.message : "Не удалось обновить статус пользователя");
     }
   };
 
@@ -111,6 +117,15 @@ export function UsersPage() {
     if (role === "regular") return "Покупатель";
     if (role === "partner") return "Продавец";
     return "Администратор";
+  };
+
+  const sanctionLabel = (
+    level: "warning" | "temp_3_days" | "temp_30_days" | "permanent",
+  ) => {
+    if (level === "warning") return "Предупреждение";
+    if (level === "temp_3_days") return "Блок на 3 дня";
+    if (level === "temp_30_days") return "Блок на 30 дней";
+    return "Перманент";
   };
 
   return (
@@ -150,7 +165,7 @@ export function UsersPage() {
           <Search className="dashboard-search__icon" />
           <input
             type="text"
-            placeholder="Поиск по любому полю пользователя"
+            placeholder="Поиск по пользователям"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="dashboard-search__input"
@@ -167,9 +182,7 @@ export function UsersPage() {
             <button
               key={option.value}
               onClick={() => setRoleFilter(option.value as UserRoleFilter)}
-              className={`dashboard-chip ${
-                roleFilter === option.value ? "dashboard-chip--active" : ""
-              }`}
+              className={`dashboard-chip ${roleFilter === option.value ? "dashboard-chip--active" : ""}`}
             >
               {option.label}
             </button>
@@ -183,9 +196,7 @@ export function UsersPage() {
             <button
               key={option.value}
               onClick={() => setStatusFilter(option.value as UserStatusFilter)}
-              className={`dashboard-chip ${
-                statusFilter === option.value ? "dashboard-chip--active" : ""
-              }`}
+              className={`dashboard-chip ${statusFilter === option.value ? "dashboard-chip--active" : ""}`}
             >
               {option.label}
             </button>
@@ -193,26 +204,26 @@ export function UsersPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           {filteredUsers.map((user) => (
             <button
               key={user.id}
               onClick={() => setSelectedUser(user.id)}
-              className={`w-full text-left dashboard-card ${
+              className={`dashboard-card w-full text-left ${
                 selectedUser === user.id ? "border-[rgb(38,83,141)]" : "border-gray-200"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm font-semibold">{user.name}</div>
-                  <div className="text-xs text-gray-500 break-words">{user.email}</div>
-                  <div className="text-xs text-gray-500 mt-1 break-words">
+                  <div className="break-words text-xs text-gray-500">{user.email}</div>
+                  <div className="mt-1 break-words text-xs text-gray-500">
                     {user.id} · {roleLabel(user.role)}
                   </div>
                 </div>
                 <span
-                  className={`shrink-0 px-2 py-1 rounded-full text-xs ${
+                  className={`shrink-0 rounded-full px-2 py-1 text-xs ${
                     user.status === "active"
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-700"
@@ -233,38 +244,50 @@ export function UsersPage() {
             <div className="text-sm text-gray-500">Выберите пользователя</div>
           ) : (
             <div className="space-y-3">
-              <div className="font-semibold break-words">{selectedUserData.name}</div>
-              <div className="text-sm text-gray-600 break-words">{selectedUserData.email}</div>
+              <div className="break-words font-semibold">{selectedUserData.name}</div>
+              <div className="break-words text-sm text-gray-600">{selectedUserData.email}</div>
               <div className="text-sm text-gray-600">Роль: {roleLabel(selectedUserData.role)}</div>
               <div className="text-sm text-gray-600">Город: {selectedUserData.city ?? "не указан"}</div>
               <div className="text-sm text-gray-600">
-                Покупок: {selectedUserData.buyerOrders} · Потрачено:{" "}
-                {formatCurrency(selectedUserData.buyerSpent)} · Средний чек:{" "}
-                {formatCurrency(selectedUserData.avgBuyerCheck)}
+                Покупок: {selectedUserData.buyerOrders} · Потрачено: {formatCurrency(selectedUserData.buyerSpent)} ·
+                Средний чек: {formatCurrency(selectedUserData.avgBuyerCheck)}
               </div>
               <div className="text-sm text-gray-600">
-                Продаж: {selectedUserData.sellerOrders} · Выручка:{" "}
-                {formatCurrency(selectedUserData.sellerRevenue)} · Средний чек:{" "}
-                {formatCurrency(selectedUserData.avgSellerCheck)}
+                Продаж: {selectedUserData.sellerOrders} · Выручка: {formatCurrency(selectedUserData.sellerRevenue)} ·
+                Средний чек: {formatCurrency(selectedUserData.avgSellerCheck)}
               </div>
               <div className="text-sm text-gray-600">
-                Объявления: {selectedUserData.totalListings} (активных:{" "}
-                {selectedUserData.activeListings}, на модерации:{" "}
-                {selectedUserData.pendingListings})
+                Объявления: {selectedUserData.totalListings} (активных: {selectedUserData.activeListings}, на модерации: {selectedUserData.pendingListings})
               </div>
               <div className="text-sm text-gray-600">
-                Жалобы: подал {selectedUserData.complaintsMade}, на него{" "}
-                {selectedUserData.complaintsAgainst}
+                Жалобы: подал {selectedUserData.complaintsMade}, на него {selectedUserData.complaintsAgainst}
               </div>
               <div className="text-sm text-gray-600">
-                KYC:{" "}
-                {selectedUserData.kycLatest
+                Подтвержденные нарушения: {selectedUserData.approvedViolations}
+              </div>
+              <div className="text-sm text-gray-600">
+                Санкции: всего {selectedUserData.sanctionsTotal}, активных {selectedUserData.sanctionsActive}
+              </div>
+              {selectedUserData.latestSanction && (
+                <div className="break-words text-sm text-gray-600">
+                  Последняя санкция: {sanctionLabel(selectedUserData.latestSanction.level)} ({selectedUserData.latestSanction.status}) · до {selectedUserData.latestSanction.endsAt
+                    ? new Date(selectedUserData.latestSanction.endsAt).toLocaleString("ru-RU")
+                    : "бессрочно"}
+                </div>
+              )}
+              <div className="text-sm text-gray-600">
+                KYC: {selectedUserData.kycLatest
                   ? `${selectedUserData.kycLatest.id} (${selectedUserData.kycLatest.status})`
                   : "нет заявок"}
               </div>
               {selectedUserData.blockReason && (
-                <div className="text-sm text-red-600 break-words">
+                <div className="break-words text-sm text-red-600">
                   Причина блокировки: {selectedUserData.blockReason}
+                </div>
+              )}
+              {selectedUserData.blockedUntil && (
+                <div className="break-words text-sm text-red-600">
+                  Блокировка до: {new Date(selectedUserData.blockedUntil).toLocaleString("ru-RU")}
                 </div>
               )}
 
@@ -274,22 +297,22 @@ export function UsersPage() {
                   className="btn-danger-soft flex w-full items-center justify-center gap-2 py-2"
                   disabled={selectedUserData.role === "admin"}
                 >
-                  <Ban className="w-4 h-4" /> Заблокировать
+                  <Ban className="h-4 w-4" /> Заблокировать
                 </button>
               ) : (
                 <button
                   onClick={() => void toggleUserStatus(selectedUserData, false)}
                   className="btn-success-soft flex w-full items-center justify-center gap-2 py-2"
                 >
-                  <Shield className="w-4 h-4" /> Разблокировать
+                  <Shield className="h-4 w-4" /> Разблокировать
                 </button>
               )}
 
-              <div className="text-xs text-gray-500 flex items-center gap-1">
+              <div className="flex items-center gap-1 text-xs text-gray-500">
                 {selectedUserData.status === "active" ? (
-                  <Shield className="w-3 h-3" />
+                  <Shield className="h-3 w-3" />
                 ) : (
-                  <ShieldOff className="w-3 h-3" />
+                  <ShieldOff className="h-3 w-3" />
                 )}
                 Статус обновляется в реальном времени
               </div>
@@ -300,4 +323,3 @@ export function UsersPage() {
     </div>
   );
 }
-

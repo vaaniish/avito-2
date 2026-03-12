@@ -14,6 +14,9 @@ export class AppErrorBoundary extends React.Component<
   };
 
   componentDidCatch(error: Error) {
+    if (this.isResizeObserverNoise(error.message)) {
+      return;
+    }
     this.setState({
       errorMessage: error.message || "Неизвестная ошибка",
     });
@@ -30,8 +33,14 @@ export class AppErrorBoundary extends React.Component<
   }
 
   private handleWindowError = (event: ErrorEvent) => {
+    const message = event.error?.message || event.message || "";
+    if (this.isResizeObserverNoise(message)) {
+      event.preventDefault();
+      return;
+    }
+
     this.setState({
-      errorMessage: event.error?.message || event.message || "Ошибка приложения",
+      errorMessage: message || "Ошибка приложения",
     });
   };
 
@@ -41,11 +50,24 @@ export class AppErrorBoundary extends React.Component<
       reason instanceof Error
         ? reason.message
         : typeof reason === "string"
-          ? reason
-          : "Необработанное исключение";
+        ? reason
+        : "Необработанное исключение";
+
+    if (this.isResizeObserverNoise(message)) {
+      event.preventDefault();
+      return;
+    }
 
     this.setState({ errorMessage: message });
   };
+
+  private isResizeObserverNoise(message: string | null | undefined): boolean {
+    const normalized = String(message ?? "");
+    return (
+      normalized.includes("ResizeObserver loop completed with undelivered notifications") ||
+      normalized.includes("ResizeObserver loop limit exceeded")
+    );
+  }
 
   private handleReset = () => {
     this.setState({ errorMessage: null });

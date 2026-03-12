@@ -12,6 +12,10 @@ For existing databases that still run the legacy schema, use this runbook.
 
 ## Steps
 
+0. Current migration baseline:
+   - Squashed migration folder: `backend/prisma/migrations/20260310120000_init_squashed`
+   - Old migration folders were merged into this one.
+
 1. Run legacy-to-3NF SQL backfill:
    - `psql "$DATABASE_URL" -f scripts/migrate_legacy_to_3nf.sql`
 2. Apply Prisma migrations (recommended, deterministic):
@@ -33,6 +37,11 @@ Rollback is restore-from-backup. This migration changes structure and data shape
 
 ## Notes
 
+- If your local DB was previously migrated by old folders (`20260306193155`, `20260308200000_align_legacy_schema`),
+  sync Prisma history after starting PostgreSQL:
+  - `DELETE FROM "_prisma_migrations" WHERE migration_name IN ('20260306193155','20260308200000_align_legacy_schema');`
+  - `npx prisma migrate resolve --applied 20260310120000_init_squashed`
+  - `npx prisma migrate status`
 - New normalized entities:
   - `seller_profile`
   - `catalog_item`

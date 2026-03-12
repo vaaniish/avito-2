@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MapPin, Search } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 declare global {
   interface Window {
@@ -8,9 +8,13 @@ declare global {
       Map: new (
         container: HTMLElement,
         options: Record<string, unknown>,
+        mapOptions?: Record<string, unknown>,
       ) => {
         events: {
           add: (name: string, callback: (event: { get: (key: string) => number[] }) => void) => void;
+        };
+        behaviors?: {
+          disable?: (name: string) => void;
         };
         setCenter: (coords: number[], zoom: number) => void;
         geoObjects: {
@@ -40,6 +44,10 @@ declare global {
           } | undefined;
         };
       }>;
+      suggest?: (
+        query: string,
+        options?: Record<string, unknown>,
+      ) => Promise<Array<{ value?: string; displayName?: string }>>;
     };
   }
 }
@@ -65,36 +73,14 @@ interface YandexMapPickerProps {
   markers?: YandexMapMarker[];
   selectedMarkerId?: string | null;
   onMarkerSelect?: (marker: YandexMapMarker) => void;
+  height?: number | string;
+  centerQuery?: string | null;
 }
 
 type MapStatus = "loading" | "ready" | "unavailable";
 
 const YANDEX_MAPS_KEY =
   import.meta.env.VITE_YANDEX_MAPS_API_KEY?.toString().trim() ?? "";
-
-function parseAddressInput(rawValue: string): AddressPayload {
-  const normalized = rawValue.trim();
-  if (!normalized) {
-    return {
-      city: "",
-      street: "",
-      building: "",
-      postalCode: "",
-    };
-  }
-
-  const parts = normalized
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  return {
-    city: parts[0] ?? normalized,
-    street: parts[1] ?? "",
-    building: parts[2] ?? "",
-    postalCode: "",
-  };
-}
 
 function markerPreset(provider?: string, selected = false): string {
   if (selected) return "islands#nightIcon";
@@ -109,15 +95,17 @@ export function YandexMapPicker({
   markers = [],
   selectedMarkerId = null,
   onMarkerSelect,
+  height = 460,
+  centerQuery = null,
 }: YandexMapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const selectedPlacemarkRef = useRef<any>(null);
   const markerPlacemarksRef = useRef<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const autoGeolocationRequestedRef = useRef(false);
   const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
+  const [locationHint, setLocationHint] = useState("");
 
-  const hasMarkers = markers.length > 0;
   const selectedMarker = useMemo(
     () => markers.find((marker) => marker.id === selectedMarkerId) ?? null,
     [markers, selectedMarkerId],
@@ -131,21 +119,29 @@ export function YandexMapPicker({
 
     const initMap = () => {
       window.ymaps.ready(() => {
-        if (!mapRef.current) return;
+        try {
+          if (!mapRef.current) return;
 
-        const map = new window.ymaps.Map(mapRef.current, {
-          center: [55.751574, 37.573856],
-          zoom: 10,
-          controls: ["zoomControl"],
-        });
+          const map = new window.ymaps.Map(mapRef.current, {
+            center: [55.751574, 37.573856],
+            zoom: 10,
+            controls: ["zoomControl", "geolocationControl"],
+          }, {
+            suppressMapOpenBlock: true,
+          });
+          map.behaviors?.disable?.("scrollZoom");
 
-        map.events.add("click", (event) => {
-          const coords = event.get("coords");
-          void getAddressByCoords(coords);
-        });
+          map.events.add("click", (event) => {
+            const coords = event.get("coords");
+            void getAddressByCoords(coords);
+          });
 
-        mapInstanceRef.current = map;
-        setMapStatus("ready");
+          mapInstanceRef.current = map;
+          setMapStatus("ready");
+        } catch (error) {
+          console.error("Yandex map init error:", error);
+          setMapStatus("unavailable");
+        }
       });
     };
 
@@ -155,7 +151,7 @@ export function YandexMapPicker({
     } else if (!existingScript) {
       const script = document.createElement("script");
       script.id = "yandex-maps-script";
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${YANDEX_MAPS_KEY}&lang=ru_RU`;
+      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${YANDEX_MAPS_KEY}&lang=ru_RU&load=package.full`;
       script.async = true;
       script.onload = () => {
         initMap();
@@ -205,8 +201,31 @@ export function YandexMapPicker({
     if (!selectedMarker || !mapInstanceRef.current || mapStatus !== "ready") return;
     mapInstanceRef.current.setCenter([selectedMarker.lat, selectedMarker.lng], 14);
   }, [mapStatus, selectedMarker]);
+  useEffect(() => {
+    const query = centerQuery?.trim();
+    if (!query || mapStatus !== "ready" || !mapInstanceRef.current || !window.ymaps?.geocode) return;
 
-  const getAddressByCoords = async (coords: number[]) => {
+    let cancelled = false;
+    void window.ymaps
+      .geocode(query)
+      .then((geocodeResult) => {
+        if (cancelled) return;
+        const firstGeoObject = geocodeResult?.geoObjects?.get?.(0);
+        if (!firstGeoObject) return;
+        const coords = firstGeoObject.geometry?.getCoordinates?.();
+        if (!Array.isArray(coords) || coords.length < 2) return;
+        mapInstanceRef.current.setCenter(coords, 14);
+      })
+      .catch(() => {
+        // noop
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [centerQuery, mapStatus]);
+
+  const getAddressByCoords = async (coords: number[], options?: { auto?: boolean }) => {
     if (!window.ymaps || !mapInstanceRef.current) return;
 
     const geocode = await window.ymaps.geocode(coords);
@@ -232,6 +251,13 @@ export function YandexMapPicker({
       }
     }
 
+    if (options?.auto && (!city || !street)) {
+      setLocationHint(
+        "Геопозиция определена неточно. Выберите точку на карте вручную или введите адрес.",
+      );
+      return;
+    }
+
     if (selectedPlacemarkRef.current) {
       mapInstanceRef.current.geoObjects.remove(selectedPlacemarkRef.current);
     }
@@ -255,66 +281,98 @@ export function YandexMapPicker({
       building,
       postalCode,
     });
+    setLocationHint("");
   };
 
-  const handleSearch = async () => {
-    const query = searchQuery.trim();
-    if (!query) return;
-
-    if (mapStatus !== "ready" || !window.ymaps || !mapInstanceRef.current) {
-      onAddressSelect(parseAddressInput(query));
+  const requestCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setLocationHint("Браузер не поддерживает геолокацию.");
       return;
     }
 
-    const geocode = await window.ymaps.geocode(query);
-    const firstGeoObject = geocode.geoObjects.get(0);
-    if (!firstGeoObject) return;
+    setLocationHint("");
 
-    const coords = firstGeoObject.geometry.getCoordinates();
-    mapInstanceRef.current.setCenter(coords, 15);
-    await getAddressByCoords(coords);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.latitude, position.coords.longitude];
+        if (position.coords.accuracy > 2000) {
+          setLocationHint(
+            "Геолокация определена слишком приблизительно. Уточните адрес вручную или выберите точку на карте.",
+          );
+          return;
+        }
+
+        if (mapStatus === "ready" && mapInstanceRef.current) {
+          mapInstanceRef.current.setCenter(coords, 15);
+          void getAddressByCoords(coords, { auto: true });
+        }
+      },
+      () => {
+        setLocationHint(
+          "Не удалось получить геолокацию. Разрешите доступ к местоположению в браузере.",
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15_000,
+        maximumAge: 0,
+      },
+    );
   };
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="mb-4">
-        <label className="block text-sm text-gray-600 mb-2 uppercase tracking-wide">
-          Поиск адреса
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                void handleSearch();
-              }
-            }}
-            className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-gray-900 transition-colors duration-300"
-            placeholder="Введите адрес..."
-          />
-          <button
-            onClick={() => {
-              void handleSearch();
-            }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-2">
-          {mapStatus === "ready"
-            ? hasMarkers
-              ? "На карте отображены доступные ПВЗ. Можно выбрать точку или указать адрес вручную."
-              : "Нажмите на карту или введите адрес для поиска."
-            : "Введите адрес вручную в формате: город, улица, дом"}
-        </p>
-      </div>
+  useEffect(() => {
+    if (mapStatus !== "ready") return;
+    if (typeof window === "undefined") return;
+    if (!navigator.geolocation) return;
+    if (autoGeolocationRequestedRef.current) return;
 
+    autoGeolocationRequestedRef.current = true;
+    void requestCurrentLocation();
+  }, [mapStatus]);
+
+  useEffect(() => {
+    if (mapStatus !== "ready" || !mapInstanceRef.current) return;
+    let frameId = 0;
+    const fit = () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+      frameId = window.requestAnimationFrame(() => {
+        try {
+          mapInstanceRef.current?.container?.fitToViewport?.();
+        } catch {
+          // no-op: prevent ResizeObserver/viewport noise from crashing UI
+        }
+      });
+    };
+
+    const timer1 = window.setTimeout(fit, 80);
+    const timer2 = window.setTimeout(fit, 260);
+    const timer3 = window.setTimeout(fit, 700);
+    window.addEventListener("resize", fit, { passive: true });
+
+    return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+      window.clearTimeout(timer1);
+      window.clearTimeout(timer2);
+      window.clearTimeout(timer3);
+      window.removeEventListener("resize", fit);
+    };
+  }, [mapStatus, height]);
+
+  return (
+    <div className="w-full">
       <div
         ref={mapRef}
-        className="flex-1 rounded-xl overflow-hidden bg-gray-100 min-h-[400px] relative"
+        className="w-full rounded-xl overflow-hidden bg-gray-100 relative"
+        style={{
+          height:
+            typeof height === "number"
+              ? `${Math.max(320, height)}px`
+              : (height || "460px"),
+        }}
       >
         {mapStatus === "loading" && (
           <div className="w-full h-full flex items-center justify-center">
@@ -336,3 +394,4 @@ export function YandexMapPicker({
     </div>
   );
 }
+

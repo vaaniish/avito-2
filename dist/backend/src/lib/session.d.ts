@@ -3,6 +3,8 @@ type SessionUser = {
     id: number;
     public_id: string;
     role: string;
+    status: "ACTIVE" | "BLOCKED";
+    blocked_until: Date | null;
     email: string;
     name: string;
 };

@@ -90,6 +90,18 @@ enum ComplaintStatus {
   REJECTED
 }
 
+enum ComplaintSanctionLevel {
+  WARNING
+  TEMP_3_DAYS
+  TEMP_30_DAYS
+  PERMANENT
+}
+
+enum ComplaintSanctionStatus {
+  ACTIVE
+  COMPLETED
+}
+
 enum KycStatus {
   PENDING
   APPROVED
@@ -118,6 +130,7 @@ model AppUser {
   city_id              Int?
   avatar               String?
   block_reason         String?
+  blocked_until        DateTime?
   joined_at            DateTime              @default(now())
   created_at           DateTime              @default(now())
   updated_at           DateTime              @updatedAt
@@ -142,6 +155,8 @@ model AppUser {
   notifications        Notification[]
   audit_logs           AuditLog[]            @relation("audit_actor")
   order_status_changes OrderStatusHistory[]  @relation("order_status_actor")
+  complaint_sanctions_received ComplaintSanction[] @relation("complaint_sanction_seller")
+  complaint_sanctions_created  ComplaintSanction[] @relation("complaint_sanction_admin")
 
   @@index([role, status])
   @@index([created_at])
@@ -371,6 +386,13 @@ model MarketOrder {
   status                OrderStatus          @default(CREATED)
   delivery_type         DeliveryType
   delivery_address      String?
+  tracking_provider     String?
+  tracking_number       String?
+  tracking_url          String?
+  delivery_ext_status   String?
+  delivery_checked_at   DateTime?
+  delivered_at          DateTime?
+  issued_at             DateTime?
   total_price           Int
   delivery_cost         Int                  @default(0)
   discount              Int                  @default(0)
@@ -386,6 +408,7 @@ model MarketOrder {
   @@index([buyer_id])
   @@index([seller_id])
   @@index([status, created_at])
+  @@index([delivery_type, status, delivery_checked_at])
 }
 
 model MarketOrderItem {
@@ -447,9 +470,32 @@ model Complaint {
   seller                AppUser            @relation("complaint_seller", fields: [seller_id], references: [id], onDelete: Cascade)
   reporter              AppUser            @relation("complaint_reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
   checked_by            AppUser?           @relation("complaint_checker", fields: [checked_by_id], references: [id], onDelete: SetNull)
+  sanction              ComplaintSanction?
 
   @@index([status])
   @@index([listing_id])
+}
+
+model ComplaintSanction {
+  id            Int                     @id @default(autoincrement())
+  public_id     String                  @unique
+  complaint_id  Int                     @unique
+  seller_id     Int
+  level         ComplaintSanctionLevel
+  status        ComplaintSanctionStatus @default(ACTIVE)
+  reason        String
+  starts_at     DateTime                @default(now())
+  ends_at       DateTime?
+  created_by_id Int?
+  created_at    DateTime                @default(now())
+  updated_at    DateTime                @updatedAt
+
+  complaint     Complaint               @relation(fields: [complaint_id], references: [id], onDelete: Cascade)
+  seller        AppUser                 @relation("complaint_sanction_seller", fields: [seller_id], references: [id], onDelete: Cascade)
+  created_by    AppUser?                @relation("complaint_sanction_admin", fields: [created_by_id], references: [id], onDelete: SetNull)
+
+  @@index([seller_id, status, created_at])
+  @@index([created_by_id])
 }
 
 model KycRequest {
