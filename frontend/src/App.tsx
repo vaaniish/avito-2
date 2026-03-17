@@ -1,27 +1,56 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { ProductGrid } from "./components/ProductGrid";
-import { CartPage } from "./components/CartPage";
-import { CheckoutPage } from "./components/CheckoutPage";
-import { OrderCompletePage } from "./components/OrderCompletePage";
-import { ProductDetail } from "./components/ProductDetail";
 import { Footer, type FooterPage } from "./components/Footer";
 import { FilterPanel, type CatalogCategory } from "./components/FilterPanel";
-import { AboutPage } from "./components/pages/AboutPage";
-import { PartnershipPage } from "./components/pages/PartnershipPage";
-import { FAQPage } from "./components/pages/FAQPage";
-import { PrivacyPage } from "./components/pages/PrivacyPage";
-import { TermsPage } from "./components/pages/TermsPage";
-import { AuthPage } from "./components/pages/AuthPage";
-import { ProfilePage } from "./components/pages/ProfilePage";
-import { AdminLogin } from "./components/admin/AdminLogin";
-import { AdminPanel } from "./components/admin/AdminPanel";
+import type { ProfileTab } from "./components/pages/ProfilePage";
+import type { AdminPage } from "./components/admin/AdminPanel";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import type { CartItem, CityClient, FilterState, Product } from "./types";
 import { apiGet, apiPost, apiDelete, clearSessionUser, getSessionUser, saveSessionUser, type SessionRole, type SessionUser } from "./lib/api";
 import { matchesSearch } from "./lib/search";
+
+const CartPage = lazy(() =>
+  import("./components/CartPage").then((module) => ({ default: module.CartPage })),
+);
+const CheckoutPage = lazy(() =>
+  import("./components/CheckoutPage").then((module) => ({ default: module.CheckoutPage })),
+);
+const OrderCompletePage = lazy(() =>
+  import("./components/OrderCompletePage").then((module) => ({ default: module.OrderCompletePage })),
+);
+const ProductDetail = lazy(() =>
+  import("./components/ProductDetail").then((module) => ({ default: module.ProductDetail })),
+);
+const AboutPage = lazy(() =>
+  import("./components/pages/AboutPage").then((module) => ({ default: module.AboutPage })),
+);
+const PartnershipPage = lazy(() =>
+  import("./components/pages/PartnershipPage").then((module) => ({ default: module.PartnershipPage })),
+);
+const FAQPage = lazy(() =>
+  import("./components/pages/FAQPage").then((module) => ({ default: module.FAQPage })),
+);
+const PrivacyPage = lazy(() =>
+  import("./components/pages/PrivacyPage").then((module) => ({ default: module.PrivacyPage })),
+);
+const TermsPage = lazy(() =>
+  import("./components/pages/TermsPage").then((module) => ({ default: module.TermsPage })),
+);
+const AuthPage = lazy(() =>
+  import("./components/pages/AuthPage").then((module) => ({ default: module.AuthPage })),
+);
+const ProfilePage = lazy(() =>
+  import("./components/pages/ProfilePage").then((module) => ({ default: module.ProfilePage })),
+);
+const AdminLogin = lazy(() =>
+  import("./components/admin/AdminLogin").then((module) => ({ default: module.AdminLogin })),
+);
+const AdminPanel = lazy(() =>
+  import("./components/admin/AdminPanel").then((module) => ({ default: module.AdminPanel })),
+);
 
 type AppView =
   | "home"
@@ -39,6 +68,158 @@ type AppView =
   | "adminLogin"
   | "adminPanel";
 
+const ADMIN_ROUTE_PAGES: AdminPage[] = [
+  "transactions",
+  "complaints",
+  "sellers",
+  "listings",
+  "users",
+  "commissions",
+  "audit",
+];
+
+const PROFILE_ROUTE_TABS: ProfileTab[] = [
+  "profile",
+  "addresses",
+  "orders",
+  "wishlist",
+  "partnership",
+  "partner-listings",
+  "partner-questions",
+  "partner-orders",
+];
+
+type ParsedRoute = {
+  view: AppView;
+  listingId: string | null;
+  adminPage: AdminPage;
+  profileTab: ProfileTab;
+};
+
+function isAdminRoutePage(value: string): value is AdminPage {
+  return ADMIN_ROUTE_PAGES.includes(value as AdminPage);
+}
+
+function isProfileRouteTab(value: string): value is ProfileTab {
+  return PROFILE_ROUTE_TABS.includes(value as ProfileTab);
+}
+
+function normalizePathname(pathname: string): string {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.replace(/\/+$/, "") || "/";
+}
+
+function parseRoute(pathname: string, search: string): ParsedRoute {
+  const normalizedPath = normalizePathname(pathname);
+  const query = new URLSearchParams(search);
+  const listingIdFromQuery = query.get("listingId")?.trim() ?? "";
+  const defaultRoute: ParsedRoute = {
+    view: "home",
+    listingId: listingIdFromQuery || null,
+    adminPage: "transactions",
+    profileTab: "profile",
+  };
+
+  if (normalizedPath === "/") return defaultRoute;
+  if (normalizedPath === "/cart") return { ...defaultRoute, view: "cart" };
+  if (normalizedPath === "/checkout") return { ...defaultRoute, view: "checkout" };
+  if (normalizedPath === "/order-complete") return { ...defaultRoute, view: "orderComplete" };
+  if (normalizedPath === "/about") return { ...defaultRoute, view: "about" };
+  if (normalizedPath === "/partnership") return { ...defaultRoute, view: "partnership" };
+  if (normalizedPath === "/faq") return { ...defaultRoute, view: "faq" };
+  if (normalizedPath === "/privacy") return { ...defaultRoute, view: "privacy" };
+  if (normalizedPath === "/terms") return { ...defaultRoute, view: "terms" };
+  if (normalizedPath === "/auth") return { ...defaultRoute, view: "auth" };
+  if (normalizedPath === "/admin/login") return { ...defaultRoute, view: "adminLogin" };
+
+  if (normalizedPath === "/admin") {
+    return { ...defaultRoute, view: "adminPanel", adminPage: "transactions" };
+  }
+
+  if (normalizedPath.startsWith("/admin/")) {
+    const segment = normalizedPath.slice("/admin/".length).trim();
+    return {
+      ...defaultRoute,
+      view: "adminPanel",
+      adminPage: isAdminRoutePage(segment) ? segment : "transactions",
+    };
+  }
+
+  if (normalizedPath === "/profile") {
+    return { ...defaultRoute, view: "profile", profileTab: "profile" };
+  }
+
+  if (normalizedPath.startsWith("/profile/")) {
+    const segment = normalizedPath.slice("/profile/".length).trim();
+    return {
+      ...defaultRoute,
+      view: "profile",
+      profileTab: isProfileRouteTab(segment) ? segment : "profile",
+    };
+  }
+
+  if (normalizedPath.startsWith("/products/")) {
+    const listingId = normalizedPath.slice("/products/".length).trim();
+    return {
+      ...defaultRoute,
+      view: "product",
+      listingId: listingId || defaultRoute.listingId,
+    };
+  }
+
+  if (normalizedPath.startsWith("/product/")) {
+    const listingId = normalizedPath.slice("/product/".length).trim();
+    return {
+      ...defaultRoute,
+      view: "product",
+      listingId: listingId || defaultRoute.listingId,
+    };
+  }
+
+  return defaultRoute;
+}
+
+function buildPathForView(params: {
+  view: AppView;
+  listingId: string | null;
+  adminPage: AdminPage;
+  profileTab: ProfileTab;
+}): string {
+  const { view, listingId, adminPage, profileTab } = params;
+  switch (view) {
+    case "home":
+      return "/";
+    case "cart":
+      return "/cart";
+    case "checkout":
+      return "/checkout";
+    case "orderComplete":
+      return "/order-complete";
+    case "product":
+      return listingId ? `/products/${listingId}` : "/";
+    case "about":
+      return "/about";
+    case "partnership":
+      return "/partnership";
+    case "faq":
+      return "/faq";
+    case "privacy":
+      return "/privacy";
+    case "terms":
+      return "/terms";
+    case "auth":
+      return "/auth";
+    case "profile":
+      return profileTab === "profile" ? "/profile" : `/profile/${profileTab}`;
+    case "adminLogin":
+      return "/admin/login";
+    case "adminPanel":
+      return adminPage === "transactions" ? "/admin" : `/admin/${adminPage}`;
+    default:
+      return "/";
+  }
+}
+
 const DEFAULT_FILTERS: FilterState = {
   categories: [],
   priceRange: [0, 500000],
@@ -51,13 +232,16 @@ const DEFAULT_FILTERS: FilterState = {
   excludeWords: "",
 };
 
+const CATALOG_PAGE_SIZE = 24;
+
+type CatalogMode = "products" | "services";
+
 export default function App() {
-  const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const listingId = params.get("listingId");
-    return listingId && listingId.trim() ? listingId.trim() : null;
-  });
-  const [currentView, setCurrentView] = useState<AppView>("home");
+  const initialRoute = parseRoute(window.location.pathname, window.location.search);
+  const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(initialRoute.listingId);
+  const [currentView, setCurrentView] = useState<AppView>(initialRoute.view);
+  const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>(initialRoute.adminPage);
+  const [currentProfileTab, setCurrentProfileTab] = useState<ProfileTab>(initialRoute.profileTab);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<SessionRole>("regular");
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
@@ -78,6 +262,11 @@ export default function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Product[]>([]);
+  const [isDeepLinkListingLoading, setIsDeepLinkListingLoading] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [hasMoreServices, setHasMoreServices] = useState(true);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [productCategories, setProductCategories] = useState<CatalogCategory[]>([]);
   const [serviceCategories, setServiceCategories] = useState<CatalogCategory[]>([]);
   const [cities, setCities] = useState<CityClient[]>([]);
@@ -118,28 +307,65 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      void loadCatalog();
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
+    const handlePopState = () => {
+      const parsedRoute = parseRoute(window.location.pathname, window.location.search);
+      setCurrentView(parsedRoute.view);
+      setCurrentAdminPage(parsedRoute.adminPage);
+      setCurrentProfileTab(parsedRoute.profileTab);
+      setDeepLinkListingId(parsedRoute.listingId);
+      if (parsedRoute.view !== "product") {
+        setSelectedProduct(null);
+      }
     };
-  }, [filters]);
 
-  const loadCatalog = async () => {
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const targetPath = buildPathForView({
+      view: currentView,
+      listingId: selectedProduct?.id ?? deepLinkListingId,
+      adminPage: currentAdminPage,
+      profileTab: currentProfileTab,
+    });
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    if (targetPath !== currentPath) {
+      window.history.pushState({}, "", targetPath);
+    }
+  }, [
+    currentAdminPage,
+    currentProfileTab,
+    currentView,
+    deepLinkListingId,
+    selectedProduct?.id,
+  ]);
+
+  useEffect(() => {
+    if (currentView === "adminPanel") {
+      if (!isAuthenticated || userType !== "admin") {
+        setCurrentView("adminLogin");
+      }
+      return;
+    }
+
+    if (
+      (currentView === "profile" || currentView === "cart" || currentView === "checkout") &&
+      !isAuthenticated
+    ) {
+      setCurrentView("auth");
+    }
+  }, [currentView, isAuthenticated, userType]);
+
+  const loadStaticCatalogData = useCallback(async () => {
     try {
-      const cityQuery = filters.cityId ? `&cityId=${filters.cityId}` : "";
-      const [productsData, servicesData, productCategoriesData, serviceCategoriesData, citiesData] = await Promise.all([
-        apiGet<Product[]>(`/catalog/listings?type=products${cityQuery}`),
-        apiGet<Product[]>(`/catalog/listings?type=services${cityQuery}`),
+      const [productCategoriesData, serviceCategoriesData, citiesData] = await Promise.all([
         apiGet<CatalogCategory[]>("/catalog/categories?type=products"),
         apiGet<CatalogCategory[]>("/catalog/categories?type=services"),
         apiGet<CityClient[]>("/catalog/cities"),
       ]);
-
-      setProducts(productsData);
-      setServices(servicesData);
       setProductCategories(productCategoriesData);
       setServiceCategories(serviceCategoriesData);
       setCities(citiesData);
@@ -147,23 +373,147 @@ export default function App() {
       console.error(error);
       alert("Не удалось загрузить каталог");
     }
-  };
+  }, []);
+
+  const loadCatalogChunk = useCallback(
+    async (mode: CatalogMode, options?: { reset?: boolean }) => {
+      const reset = Boolean(options?.reset);
+      const sourceItems = mode === "products" ? products : services;
+      const offset = reset ? 0 : sourceItems.length;
+      const cityQuery = filters.cityId ? `&cityId=${filters.cityId}` : "";
+
+      if (mode === "products") {
+        if (isLoadingProducts) return;
+        setIsLoadingProducts(true);
+      } else {
+        if (isLoadingServices) return;
+        setIsLoadingServices(true);
+      }
+
+      try {
+        const page = await apiGet<Product[]>(
+          `/catalog/listings?type=${mode}&limit=${CATALOG_PAGE_SIZE}&offset=${offset}${cityQuery}`,
+        );
+
+        if (mode === "products") {
+          setProducts((prev) => {
+            if (reset) return page;
+            const known = new Set(prev.map((item) => item.id));
+            const merged = [...prev];
+            for (const nextItem of page) {
+              if (known.has(nextItem.id)) continue;
+              known.add(nextItem.id);
+              merged.push(nextItem);
+            }
+            return merged;
+          });
+          setHasMoreProducts(page.length === CATALOG_PAGE_SIZE);
+        } else {
+          setServices((prev) => {
+            if (reset) return page;
+            const known = new Set(prev.map((item) => item.id));
+            const merged = [...prev];
+            for (const nextItem of page) {
+              if (known.has(nextItem.id)) continue;
+              known.add(nextItem.id);
+              merged.push(nextItem);
+            }
+            return merged;
+          });
+          setHasMoreServices(page.length === CATALOG_PAGE_SIZE);
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось загрузить каталог");
+      } finally {
+        if (mode === "products") {
+          setIsLoadingProducts(false);
+        } else {
+          setIsLoadingServices(false);
+        }
+      }
+    },
+    [filters.cityId, isLoadingProducts, isLoadingServices, products, services],
+  );
+
+  useEffect(() => {
+    void loadStaticCatalogData();
+  }, [loadStaticCatalogData]);
+
+  useEffect(() => {
+    const handler = window.setTimeout(() => {
+      if (viewMode === "products") {
+        void loadCatalogChunk("products", { reset: true });
+        return;
+      }
+      void loadCatalogChunk("services", { reset: true });
+    }, 350);
+
+    return () => {
+      window.clearTimeout(handler);
+    };
+  }, [filters, loadCatalogChunk, viewMode]);
+
+  const handleLoadMoreCatalogItems = useCallback(() => {
+    if (viewMode === "products") {
+      if (!hasMoreProducts || isLoadingProducts) return;
+      void loadCatalogChunk("products");
+      return;
+    }
+
+    if (!hasMoreServices || isLoadingServices) return;
+    void loadCatalogChunk("services");
+  }, [
+    hasMoreProducts,
+    hasMoreServices,
+    isLoadingProducts,
+    isLoadingServices,
+    loadCatalogChunk,
+    viewMode,
+  ]);
 
   const currentItems = viewMode === "products" ? products : services;
   const currentCategories = viewMode === "products" ? productCategories : serviceCategories;
+  const hasMoreItems = viewMode === "products" ? hasMoreProducts : hasMoreServices;
+  const isLoadingMoreItems = viewMode === "products" ? isLoadingProducts : isLoadingServices;
 
   useEffect(() => {
-    if (!deepLinkListingId) return;
+    if (!deepLinkListingId || currentView !== "product") return;
 
     const allItems = [...products, ...services];
     const target = allItems.find((item) => item.id === deepLinkListingId);
-    if (!target) return;
+    if (target) {
+      setSelectedProduct(target);
+      setDeepLinkListingId(null);
+      setIsDeepLinkListingLoading(false);
+      return;
+    }
 
-    setSelectedProduct(target);
-    setCurrentView("product");
-    setDeepLinkListingId(null);
-    window.history.replaceState({}, "", window.location.pathname);
-  }, [deepLinkListingId, products, services]);
+    let cancelled = false;
+    setIsDeepLinkListingLoading(true);
+
+    void apiGet<Product>(`/catalog/listings/${encodeURIComponent(deepLinkListingId)}`)
+      .then((listing) => {
+        if (cancelled) return;
+        setSelectedProduct(listing);
+        setDeepLinkListingId(null);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load listing by id:", error);
+        setDeepLinkListingId(null);
+        setCurrentView("home");
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsDeepLinkListingLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentView, deepLinkListingId, products, services]);
 
   const categoryMap = useMemo(() => {
     const newMap = new Map<string, Set<string>>();
@@ -246,6 +596,9 @@ export default function App() {
 
   const handleLogoClick = () => {
     setCurrentView("home");
+    setCurrentProfileTab("profile");
+    setCurrentAdminPage("transactions");
+    setDeepLinkListingId(null);
     setSelectedProduct(null);
     setIsSearchActive(false);
     setFilters(DEFAULT_FILTERS);
@@ -278,6 +631,7 @@ export default function App() {
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
+    setDeepLinkListingId(product.id);
     setCurrentView("product");
     scrollToTop();
   };
@@ -309,11 +663,15 @@ export default function App() {
     }
 
     if (page === "partnership" && isAuthenticated) {
+      setCurrentProfileTab("partnership");
       setCurrentView("profile");
       scrollToTop();
       return;
     }
 
+    if (page !== "partnership") {
+      setCurrentProfileTab("profile");
+    }
     setCurrentView(page);
     scrollToTop();
   };
@@ -330,6 +688,7 @@ export default function App() {
       return;
     }
 
+    setCurrentProfileTab("profile");
     setCurrentView("profile");
     scrollToTop();
   };
@@ -408,9 +767,14 @@ export default function App() {
     });
   }, [filteredItems, sortBy]);
 
+  const lazyFallback = (
+    <div className="page-container py-16 text-center text-gray-600">Загрузка...</div>
+  );
+
   if (currentView === "product" && selectedProduct) {
     const cartItem = cartItems.find((item) => item.id === selectedProduct.id);
     const cartQuantity = cartItem ? cartItem.quantity : 0;
+    const relatedPool = [...products, ...services];
 
     return (
       <div className="min-h-screen app-shell">
@@ -424,31 +788,57 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <ProductDetail
-          product={selectedProduct}
-          onBack={() => setCurrentView("home")}
-          onAddToCart={addToCart}
-          onBuyNow={handleBuyNow}
-          onUpdateQuantity={updateQuantity}
-          cartQuantity={cartQuantity}
-          relatedProducts={currentItems
-            .filter(
-              (item) =>
-                item.id !== selectedProduct.id && item.category === selectedProduct.category
-            )
-            .slice(0, 4)}
-          initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
-          onWishlistToggle={handleWishlistToggle}
-        />
+        <Suspense fallback={lazyFallback}>
+          <ProductDetail
+            product={selectedProduct}
+            onBack={() => {
+              setSelectedProduct(null);
+              setCurrentView("home");
+            }}
+            onAddToCart={addToCart}
+            onBuyNow={handleBuyNow}
+            onUpdateQuantity={updateQuantity}
+            cartQuantity={cartQuantity}
+            relatedProducts={relatedPool
+              .filter(
+                (item) =>
+                  item.id !== selectedProduct.id && item.category === selectedProduct.category
+              )
+              .slice(0, 4)}
+            initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
+            onWishlistToggle={handleWishlistToggle}
+          />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </div>
+    );
+  }
+
+  if (currentView === "product" && !selectedProduct) {
+    return (
+      <>
+        <Header
+          isAuthenticated={isAuthenticated}
+          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          onCartClick={handleCartClick}
+          onSearchSubmit={handleSearchSubmit}
+          onLogoClick={handleLogoClick}
+          onProfileClick={handleProfileClick}
+        />
+        <div className="page-container py-16 text-center text-gray-600">
+          {isDeepLinkListingLoading ? "Загрузка объявления..." : "Объявление не найдено"}
+        </div>
+        <Footer onNavigate={handleFooterNavigation} />
+      </>
     );
   }
 
   if (currentView === "cart") {
     return (
       <>
-        <CartPage items={cartItems} onUpdateQuantity={updateQuantity} onCheckout={handleCheckout} />
+        <Suspense fallback={lazyFallback}>
+          <CartPage items={cartItems} onUpdateQuantity={updateQuantity} onCheckout={handleCheckout} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -465,22 +855,24 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <CheckoutPage
-          items={cartItems}
-          deliveryType={selectedDeliveryType}
-          onBack={() => setCurrentView("cart")}
-          onRemoveUnavailableItems={(itemIds) => {
-            setCartItems((prev) => prev.filter((item) => !itemIds.includes(item.id)));
-          }}
-          onComplete={(result) => {
-            setLastOrderTotal(result.total);
-            setLastPaymentMethod(result.paymentMethod);
-            setLastOrderIds(result.orderIds);
-            setLastDeliveryType(result.deliveryType);
-            setCartItems([]);
-            setCurrentView("orderComplete");
-          }}
-        />
+        <Suspense fallback={lazyFallback}>
+          <CheckoutPage
+            items={cartItems}
+            deliveryType={selectedDeliveryType}
+            onBack={() => setCurrentView("cart")}
+            onRemoveUnavailableItems={(itemIds) => {
+              setCartItems((prev) => prev.filter((item) => !itemIds.includes(item.id)));
+            }}
+            onComplete={(result) => {
+              setLastOrderTotal(result.total);
+              setLastPaymentMethod(result.paymentMethod);
+              setLastOrderIds(result.orderIds);
+              setLastDeliveryType(result.deliveryType);
+              setCartItems([]);
+              setCurrentView("orderComplete");
+            }}
+          />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -497,17 +889,20 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <OrderCompletePage
-          orderTotal={lastOrderTotal}
-          orderIds={lastOrderIds}
-          paymentMethod={lastPaymentMethod}
-          deliveryType={lastDeliveryType}
-          onViewHistory={() => {
-            setCurrentView("profile");
-            scrollToTop();
-          }}
-          onBackToHome={handleLogoClick}
-        />
+        <Suspense fallback={lazyFallback}>
+          <OrderCompletePage
+            orderTotal={lastOrderTotal}
+            orderIds={lastOrderIds}
+            paymentMethod={lastPaymentMethod}
+            deliveryType={lastDeliveryType}
+            onViewHistory={() => {
+              setCurrentProfileTab("orders");
+              setCurrentView("profile");
+              scrollToTop();
+            }}
+            onBackToHome={handleLogoClick}
+          />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -524,7 +919,9 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <AboutPage onBack={handleLogoClick} />
+        <Suspense fallback={lazyFallback}>
+          <AboutPage onBack={handleLogoClick} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -541,7 +938,9 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <PartnershipPage onBack={handleLogoClick} />
+        <Suspense fallback={lazyFallback}>
+          <PartnershipPage onBack={handleLogoClick} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -558,7 +957,9 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <FAQPage onBack={handleLogoClick} />
+        <Suspense fallback={lazyFallback}>
+          <FAQPage onBack={handleLogoClick} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -575,7 +976,9 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <PrivacyPage onBack={handleLogoClick} />
+        <Suspense fallback={lazyFallback}>
+          <PrivacyPage onBack={handleLogoClick} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -592,7 +995,9 @@ export default function App() {
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
-        <TermsPage onBack={handleLogoClick} />
+        <Suspense fallback={lazyFallback}>
+          <TermsPage onBack={handleLogoClick} />
+        </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
     );
@@ -600,75 +1005,97 @@ export default function App() {
 
   if (currentView === "auth") {
     return (
-      <AuthPage
-        onBack={handleLogoClick}
-        onPartnershipClick={() => setCurrentView("partnership")}
-        onLoginSuccess={(role, user, profile) => {
-          if (!user) return;
-          saveSessionUser(user);
-          setCurrentUser(user);
-          setIsAuthenticated(true);
-          setUserType(role || "regular");
-          setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
+      <Suspense fallback={lazyFallback}>
+        <AuthPage
+          onBack={handleLogoClick}
+          onPartnershipClick={() => setCurrentView("partnership")}
+          onLoginSuccess={(role, user, profile) => {
+            if (!user) return;
+            saveSessionUser(user);
+            setCurrentUser(user);
+            setIsAuthenticated(true);
+            setUserType(role || "regular");
+            setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
 
-          if (role === "admin") {
-            setCurrentView("adminPanel");
-            return;
-          }
+            if (role === "admin") {
+              setCurrentAdminPage("transactions");
+              setCurrentView("adminPanel");
+              return;
+            }
 
-          setCurrentView("profile");
-        }}
-      />
+            setCurrentProfileTab("profile");
+            setCurrentView("profile");
+          }}
+        />
+      </Suspense>
     );
   }
 
   if (currentView === "profile") {
     return (
-      <ProfilePage
-        onBack={handleLogoClick}
-        onLogout={() => {
-          clearSessionUser();
-          setCurrentUser(null);
-          setIsAuthenticated(false);
-          setUserType("regular");
-          setCurrentView("auth");
-        }}
-        userType={userType === "partner" ? "partner" : "regular"}
-        initialTab={undefined}
-        onWishlistUpdate={handleWishlistToggle}
-      />
+      <Suspense fallback={lazyFallback}>
+        <ProfilePage
+          onBack={handleLogoClick}
+          onLogout={() => {
+            clearSessionUser();
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            setUserType("regular");
+            setCurrentProfileTab("profile");
+            setCurrentView("auth");
+          }}
+          userType={userType === "partner" ? "partner" : "regular"}
+          initialTab={currentProfileTab}
+          onTabChange={setCurrentProfileTab}
+          onWishlistUpdate={handleWishlistToggle}
+          onOpenListing={(listingPublicId) => {
+            setSelectedProduct(null);
+            setDeepLinkListingId(listingPublicId);
+            setCurrentView("product");
+            scrollToTop();
+          }}
+        />
+      </Suspense>
     );
   }
 
   if (currentView === "adminLogin") {
     return (
-      <AdminLogin
-        onBack={handleLogoClick}
-        onLoginSuccess={(user) => {
-          if (user) {
-            saveSessionUser(user);
-            setCurrentUser(user);
-            setIsAuthenticated(true);
-            setUserType(user.role);
-          }
-          setCurrentView("adminPanel");
-        }}
-      />
+      <Suspense fallback={lazyFallback}>
+        <AdminLogin
+          onBack={handleLogoClick}
+          onLoginSuccess={(user) => {
+            if (user) {
+              saveSessionUser(user);
+              setCurrentUser(user);
+              setIsAuthenticated(true);
+              setUserType(user.role);
+            }
+            setCurrentAdminPage("transactions");
+            setCurrentView("adminPanel");
+          }}
+        />
+      </Suspense>
     );
   }
 
   if (currentView === "adminPanel") {
     return (
-      <AdminPanel
-        onLogout={() => {
-          clearSessionUser();
-          setCurrentUser(null);
-          setIsAuthenticated(false);
-          setUserType("regular");
-          setCurrentView("home");
-          scrollToTop();
-        }}
-      />
+      <Suspense fallback={lazyFallback}>
+        <AdminPanel
+          initialPage={currentAdminPage}
+          onPageChange={setCurrentAdminPage}
+          onLogout={() => {
+            clearSessionUser();
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            setUserType("regular");
+            setCurrentAdminPage("transactions");
+            setCurrentView("home");
+            scrollToTop();
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -740,6 +1167,9 @@ export default function App() {
           <main className="flex-1 min-w-0">
             <ProductGrid
               products={sortedItems}
+              hasMore={hasMoreItems}
+              isLoadingMore={isLoadingMoreItems}
+              onLoadMore={handleLoadMoreCatalogItems}
               onProductClick={handleProductClick}
               onAddToCart={addToCart}
               onUpdateQuantity={updateQuantity}

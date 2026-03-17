@@ -30,6 +30,10 @@ const RUSSIAN_POST_API_PATH =
 const RUSSIAN_POST_API_TIMEOUT_MS = Number(process.env.RUSSIAN_POST_API_TIMEOUT_MS ?? "8000");
 const RUSSIAN_POST_ACCESS_TOKEN = process.env.RUSSIAN_POST_ACCESS_TOKEN?.trim() ?? "";
 const RUSSIAN_POST_USER_AUTH = process.env.RUSSIAN_POST_USER_AUTH?.trim() ?? "";
+const RUSSIAN_POST_SOAP_URL =
+  process.env.RUSSIAN_POST_SOAP_URL?.trim() ?? "https://tracking.russianpost.ru/rtm34";
+const RUSSIAN_POST_LOGIN = process.env.RUSSIAN_POST_LOGIN?.trim() ?? "";
+const RUSSIAN_POST_PASSWORD = process.env.RUSSIAN_POST_PASSWORD?.trim() ?? "";
 
 function isLikelyRussianPostTrack(value: string): boolean {
   const v = value.trim().toUpperCase();
@@ -91,8 +95,107 @@ function getPathString(root: unknown, path: string[]): string | null {
   return typeof cursor === "string" && cursor.trim() ? cursor.trim() : null;
 }
 
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function decodeXmlEntities(value: string): string {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function collectXmlTagValues(xml: string, tagName: string): string[] {
+  const pattern = new RegExp(
+    `<(?:\\w+:)?${tagName}[^>]*>([\\s\\S]*?)<\\/(?:\\w+:)?${tagName}>`,
+    "giu",
+  );
+  const values: string[] = [];
+  for (const match of xml.matchAll(pattern)) {
+    const rawValue = (match[1] ?? "").replace(/<[^>]+>/gu, "").trim();
+    if (!rawValue) continue;
+    values.push(decodeXmlEntities(rawValue));
+  }
+  return values;
+}
+
+function collectXmlNestedTagValues(
+  xml: string,
+  parentTagName: string,
+  childTagName: string,
+): string[] {
+  const parentPattern = new RegExp(
+    `<(?:\\w+:)?${parentTagName}[^>]*>([\\s\\S]*?)<\\/(?:\\w+:)?${parentTagName}>`,
+    "giu",
+  );
+  const values: string[] = [];
+  for (const parentMatch of xml.matchAll(parentPattern)) {
+    const parentBlock = parentMatch[1] ?? "";
+    const nestedValues = collectXmlTagValues(parentBlock, childTagName);
+    values.push(...nestedValues);
+  }
+  return values;
+}
+
+function getLastValue(values: string[]): string | null {
+  if (values.length === 0) return null;
+  const candidate = values[values.length - 1];
+  return typeof candidate === "string" && candidate.trim() ? candidate : null;
+}
+
 function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExternalStatus {
-  const snapshot = JSON.stringify(payload).toLocaleLowerCase("ru-RU");
+  const snapshot = JSON.stringify(payload).toLowerCase();
+  const includesAny = (hints: string[]) => hints.some((hint) => snapshot.includes(hint));
+
+  if (
+    includesAny([
+      "\u0432\u0440\u0443\u0447\u0435\u043d",
+      "\u0432\u044b\u0434\u0430\u043d",
+      "\u043f\u043e\u043b\u0443\u0447\u0435\u043d",
+      "delivered_to_recipient",
+      "issued",
+      "picked_up",
+      "handed_over",
+      "completed",
+    ])
+  ) {
+    return "ISSUED";
+  }
+  if (
+    includesAny([
+      "\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d",
+      "\u043f\u0440\u0438\u0431\u044b\u043b",
+      "\u0433\u043e\u0442\u043e\u0432 \u043a \u0432\u044b\u0434\u0430\u0447\u0435",
+      "ready_for_pickup",
+      "arrived",
+      "available_for_pickup",
+    ])
+  ) {
+    return "DELIVERED";
+  }
+  if (
+    includesAny([
+      "\u0432 \u043f\u0443\u0442\u0438",
+      "\u0442\u0440\u0430\u043d\u0437\u0438\u0442",
+      "\u0441\u043e\u0440\u0442\u0438\u0440",
+      "\u043f\u043e\u043a\u0438\u043d\u0443\u043b",
+      "\u043f\u0440\u0438\u043d\u044f\u0442",
+      "in_transit",
+      "transit",
+      "moving",
+      "shipped",
+    ])
+  ) {
+    return "IN_TRANSIT";
+  }
   if (
     snapshot.includes("вручен") ||
     snapshot.includes("выдан") ||
@@ -125,6 +228,9 @@ function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExte
 
 function extractRussianPostRawStatus(payload: Record<string, unknown>): string | undefined {
   const directCandidates = [
+    ["soapLatestOperation"],
+    ["soapLatestEvent"],
+    ["soapFaultReason"],
     ["status", "name"],
     ["status_name"],
     ["globalStatus", "name"],
@@ -159,12 +265,14 @@ function extractRussianPostRawStatus(payload: Record<string, unknown>): string |
 }
 
 function isRussianPostNotFound(payload: Record<string, unknown>): boolean {
-  const snapshot = JSON.stringify(payload).toLocaleLowerCase("ru-RU");
+  const snapshot = JSON.stringify(payload).toLowerCase();
   return (
-    snapshot.includes("не найден") ||
-    snapshot.includes("не существует") ||
+    snapshot.includes("\u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d") ||
+    snapshot.includes("\u043d\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442") ||
+    snapshot.includes("\u043d\u0435\u0432\u0435\u0440\u043d") ||
     snapshot.includes("not found") ||
-    snapshot.includes("invalid")
+    snapshot.includes("invalid") ||
+    snapshot.includes("authorizationfaultreason")
   );
 }
 
@@ -225,10 +333,11 @@ async function requestTrackingApi(
   }
 }
 
-async function requestRussianPostTracking(
+async function requestRussianPostTrackingJson(
   trackingNumber: string,
 ): Promise<Record<string, unknown> | null> {
   if (!RUSSIAN_POST_API_BASE_URL) return null;
+  if (!RUSSIAN_POST_ACCESS_TOKEN && !RUSSIAN_POST_USER_AUTH) return null;
 
   const baseUrl = RUSSIAN_POST_API_BASE_URL.replace(/\/+$/u, "");
   const apiPath = RUSSIAN_POST_API_PATH.startsWith("/")
@@ -271,6 +380,115 @@ async function requestRussianPostTracking(
   } catch (_error) {
     return null;
   }
+}
+
+function buildRussianPostSoapRequest(
+  trackingNumber: string,
+  login: string,
+  password: string,
+): string {
+  return [
+    `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:oper="http://russianpost.org/operationhistory" xmlns:data="http://russianpost.org/operationhistory/data" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">`,
+    "<soap:Header/>",
+    "<soap:Body>",
+    "<oper:getOperationHistory>",
+    "<data:OperationHistoryRequest>",
+    `<data:Barcode>${escapeXml(trackingNumber)}</data:Barcode>`,
+    "<data:MessageType>0</data:MessageType>",
+    "<data:Language>RUS</data:Language>",
+    "</data:OperationHistoryRequest>",
+    '<data:AuthorizationHeader soapenv:mustUnderstand="1">',
+    `<data:login>${escapeXml(login)}</data:login>`,
+    `<data:password>${escapeXml(password)}</data:password>`,
+    "</data:AuthorizationHeader>",
+    "</oper:getOperationHistory>",
+    "</soap:Body>",
+    "</soap:Envelope>",
+  ].join("");
+}
+
+async function requestRussianPostTrackingSoap(
+  trackingNumber: string,
+): Promise<Record<string, unknown> | null> {
+  if (!RUSSIAN_POST_SOAP_URL) return null;
+  if (!RUSSIAN_POST_LOGIN || !RUSSIAN_POST_PASSWORD) return null;
+
+  const soapPayload = buildRussianPostSoapRequest(
+    trackingNumber,
+    RUSSIAN_POST_LOGIN,
+    RUSSIAN_POST_PASSWORD,
+  );
+
+  try {
+    const response = await fetchWithTimeout(
+      RUSSIAN_POST_SOAP_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/soap+xml;charset=UTF-8",
+          Accept: "application/soap+xml, text/xml",
+          "User-Agent": "avito-2/1.0 (tracking)",
+        },
+        body: soapPayload,
+      },
+      Number.isFinite(RUSSIAN_POST_API_TIMEOUT_MS)
+        ? Math.max(2_000, RUSSIAN_POST_API_TIMEOUT_MS)
+        : 8_000,
+    );
+
+    const responseText = await response.text();
+    if (!responseText.trim()) return null;
+
+    const normalizedXml = responseText.replace(/\s+/gu, " ").trim();
+    const latestOperationType = getLastValue(
+      collectXmlNestedTagValues(responseText, "OperType", "Name"),
+    );
+    const latestOperationAttr = getLastValue(
+      collectXmlNestedTagValues(responseText, "OperAttr", "Name"),
+    );
+    const combinedOperation = [latestOperationType, latestOperationAttr]
+      .filter((value): value is string => Boolean(value))
+      .join(", ");
+    const explicitOperation = getLastValue(collectXmlTagValues(responseText, "OperName"));
+    const latestOperation = explicitOperation ?? (combinedOperation || null);
+    const latestEvent = getLastValue(collectXmlTagValues(responseText, "PlaceName"));
+    const latestDate = getLastValue(collectXmlTagValues(responseText, "OperDate"));
+    const faultReason =
+      collectXmlTagValues(responseText, "AuthorizationFaultReason")[0] ??
+      collectXmlTagValues(responseText, "Text")[0] ??
+      null;
+
+    if (responseText.includes("AuthorizationFaultReason")) {
+      return null;
+    }
+
+    if (!response.ok && !latestOperation && !latestEvent) {
+      return null;
+    }
+
+    if (faultReason && /ошибк\p{L}*\s+авторизац\p{L}*/iu.test(faultReason)) {
+      return null;
+    }
+
+    return {
+      source: "russian_post_soap",
+      soapLatestOperation: latestOperation,
+      soapLatestEvent: latestEvent,
+      soapLatestDate: latestDate,
+      soapFaultReason: faultReason,
+      soapPayload: normalizedXml.slice(0, 10_000),
+    };
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function requestRussianPostTracking(
+  trackingNumber: string,
+): Promise<Record<string, unknown> | null> {
+  const jsonPayload = await requestRussianPostTrackingJson(trackingNumber);
+  if (jsonPayload) return jsonPayload;
+  return requestRussianPostTrackingSoap(trackingNumber);
 }
 
 export async function validateTrackingNumber(params: {

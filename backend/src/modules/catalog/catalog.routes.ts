@@ -252,10 +252,21 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
   try {
     const type = resolveListingType(req.query.type);
     const cityId = req.query.cityId ? Number(req.query.cityId) : undefined;
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const offset = req.query.offset ? Number(req.query.offset) : 0;
 
     if (req.query.cityId && (isNaN(cityId!) || cityId! <= 0)) {
       return res.status(400).json({ error: "Invalid city ID" });
     }
+    if (req.query.limit && (!Number.isInteger(limit) || (limit ?? 0) <= 0)) {
+      return res.status(400).json({ error: "Invalid limit" });
+    }
+    if (req.query.offset && (!Number.isInteger(offset) || offset < 0)) {
+      return res.status(400).json({ error: "Invalid offset" });
+    }
+
+    const take = typeof limit === "number" ? Math.min(limit, 100) : undefined;
+    const skip = take ? offset : undefined;
 
     const listings = await prisma.marketplaceListing.findMany({
       where: {
@@ -311,6 +322,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
         },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      ...(typeof take === "number" ? { take, skip } : {}),
     });
 
     return res.json(
@@ -367,35 +379,169 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
   }
 });
 
-catalogRouter.get("/cities", async (_req: Request, res: Response) => {
+catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => {
   try {
-    const citiesFromListings = await prisma.marketplaceListing.findMany({
+    const publicId = String(req.params.publicId ?? "").trim();
+    if (!publicId) {
+      return res.status(400).json({ error: "Invalid listing ID" });
+    }
+
+    const sessionUser = await getSessionUser(req);
+
+    const listing = await prisma.marketplaceListing.findFirst({
       where: {
-        status: "ACTIVE",
-        moderation_status: "APPROVED",
+        public_id: publicId,
       },
-      select: {
-        city: {
-            select: { id: true, name: true, region: true, created_at: true, updated_at: true } // Select all City properties
+      include: {
+        city: true,
+        seller: {
+          select: {
+            name: true,
+            avatar: true,
+            _count: {
+              select: {
+                listings: true,
+              },
+            },
+            seller_profile: {
+              select: {
+                is_verified: true,
+                average_response_minutes: true,
+              },
+            },
+          },
+        },
+        item: {
+          include: {
+            subcategory: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        },
+        images: {
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+        },
+        attributes: {
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+        },
+        reviews: {
+          orderBy: [{ created_at: "desc" }],
+          include: {
+            author: {
+              select: {
+                display_name: true,
+                avatar: true,
+              },
+            },
+          },
         },
       },
-      distinct: ["city_id"],
     });
 
-    const uniqueCities: City[] = [];
-    const seenCityIds = new Set<number>();
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
 
-    for (const listing of citiesFromListings) {
-      if (!seenCityIds.has(listing.city.id)) {
-        uniqueCities.push(listing.city);
-        seenCityIds.add(listing.city.id);
+    if (listing.status !== "ACTIVE") {
+      if (!sessionUser) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+
+      let hasRelatedAccess =
+        sessionUser.role === "ADMIN" || listing.seller_id === sessionUser.id;
+
+      if (!hasRelatedAccess) {
+        const [relatedOrderItem, relatedWishlistItem] = await Promise.all([
+          prisma.marketOrderItem.findFirst({
+            where: {
+              listing_id: listing.id,
+              order: {
+                buyer_id: sessionUser.id,
+              },
+            },
+            select: { id: true },
+          }),
+          prisma.wishlistItem.findFirst({
+            where: {
+              user_id: sessionUser.id,
+              listing_id: listing.id,
+            },
+            select: { id: true },
+          }),
+        ]);
+
+        hasRelatedAccess = Boolean(relatedOrderItem || relatedWishlistItem);
+      }
+
+      if (!hasRelatedAccess) {
+        return res.status(404).json({ error: "Listing not found" });
       }
     }
 
-    res.json(
-      uniqueCities
-        .sort((left: City, right: City) => left.name.localeCompare(right.name, "ru-RU")),
-    );
+    const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+    const salePrice =
+      listing.sale_price !== null && listing.sale_price < listing.price
+        ? listing.sale_price
+        : null;
+
+    return res.json({
+      id: listing.public_id,
+      title: normalizeDisplayText(listing.title, "Без названия"),
+      price: listing.price,
+      salePrice,
+      image: primaryImage,
+      images: listing.images.map((image) => image.url),
+      rating: listing.rating,
+      seller: normalizeDisplayText(listing.seller.name, "Продавец"),
+      sellerAvatar: listing.seller.avatar,
+      category: listingCategoryName(listing),
+      sku: listing.sku,
+      isNew: listing.condition === "NEW",
+      isSale: salePrice !== null,
+      isVerified: Boolean(listing.seller.seller_profile?.is_verified),
+      description: normalizeDisplayText(listing.description ?? "", ""),
+      shippingBySeller: listing.shipping_by_seller,
+      location: listing.city?.name ?? "",
+      city: listing.city?.name ?? "",
+      publishDate: formatPublishDate(listing.created_at),
+      views: listing.views,
+      sellerListings: listing.seller._count.listings,
+      sellerResponseTime: formatResponseTime(
+        listing.seller.seller_profile?.average_response_minutes,
+      ),
+      breadcrumbs: listingBreadcrumbs(listing),
+      condition: toClientCondition(listing.condition),
+      specifications: listingSpecifications(listing.attributes),
+      reviews: listing.reviews.map((review) => ({
+        id: String(review.id),
+        author: normalizeDisplayText(review.author.display_name ?? "", "Покупатель"),
+        avatar: review.author.avatar,
+        rating: review.rating,
+        comment: normalizeDisplayText(review.comment, ""),
+        date: review.created_at.toLocaleString("ru-RU", {
+          day: "numeric",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching listing by id:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+catalogRouter.get("/cities", async (_req: Request, res: Response) => {
+  try {
+    const cities = await prisma.city.findMany({
+      select: { id: true, name: true, region: true },
+      orderBy: [{ region: "asc" }, { name: "asc" }],
+    });
+
+    res.json(cities);
   } catch (error) {
     console.error("Error fetching cities:", error);
     res.status(500).json({ error: "Internal server error" });

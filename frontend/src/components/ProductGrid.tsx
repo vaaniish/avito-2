@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import type { Product, CartItem } from "../types";
 
 interface ProductGridProps {
   products: Product[];
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
   onUpdateQuantity: (id: string, quantity: number) => void;
@@ -18,6 +21,9 @@ interface ProductGridProps {
 
 export function ProductGrid({
   products,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
   onProductClick,
   onAddToCart,
   onUpdateQuantity,
@@ -29,6 +35,7 @@ export function ProductGrid({
   onWishlistToggle,
 }: ProductGridProps) {
   const [sortOpen, setSortOpen] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const sortOptions = [
     { value: "popular", label: "Популярные" },
@@ -40,9 +47,30 @@ export function ProductGrid({
 
   const currentSort = sortOptions.find((opt) => opt.value === sortBy);
 
+  useEffect(() => {
+    if (!hasMore || isLoadingMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+        onLoadMore();
+      },
+      {
+        root: null,
+        rootMargin: "320px 0px",
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, onLoadMore]);
+
   return (
     <div>
-      {/* Header with Sort */}
       <div className="flex items-center justify-between mb-[20px] mt-[0px] mr-[0px] ml-[0px]">
         <div>
           <h2 className="text-3xl text-gray-900">{viewMode === "products" ? "Товары" : "Услуги"}</h2>
@@ -50,7 +78,6 @@ export function ProductGrid({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Sort Dropdown */}
           <div className="relative flex-1 sm:flex-none">
             <button
               onClick={() => setSortOpen(!sortOpen)}
@@ -87,7 +114,6 @@ export function ProductGrid({
         </div>
       </div>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {products.map((product) => {
           const cartItem = cartItems.find((item) => item.id === product.id);
@@ -110,14 +136,19 @@ export function ProductGrid({
         })}
       </div>
 
+      {hasMore && (
+        <div className="mt-6">
+          <div ref={sentinelRef} className="h-4 w-full" aria-hidden="true" />
+          <p className="text-center text-sm text-gray-500">
+            {isLoadingMore ? "Загружаем ещё..." : "Прокрутите ниже для загрузки"}
+          </p>
+        </div>
+      )}
+
       {products.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-2xl text-gray-500">
-            Товары не найдены
-          </p>
-          <p className="text-gray-400 mt-2 text-lg">
-            Попробуйте изменить фильтры
-          </p>
+          <p className="text-2xl text-gray-500">Товары не найдены</p>
+          <p className="text-gray-400 mt-2 text-lg">Попробуйте изменить фильтры</p>
         </div>
       )}
     </div>

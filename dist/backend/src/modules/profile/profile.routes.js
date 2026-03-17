@@ -229,6 +229,86 @@ async function getDeliveryPoints(city) {
     }
     return buildFallbackDeliveryPoints(city);
 }
+function normalizeTextField(value) {
+    return typeof value === "string" ? value.trim() : "";
+}
+function parseLegacyBuilding(value) {
+    const raw = value.trim();
+    if (!raw) {
+        return {
+            house: "",
+            apartment: "",
+            entrance: "",
+        };
+    }
+    const houseMatch = raw.match(/(?:^|,\s*)(?:д(?:ом)?\.?)\s*([^,]+)/iu);
+    const apartmentMatch = raw.match(/(?:^|,\s*)(?:кв(?:артира)?\.?)\s*([^,]+)/iu);
+    const entranceMatch = raw.match(/(?:^|,\s*)(?:под[ъь]?езд)\s*([^,]+)/iu);
+    const fallbackHouse = raw.split(",")[0]?.trim() ?? "";
+    return {
+        house: (houseMatch?.[1] ?? fallbackHouse).trim(),
+        apartment: (apartmentMatch?.[1] ?? "").trim(),
+        entrance: (entranceMatch?.[1] ?? "").trim(),
+    };
+}
+function buildAddressFullAddress(parts) {
+    const region = normalizeTextField(parts.region);
+    const city = normalizeTextField(parts.city);
+    const street = normalizeTextField(parts.street);
+    const house = normalizeTextField(parts.house);
+    const apartment = normalizeTextField(parts.apartment);
+    const entrance = normalizeTextField(parts.entrance);
+    const housePart = house ? `д. ${house}` : "";
+    const entrancePart = entrance ? `подъезд ${entrance}` : "";
+    const apartmentPart = apartment ? `кв. ${apartment}` : "";
+    return [region, city, street, housePart, entrancePart, apartmentPart]
+        .filter(Boolean)
+        .join(", ");
+}
+function buildAddressBuildingLabel(parts) {
+    const house = normalizeTextField(parts.house);
+    const apartment = normalizeTextField(parts.apartment);
+    const entrance = normalizeTextField(parts.entrance);
+    return [
+        house ? `д. ${house}` : "",
+        entrance ? `подъезд ${entrance}` : "",
+        apartment ? `кв. ${apartment}` : "",
+    ]
+        .filter(Boolean)
+        .join(", ");
+}
+function mapUserAddressToDto(address) {
+    const fullAddress = normalizeTextField(address.full_address) ||
+        buildAddressFullAddress({
+            region: address.region,
+            city: address.city,
+            street: address.street,
+            house: address.house,
+            apartment: address.apartment ?? "",
+            entrance: address.entrance ?? "",
+        });
+    return {
+        id: String(address.id),
+        name: address.label,
+        label: address.label,
+        fullAddress,
+        region: address.region,
+        city: address.city,
+        street: address.street,
+        house: address.house,
+        apartment: address.apartment ?? "",
+        entrance: address.entrance ?? "",
+        building: buildAddressBuildingLabel({
+            house: address.house,
+            apartment: address.apartment ?? "",
+            entrance: address.entrance ?? "",
+        }),
+        postalCode: address.postal_code,
+        lat: address.lat ?? null,
+        lon: address.lon ?? null,
+        isDefault: address.is_default,
+    };
+}
 profileRouter.get("/me", async (req, res) => {
     try {
         const session = await (0, session_1.requireAnyRole)(req, [
@@ -246,7 +326,6 @@ profileRouter.get("/me", async (req, res) => {
                 city: true,
                 addresses: {
                     orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
-                    include: { city: true },
                 },
                 wishlist_items: {
                     include: {
@@ -299,14 +378,7 @@ profileRouter.get("/me", async (req, res) => {
                 joinDate: userWithRelations.joined_at.getFullYear().toString(),
             },
             addresses: userWithRelations.addresses.map((address) => ({
-                id: String(address.id),
-                name: address.label,
-                region: address.city.region,
-                city: address.city.name,
-                street: address.street,
-                building: address.building,
-                postalCode: address.postal_code,
-                isDefault: address.is_default,
+                ...mapUserAddressToDto(address),
             })),
             orders: userWithRelations.orders_as_buyer.map((order) => ({
                 id: String(order.id),
@@ -439,20 +511,9 @@ profileRouter.get("/addresses", async (req, res) => {
         }
         const addresses = await prisma_1.prisma.userAddress.findMany({
             where: { user_id: session.user.id },
-            include: { city: true },
             orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
         });
-        res.json(addresses.map((address) => ({
-            id: String(address.id),
-            label: address.label,
-            fullAddress: `${address.city.region}, ${address.city.name}, ${address.street}, ${address.building}`,
-            isDefault: address.is_default,
-            region: address.city.region,
-            city: address.city.name,
-            street: address.street,
-            building: address.building,
-            postalCode: address.postal_code,
-        })));
+        res.json(addresses.map((address) => mapUserAddressToDto(address)));
     }
     catch (error) {
         console.error("Error fetching addresses:", error);
@@ -471,14 +532,44 @@ profileRouter.post("/addresses", async (req, res) => {
             return;
         }
         const body = (req.body ?? {});
-        const label = typeof body.name === "string" ? body.name.trim() : "";
-        const cityId = typeof body.cityId === "number" ? body.cityId : 0;
-        const street = typeof body.street === "string" ? body.street.trim() : "";
-        const building = typeof body.building === "string" ? body.building.trim() : "";
-        const postalCode = typeof body.postalCode === "string" ? body.postalCode.trim() : "";
+        const label = normalizeTextField(body.name ?? body.label);
+        const fullAddress = normalizeTextField(body.fullAddress);
+        const region = normalizeTextField(body.region ?? body.regionName);
+        const city = normalizeTextField(body.city ?? body.cityName);
+        const street = normalizeTextField(body.street);
+        const postalCode = normalizeTextField(body.postalCode);
+        const legacyBuilding = normalizeTextField(body.building);
+        const parsedLegacyBuilding = parseLegacyBuilding(legacyBuilding);
+        const house = normalizeTextField(body.house) || parsedLegacyBuilding.house;
+        const apartment = normalizeTextField(body.apartment) || parsedLegacyBuilding.apartment;
+        const entrance = normalizeTextField(body.entrance) || parsedLegacyBuilding.entrance;
+        const lat = typeof body.lat === "number" && Number.isFinite(body.lat)
+            ? body.lat
+            : null;
+        const lon = typeof body.lon === "number" && Number.isFinite(body.lon)
+            ? body.lon
+            : null;
         const isDefault = Boolean(body.isDefault);
-        if (!label || !cityId || !street) {
-            res.status(400).json({ error: "Missing required address fields" });
+        const normalizedFullAddress = fullAddress ||
+            buildAddressFullAddress({
+                region,
+                city,
+                street,
+                house,
+                apartment,
+                entrance,
+            }) ||
+            [region, city, street, house].filter(Boolean).join(", ");
+        if (!label) {
+            res.status(400).json({ error: "Address label is required" });
+            return;
+        }
+        if (!normalizedFullAddress) {
+            res.status(400).json({ error: "Address text is required" });
+            return;
+        }
+        if (lat === null || lon === null) {
+            res.status(400).json({ error: "Address coordinates are required" });
             return;
         }
         if (isDefault) {
@@ -491,24 +582,20 @@ profileRouter.post("/addresses", async (req, res) => {
             data: {
                 user_id: session.user.id,
                 label,
-                city_id: cityId,
-                street,
-                building,
-                postal_code: postalCode,
+                full_address: normalizedFullAddress,
+                region: region || "",
+                city: city || "",
+                street: street || "",
+                house: house || "",
+                apartment,
+                entrance,
+                postal_code: postalCode || "",
+                lat,
+                lon,
                 is_default: isDefault,
             },
-            include: { city: true },
         });
-        res.status(201).json({
-            id: String(created.id),
-            name: created.label,
-            region: created.city.region,
-            city: created.city.name,
-            street: created.street,
-            building: created.building,
-            postalCode: created.postal_code,
-            isDefault: created.is_default,
-        });
+        res.status(201).json(mapUserAddressToDto(created));
     }
     catch (error) {
         console.error("Error creating address:", error);
@@ -539,37 +626,46 @@ profileRouter.patch("/addresses/:id", async (req, res) => {
             return;
         }
         const body = (req.body ?? {});
-        const isDefault = Boolean(body.isDefault);
+        const hasIsDefault = typeof body.isDefault === "boolean";
+        const isDefault = hasIsDefault ? Boolean(body.isDefault) : undefined;
         if (isDefault) {
             await prisma_1.prisma.userAddress.updateMany({
                 where: { user_id: session.user.id },
                 data: { is_default: false },
             });
         }
+        const legacyBuilding = normalizeTextField(body.building);
+        const parsedLegacyBuilding = parseLegacyBuilding(legacyBuilding);
         const updated = await prisma_1.prisma.userAddress.update({
             where: { id: existing.id },
             data: {
-                label: typeof body.name === "string" ? body.name.trim() : undefined,
-                city_id: typeof body.cityId === "number" ? body.cityId : undefined,
+                label: normalizeTextField(body.name ?? body.label) || undefined,
+                full_address: normalizeTextField(body.fullAddress) || undefined,
+                region: normalizeTextField(body.region) || undefined,
+                city: normalizeTextField(body.city) || undefined,
                 street: typeof body.street === "string" ? body.street.trim() : undefined,
-                building: typeof body.building === "string" ? body.building.trim() : undefined,
+                house: normalizeTextField(body.house) ||
+                    parsedLegacyBuilding.house ||
+                    undefined,
+                apartment: normalizeTextField(body.apartment) ||
+                    parsedLegacyBuilding.apartment ||
+                    undefined,
+                entrance: normalizeTextField(body.entrance) ||
+                    parsedLegacyBuilding.entrance ||
+                    undefined,
                 postal_code: typeof body.postalCode === "string"
                     ? body.postalCode.trim()
                     : undefined,
+                lat: typeof body.lat === "number" && Number.isFinite(body.lat)
+                    ? body.lat
+                    : undefined,
+                lon: typeof body.lon === "number" && Number.isFinite(body.lon)
+                    ? body.lon
+                    : undefined,
                 is_default: isDefault,
             },
-            include: { city: true },
         });
-        res.json({
-            id: String(updated.id),
-            name: updated.label,
-            region: updated.city.region,
-            city: updated.city.name,
-            street: updated.street,
-            building: updated.building,
-            postalCode: updated.postal_code,
-            isDefault: updated.is_default,
-        });
+        res.json(mapUserAddressToDto(updated));
     }
     catch (error) {
         console.error("Error updating address:", error);
@@ -597,6 +693,10 @@ profileRouter.delete("/addresses/:id", async (req, res) => {
         });
         if (!existing) {
             res.status(404).json({ error: "Address not found" });
+            return;
+        }
+        if (existing.is_default) {
+            res.status(400).json({ error: "Default address cannot be deleted" });
             return;
         }
         await prisma_1.prisma.userAddress.delete({
@@ -757,10 +857,18 @@ profileRouter.post("/orders", async (req, res) => {
                     id: addressId,
                     user_id: session.user.id,
                 },
-                include: { city: true },
             });
             if (selectedAddress) {
-                deliveryAddress = `${selectedAddress.city.region}, ${selectedAddress.city.name}, ${selectedAddress.street}, ${selectedAddress.building}`;
+                deliveryAddress =
+                    normalizeTextField(selectedAddress.full_address) ||
+                        buildAddressFullAddress({
+                            region: selectedAddress.region,
+                            city: selectedAddress.city,
+                            street: selectedAddress.street,
+                            house: selectedAddress.house,
+                            apartment: selectedAddress.apartment ?? "",
+                            entrance: selectedAddress.entrance ?? "",
+                        });
             }
         }
         if (!deliveryAddress) {
@@ -769,10 +877,18 @@ profileRouter.post("/orders", async (req, res) => {
                     user_id: session.user.id,
                     is_default: true,
                 },
-                include: { city: true },
             });
             if (defaultAddress) {
-                deliveryAddress = `${defaultAddress.city.region}, ${defaultAddress.city.name}, ${defaultAddress.street}, ${defaultAddress.building}`;
+                deliveryAddress =
+                    normalizeTextField(defaultAddress.full_address) ||
+                        buildAddressFullAddress({
+                            region: defaultAddress.region,
+                            city: defaultAddress.city,
+                            street: defaultAddress.street,
+                            house: defaultAddress.house,
+                            apartment: defaultAddress.apartment ?? "",
+                            entrance: defaultAddress.entrance ?? "",
+                        });
             }
         }
         if (deliveryType === "DELIVERY" && !deliveryAddress) {

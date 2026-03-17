@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import {
   AlertTriangle,
   ClipboardList,
@@ -11,15 +11,29 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { AuditLogsPage } from "./AuditLogsPage";
-import { CommissionsPage } from "./CommissionsPage";
-import { ComplaintsPage } from "./ComplaintsPage";
-import { ListingsPage } from "./ListingsPage";
-import { SellersPage } from "./SellersPage";
-import { TransactionsPage } from "./TransactionsPage";
-import { UsersPage } from "./UsersPage";
+const TransactionsPage = lazy(() =>
+  import("./TransactionsPage").then((module) => ({ default: module.TransactionsPage })),
+);
+const ComplaintsPage = lazy(() =>
+  import("./ComplaintsPage").then((module) => ({ default: module.ComplaintsPage })),
+);
+const SellersPage = lazy(() =>
+  import("./SellersPage").then((module) => ({ default: module.SellersPage })),
+);
+const ListingsPage = lazy(() =>
+  import("./ListingsPage").then((module) => ({ default: module.ListingsPage })),
+);
+const UsersPage = lazy(() =>
+  import("./UsersPage").then((module) => ({ default: module.UsersPage })),
+);
+const CommissionsPage = lazy(() =>
+  import("./CommissionsPage").then((module) => ({ default: module.CommissionsPage })),
+);
+const AuditLogsPage = lazy(() =>
+  import("./AuditLogsPage").then((module) => ({ default: module.AuditLogsPage })),
+);
 
-type AdminPage =
+export type AdminPage =
   | "transactions"
   | "complaints"
   | "sellers"
@@ -30,11 +44,25 @@ type AdminPage =
 
 interface AdminPanelProps {
   onLogout: () => void;
+  initialPage?: AdminPage;
+  onPageChange?: (page: AdminPage) => void;
 }
 
-export function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [currentPage, setCurrentPage] = useState<AdminPage>("transactions");
+export function AdminPanel({
+  onLogout,
+  initialPage = "transactions",
+  onPageChange,
+}: AdminPanelProps) {
+  const [currentPage, setCurrentPage] = useState<AdminPage>(initialPage);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setCurrentPage((prev) => (prev === initialPage ? prev : initialPage));
+  }, [initialPage]);
+
+  useEffect(() => {
+    onPageChange?.(currentPage);
+  }, [currentPage, onPageChange]);
 
   const navigation = [
     {
@@ -167,7 +195,17 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           />
         )}
 
-        <main className="w-full min-w-0 flex-1 p-3 md:p-6 lg:p-8">{renderPage()}</main>
+        <main className="w-full min-w-0 flex-1 p-3 md:p-6 lg:p-8">
+          <Suspense
+            fallback={(
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600">
+                Загрузка раздела...
+              </div>
+            )}
+          >
+            {renderPage()}
+          </Suspense>
+        </main>
       </div>
     </div>
   );

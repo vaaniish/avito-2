@@ -103,12 +103,6 @@ export class AppErrorBoundary extends React.Component<
               <RefreshCcw className="h-4 w-4" />
               Попробовать снова
             </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="btn-primary px-4 py-2.5"
-            >
-              Перезагрузить страницу
-            </button>
           </div>
         </div>
       </div>

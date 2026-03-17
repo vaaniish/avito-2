@@ -66,6 +66,7 @@ async function main(): Promise<void> {
       c.id,
     ]),
   );
+  const cityRegionMap = new Map(cities.map(([name, region]) => [name, region]));
 
   const users = [
     ["ADM-001", "ADMIN", "ACTIVE", "admin@ecomm.local", "admin123", "Главный администратор", "admin_main", "Москва", 800, "+79001000100", null],
@@ -136,11 +137,22 @@ async function main(): Promise<void> {
       ["SLR-003", "склад", "Екатеринбург", "Малышева", "36", "620014", true],
       ["SLR-004", "склад", "Краснодар", "Красная", "120", "350000", true],
     ].map((a: any) => ({
+      ...(() => {
+        const cityName = a[2];
+        const regionName = getRequired(cityRegionMap, cityName, "City region");
+        const house = a[4];
+        return {
+          full_address: `${regionName}, ${cityName}, ${a[3]}, д. ${house}`,
+          region: regionName,
+          city: cityName,
+          house,
+        };
+      })(),
       user_id: getRequired(userMap, a[0], "User"),
       label: a[1],
-      city_id: getRequired(cityMap, a[2], "City"),
       street: a[3],
-      building: a[4],
+      apartment: "",
+      entrance: "",
       postal_code: a[5],
       is_default: a[6],
     })),

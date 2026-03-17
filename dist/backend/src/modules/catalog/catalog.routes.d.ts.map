@@ -1,1 +1,1 @@
-{"version":3,"file":"catalog.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/catalog/catalog.routes.ts"],"names":[],"mappings":"AAkBA,QAAA,MAAM,aAAa,4CAAW,CAAC;AAunB/B,OAAO,EAAE,aAAa,EAAE,CAAC"}
+{"version":3,"file":"catalog.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/catalog/catalog.routes.ts"],"names":[],"mappings":"AAkBA,QAAA,MAAM,aAAa,4CAAW,CAAC;AAywB/B,OAAO,EAAE,aAAa,EAAE,CAAC"}
