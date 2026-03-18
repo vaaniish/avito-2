@@ -6,7 +6,6 @@ import {
   MarketplaceListing,
   UserAddress,
   WishlistItem,
-  City,
 } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Router, type Request, type Response } from "express";
@@ -425,6 +424,11 @@ function mapUserAddressToDto(address: UserAddress) {
   };
 }
 
+function extractPrimaryCityFromAddresses(addresses: Array<{ city: string }>): string | null {
+  const city = addresses[0]?.city?.trim();
+  return city || null;
+}
+
 profileRouter.get("/me", async (req: Request, res: Response) => {
   try {
     const session = await requireAnyRole(req, [
@@ -440,7 +444,6 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
     const user = await prisma.appUser.findUnique({
       where: { id: session.user.id },
       include: {
-        city: true, // Include City for AppUser
         addresses: {
           orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
         },
@@ -448,11 +451,20 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
           include: {
             listing: {
               include: {
-                seller: { include: { city: true } }, // Include City for seller in listing
+                seller: {
+                  include: {
+                    addresses: {
+                      select: {
+                        city: true,
+                      },
+                      orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                      take: 1,
+                    },
+                  },
+                },
                 images: {
                   orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                 },
-                city: true, // Include City for listing
               },
             },
           },
@@ -460,7 +472,17 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
         },
         orders_as_buyer: {
           include: {
-            seller: { include: { city: true } }, // Include City for seller in order
+            seller: {
+              include: {
+                addresses: {
+                  select: {
+                    city: true,
+                  },
+                  orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                  take: 1,
+                },
+              },
+            },
             items: {
               include: {
                 listing: {
@@ -483,17 +505,15 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
 
     // Type for AppUser with included relations
     type UserWithRelations = AppUser & {
-      city: City | null;
       addresses: UserAddress[];
       orders_as_buyer: (MarketOrder & {
-        seller: AppUser & { city: City | null };
+        seller: AppUser & { addresses: Array<{ city: string }> };
         items: (MarketOrderItem & { listing: { public_id: string } | null })[];
       })[];
       wishlist_items: (WishlistItem & {
         listing: MarketplaceListing & {
-          seller: AppUser & { city: City | null };
+          seller: AppUser & { addresses: Array<{ city: string }> };
           images: ListingImage[];
-          city: City;
         };
       })[];
     };
@@ -511,7 +531,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
         name: userWithRelations.name,
         email: userWithRelations.email,
         avatar: userWithRelations.avatar,
-        city: userWithRelations.city?.name ?? null, // Use city.name
+        city: extractPrimaryCityFromAddresses(userWithRelations.addresses),
         joinDate: userWithRelations.joined_at.getFullYear().toString(),
       },
       addresses: userWithRelations.addresses.map((address) => ({
@@ -532,7 +552,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
             name: order.seller.name,
             avatar: order.seller.avatar,
             phone: order.seller.phone ?? "",
-            address: `${order.seller.city?.name ?? "Город не указан"}`, // Use order.seller.city.name
+            address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
             workingHours: "пн — вс: 9:00-21:00",
           },
           items: order.items.map((item) => ({
@@ -551,7 +571,7 @@ profileRouter.get("/me", async (req: Request, res: Response) => {
           name: item.listing.title,
           price: item.listing.sale_price ?? item.listing.price,
           image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-          location: item.listing.city.name, // Use item.listing.city.name
+          location: extractPrimaryCityFromAddresses(item.listing.seller.addresses) ?? "",
           condition: toClientCondition(item.listing.condition),
           seller: item.listing.seller.name,
           addedDate: item.added_at.toISOString().split("T")[0],
@@ -1370,7 +1390,17 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
     const orders = await prisma.marketOrder.findMany({
       where: { buyer_id: session.user.id },
       include: {
-        seller: { include: { city: true } }, // Include City for seller in order
+        seller: {
+          include: {
+            addresses: {
+              select: {
+                city: true,
+              },
+              orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+              take: 1,
+            },
+          },
+        },
         items: true,
       },
       orderBy: [{ created_at: "desc" }],
@@ -1379,7 +1409,7 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
     res.json(
       orders.map(
         (
-          order: MarketOrder & { seller: AppUser & { city: City | null }; items: MarketOrderItem[] },
+          order: MarketOrder & { seller: AppUser & { addresses: Array<{ city: string }> }; items: MarketOrderItem[] },
         ) => ({
           id: String(order.id),
           orderNumber: `#${order.public_id}`,
@@ -1394,7 +1424,7 @@ profileRouter.get("/orders", async (req: Request, res: Response) => {
             name: order.seller.name,
             avatar: order.seller.avatar,
             phone: order.seller.phone ?? "",
-            address: `${order.seller.city?.name ?? "Город не указан"}`, // Use order.seller.city.name
+            address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
             workingHours: "пн — вс: 9:00-21:00",
           },
           items: order.items.map((item: MarketOrderItem) => ({
@@ -1430,11 +1460,20 @@ profileRouter.get("/wishlist", async (req: Request, res: Response) => {
       include: {
         listing: {
           include: {
-            seller: true,
+            seller: {
+              include: {
+                addresses: {
+                  select: {
+                    city: true,
+                  },
+                  orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                  take: 1,
+                },
+              },
+            },
             images: {
               orderBy: [{ sort_order: "asc" }, { id: "asc" }],
             },
-            city: true, // Include City for listing
           },
         },
       },
@@ -1446,9 +1485,8 @@ profileRouter.get("/wishlist", async (req: Request, res: Response) => {
         (
           item: WishlistItem & {
             listing: MarketplaceListing & {
-              seller: AppUser;
+              seller: AppUser & { addresses: Array<{ city: string }> };
               images: ListingImage[];
-              city: City; // Include City in type definition
             };
           },
         ) => ({
@@ -1456,7 +1494,7 @@ profileRouter.get("/wishlist", async (req: Request, res: Response) => {
           name: item.listing.title,
           price: item.listing.sale_price ?? item.listing.price,
           image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-          location: item.listing.city.name, // Use item.listing.city.name
+          location: extractPrimaryCityFromAddresses(item.listing.seller.addresses) ?? "",
           condition: toClientCondition(item.listing.condition),
           seller: item.listing.seller.name,
           addedDate: item.added_at.toISOString().split("T")[0],

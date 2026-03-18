@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminRouter = void 0;
+const node_crypto_1 = require("node:crypto");
+const client_1 = require("@prisma/client");
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
@@ -156,6 +158,13 @@ function splitEvidenceFiles(value) {
         .split(/[,\n;|]/g)
         .map((item) => item.trim())
         .filter(Boolean);
+}
+function extractPrimaryAddressInfo(addresses) {
+    const first = addresses[0];
+    return {
+        city: first?.city?.trim() ?? "",
+        region: first?.region?.trim() ?? "",
+    };
 }
 function toSearchText(input) {
     if (input === null || input === undefined)
@@ -411,7 +420,7 @@ adminRouter.get("/audit-logs", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
-adminRouter.get("/complaints", async (req, res) => {
+adminRouter.get("/complaints-legacy", async (req, res) => {
     try {
         const access = await requireAdmin(req, res);
         if (!access.ok)
@@ -426,12 +435,6 @@ adminRouter.get("/complaints", async (req, res) => {
                         created_at: true,
                         status: true,
                         moderation_status: true,
-                        city: {
-                            select: {
-                                name: true,
-                                region: true,
-                            },
-                        },
                         _count: {
                             select: {
                                 complaints: true,
@@ -454,6 +457,14 @@ adminRouter.get("/complaints", async (req, res) => {
                                 is_verified: true,
                                 average_response_minutes: true,
                             },
+                        },
+                        addresses: {
+                            select: {
+                                city: true,
+                                region: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
                         },
                         _count: {
                             select: {
@@ -547,86 +558,89 @@ adminRouter.get("/complaints", async (req, res) => {
                 activeSanctionBySeller.set(sanction.seller_id, sanction);
             }
         }
-        res.json(complaints.map((complaint) => ({
-            id: complaint.public_id,
-            createdAt: complaint.created_at,
-            status: complaint.status.toLowerCase(),
-            targetType: "listing",
-            complaintType: complaint.complaint_type,
-            listingId: complaint.listing.public_id,
-            listingUrl: buildListingPublicUrl(complaint.listing.public_id),
-            listingTitle: complaint.listing.title,
-            listingPrice: complaint.listing.price,
-            listingCreatedAt: complaint.listing.created_at,
-            listingStatus: complaint.listing.status.toLowerCase(),
-            listingModerationStatus: complaint.listing.moderation_status.toLowerCase(),
-            listingCity: complaint.listing.city.name,
-            listingRegion: complaint.listing.city.region,
-            listingComplaintsCount: complaint.listing._count.complaints,
-            sellerId: complaint.seller.public_id,
-            sellerName: complaint.seller.name,
-            sellerEmail: complaint.seller.email,
-            sellerPhone: complaint.seller.phone,
-            sellerStatus: complaint.seller.status.toLowerCase(),
-            sellerBlockedUntil: complaint.seller.blocked_until,
-            sellerBlockReason: complaint.seller.block_reason,
-            sellerJoinedAt: complaint.seller.joined_at,
-            sellerVerified: Boolean(complaint.seller.seller_profile?.is_verified),
-            sellerResponseMinutes: complaint.seller.seller_profile?.average_response_minutes ?? null,
-            reporterId: complaint.reporter.public_id,
-            reporterName: complaint.reporter.name,
-            reporterEmail: complaint.reporter.email,
-            sellerViolationsCount: approvedBySeller.get(complaint.seller_id) ?? 0,
-            sellerListingsCount: complaint.seller._count.listings,
-            sellerOrdersCount: complaint.seller._count.orders_as_seller,
-            description: complaint.description,
-            evidence: complaint.evidence,
-            evidenceFiles: splitEvidenceFiles(complaint.evidence),
-            checkedAt: complaint.checked_at,
-            checkedBy: complaint.checked_by
-                ? {
-                    id: complaint.checked_by.public_id,
-                    name: complaint.checked_by.name,
-                    email: complaint.checked_by.email,
-                }
-                : null,
-            actionTaken: complaint.action_taken,
-            sanction: sanctionByComplaint.get(complaint.id)
-                ? {
-                    id: sanctionByComplaint.get(complaint.id)?.public_id,
-                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(sanctionByComplaint.get(complaint.id)?.level ?? "WARNING"),
-                    status: toClientComplaintSanctionStatus(sanctionByComplaint.get(complaint.id)?.status ?? "COMPLETED"),
-                    startsAt: sanctionByComplaint.get(complaint.id)?.starts_at ?? null,
-                    endsAt: sanctionByComplaint.get(complaint.id)?.ends_at ?? null,
-                    reason: sanctionByComplaint.get(complaint.id)?.reason ?? null,
-                    createdAt: sanctionByComplaint.get(complaint.id)?.created_at ?? null,
-                }
-                : null,
-            activeSellerSanction: activeSanctionBySeller.get(complaint.seller_id)
-                ? {
-                    id: activeSanctionBySeller.get(complaint.seller_id)?.public_id,
-                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(activeSanctionBySeller.get(complaint.seller_id)?.level ?? "WARNING"),
-                    status: toClientComplaintSanctionStatus(activeSanctionBySeller.get(complaint.seller_id)?.status ?? "ACTIVE"),
-                    startsAt: activeSanctionBySeller.get(complaint.seller_id)?.starts_at ?? null,
-                    endsAt: activeSanctionBySeller.get(complaint.seller_id)?.ends_at ?? null,
-                    reason: activeSanctionBySeller.get(complaint.seller_id)?.reason ?? null,
-                    createdAt: activeSanctionBySeller.get(complaint.seller_id)?.created_at ?? null,
-                }
-                : null,
-            evaluation: buildComplaintEvaluation({
+        res.json(complaints.map((complaint) => {
+            const addressInfo = extractPrimaryAddressInfo(complaint.seller.addresses);
+            return {
+                id: complaint.public_id,
+                createdAt: complaint.created_at,
+                status: complaint.status.toLowerCase(),
+                targetType: "listing",
                 complaintType: complaint.complaint_type,
-                evidenceCount: splitEvidenceFiles(complaint.evidence).length,
-                listingComplaintCount: complaint.listing._count.complaints,
-                sellerComplaintCount: complaint.seller._count.complaints_against,
-            }),
-        })));
+                listingId: complaint.listing.public_id,
+                listingUrl: buildListingPublicUrl(complaint.listing.public_id),
+                listingTitle: complaint.listing.title,
+                listingPrice: complaint.listing.price,
+                listingCreatedAt: complaint.listing.created_at,
+                listingStatus: complaint.listing.status.toLowerCase(),
+                listingModerationStatus: complaint.listing.moderation_status.toLowerCase(),
+                listingCity: addressInfo.city,
+                listingRegion: addressInfo.region,
+                listingComplaintsCount: complaint.listing._count.complaints,
+                sellerId: complaint.seller.public_id,
+                sellerName: complaint.seller.name,
+                sellerEmail: complaint.seller.email,
+                sellerPhone: complaint.seller.phone,
+                sellerStatus: complaint.seller.status.toLowerCase(),
+                sellerBlockedUntil: complaint.seller.blocked_until,
+                sellerBlockReason: complaint.seller.block_reason,
+                sellerJoinedAt: complaint.seller.joined_at,
+                sellerVerified: Boolean(complaint.seller.seller_profile?.is_verified),
+                sellerResponseMinutes: complaint.seller.seller_profile?.average_response_minutes ?? null,
+                reporterId: complaint.reporter.public_id,
+                reporterName: complaint.reporter.name,
+                reporterEmail: complaint.reporter.email,
+                sellerViolationsCount: approvedBySeller.get(complaint.seller_id) ?? 0,
+                sellerListingsCount: complaint.seller._count.listings,
+                sellerOrdersCount: complaint.seller._count.orders_as_seller,
+                description: complaint.description,
+                evidence: complaint.evidence,
+                evidenceFiles: splitEvidenceFiles(complaint.evidence),
+                checkedAt: complaint.checked_at,
+                checkedBy: complaint.checked_by
+                    ? {
+                        id: complaint.checked_by.public_id,
+                        name: complaint.checked_by.name,
+                        email: complaint.checked_by.email,
+                    }
+                    : null,
+                actionTaken: complaint.action_taken,
+                sanction: sanctionByComplaint.get(complaint.id)
+                    ? {
+                        id: sanctionByComplaint.get(complaint.id)?.public_id,
+                        level: (0, complaint_sanctions_1.toClientSanctionLevel)(sanctionByComplaint.get(complaint.id)?.level ?? "WARNING"),
+                        status: toClientComplaintSanctionStatus(sanctionByComplaint.get(complaint.id)?.status ?? "COMPLETED"),
+                        startsAt: sanctionByComplaint.get(complaint.id)?.starts_at ?? null,
+                        endsAt: sanctionByComplaint.get(complaint.id)?.ends_at ?? null,
+                        reason: sanctionByComplaint.get(complaint.id)?.reason ?? null,
+                        createdAt: sanctionByComplaint.get(complaint.id)?.created_at ?? null,
+                    }
+                    : null,
+                activeSellerSanction: activeSanctionBySeller.get(complaint.seller_id)
+                    ? {
+                        id: activeSanctionBySeller.get(complaint.seller_id)?.public_id,
+                        level: (0, complaint_sanctions_1.toClientSanctionLevel)(activeSanctionBySeller.get(complaint.seller_id)?.level ?? "WARNING"),
+                        status: toClientComplaintSanctionStatus(activeSanctionBySeller.get(complaint.seller_id)?.status ?? "ACTIVE"),
+                        startsAt: activeSanctionBySeller.get(complaint.seller_id)?.starts_at ?? null,
+                        endsAt: activeSanctionBySeller.get(complaint.seller_id)?.ends_at ?? null,
+                        reason: activeSanctionBySeller.get(complaint.seller_id)?.reason ?? null,
+                        createdAt: activeSanctionBySeller.get(complaint.seller_id)?.created_at ?? null,
+                    }
+                    : null,
+                evaluation: buildComplaintEvaluation({
+                    complaintType: complaint.complaint_type,
+                    evidenceCount: splitEvidenceFiles(complaint.evidence).length,
+                    listingComplaintCount: complaint.listing._count.complaints,
+                    sellerComplaintCount: complaint.seller._count.complaints_against,
+                }),
+            };
+        }));
     }
     catch (error) {
         console.error("Error fetching complaints:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
-adminRouter.patch("/complaints/:publicId", async (req, res) => {
+adminRouter.patch("/complaints/:publicId/legacy", async (req, res) => {
     try {
         const access = await requireAdmin(req, res);
         if (!access.ok)
@@ -774,6 +788,1160 @@ adminRouter.patch("/complaints/:publicId", async (req, res) => {
         console.error("Error updating complaint:", error);
         res.status(500).json({ error: "Internal server error" });
     }
+});
+const COMPLAINT_STATUS_IDEMPOTENCY_ACTION = "complaint.status.update";
+const MAX_COMPLAINT_PAGE_SIZE = 100;
+const COMPLAINT_LIST_INCLUDE = client_1.Prisma.validator()({
+    listing: {
+        select: {
+            public_id: true,
+            title: true,
+            price: true,
+            created_at: true,
+            status: true,
+            moderation_status: true,
+            _count: {
+                select: {
+                    complaints: true,
+                },
+            },
+        },
+    },
+    seller: {
+        select: {
+            public_id: true,
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+            block_reason: true,
+            blocked_until: true,
+            joined_at: true,
+            seller_profile: {
+                select: {
+                    is_verified: true,
+                    average_response_minutes: true,
+                },
+            },
+            addresses: {
+                select: {
+                    city: true,
+                    region: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+            },
+            _count: {
+                select: {
+                    complaints_against: true,
+                    listings: true,
+                    orders_as_seller: true,
+                },
+            },
+        },
+    },
+    reporter: {
+        select: {
+            public_id: true,
+            name: true,
+            email: true,
+        },
+    },
+    checked_by: {
+        select: {
+            public_id: true,
+            name: true,
+            email: true,
+        },
+    },
+});
+function makePublicId(prefix) {
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+}
+function toClientComplaintStatus(status) {
+    if (status === "NEW")
+        return "new";
+    if (status === "PENDING")
+        return "pending";
+    if (status === "APPROVED")
+        return "approved";
+    return "rejected";
+}
+function parseQueryValues(input) {
+    if (typeof input === "string") {
+        return input
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    if (Array.isArray(input)) {
+        return input.flatMap((item) => parseQueryValues(item));
+    }
+    return [];
+}
+function parseComplaintStatusesFilter(input) {
+    const parsed = parseQueryValues(input)
+        .map((item) => parseComplaintStatus(item.toLowerCase()))
+        .filter((item) => item !== null);
+    return Array.from(new Set(parsed));
+}
+function parseComplaintPriorityFilter(input) {
+    const parsed = parseQueryValues(input)
+        .map((item) => item.toLowerCase())
+        .filter((item) => item === "low" || item === "medium" || item === "high");
+    return Array.from(new Set(parsed));
+}
+function parseDateQuery(input) {
+    if (typeof input !== "string" || !input.trim())
+        return null;
+    const parsed = new Date(input);
+    if (Number.isNaN(parsed.getTime()))
+        return null;
+    return parsed;
+}
+function parsePageQuery(input) {
+    if (typeof input !== "string")
+        return 1;
+    const parsed = Number(input);
+    if (!Number.isInteger(parsed) || parsed <= 0)
+        return 1;
+    return parsed;
+}
+function parsePageSizeQuery(input) {
+    if (typeof input !== "string")
+        return 20;
+    const parsed = Number(input);
+    if (!Number.isInteger(parsed) || parsed <= 0)
+        return 20;
+    return Math.min(parsed, MAX_COMPLAINT_PAGE_SIZE);
+}
+function parseComplaintSortBy(input) {
+    if (input === "createdAt")
+        return "createdAt";
+    if (input === "riskScore")
+        return "riskScore";
+    if (input === "queueScore")
+        return "queueScore";
+    return "queueScore";
+}
+function parseComplaintSortOrder(input) {
+    return input === "asc" ? "asc" : "desc";
+}
+function normalizeQueryText(input) {
+    if (typeof input !== "string")
+        return "";
+    return input.trim();
+}
+function computeComplaintQueueMetrics(params) {
+    const ageHours = Math.max(0, Math.floor((Date.now() - params.createdAt.getTime()) / (1000 * 60 * 60)));
+    const ageBoost = Math.min(30, Math.floor(ageHours / 12) * 2);
+    const repeatBoost = Math.min(36, params.sellerViolationsCount * 9);
+    const listingBoost = Math.min(20, Math.max(0, params.listingComplaintsCount - 1) * 7);
+    const queueScore = params.riskScore + ageBoost + repeatBoost + listingBoost;
+    if (queueScore >= 85) {
+        return { queueScore, priority: "high", ageHours };
+    }
+    if (queueScore >= 50) {
+        return { queueScore, priority: "medium", ageHours };
+    }
+    return { queueScore, priority: "low", ageHours };
+}
+function complaintPriorityRank(value) {
+    if (value === "high")
+        return 3;
+    if (value === "medium")
+        return 2;
+    return 1;
+}
+function sortComplaints(complaints, sortBy, sortOrder) {
+    const direction = sortOrder === "asc" ? 1 : -1;
+    return [...complaints].sort((left, right) => {
+        let primaryDiff = 0;
+        if (sortBy === "riskScore") {
+            primaryDiff = left.riskScore - right.riskScore;
+        }
+        else if (sortBy === "queueScore") {
+            primaryDiff = left.queueScore - right.queueScore;
+            if (primaryDiff === 0) {
+                primaryDiff =
+                    complaintPriorityRank(left.priority) - complaintPriorityRank(right.priority);
+            }
+        }
+        else {
+            primaryDiff =
+                new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+        }
+        if (primaryDiff !== 0) {
+            return primaryDiff * direction;
+        }
+        const secondaryDiff = new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+        if (secondaryDiff !== 0) {
+            return secondaryDiff * -1;
+        }
+        return left.id.localeCompare(right.id);
+    });
+}
+function buildComplaintWhere(filters) {
+    const where = {};
+    if (filters.statuses && filters.statuses.length > 0) {
+        where.status = { in: filters.statuses };
+    }
+    if (filters.from || filters.to) {
+        const createdAt = {};
+        if (filters.from)
+            createdAt.gte = filters.from;
+        if (filters.to)
+            createdAt.lte = filters.to;
+        where.created_at = createdAt;
+    }
+    const moderatorPublicId = filters.moderatorPublicId?.trim();
+    if (moderatorPublicId) {
+        if (moderatorPublicId === "unassigned") {
+            where.checked_by_id = null;
+        }
+        else {
+            where.checked_by = {
+                is: {
+                    public_id: moderatorPublicId,
+                },
+            };
+        }
+    }
+    const query = filters.query?.trim();
+    if (query) {
+        where.OR = [
+            { public_id: { contains: query, mode: "insensitive" } },
+            { complaint_type: { contains: query, mode: "insensitive" } },
+            { description: { contains: query, mode: "insensitive" } },
+            {
+                listing: {
+                    is: {
+                        public_id: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                listing: {
+                    is: {
+                        title: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                seller: {
+                    is: {
+                        public_id: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                seller: {
+                    is: {
+                        name: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                seller: {
+                    is: {
+                        email: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                reporter: {
+                    is: {
+                        public_id: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                reporter: {
+                    is: {
+                        name: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                reporter: {
+                    is: {
+                        email: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                checked_by: {
+                    is: {
+                        public_id: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                checked_by: {
+                    is: {
+                        name: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+            {
+                checked_by: {
+                    is: {
+                        email: { contains: query, mode: "insensitive" },
+                    },
+                },
+            },
+        ];
+    }
+    return where;
+}
+async function mapComplaintsForAdmin(complaints) {
+    if (complaints.length === 0)
+        return [];
+    const sellerIds = Array.from(new Set(complaints.map((complaint) => complaint.seller_id)));
+    const complaintIds = complaints.map((complaint) => complaint.id);
+    const [approvedBySellerRaw, sanctionsByComplaintRaw, activeSanctionsRaw] = await Promise.all([
+        sellerIds.length > 0
+            ? prisma_1.prisma.complaint.groupBy({
+                by: ["seller_id"],
+                where: {
+                    seller_id: { in: sellerIds },
+                    status: "APPROVED",
+                },
+                _count: {
+                    _all: true,
+                },
+            })
+            : Promise.resolve([]),
+        complaintIds.length > 0
+            ? prisma_1.prisma.complaintSanction.findMany({
+                where: {
+                    complaint_id: { in: complaintIds },
+                },
+                select: {
+                    complaint_id: true,
+                    public_id: true,
+                    level: true,
+                    status: true,
+                    starts_at: true,
+                    ends_at: true,
+                    reason: true,
+                    created_at: true,
+                },
+            })
+            : Promise.resolve([]),
+        sellerIds.length > 0
+            ? prisma_1.prisma.complaintSanction.findMany({
+                where: {
+                    seller_id: { in: sellerIds },
+                    status: "ACTIVE",
+                },
+                select: {
+                    seller_id: true,
+                    public_id: true,
+                    level: true,
+                    status: true,
+                    starts_at: true,
+                    ends_at: true,
+                    reason: true,
+                    created_at: true,
+                },
+                orderBy: [{ created_at: "desc" }, { id: "desc" }],
+            })
+            : Promise.resolve([]),
+    ]);
+    const approvedBySeller = new Map();
+    for (const item of approvedBySellerRaw) {
+        approvedBySeller.set(item.seller_id, item._count._all);
+    }
+    const sanctionByComplaint = new Map();
+    for (const sanction of sanctionsByComplaintRaw) {
+        sanctionByComplaint.set(sanction.complaint_id, sanction);
+    }
+    const activeSanctionBySeller = new Map();
+    for (const sanction of activeSanctionsRaw) {
+        if (!activeSanctionBySeller.has(sanction.seller_id)) {
+            activeSanctionBySeller.set(sanction.seller_id, sanction);
+        }
+    }
+    return complaints.map((complaint) => {
+        const evaluation = buildComplaintEvaluation({
+            complaintType: complaint.complaint_type,
+            evidenceCount: splitEvidenceFiles(complaint.evidence).length,
+            listingComplaintCount: complaint.listing._count.complaints,
+            sellerComplaintCount: complaint.seller._count.complaints_against,
+        });
+        const addressInfo = extractPrimaryAddressInfo(complaint.seller.addresses);
+        const sellerViolationsCount = approvedBySeller.get(complaint.seller_id) ?? 0;
+        const queueMetrics = computeComplaintQueueMetrics({
+            createdAt: complaint.created_at,
+            riskScore: evaluation.score,
+            listingComplaintsCount: complaint.listing._count.complaints,
+            sellerViolationsCount,
+        });
+        return {
+            id: complaint.public_id,
+            createdAt: complaint.created_at,
+            status: toClientComplaintStatus(complaint.status),
+            targetType: "listing",
+            complaintType: complaint.complaint_type,
+            listingId: complaint.listing.public_id,
+            listingUrl: buildListingPublicUrl(complaint.listing.public_id),
+            listingTitle: complaint.listing.title,
+            listingPrice: complaint.listing.price,
+            listingCreatedAt: complaint.listing.created_at,
+            listingStatus: complaint.listing.status.toLowerCase(),
+            listingModerationStatus: complaint.listing.moderation_status.toLowerCase(),
+            listingCity: addressInfo.city,
+            listingRegion: addressInfo.region,
+            listingComplaintsCount: complaint.listing._count.complaints,
+            sellerId: complaint.seller.public_id,
+            sellerName: complaint.seller.name,
+            sellerEmail: complaint.seller.email,
+            sellerPhone: complaint.seller.phone,
+            sellerStatus: complaint.seller.status.toLowerCase(),
+            sellerBlockedUntil: complaint.seller.blocked_until,
+            sellerBlockReason: complaint.seller.block_reason,
+            sellerJoinedAt: complaint.seller.joined_at,
+            sellerVerified: Boolean(complaint.seller.seller_profile?.is_verified),
+            sellerResponseMinutes: complaint.seller.seller_profile?.average_response_minutes ?? null,
+            reporterId: complaint.reporter.public_id,
+            reporterName: complaint.reporter.name,
+            reporterEmail: complaint.reporter.email,
+            sellerViolationsCount,
+            sellerListingsCount: complaint.seller._count.listings,
+            sellerOrdersCount: complaint.seller._count.orders_as_seller,
+            description: complaint.description,
+            evidence: complaint.evidence,
+            evidenceFiles: splitEvidenceFiles(complaint.evidence),
+            checkedAt: complaint.checked_at,
+            checkedBy: complaint.checked_by
+                ? {
+                    id: complaint.checked_by.public_id,
+                    name: complaint.checked_by.name,
+                    email: complaint.checked_by.email,
+                }
+                : null,
+            actionTaken: complaint.action_taken,
+            sanction: sanctionByComplaint.get(complaint.id)
+                ? {
+                    id: sanctionByComplaint.get(complaint.id)?.public_id ?? "",
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(sanctionByComplaint.get(complaint.id)?.level ?? "WARNING"),
+                    status: toClientComplaintSanctionStatus(sanctionByComplaint.get(complaint.id)?.status ?? "COMPLETED"),
+                    startsAt: sanctionByComplaint.get(complaint.id)?.starts_at ?? null,
+                    endsAt: sanctionByComplaint.get(complaint.id)?.ends_at ?? null,
+                    reason: sanctionByComplaint.get(complaint.id)?.reason ?? null,
+                    createdAt: sanctionByComplaint.get(complaint.id)?.created_at ?? null,
+                }
+                : null,
+            activeSellerSanction: activeSanctionBySeller.get(complaint.seller_id)
+                ? {
+                    id: activeSanctionBySeller.get(complaint.seller_id)?.public_id ?? "",
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(activeSanctionBySeller.get(complaint.seller_id)?.level ?? "WARNING"),
+                    status: toClientComplaintSanctionStatus(activeSanctionBySeller.get(complaint.seller_id)?.status ?? "ACTIVE"),
+                    startsAt: activeSanctionBySeller.get(complaint.seller_id)?.starts_at ?? null,
+                    endsAt: activeSanctionBySeller.get(complaint.seller_id)?.ends_at ?? null,
+                    reason: activeSanctionBySeller.get(complaint.seller_id)?.reason ?? null,
+                    createdAt: activeSanctionBySeller.get(complaint.seller_id)?.created_at ?? null,
+                }
+                : null,
+            evaluation,
+            riskScore: evaluation.score,
+            queueScore: queueMetrics.queueScore,
+            priority: queueMetrics.priority,
+            ageHours: queueMetrics.ageHours,
+        };
+    });
+}
+async function fetchMappedComplaints(where) {
+    const complaints = await prisma_1.prisma.complaint.findMany({
+        where,
+        include: COMPLAINT_LIST_INCLUDE,
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+    });
+    return mapComplaintsForAdmin(complaints);
+}
+function serializeForJson(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+function isUniqueConstraintError(error) {
+    return (error instanceof client_1.Prisma.PrismaClientKnownRequestError && error.code === "P2002");
+}
+function makeIdempotencyHash(payload) {
+    return (0, node_crypto_1.createHash)("sha256").update(JSON.stringify(payload)).digest("hex");
+}
+async function beginAdminIdempotency(params) {
+    const lookupWhere = {
+        actor_user_id: params.actorUserId,
+        action: params.action,
+        idempotency_key: params.key,
+    };
+    const existing = await prisma_1.prisma.adminIdempotencyKey.findFirst({
+        where: lookupWhere,
+        select: {
+            id: true,
+            request_hash: true,
+            response_status: true,
+            response_body: true,
+        },
+    });
+    if (existing) {
+        if (existing.request_hash !== params.requestHash) {
+            return {
+                kind: "conflict",
+                message: "Idempotency-Key reuse with different payload is not allowed for this action.",
+            };
+        }
+        if (existing.response_status && existing.response_body) {
+            return {
+                kind: "cached",
+                statusCode: existing.response_status,
+                body: existing.response_body,
+            };
+        }
+        return {
+            kind: "conflict",
+            message: "Request with this Idempotency-Key is already in progress.",
+        };
+    }
+    try {
+        const created = await prisma_1.prisma.adminIdempotencyKey.create({
+            data: {
+                public_id: makePublicId("IDM"),
+                actor_user_id: params.actorUserId,
+                action: params.action,
+                idempotency_key: params.key,
+                request_hash: params.requestHash,
+            },
+            select: {
+                id: true,
+            },
+        });
+        return { kind: "created", recordId: created.id };
+    }
+    catch (error) {
+        if (!isUniqueConstraintError(error)) {
+            throw error;
+        }
+        const resolved = await prisma_1.prisma.adminIdempotencyKey.findFirst({
+            where: lookupWhere,
+            select: {
+                id: true,
+                request_hash: true,
+                response_status: true,
+                response_body: true,
+            },
+        });
+        if (!resolved) {
+            throw error;
+        }
+        if (resolved.request_hash !== params.requestHash) {
+            return {
+                kind: "conflict",
+                message: "Idempotency-Key reuse with different payload is not allowed for this action.",
+            };
+        }
+        if (resolved.response_status && resolved.response_body) {
+            return {
+                kind: "cached",
+                statusCode: resolved.response_status,
+                body: resolved.response_body,
+            };
+        }
+        return {
+            kind: "conflict",
+            message: "Request with this Idempotency-Key is already in progress.",
+        };
+    }
+}
+async function completeAdminIdempotency(params) {
+    await prisma_1.prisma.adminIdempotencyKey.update({
+        where: { id: params.recordId },
+        data: {
+            response_status: params.statusCode,
+            response_body: serializeForJson(params.body),
+        },
+    });
+}
+async function fetchComplaintHistory(complaintId) {
+    const complaintEventDelegate = prisma_1.prisma.complaintEvent;
+    if (!complaintEventDelegate?.findMany) {
+        return [];
+    }
+    const events = await complaintEventDelegate.findMany({
+        where: { complaint_id: complaintId },
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        include: {
+            actor: {
+                select: {
+                    public_id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+        },
+    });
+    return events.map((event) => ({
+        id: event.public_id,
+        type: event.event_type,
+        fromStatus: event.from_status
+            ? toClientComplaintStatus(event.from_status)
+            : null,
+        toStatus: event.to_status ? toClientComplaintStatus(event.to_status) : null,
+        note: event.note,
+        metadata: event.metadata,
+        createdAt: event.created_at,
+        actor: event.actor
+            ? {
+                id: event.actor.public_id,
+                name: event.actor.name,
+                email: event.actor.email,
+            }
+            : null,
+    }));
+}
+async function loadComplaintEntity(publicId) {
+    return prisma_1.prisma.complaint.findUnique({
+        where: { public_id: publicId },
+        include: COMPLAINT_LIST_INCLUDE,
+    });
+}
+async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const body = (req.body ?? {});
+        const parsedStatus = parseComplaintStatus(body.status);
+        if (!parsedStatus) {
+            res.status(400).json({ error: "Invalid complaint status" });
+            return;
+        }
+        const idempotencyKey = req.header("Idempotency-Key")?.trim();
+        if (!idempotencyKey) {
+            res.status(400).json({ error: "Idempotency-Key header is required" });
+            return;
+        }
+        const actionTakenRaw = typeof body.actionTaken === "string" ? body.actionTaken.trim() : "";
+        const actionTaken = actionTakenRaw.length > 0 ? actionTakenRaw : null;
+        const idempotencyHash = makeIdempotencyHash({
+            complaintPublicId,
+            status: parsedStatus,
+            actionTaken,
+        });
+        const idempotencyStart = await beginAdminIdempotency({
+            actorUserId: access.user.id,
+            action: COMPLAINT_STATUS_IDEMPOTENCY_ACTION,
+            key: idempotencyKey,
+            requestHash: idempotencyHash,
+        });
+        if (idempotencyStart.kind === "cached") {
+            res.status(idempotencyStart.statusCode).json(idempotencyStart.body);
+            return;
+        }
+        if (idempotencyStart.kind === "conflict") {
+            res.status(409).json({ error: idempotencyStart.message });
+            return;
+        }
+        const existing = await prisma_1.prisma.complaint.findUnique({
+            where: { public_id: complaintPublicId },
+            select: {
+                id: true,
+                public_id: true,
+                status: true,
+                action_taken: true,
+                complaint_type: true,
+                seller_id: true,
+                listing_id: true,
+                seller: {
+                    select: {
+                        public_id: true,
+                        status: true,
+                        block_reason: true,
+                        blocked_until: true,
+                    },
+                },
+                listing: {
+                    select: {
+                        public_id: true,
+                        status: true,
+                        moderation_status: true,
+                    },
+                },
+            },
+        });
+        if (!existing) {
+            const payload = { error: "Complaint not found" };
+            await completeAdminIdempotency({
+                recordId: idempotencyStart.recordId,
+                statusCode: 404,
+                body: payload,
+            });
+            res.status(404).json(payload);
+            return;
+        }
+        if (existing.status === "APPROVED" && parsedStatus !== "APPROVED") {
+            const payload = {
+                error: "Approved complaint cannot be moved back. Create a separate compensating admin action.",
+            };
+            await completeAdminIdempotency({
+                recordId: idempotencyStart.recordId,
+                statusCode: 400,
+                body: payload,
+            });
+            res.status(400).json(payload);
+            return;
+        }
+        const txResult = await prisma_1.prisma.$transaction(async (tx) => {
+            const nextUpdate = await tx.complaint.updateMany({
+                where: {
+                    id: existing.id,
+                    status: existing.status,
+                },
+                data: {
+                    status: parsedStatus,
+                    checked_at: new Date(),
+                    checked_by_id: access.user.id,
+                    action_taken: actionTaken,
+                },
+            });
+            if (nextUpdate.count !== 1) {
+                throw new Error("COMPLAINT_STATUS_CONFLICT");
+            }
+            await tx.complaintEvent.create({
+                data: {
+                    public_id: makePublicId("CME"),
+                    complaint_id: existing.id,
+                    actor_user_id: access.user.id,
+                    event_type: "STATUS_CHANGED",
+                    from_status: existing.status,
+                    to_status: parsedStatus,
+                    note: actionTaken,
+                    metadata: {
+                        source: "admin_panel",
+                    },
+                },
+            });
+            let enforcement = null;
+            if (parsedStatus === "APPROVED" && existing.status !== "APPROVED") {
+                const enforcementResult = await (0, complaint_sanctions_1.applyApprovedComplaintConsequences)(tx, {
+                    complaintId: existing.id,
+                    complaintPublicId: existing.public_id,
+                    complaintType: existing.complaint_type,
+                    sellerId: existing.seller_id,
+                    listingId: existing.listing_id,
+                    adminUserId: access.user.id,
+                    actionTaken,
+                });
+                enforcement = {
+                    applied: true,
+                    approvedViolationsCount: enforcementResult.approvedViolationsCount,
+                    level: (0, complaint_sanctions_1.toClientSanctionLevel)(enforcementResult.level),
+                    sanctionId: enforcementResult.sanctionPublicId,
+                    sellerStatus: enforcementResult.sellerStatus.toLowerCase(),
+                    blockedUntil: enforcementResult.blockedUntil,
+                    listingStatus: enforcementResult.listingStatus.toLowerCase(),
+                    listingModerationStatus: enforcementResult.listingModerationStatus.toLowerCase(),
+                    message: enforcementResult.message,
+                };
+                await tx.complaintEvent.create({
+                    data: {
+                        public_id: makePublicId("CME"),
+                        complaint_id: existing.id,
+                        actor_user_id: access.user.id,
+                        event_type: "SANCTION_APPLIED",
+                        note: enforcement.message,
+                        metadata: {
+                            level: enforcement.level,
+                            sanctionId: enforcement.sanctionId,
+                            sellerStatus: enforcement.sellerStatus,
+                            blockedUntil: enforcement.blockedUntil,
+                        },
+                    },
+                });
+            }
+            const updated = await tx.complaint.findUnique({
+                where: { id: existing.id },
+                select: {
+                    status: true,
+                    action_taken: true,
+                },
+            });
+            if (!updated) {
+                throw new Error("COMPLAINT_NOT_FOUND_AFTER_UPDATE");
+            }
+            return {
+                updated,
+                enforcement,
+            };
+        });
+        await writeAudit({
+            req,
+            actorUserId: access.user.id,
+            action: "complaint.status_changed",
+            entityType: "complaint",
+            entityPublicId: complaintPublicId,
+            details: {
+                beforeStatus: existing.status,
+                afterStatus: txResult.updated.status,
+                beforeActionTaken: existing.action_taken,
+                afterActionTaken: txResult.updated.action_taken,
+            },
+        });
+        if (txResult.enforcement) {
+            await writeAudit({
+                req,
+                actorUserId: access.user.id,
+                action: "listing.moderation_changed",
+                entityType: "listing",
+                entityPublicId: existing.listing.public_id,
+                details: {
+                    source: "complaint_approved_auto_enforcement",
+                    complaintId: existing.public_id,
+                    beforeModerationStatus: existing.listing.moderation_status,
+                    afterModerationStatus: "REJECTED",
+                    beforeListingStatus: existing.listing.status,
+                    afterListingStatus: "INACTIVE",
+                },
+            });
+            await writeAudit({
+                req,
+                actorUserId: access.user.id,
+                action: "user.status_changed",
+                entityType: "user",
+                entityPublicId: existing.seller.public_id,
+                details: {
+                    source: "complaint_approved_auto_enforcement",
+                    complaintId: existing.public_id,
+                    sanctionLevel: txResult.enforcement.level,
+                    beforeStatus: existing.seller.status,
+                    afterStatus: txResult.enforcement.sellerStatus.toUpperCase(),
+                    beforeBlockReason: existing.seller.block_reason,
+                    afterBlockReason: actionTaken && actionTaken.length > 0
+                        ? actionTaken
+                        : existing.seller.block_reason,
+                    beforeBlockedUntil: existing.seller.blocked_until,
+                    afterBlockedUntil: txResult.enforcement.blockedUntil,
+                },
+            });
+        }
+        const payload = {
+            success: true,
+            status: txResult.updated.status.toLowerCase(),
+            enforcement: txResult.enforcement,
+        };
+        await completeAdminIdempotency({
+            recordId: idempotencyStart.recordId,
+            statusCode: 200,
+            body: payload,
+        });
+        res.json(payload);
+    }
+    catch (error) {
+        if (error instanceof Error && error.message === "COMPLAINT_STATUS_CONFLICT") {
+            res.status(409).json({
+                error: "Complaint status changed by another moderator. Reload and retry.",
+            });
+            return;
+        }
+        console.error("Error updating complaint:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+adminRouter.get("/complaints/stats", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const queryText = normalizeQueryText(req.query.q);
+        const moderatorPublicId = typeof req.query.moderator === "string" ? req.query.moderator : undefined;
+        const from = parseDateQuery(req.query.from);
+        const to = parseDateQuery(req.query.to);
+        const priorities = parseComplaintPriorityFilter(req.query.priority);
+        const where = buildComplaintWhere({
+            moderatorPublicId,
+            from,
+            to,
+            query: queryText,
+        });
+        let complaints = await fetchMappedComplaints(where);
+        if (priorities.length > 0) {
+            complaints = complaints.filter((item) => priorities.includes(item.priority));
+        }
+        res.json({
+            total: complaints.length,
+            new: complaints.filter((item) => item.status === "new").length,
+            pending: complaints.filter((item) => item.status === "pending").length,
+            approved: complaints.filter((item) => item.status === "approved").length,
+            rejected: complaints.filter((item) => item.status === "rejected").length,
+            highPriority: complaints.filter((item) => item.priority === "high").length,
+            mediumPriority: complaints.filter((item) => item.priority === "medium").length,
+            lowPriority: complaints.filter((item) => item.priority === "low").length,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching complaint stats:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.get("/complaints", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const page = parsePageQuery(req.query.page);
+        const pageSize = parsePageSizeQuery(req.query.pageSize);
+        const statuses = parseComplaintStatusesFilter(req.query.status);
+        const priorities = parseComplaintPriorityFilter(req.query.priority);
+        const sortBy = parseComplaintSortBy(req.query.sortBy);
+        const sortOrder = parseComplaintSortOrder(req.query.sortOrder);
+        const queryText = normalizeQueryText(req.query.q);
+        const moderatorPublicId = typeof req.query.moderator === "string" ? req.query.moderator : undefined;
+        const from = parseDateQuery(req.query.from);
+        const to = parseDateQuery(req.query.to);
+        const where = buildComplaintWhere({
+            statuses,
+            moderatorPublicId,
+            from,
+            to,
+            query: queryText,
+        });
+        let complaints = await fetchMappedComplaints(where);
+        if (priorities.length > 0) {
+            complaints = complaints.filter((item) => priorities.includes(item.priority));
+        }
+        const sorted = sortComplaints(complaints, sortBy, sortOrder);
+        const total = sorted.length;
+        const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+        const safePage = totalPages === 0 ? 1 : Math.min(page, totalPages);
+        const start = totalPages === 0 ? 0 : (safePage - 1) * pageSize;
+        const items = sorted.slice(start, start + pageSize);
+        const moderators = Array.from(new Map(complaints
+            .filter((item) => item.checkedBy)
+            .map((item) => [item.checkedBy?.id ?? "", item.checkedBy])).values()).filter((item) => Boolean(item));
+        res.json({
+            items,
+            pagination: {
+                page: safePage,
+                pageSize,
+                total,
+                totalPages,
+            },
+            sort: {
+                by: sortBy,
+                order: sortOrder,
+            },
+            filters: {
+                status: statuses.map((status) => status.toLowerCase()),
+                priority: priorities,
+                moderator: moderatorPublicId ?? null,
+                from,
+                to,
+                q: queryText,
+            },
+            options: {
+                moderators,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error fetching complaints:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.get("/complaints/:id/related-listing", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const complaintPublicId = String(req.params.id);
+        const complaint = await prisma_1.prisma.complaint.findUnique({
+            where: { public_id: complaintPublicId },
+            select: {
+                id: true,
+                listing_id: true,
+            },
+        });
+        if (!complaint) {
+            res.status(404).json({ error: "Complaint not found" });
+            return;
+        }
+        const related = await prisma_1.prisma.complaint.findMany({
+            where: {
+                listing_id: complaint.listing_id,
+            },
+            include: COMPLAINT_LIST_INCLUDE,
+            orderBy: [{ created_at: "desc" }, { id: "desc" }],
+            take: 20,
+        });
+        const mapped = await mapComplaintsForAdmin(related);
+        res.json({
+            items: mapped.map((item) => ({
+                id: item.id,
+                createdAt: item.createdAt,
+                status: item.status,
+                complaintType: item.complaintType,
+                reporterName: item.reporterName,
+                priority: item.priority,
+                queueScore: item.queueScore,
+                isCurrent: item.id === complaintPublicId,
+            })),
+        });
+    }
+    catch (error) {
+        console.error("Error fetching related listing complaints:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.get("/complaints/:id/seller-summary", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const complaintPublicId = String(req.params.id);
+        const complaint = await prisma_1.prisma.complaint.findUnique({
+            where: { public_id: complaintPublicId },
+            select: {
+                seller_id: true,
+                seller: {
+                    select: {
+                        public_id: true,
+                        name: true,
+                        email: true,
+                        status: true,
+                        blocked_until: true,
+                        block_reason: true,
+                        seller_profile: {
+                            select: {
+                                is_verified: true,
+                            },
+                        },
+                        _count: {
+                            select: {
+                                listings: true,
+                                orders_as_seller: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!complaint) {
+            res.status(404).json({ error: "Complaint not found" });
+            return;
+        }
+        const [countsRaw, activeSanctionsCount, recentCasesRaw] = await Promise.all([
+            prisma_1.prisma.complaint.groupBy({
+                by: ["status"],
+                where: {
+                    seller_id: complaint.seller_id,
+                },
+                _count: {
+                    _all: true,
+                },
+            }),
+            prisma_1.prisma.complaintSanction.count({
+                where: {
+                    seller_id: complaint.seller_id,
+                    status: "ACTIVE",
+                },
+            }),
+            prisma_1.prisma.complaint.findMany({
+                where: {
+                    seller_id: complaint.seller_id,
+                },
+                include: {
+                    listing: {
+                        select: {
+                            public_id: true,
+                            title: true,
+                        },
+                    },
+                },
+                orderBy: [{ created_at: "desc" }, { id: "desc" }],
+                take: 8,
+            }),
+        ]);
+        const counts = {
+            total: 0,
+            approved: 0,
+            pending: 0,
+            new: 0,
+            rejected: 0,
+        };
+        for (const item of countsRaw) {
+            counts.total += item._count._all;
+            if (item.status === "APPROVED")
+                counts.approved = item._count._all;
+            if (item.status === "PENDING")
+                counts.pending = item._count._all;
+            if (item.status === "NEW")
+                counts.new = item._count._all;
+            if (item.status === "REJECTED")
+                counts.rejected = item._count._all;
+        }
+        res.json({
+            seller: {
+                id: complaint.seller.public_id,
+                name: complaint.seller.name,
+                email: complaint.seller.email,
+                status: complaint.seller.status.toLowerCase(),
+                blockedUntil: complaint.seller.blocked_until,
+                blockReason: complaint.seller.block_reason,
+                verified: Boolean(complaint.seller.seller_profile?.is_verified),
+                listingsCount: complaint.seller._count.listings,
+                ordersCount: complaint.seller._count.orders_as_seller,
+            },
+            complaints: {
+                total: counts.total,
+                approved: counts.approved,
+                pending: counts.pending,
+                new: counts.new,
+                rejected: counts.rejected,
+            },
+            activeSanctionsCount,
+            recentCases: recentCasesRaw.map((item) => ({
+                id: item.public_id,
+                status: item.status.toLowerCase(),
+                complaintType: item.complaint_type,
+                listingId: item.listing.public_id,
+                listingTitle: item.listing.title,
+                createdAt: item.created_at,
+            })),
+        });
+    }
+    catch (error) {
+        console.error("Error fetching seller summary:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.get("/complaints/:id", async (req, res) => {
+    try {
+        const access = await requireAdmin(req, res);
+        if (!access.ok)
+            return;
+        const complaintPublicId = String(req.params.id);
+        const complaint = await loadComplaintEntity(complaintPublicId);
+        if (!complaint) {
+            res.status(404).json({ error: "Complaint not found" });
+            return;
+        }
+        const [mapped] = await mapComplaintsForAdmin([complaint]);
+        const history = await fetchComplaintHistory(complaint.id);
+        res.json({
+            ...mapped,
+            history,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching complaint details:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+adminRouter.patch("/complaints/:id/status", async (req, res) => {
+    await handleComplaintStatusUpdate(req, res, String(req.params.id));
+});
+adminRouter.patch("/complaints/:publicId", async (req, res) => {
+    await handleComplaintStatusUpdate(req, res, String(req.params.publicId));
 });
 adminRouter.get("/kyc-requests", async (req, res) => {
     try {
@@ -942,12 +2110,14 @@ adminRouter.get("/listings", async (req, res) => {
                         name: true,
                         joined_at: true,
                         status: true,
-                    },
-                },
-                city: {
-                    select: {
-                        name: true,
-                        region: true,
+                        addresses: {
+                            select: {
+                                city: true,
+                                region: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
                     },
                 },
                 _count: {
@@ -970,35 +2140,38 @@ adminRouter.get("/listings", async (req, res) => {
             },
             orderBy: [{ created_at: "desc" }, { id: "desc" }],
         });
-        res.json(listings.map((listing) => ({
-            id: listing.public_id,
-            listingUrl: buildListingPublicUrl(listing.public_id),
-            title: listing.title,
-            description: listing.description,
-            sellerId: listing.seller.public_id,
-            sellerName: listing.seller.name,
-            sellerStatus: listing.seller.status.toLowerCase(),
-            sellerJoinedAt: listing.seller.joined_at,
-            status: (0, format_1.toAdminListingStatus)(listing.moderation_status),
-            listingStatus: listing.status.toLowerCase(),
-            createdAt: listing.created_at,
-            category: listing.item?.name ?? "No category",
-            city: listing.city.name,
-            region: listing.city.region,
-            price: listing.price,
-            salePrice: listing.sale_price,
-            views: listing.views,
-            rating: listing.rating,
-            complaintsCount: listing._count.complaints,
-            ordersCount: listing._count.order_items,
-            wishlistCount: listing._count.wishlist_items,
-            questionsCount: listing._count.questions,
-            autoFlags: buildAutoFlags({
+        res.json(listings.map((listing) => {
+            const addressInfo = extractPrimaryAddressInfo(listing.seller.addresses);
+            return {
+                id: listing.public_id,
+                listingUrl: buildListingPublicUrl(listing.public_id),
+                title: listing.title,
                 description: listing.description,
-                seller: listing.seller,
-                complaints_count: listing._count.complaints,
-            }),
-        })));
+                sellerId: listing.seller.public_id,
+                sellerName: listing.seller.name,
+                sellerStatus: listing.seller.status.toLowerCase(),
+                sellerJoinedAt: listing.seller.joined_at,
+                status: (0, format_1.toAdminListingStatus)(listing.moderation_status),
+                listingStatus: listing.status.toLowerCase(),
+                createdAt: listing.created_at,
+                category: listing.item?.name ?? "No category",
+                city: addressInfo.city,
+                region: addressInfo.region,
+                price: listing.price,
+                salePrice: listing.sale_price,
+                views: listing.views,
+                rating: listing.rating,
+                complaintsCount: listing._count.complaints,
+                ordersCount: listing._count.order_items,
+                wishlistCount: listing._count.wishlist_items,
+                questionsCount: listing._count.questions,
+                autoFlags: buildAutoFlags({
+                    description: listing.description,
+                    seller: listing.seller,
+                    complaints_count: listing._count.complaints,
+                }),
+            };
+        }));
     }
     catch (error) {
         console.error("Error fetching listings:", error);
@@ -1067,7 +2240,14 @@ adminRouter.get("/users", async (req, res) => {
             return;
         const users = await prisma_1.prisma.appUser.findMany({
             include: {
-                city: true,
+                addresses: {
+                    select: {
+                        city: true,
+                        region: true,
+                    },
+                    orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                    take: 1,
+                },
                 seller_profile: {
                     select: {
                         is_verified: true,
@@ -1208,7 +2388,7 @@ adminRouter.get("/users", async (req, res) => {
                 role: (0, format_1.toClientRole)(user.role),
                 status: user.status.toLowerCase(),
                 joinedAt: user.joined_at,
-                city: user.city?.name ?? null,
+                city: extractPrimaryAddressInfo(user.addresses).city || null,
                 phone: user.phone,
                 blockReason: user.block_reason,
                 blockedUntil: user.blocked_until,

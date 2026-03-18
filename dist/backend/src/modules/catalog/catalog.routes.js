@@ -8,6 +8,10 @@ const format_1 = require("../../utils/format");
 const catalogRouter = (0, express_1.Router)();
 exports.catalogRouter = catalogRouter;
 const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+const COMPLAINT_RATE_LIMIT_PER_HOUR = 20;
+const COMPLAINT_DEDUP_WINDOW_MINUTES = 45;
+const MAX_COMPLAINT_DESCRIPTION_LENGTH = 3000;
+const MAX_COMPLAINT_EVIDENCE_FILES = 10;
 const CP1251_SPECIAL_CHAR_TO_BYTE = {
     0x0402: 0x80,
     0x0403: 0x81,
@@ -151,6 +155,28 @@ function formatResponseTime(minutes) {
         return "около 1 часа";
     return `около ${Math.round(minutes / 60)} часов`;
 }
+function makeComplaintPublicId() {
+    return `CMP-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+}
+function makeComplaintEventPublicId() {
+    return `CME-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+}
+function normalizeEvidenceFiles(raw) {
+    if (typeof raw === "string") {
+        return raw
+            .split(/[,\n;|]/g)
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .slice(0, MAX_COMPLAINT_EVIDENCE_FILES);
+    }
+    if (Array.isArray(raw)) {
+        return raw
+            .map((item) => (typeof item === "string" ? item.trim() : ""))
+            .filter(Boolean)
+            .slice(0, MAX_COMPLAINT_EVIDENCE_FILES);
+    }
+    return [];
+}
 function listingCategoryName(listing) {
     return normalizeDisplayText(listing.item?.name, "Без категории");
 }
@@ -172,6 +198,9 @@ function listingSpecifications(attributes) {
         attribute.value,
     ]));
     return Object.keys(object).length ? object : undefined;
+}
+function extractSellerCity(seller) {
+    return seller.addresses[0]?.city?.trim() ?? "";
 }
 catalogRouter.get("/categories", async (req, res) => {
     try {
@@ -209,12 +238,8 @@ catalogRouter.get("/categories", async (req, res) => {
 catalogRouter.get("/listings", async (req, res) => {
     try {
         const type = resolveListingType(req.query.type);
-        const cityId = req.query.cityId ? Number(req.query.cityId) : undefined;
         const limit = req.query.limit ? Number(req.query.limit) : undefined;
         const offset = req.query.offset ? Number(req.query.offset) : 0;
-        if (req.query.cityId && (isNaN(cityId) || cityId <= 0)) {
-            return res.status(400).json({ error: "Invalid city ID" });
-        }
         if (req.query.limit && (!Number.isInteger(limit) || (limit ?? 0) <= 0)) {
             return res.status(400).json({ error: "Invalid limit" });
         }
@@ -226,16 +251,21 @@ catalogRouter.get("/listings", async (req, res) => {
         const listings = await prisma_1.prisma.marketplaceListing.findMany({
             where: {
                 type,
-                city_id: cityId,
                 status: "ACTIVE",
                 moderation_status: "APPROVED",
             },
             include: {
-                city: true,
                 seller: {
                     select: {
                         name: true,
                         avatar: true,
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
                         _count: {
                             select: {
                                 listings: true,
@@ -301,7 +331,7 @@ catalogRouter.get("/listings", async (req, res) => {
                 isVerified: Boolean(listing.seller.seller_profile?.is_verified),
                 description: normalizeDisplayText(listing.description ?? "", ""),
                 shippingBySeller: listing.shipping_by_seller,
-                city: normalizeDisplayText(listing.city.name, "Город"),
+                city: normalizeDisplayText(extractSellerCity(listing.seller), ""),
                 publishDate: formatPublishDate(listing.created_at),
                 views: listing.views,
                 sellerResponseTime: formatResponseTime(listing.seller.seller_profile?.average_response_minutes),
@@ -338,11 +368,17 @@ catalogRouter.get("/listings/:publicId", async (req, res) => {
                 public_id: publicId,
             },
             include: {
-                city: true,
                 seller: {
                     select: {
                         name: true,
                         avatar: true,
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
                         _count: {
                             select: {
                                 listings: true,
@@ -438,8 +474,8 @@ catalogRouter.get("/listings/:publicId", async (req, res) => {
             isVerified: Boolean(listing.seller.seller_profile?.is_verified),
             description: normalizeDisplayText(listing.description ?? "", ""),
             shippingBySeller: listing.shipping_by_seller,
-            location: listing.city?.name ?? "",
-            city: listing.city?.name ?? "",
+            location: extractSellerCity(listing.seller),
+            city: extractSellerCity(listing.seller),
             publishDate: formatPublishDate(listing.created_at),
             views: listing.views,
             sellerListings: listing.seller._count.listings,
@@ -465,19 +501,6 @@ catalogRouter.get("/listings/:publicId", async (req, res) => {
     catch (error) {
         console.error("Error fetching listing by id:", error);
         return res.status(500).json({ error: "Internal server error" });
-    }
-});
-catalogRouter.get("/cities", async (_req, res) => {
-    try {
-        const cities = await prisma_1.prisma.city.findMany({
-            select: { id: true, name: true, region: true },
-            orderBy: [{ region: "asc" }, { name: "asc" }],
-        });
-        res.json(cities);
-    }
-    catch (error) {
-        console.error("Error fetching cities:", error);
-        res.status(500).json({ error: "Internal server error" });
     }
 });
 catalogRouter.get("/suggestions", async (req, res) => {
@@ -681,6 +704,125 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
     }
     catch (error) {
         console.error("Error creating listing question:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+catalogRouter.post("/listings/:publicId/complaints", async (req, res) => {
+    try {
+        const access = await (0, session_1.requireAnyRole)(req, ["BUYER"]);
+        if (!access.ok) {
+            res.status(access.status).json({ error: access.message });
+            return;
+        }
+        const listingPublicId = String(req.params.publicId ?? "").trim();
+        if (!listingPublicId) {
+            res.status(400).json({ error: "Invalid listing ID" });
+            return;
+        }
+        const body = (req.body ?? {});
+        const complaintType = typeof body.complaintType === "string" ? body.complaintType.trim() : "";
+        if (complaintType.length < 2 || complaintType.length > 80) {
+            res.status(400).json({ error: "Invalid complaint type" });
+            return;
+        }
+        const description = typeof body.description === "string" ? body.description.trim() : "";
+        if (description.length < 8 || description.length > MAX_COMPLAINT_DESCRIPTION_LENGTH) {
+            res.status(400).json({ error: "Invalid complaint description" });
+            return;
+        }
+        const evidenceFiles = normalizeEvidenceFiles(body.evidenceFiles ?? body.evidence);
+        const listing = await prisma_1.prisma.marketplaceListing.findUnique({
+            where: { public_id: listingPublicId },
+            select: {
+                id: true,
+                public_id: true,
+                seller_id: true,
+                title: true,
+            },
+        });
+        if (!listing) {
+            res.status(404).json({ error: "Listing not found" });
+            return;
+        }
+        if (listing.seller_id === access.user.id) {
+            res.status(400).json({ error: "Cannot submit complaint for own listing" });
+            return;
+        }
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const complaintsInHour = await prisma_1.prisma.complaint.count({
+            where: {
+                reporter_id: access.user.id,
+                created_at: {
+                    gte: oneHourAgo,
+                },
+            },
+        });
+        if (complaintsInHour >= COMPLAINT_RATE_LIMIT_PER_HOUR) {
+            res.status(429).json({
+                error: "Too many complaints from this account. Please wait before submitting another one.",
+            });
+            return;
+        }
+        const dedupeWindowStart = new Date(Date.now() - COMPLAINT_DEDUP_WINDOW_MINUTES * 60 * 1000);
+        const existingDuplicate = await prisma_1.prisma.complaint.findFirst({
+            where: {
+                reporter_id: access.user.id,
+                listing_id: listing.id,
+                complaint_type: complaintType,
+                created_at: {
+                    gte: dedupeWindowStart,
+                },
+            },
+            orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        });
+        if (existingDuplicate) {
+            res.status(200).json({
+                id: existingDuplicate.public_id,
+                status: existingDuplicate.status.toLowerCase(),
+                deduplicated: true,
+                createdAt: existingDuplicate.created_at,
+                message: "Similar complaint already exists within the deduplication window.",
+            });
+            return;
+        }
+        const created = await prisma_1.prisma.$transaction(async (tx) => {
+            const complaint = await tx.complaint.create({
+                data: {
+                    public_id: makeComplaintPublicId(),
+                    status: "NEW",
+                    complaint_type: complaintType,
+                    listing_id: listing.id,
+                    seller_id: listing.seller_id,
+                    reporter_id: access.user.id,
+                    description,
+                    evidence: evidenceFiles.length > 0 ? evidenceFiles.join(", ") : null,
+                },
+            });
+            await tx.complaintEvent.create({
+                data: {
+                    public_id: makeComplaintEventPublicId(),
+                    complaint_id: complaint.id,
+                    actor_user_id: access.user.id,
+                    event_type: "SUBMITTED",
+                    to_status: "NEW",
+                    note: description.slice(0, 280),
+                    metadata: {
+                        source: "catalog_listing_complaint",
+                        evidenceCount: evidenceFiles.length,
+                    },
+                },
+            });
+            return complaint;
+        });
+        res.status(201).json({
+            id: created.public_id,
+            status: created.status.toLowerCase(),
+            deduplicated: false,
+            createdAt: created.created_at,
+        });
+    }
+    catch (error) {
+        console.error("Error creating listing complaint:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

@@ -1,4 +1,11 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
@@ -7,49 +14,90 @@ import { Footer, type FooterPage } from "./components/Footer";
 import { FilterPanel, type CatalogCategory } from "./components/FilterPanel";
 import type { ProfileTab } from "./components/pages/ProfilePage";
 import type { AdminPage } from "./components/admin/AdminPanel";
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./components/ui/sheet";
-import type { CartItem, CityClient, FilterState, Product } from "./types";
-import { apiGet, apiPost, apiDelete, clearSessionUser, getSessionUser, saveSessionUser, type SessionRole, type SessionUser } from "./lib/api";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "./components/ui/sheet";
+import type { CartItem, FilterState, Product } from "./types";
+import {
+  apiGet,
+  apiPost,
+  apiDelete,
+  clearSessionUser,
+  getSessionUser,
+  saveSessionUser,
+  type SessionRole,
+  type SessionUser,
+} from "./lib/api";
 import { matchesSearch } from "./lib/search";
 
 const CartPage = lazy(() =>
-  import("./components/CartPage").then((module) => ({ default: module.CartPage })),
+  import("./components/CartPage").then((module) => ({
+    default: module.CartPage,
+  })),
 );
 const CheckoutPage = lazy(() =>
-  import("./components/CheckoutPage").then((module) => ({ default: module.CheckoutPage })),
+  import("./components/CheckoutPage").then((module) => ({
+    default: module.CheckoutPage,
+  })),
 );
 const OrderCompletePage = lazy(() =>
-  import("./components/OrderCompletePage").then((module) => ({ default: module.OrderCompletePage })),
+  import("./components/OrderCompletePage").then((module) => ({
+    default: module.OrderCompletePage,
+  })),
 );
 const ProductDetail = lazy(() =>
-  import("./components/ProductDetail").then((module) => ({ default: module.ProductDetail })),
+  import("./components/ProductDetail").then((module) => ({
+    default: module.ProductDetail,
+  })),
 );
 const AboutPage = lazy(() =>
-  import("./components/pages/AboutPage").then((module) => ({ default: module.AboutPage })),
+  import("./components/pages/AboutPage").then((module) => ({
+    default: module.AboutPage,
+  })),
 );
 const PartnershipPage = lazy(() =>
-  import("./components/pages/PartnershipPage").then((module) => ({ default: module.PartnershipPage })),
+  import("./components/pages/PartnershipPage").then((module) => ({
+    default: module.PartnershipPage,
+  })),
 );
 const FAQPage = lazy(() =>
-  import("./components/pages/FAQPage").then((module) => ({ default: module.FAQPage })),
+  import("./components/pages/FAQPage").then((module) => ({
+    default: module.FAQPage,
+  })),
 );
 const PrivacyPage = lazy(() =>
-  import("./components/pages/PrivacyPage").then((module) => ({ default: module.PrivacyPage })),
+  import("./components/pages/PrivacyPage").then((module) => ({
+    default: module.PrivacyPage,
+  })),
 );
 const TermsPage = lazy(() =>
-  import("./components/pages/TermsPage").then((module) => ({ default: module.TermsPage })),
+  import("./components/pages/TermsPage").then((module) => ({
+    default: module.TermsPage,
+  })),
 );
 const AuthPage = lazy(() =>
-  import("./components/pages/AuthPage").then((module) => ({ default: module.AuthPage })),
+  import("./components/pages/AuthPage").then((module) => ({
+    default: module.AuthPage,
+  })),
 );
 const ProfilePage = lazy(() =>
-  import("./components/pages/ProfilePage").then((module) => ({ default: module.ProfilePage })),
+  import("./components/pages/ProfilePage").then((module) => ({
+    default: module.ProfilePage,
+  })),
 );
 const AdminLogin = lazy(() =>
-  import("./components/admin/AdminLogin").then((module) => ({ default: module.AdminLogin })),
+  import("./components/admin/AdminLogin").then((module) => ({
+    default: module.AdminLogin,
+  })),
 );
 const AdminPanel = lazy(() =>
-  import("./components/admin/AdminPanel").then((module) => ({ default: module.AdminPanel })),
+  import("./components/admin/AdminPanel").then((module) => ({
+    default: module.AdminPanel,
+  })),
 );
 
 type AppView =
@@ -122,15 +170,20 @@ function parseRoute(pathname: string, search: string): ParsedRoute {
 
   if (normalizedPath === "/") return defaultRoute;
   if (normalizedPath === "/cart") return { ...defaultRoute, view: "cart" };
-  if (normalizedPath === "/checkout") return { ...defaultRoute, view: "checkout" };
-  if (normalizedPath === "/order-complete") return { ...defaultRoute, view: "orderComplete" };
+  if (normalizedPath === "/checkout")
+    return { ...defaultRoute, view: "checkout" };
+  if (normalizedPath === "/order-complete")
+    return { ...defaultRoute, view: "orderComplete" };
   if (normalizedPath === "/about") return { ...defaultRoute, view: "about" };
-  if (normalizedPath === "/partnership") return { ...defaultRoute, view: "partnership" };
+  if (normalizedPath === "/partnership")
+    return { ...defaultRoute, view: "partnership" };
   if (normalizedPath === "/faq") return { ...defaultRoute, view: "faq" };
-  if (normalizedPath === "/privacy") return { ...defaultRoute, view: "privacy" };
+  if (normalizedPath === "/privacy")
+    return { ...defaultRoute, view: "privacy" };
   if (normalizedPath === "/terms") return { ...defaultRoute, view: "terms" };
   if (normalizedPath === "/auth") return { ...defaultRoute, view: "auth" };
-  if (normalizedPath === "/admin/login") return { ...defaultRoute, view: "adminLogin" };
+  if (normalizedPath === "/admin/login")
+    return { ...defaultRoute, view: "adminLogin" };
 
   if (normalizedPath === "/admin") {
     return { ...defaultRoute, view: "adminPanel", adminPage: "transactions" };
@@ -227,7 +280,6 @@ const DEFAULT_FILTERS: FilterState = {
   searchQuery: "",
   showOnlySale: false,
   condition: "all",
-  cityId: undefined,
   includeWords: "",
   excludeWords: "",
 };
@@ -237,48 +289,72 @@ const CATALOG_PAGE_SIZE = 24;
 type CatalogMode = "products" | "services";
 
 export default function App() {
-  const initialRoute = parseRoute(window.location.pathname, window.location.search);
-  const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(initialRoute.listingId);
+  const initialRoute = parseRoute(
+    window.location.pathname,
+    window.location.search,
+  );
+  const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(
+    initialRoute.listingId,
+  );
   const [currentView, setCurrentView] = useState<AppView>(initialRoute.view);
-  const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>(initialRoute.adminPage);
-  const [currentProfileTab, setCurrentProfileTab] = useState<ProfileTab>(initialRoute.profileTab);
+  const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>(
+    initialRoute.adminPage,
+  );
+  const [currentProfileTab, setCurrentProfileTab] = useState<ProfileTab>(
+    initialRoute.profileTab,
+  );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<SessionRole>("regular");
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [lastOrderTotal, setLastOrderTotal] = useState(0);
-  const [lastPaymentMethod, setLastPaymentMethod] = useState<"card" | "cash">("card");
+  const [lastPaymentMethod, setLastPaymentMethod] = useState<"card" | "cash">(
+    "card",
+  );
   const [lastOrderIds, setLastOrderIds] = useState<string[]>([]);
-  const [selectedDeliveryType, setSelectedDeliveryType] = useState<"delivery" | "pickup">("delivery");
-  const [lastDeliveryType, setLastDeliveryType] = useState<"delivery" | "pickup">("delivery");
+  const [selectedDeliveryType, setSelectedDeliveryType] = useState<
+    "delivery" | "pickup"
+  >("delivery");
+  const [lastDeliveryType, setLastDeliveryType] = useState<
+    "delivery" | "pickup"
+  >("delivery");
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode, setViewMode] = useState<"products" | "services">("products");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<string>("popular");
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const [wishlistProductIds, setWishlistProductIds] = useState(new Set<string>());
+  const [wishlistProductIds, setWishlistProductIds] = useState(
+    new Set<string>(),
+  );
 
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Product[]>([]);
-  const [isDeepLinkListingLoading, setIsDeepLinkListingLoading] = useState(false);
+  const [isDeepLinkListingLoading, setIsDeepLinkListingLoading] =
+    useState(false);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [hasMoreServices, setHasMoreServices] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
-  const [productCategories, setProductCategories] = useState<CatalogCategory[]>([]);
-  const [serviceCategories, setServiceCategories] = useState<CatalogCategory[]>([]);
-  const [cities, setCities] = useState<CityClient[]>([]);
+  const [productCategories, setProductCategories] = useState<CatalogCategory[]>(
+    [],
+  );
+  const [serviceCategories, setServiceCategories] = useState<CatalogCategory[]>(
+    [],
+  );
 
-  const handleWishlistToggle = async (productId: string, shouldAddToWishlist: boolean) => {
+  const handleWishlistToggle = async (
+    productId: string,
+    shouldAddToWishlist: boolean,
+  ) => {
     try {
       if (shouldAddToWishlist) {
         await apiPost<{ success: boolean }>(`/profile/wishlist/${productId}`);
       } else {
         await apiDelete<{ success: boolean }>(`/profile/wishlist/${productId}`);
       }
-      
+
       setWishlistProductIds((prev) => {
         const next = new Set(prev);
         if (shouldAddToWishlist) {
@@ -289,8 +365,8 @@ export default function App() {
         return next;
       });
     } catch (error) {
-      console.error('Error toggling wishlist:', error);
-      alert('Не удалось обновить список избранного');
+      console.error("Error toggling wishlist:", error);
+      alert("Не удалось обновить список избранного");
     }
   };
 
@@ -308,7 +384,10 @@ export default function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      const parsedRoute = parseRoute(window.location.pathname, window.location.search);
+      const parsedRoute = parseRoute(
+        window.location.pathname,
+        window.location.search,
+      );
       setCurrentView(parsedRoute.view);
       setCurrentAdminPage(parsedRoute.adminPage);
       setCurrentProfileTab(parsedRoute.profileTab);
@@ -352,7 +431,9 @@ export default function App() {
     }
 
     if (
-      (currentView === "profile" || currentView === "cart" || currentView === "checkout") &&
+      (currentView === "profile" ||
+        currentView === "cart" ||
+        currentView === "checkout") &&
       !isAuthenticated
     ) {
       setCurrentView("auth");
@@ -361,14 +442,13 @@ export default function App() {
 
   const loadStaticCatalogData = useCallback(async () => {
     try {
-      const [productCategoriesData, serviceCategoriesData, citiesData] = await Promise.all([
-        apiGet<CatalogCategory[]>("/catalog/categories?type=products"),
-        apiGet<CatalogCategory[]>("/catalog/categories?type=services"),
-        apiGet<CityClient[]>("/catalog/cities"),
-      ]);
+      const [productCategoriesData, serviceCategoriesData] =
+        await Promise.all([
+          apiGet<CatalogCategory[]>("/catalog/categories?type=products"),
+          apiGet<CatalogCategory[]>("/catalog/categories?type=services"),
+        ]);
       setProductCategories(productCategoriesData);
       setServiceCategories(serviceCategoriesData);
-      setCities(citiesData);
     } catch (error) {
       console.error(error);
       alert("Не удалось загрузить каталог");
@@ -380,7 +460,6 @@ export default function App() {
       const reset = Boolean(options?.reset);
       const sourceItems = mode === "products" ? products : services;
       const offset = reset ? 0 : sourceItems.length;
-      const cityQuery = filters.cityId ? `&cityId=${filters.cityId}` : "";
 
       if (mode === "products") {
         if (isLoadingProducts) return;
@@ -392,7 +471,7 @@ export default function App() {
 
       try {
         const page = await apiGet<Product[]>(
-          `/catalog/listings?type=${mode}&limit=${CATALOG_PAGE_SIZE}&offset=${offset}${cityQuery}`,
+          `/catalog/listings?type=${mode}&limit=${CATALOG_PAGE_SIZE}&offset=${offset}`,
         );
 
         if (mode === "products") {
@@ -433,7 +512,7 @@ export default function App() {
         }
       }
     },
-    [filters.cityId, isLoadingProducts, isLoadingServices, products, services],
+    [isLoadingProducts, isLoadingServices, products, services],
   );
 
   useEffect(() => {
@@ -473,9 +552,12 @@ export default function App() {
   ]);
 
   const currentItems = viewMode === "products" ? products : services;
-  const currentCategories = viewMode === "products" ? productCategories : serviceCategories;
-  const hasMoreItems = viewMode === "products" ? hasMoreProducts : hasMoreServices;
-  const isLoadingMoreItems = viewMode === "products" ? isLoadingProducts : isLoadingServices;
+  const currentCategories =
+    viewMode === "products" ? productCategories : serviceCategories;
+  const hasMoreItems =
+    viewMode === "products" ? hasMoreProducts : hasMoreServices;
+  const isLoadingMoreItems =
+    viewMode === "products" ? isLoadingProducts : isLoadingServices;
 
   useEffect(() => {
     if (!deepLinkListingId || currentView !== "product") return;
@@ -492,7 +574,9 @@ export default function App() {
     let cancelled = false;
     setIsDeepLinkListingLoading(true);
 
-    void apiGet<Product>(`/catalog/listings/${encodeURIComponent(deepLinkListingId)}`)
+    void apiGet<Product>(
+      `/catalog/listings/${encodeURIComponent(deepLinkListingId)}`,
+    )
       .then((listing) => {
         if (cancelled) return;
         setSelectedProduct(listing);
@@ -709,8 +793,16 @@ export default function App() {
     }
 
     return currentItems.filter((item) => {
-      if (effectiveCategories.size > 0 && !effectiveCategories.has(item.category)) return false;
-      if (item.price < filters.priceRange[0] || item.price > filters.priceRange[1]) return false;
+      if (
+        effectiveCategories.size > 0 &&
+        !effectiveCategories.has(item.category)
+      )
+        return false;
+      if (
+        item.price < filters.priceRange[0] ||
+        item.price > filters.priceRange[1]
+      )
+        return false;
       if (item.rating < filters.minRating) return false;
 
       if (filters.searchQuery) {
@@ -733,23 +825,32 @@ export default function App() {
       if (filters.showOnlySale && !item.isSale) return false;
 
       if (filters.condition && filters.condition !== "all") {
-        if (!item.condition || item.condition !== filters.condition) return false;
+        if (!item.condition || item.condition !== filters.condition)
+          return false;
       }
 
       if (filters.includeWords) {
-        const words = filters.includeWords.toLowerCase().split(" ").filter(Boolean);
-        if (words.some((word) => !item.title.toLowerCase().includes(word))) return false;
+        const words = filters.includeWords
+          .toLowerCase()
+          .split(" ")
+          .filter(Boolean);
+        if (words.some((word) => !item.title.toLowerCase().includes(word)))
+          return false;
       }
 
       if (filters.excludeWords) {
-        const words = filters.excludeWords.toLowerCase().split(" ").filter(Boolean);
-        if (words.some((word) => item.title.toLowerCase().includes(word))) return false;
+        const words = filters.excludeWords
+          .toLowerCase()
+          .split(" ")
+          .filter(Boolean);
+        if (words.some((word) => item.title.toLowerCase().includes(word)))
+          return false;
       }
 
       return true;
     });
   }, [currentItems, filters, categoryMap]);
-  
+
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((left, right) => {
       switch (sortBy) {
@@ -768,7 +869,9 @@ export default function App() {
   }, [filteredItems, sortBy]);
 
   const lazyFallback = (
-    <div className="page-container py-16 text-center text-gray-600">Загрузка...</div>
+    <div className="page-container py-16 text-center text-gray-600">
+      Загрузка...
+    </div>
   );
 
   if (currentView === "product" && selectedProduct) {
@@ -782,7 +885,10 @@ export default function App() {
 
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -802,7 +908,8 @@ export default function App() {
             relatedProducts={relatedPool
               .filter(
                 (item) =>
-                  item.id !== selectedProduct.id && item.category === selectedProduct.category
+                  item.id !== selectedProduct.id &&
+                  item.category === selectedProduct.category,
               )
               .slice(0, 4)}
             initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
@@ -819,14 +926,19 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
           onProfileClick={handleProfileClick}
         />
         <div className="page-container py-16 text-center text-gray-600">
-          {isDeepLinkListingLoading ? "Загрузка объявления..." : "Объявление не найдено"}
+          {isDeepLinkListingLoading
+            ? "Загрузка объявления..."
+            : "Объявление не найдено"}
         </div>
         <Footer onNavigate={handleFooterNavigation} />
       </>
@@ -837,7 +949,11 @@ export default function App() {
     return (
       <>
         <Suspense fallback={lazyFallback}>
-          <CartPage items={cartItems} onUpdateQuantity={updateQuantity} onCheckout={handleCheckout} />
+          <CartPage
+            items={cartItems}
+            onUpdateQuantity={updateQuantity}
+            onCheckout={handleCheckout}
+          />
         </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
@@ -849,7 +965,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -861,7 +980,9 @@ export default function App() {
             deliveryType={selectedDeliveryType}
             onBack={() => setCurrentView("cart")}
             onRemoveUnavailableItems={(itemIds) => {
-              setCartItems((prev) => prev.filter((item) => !itemIds.includes(item.id)));
+              setCartItems((prev) =>
+                prev.filter((item) => !itemIds.includes(item.id)),
+              );
             }}
             onComplete={(result) => {
               setLastOrderTotal(result.total);
@@ -883,7 +1004,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -913,7 +1037,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -932,7 +1059,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -951,7 +1081,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -970,7 +1103,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -989,7 +1125,10 @@ export default function App() {
       <>
         <Header
           isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
           onCartClick={handleCartClick}
           onSearchSubmit={handleSearchSubmit}
           onLogoClick={handleLogoClick}
@@ -1015,7 +1154,9 @@ export default function App() {
             setCurrentUser(user);
             setIsAuthenticated(true);
             setUserType(role || "regular");
-            setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
+            setWishlistProductIds(
+              new Set(profile.wishlist.map((item) => item.id)),
+            );
 
             if (role === "admin") {
               setCurrentAdminPage("transactions");
@@ -1085,6 +1226,12 @@ export default function App() {
         <AdminPanel
           initialPage={currentAdminPage}
           onPageChange={setCurrentAdminPage}
+          onBack={() => {
+            setCurrentView("home");
+            scrollToTop();
+          }}
+          userName={currentUser?.name}
+          userEmail={currentUser?.email}
           onLogout={() => {
             clearSessionUser();
             setCurrentUser(null);
@@ -1123,9 +1270,14 @@ export default function App() {
                 <span>Фильтры</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-full sm:w-96 overflow-y-auto">
+            <SheetContent
+              side="left"
+              className="w-full sm:w-96 overflow-y-auto"
+            >
               <SheetTitle className="sr-only">Фильтры товаров</SheetTitle>
-              <SheetDescription className="sr-only">Фильтрация товаров по категориям, цене и рейтингу</SheetDescription>
+              <SheetDescription className="sr-only">
+                Фильтрация товаров по категориям, цене и рейтингу
+              </SheetDescription>
               <FilterPanel
                 filters={filters}
                 onFilterChange={(newFilters) => {
@@ -1137,9 +1289,10 @@ export default function App() {
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
                 categories={currentCategories}
-                cities={cities}
                 onApplyFilters={() => {
-                  const closeButton = document.querySelector('[data-slot="sheet-close"]') as HTMLButtonElement | null;
+                  const closeButton = document.querySelector(
+                    '[data-slot="sheet-close"]',
+                  ) as HTMLButtonElement | null;
                   closeButton?.click();
                 }}
               />
@@ -1160,7 +1313,6 @@ export default function App() {
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               categories={currentCategories}
-              cities={cities}
             />
           </aside>
 

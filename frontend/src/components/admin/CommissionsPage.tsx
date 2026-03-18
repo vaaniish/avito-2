@@ -75,7 +75,7 @@ export function CommissionsPage() {
             <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
               <div className="min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-sm font-bold text-white md:h-10 md:w-10 md:rounded-xl">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[rgb(58,103,161)] to-[rgb(38,83,141)] text-sm font-bold text-white md:h-10 md:w-10 md:rounded-xl">
                     {index + 1}
                   </div>
                   <div>
@@ -97,11 +97,11 @@ export function CommissionsPage() {
                     <div className="text-xs text-blue-700 mb-1">Комиссия</div>
                     <div className="font-bold text-lg text-blue-700">{tier.commissionRate}%</div>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-xs text-purple-700 mb-1 flex items-center gap-1">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="mb-1 flex items-center gap-1 text-xs text-slate-700">
                       <Users className="w-3 h-3" /> Продавцов
                     </div>
-                    <div className="font-bold text-lg text-purple-700">{tier.sellersCount}</div>
+                    <div className="text-lg font-bold text-slate-700">{tier.sellersCount}</div>
                   </div>
                 </div>
               </div>

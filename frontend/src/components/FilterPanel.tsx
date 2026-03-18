@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Star } from "lucide-react";
-import type { FilterState, CityClient } from "../types"; // Import CityClient
+import type { FilterState } from "../types";
 
 export type CatalogSubcategory = {
   id: string;
@@ -21,7 +21,6 @@ interface FilterPanelProps {
   viewMode: "products" | "services";
   onViewModeChange: (mode: "products" | "services") => void;
   categories: CatalogCategory[];
-  cities: CityClient[]; // Changed to CityClient[]
   onApplyFilters?: () => void;
 }
 
@@ -31,7 +30,6 @@ export function FilterPanel({
   viewMode,
   onViewModeChange,
   categories,
-  cities,
   onApplyFilters,
 }: FilterPanelProps) {
   const [categoriesOpen, setCategoriesOpen] = useState(true);
@@ -93,7 +91,6 @@ export function FilterPanel({
       searchQuery: "",
       showOnlySale: false,
       condition: "all",
-      cityId: undefined,
       includeWords: "",
       excludeWords: "",
     };
@@ -363,24 +360,6 @@ export function FilterPanel({
           </div>
         </div>
       )}
-
-      <div className="border-b border-gray-200 pb-6 mb-6">
-        <label className="text-lg text-gray-900 mb-4 block">Город</label>
-        <select
-          value={filters.cityId ?? ""}
-          onChange={(event) =>
-            onFilterChange({ ...filters, cityId: Number(event.target.value) || undefined })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-base"
-        >
-          <option value="">Все города</option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name} ({city.region})
-            </option>
-          ))}
-        </select>
-      </div>
 
       <div className="border-b border-gray-200 pb-6 mb-6">
         <span className="text-lg text-gray-900 mb-4 block">Фильтр по словам</span>

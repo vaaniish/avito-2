@@ -7,7 +7,6 @@ import {
   MarketplaceListing,
   MarketOrder,
   MarketOrderItem,
-  City, // Added City import
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
@@ -63,19 +62,6 @@ function toDeliveryType(value: string): "pickup" | "delivery" {
 
 function parseCondition(value: unknown): ListingConditionValue {
   return value === "used" ? "USED" : "NEW";
-}
-
-function parseCityId(value: unknown): number | undefined {
-  if (typeof value === "number" && Number.isInteger(value) && value > 0) {
-    return value;
-  }
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    if (Number.isInteger(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-  return undefined;
 }
 
 function normalizeImageArray(input: unknown): string[] {
@@ -520,6 +506,11 @@ function listingImageUrl(images: ListingImage[]): string {
   return images[0]?.url ?? FALLBACK_LISTING_IMAGE;
 }
 
+function extractSellerCity(seller: { addresses: Array<{ city: string }> }): string | null {
+  const city = seller.addresses[0]?.city?.trim();
+  return city || null;
+}
+
 partnerRouter.get("/listings", async (req: Request, res: Response) => {
   try {
     const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
@@ -545,9 +536,15 @@ partnerRouter.get("/listings", async (req: Request, res: Response) => {
             },
           },
         },
-        city: {
+        seller: {
           select: {
-            name: true,
+            addresses: {
+              select: {
+                city: true,
+              },
+              orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+              take: 1,
+            },
           },
         },
         attributes: {
@@ -573,7 +570,7 @@ partnerRouter.get("/listings", async (req: Request, res: Response) => {
           image: listingImageUrl(listing.images),
           images: listing.images.map((image) => image.url),
           description: listing.description,
-          city: listing.city?.name ?? null,
+          city: extractSellerCity(listing.seller),
           category: extractCategoryName(listing.item),
           attributes: listing.attributes.map((attribute) => ({
             key: attribute.key,
@@ -843,7 +840,6 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
       images?: unknown;
       attributes?: unknown;
       type?: unknown;
-      cityId?: unknown; // Changed from city
     };
 
     const title = typeof body.title === "string" ? body.title.trim() : "";
@@ -861,25 +857,15 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
         ? [legacyImage]
         : [];
     const type = parseListingType(body.type);
-    const cityId = parseCityId(body.cityId);
     const attributes = normalizeAttributes(body.attributes);
 
-    if (!title || !Number.isFinite(price) || price <= 0 || cityId === undefined) {
-      res.status(400).json({ error: "Provide valid title, price and city" });
+    if (!title || !Number.isFinite(price) || price <= 0) {
+      res.status(400).json({ error: "Provide valid title and price" });
       return;
     }
 
     if (images.length === 0) {
       res.status(400).json({ error: "Provide at least one image" });
-      return;
-    }
-
-    const cityExists = await prisma.city.findUnique({
-      where: { id: cityId },
-      select: { id: true },
-    });
-    if (!cityExists) {
-      res.status(400).json({ error: "Unknown cityId" });
       return;
     }
 
@@ -900,12 +886,17 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
           condition,
           status: LISTING_MODERATION,
           moderation_status: "PENDING",
-          city_id: cityId, // Use city_id
         },
         include: {
-          city: {
+          seller: {
             select: {
-              name: true,
+              addresses: {
+                select: {
+                  city: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+              },
             },
           },
           attributes: {
@@ -939,9 +930,15 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
           public_id: formatListingPublicId(listing.id),
         },
         include: {
-          city: {
+          seller: {
             select: {
-              name: true,
+              addresses: {
+                select: {
+                  city: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+              },
             },
           },
           images: {
@@ -986,7 +983,7 @@ partnerRouter.post("/listings", async (req: Request, res: Response) => {
       images: created.images.map((listingImage) => listingImage.url),
       description: created.description,
       category: extractCategoryName(created.item),
-      city: created.city?.name ?? null,
+      city: extractSellerCity(created.seller),
       attributes: created.attributes.map((attribute) => ({
         key: attribute.key,
         value: attribute.value,
@@ -1034,7 +1031,17 @@ partnerRouter.patch(
           images: {
             orderBy: [{ sort_order: "asc" }, { id: "asc" }],
           },
-          city: true, // Include City for existing listing
+          seller: {
+            select: {
+              addresses: {
+                select: {
+                  city: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+              },
+            },
+          },
         },
       });
 
@@ -1052,7 +1059,6 @@ partnerRouter.patch(
         image?: unknown;
         images?: unknown;
         attributes?: unknown;
-        cityId?: unknown; // Changed from city
       };
 
       const price = body.price === undefined ? undefined : Number(body.price);
@@ -1101,17 +1107,6 @@ partnerRouter.patch(
         nextImages === undefined
           ? existing.images[0]?.url ?? FALLBACK_LISTING_IMAGE
           : nextImages[0];
-      const nextCityId = parseCityId(body.cityId);
-      if (nextCityId !== undefined) {
-        const cityExists = await prisma.city.findUnique({
-          where: { id: nextCityId },
-          select: { id: true },
-        });
-        if (!cityExists) {
-          res.status(400).json({ error: "Unknown cityId" });
-          return;
-        }
-      }
       const updated = await prisma.$transaction(async (tx) => {
         const listing = await tx.marketplaceListing.update({
           where: { id: existing.id },
@@ -1127,7 +1122,6 @@ partnerRouter.patch(
                 ? body.description.trim()
                 : undefined,
             item_id: nextItemId,
-            city_id: nextCityId,
             status: LISTING_MODERATION,
             moderation_status: "PENDING",
           },
@@ -1183,7 +1177,17 @@ partnerRouter.patch(
           images: {
             orderBy: [{ sort_order: "asc" }, { id: "asc" }],
           },
-          city: true, // Include City for reloaded listing
+          seller: {
+            select: {
+              addresses: {
+                select: {
+                  city: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+              },
+            },
+          },
         },
       });
 
@@ -1215,7 +1219,7 @@ partnerRouter.patch(
         images: reloaded.images.map((listingImage) => listingImage.url),
         description: reloaded.description,
         category: extractCategoryName(reloaded.item),
-        city: reloaded.city?.name ?? null, // Added city to response
+        city: extractSellerCity(reloaded.seller),
         attributes: reloaded.attributes.map((attribute) => ({
           key: attribute.key,
           value: attribute.value,

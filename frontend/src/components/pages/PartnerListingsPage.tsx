@@ -2,7 +2,6 @@
 import { ArrowLeft, Edit2, Eye, EyeOff, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
-import type { CityClient } from "../../types";
 import { ConfirmDialog, ToastViewport, type AppNotice } from "../ui/feedback";
 
 type ListingAttribute = { key: string; value: string };
@@ -33,7 +32,6 @@ type FormState = {
   description: string;
   category: string;
   type: ListingType;
-  cityId: number | null;
   meetingAddress: string;
   images: string[];
 };
@@ -44,12 +42,20 @@ type CatalogCategoryDto = {
   subcategories: Array<{ id: string; name: string; items: string[] }>;
 };
 
-type ProfileAddressDto = { id: string; fullAddress: string };
+type ProfileAddressDto = {
+  id: string;
+  fullAddress: string;
+  city?: string | null;
+  isDefault?: boolean;
+};
 type CategoryGuessDto = { category: string | null; confidence: number; source?: "listing" | "catalog" };
+
+type PartnerListingsPageProps = {
+  onRequestAddressChange?: () => void;
+};
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
-const DEFAULT_CITY = "Москва";
 const MAX_IMAGES = 10;
 const MIN_IMAGES = 1;
 const META_ATTR_MEETING_ADDRESS = "__meeting_address";
@@ -84,7 +90,7 @@ function getMetaAttribute(attrs: ListingAttribute[] | undefined, key: string): s
   return attrs?.find((x) => x.key === key)?.value ?? "";
 }
 
-function buildInitialForm(type: ListingType, cityId: number | null): FormState {
+function buildInitialForm(type: ListingType): FormState {
   return {
     title: "",
     price: "",
@@ -92,13 +98,12 @@ function buildInitialForm(type: ListingType, cityId: number | null): FormState {
     description: "",
     category: "",
     type,
-    cityId,
     meetingAddress: "",
     images: [],
   };
 }
 
-export function PartnerListingsPage() {
+export function PartnerListingsPage({ onRequestAddressChange }: PartnerListingsPageProps) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "moderation">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,9 +112,9 @@ export function PartnerListingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<WizardStep>(1);
 
-  const [cities, setCities] = useState<CityClient[]>([]);
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [addressBook, setAddressBook] = useState<string[]>([]);
+  const [defaultProfileAddress, setDefaultProfileAddress] = useState<ProfileAddressDto | null>(null);
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
   const [isGuessingCategory, setIsGuessingCategory] = useState(false);
@@ -123,7 +128,7 @@ export function PartnerListingsPage() {
   const [inlinePreservedAttributes, setInlinePreservedAttributes] = useState<ListingAttribute[]>([]);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
 
-  const [form, setForm] = useState<FormState>(() => buildInitialForm("products", null));
+  const [form, setForm] = useState<FormState>(() => buildInitialForm("products"));
 
   const showNotice = useCallback((message: string, tone: AppNotice["tone"] = "info") => {
     const id = Date.now() + Math.floor(Math.random() * 1_000);
@@ -136,11 +141,6 @@ export function PartnerListingsPage() {
   const closeNotice = useCallback((id: number) => {
     setNotices((prev) => prev.filter((item) => item.id !== id));
   }, []);
-
-  const resolveCityId = useCallback(
-    (cityName: string): number | null => cities.find((c) => c.name === cityName)?.id ?? null,
-    [cities],
-  );
 
   const loadListings = useCallback(async () => {
     setIsLoading(true);
@@ -173,14 +173,21 @@ export function PartnerListingsPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const [citiesData, addressesData] = await Promise.all([
-          apiGet<CityClient[]>("/catalog/cities"),
-          apiGet<ProfileAddressDto[]>("/profile/addresses"),
-        ]);
-        setCities(citiesData);
-        setAddressBook(Array.from(new Set(addressesData.map((a) => a.fullAddress.trim()).filter(Boolean))));
+        const addressesData = await apiGet<ProfileAddressDto[]>("/profile/addresses");
+        const normalizedAddresses = addressesData
+          .map((address) => ({
+            ...address,
+            fullAddress: address.fullAddress?.trim() ?? "",
+            city: address.city?.trim() ?? "",
+          }))
+          .filter((address) => address.fullAddress);
+        setAddressBook(Array.from(new Set(normalizedAddresses.map((address) => address.fullAddress))));
+        setDefaultProfileAddress(
+          normalizedAddresses.find((address) => address.isDefault) ?? normalizedAddresses[0] ?? null,
+        );
       } catch {
         setAddressBook([]);
+        setDefaultProfileAddress(null);
       }
     })();
   }, []);
@@ -267,22 +274,31 @@ export function PartnerListingsPage() {
     inactive: listings.filter((x) => x.status === "inactive").length,
   }), [listings]);
 
-  const addressSuggestions = useMemo(() => {
-    const q = form.meetingAddress.trim().toLocaleLowerCase("ru-RU");
-    if (!q) return addressBook.slice(0, 8);
-    return addressBook.filter((x) => x.toLocaleLowerCase("ru-RU").includes(q)).slice(0, 8);
-  }, [addressBook, form.meetingAddress]);
+  const hasMeetingAddress = form.meetingAddress.trim().length >= 5;
+  const isStep6Ready = hasMeetingAddress;
 
   const openCreate = () => {
     setInlineEditingId(null);
     setInlineForm(null);
     setInlinePreservedAttributes([]);
-    setForm(buildInitialForm(listingTypeFilter, resolveCityId(DEFAULT_CITY)));
+    const defaultAddressValue = defaultProfileAddress?.fullAddress?.trim() ?? "";
+    setForm({
+      ...buildInitialForm(listingTypeFilter),
+      meetingAddress: defaultAddressValue,
+    });
     setPreservedAttributes([]);
     setTitlePickedFromSuggestion(false);
     setTitleSuggestions([]);
     setStep(1);
     setShowModal(true);
+  };
+
+  const handleChangeAddress = () => {
+    if (onRequestAddressChange) {
+      onRequestAddressChange();
+      return;
+    }
+    window.location.assign("/profile/addresses");
   };
 
   const openEdit = (listing: Listing) => {
@@ -298,7 +314,6 @@ export function PartnerListingsPage() {
       description: listing.description ?? "",
       category: listing.category ?? "",
       type: listingTypeFilter,
-      cityId: resolveCityId(listing.city ?? ""),
       meetingAddress: getMetaAttribute(listing.attributes, META_ATTR_MEETING_ADDRESS),
       images: listing.images && listing.images.length > 0 ? listing.images : listing.image ? [listing.image] : [],
     });
@@ -339,8 +354,7 @@ export function PartnerListingsPage() {
     if (s === 3 && !form.category) return "Выберите категорию";
     if (s === 5 && form.description.trim().length < 10) return "Описание должно быть не короче 10 символов";
     if (s === 6) {
-      if (form.cityId === null) return "Выберите город";
-      if (form.meetingAddress.trim().length < 5) return "Укажите адрес";
+      if (form.meetingAddress.trim().length < 5) return "Не найден адрес по умолчанию. Добавьте адрес доставки";
     }
     if (s === 7) {
       const price = Number(form.price);
@@ -393,12 +407,10 @@ export function PartnerListingsPage() {
       description: snapshotForm.description,
       category: snapshotForm.category,
       images: snapshotForm.images,
-      cityId: snapshotForm.cityId as number,
       attributes,
     };
 
-    const optimisticCity =
-      cities.find((city) => city.id === snapshotForm.cityId)?.name ?? null;
+    const optimisticCity = defaultProfileAddress?.city ?? null;
 
     const optimisticListing: Listing = {
       id: `tmp-${Date.now()}`,
@@ -546,10 +558,6 @@ export function PartnerListingsPage() {
       showNotice("Описание должно быть не короче 10 символов", "info");
       return;
     }
-    if (inlineForm.cityId === null) {
-      showNotice("Выберите город", "info");
-      return;
-    }
     if (meetingAddress.length < 5) {
       showNotice("Укажите адрес", "info");
       return;
@@ -569,11 +577,10 @@ export function PartnerListingsPage() {
       description,
       category: inlineForm.category,
       images: inlineForm.images,
-      cityId: inlineForm.cityId,
       attributes,
     };
 
-    const optimisticCity = cities.find((city) => city.id === inlineForm.cityId)?.name ?? null;
+    const optimisticCity = listing.city ?? null;
     setListings((prev) =>
       prev.map((item) =>
         item.id === listing.id
@@ -736,17 +743,6 @@ export function PartnerListingsPage() {
                             >
                               <option value="">Выберите категорию</option>
                               {categoryOptions.map((x) => <option key={x} value={x}>{x}</option>)}
-                            </select>
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-medium uppercase tracking-wide text-gray-500">Город</label>
-                            <select
-                              value={inlineForm.cityId ?? ""}
-                              onChange={(e) => setInlineForm((prev) => (prev ? { ...prev, cityId: e.target.value ? Number(e.target.value) : null } : prev))}
-                              className="field-control"
-                            >
-                              <option value="">Выберите город</option>
-                              {cities.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.region})</option>)}
                             </select>
                           </div>
                         </div>
@@ -966,13 +962,26 @@ export function PartnerListingsPage() {
               {step === 6 && (
                 <div className="space-y-4">
                   <h3 className="text-2xl font-semibold">Адрес</h3>
-                  <select value={form.cityId ?? ""} onChange={(e) => setForm((p) => ({ ...p, cityId: e.target.value ? Number(e.target.value) : null }))} className="field-control">
-                    <option value="">Выберите город</option>
-                    {cities.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.region})</option>)}
-                  </select>
-                  <input value={form.meetingAddress} onChange={(e) => setForm((p) => ({ ...p, meetingAddress: e.target.value }))} className="field-control" list="address-suggest" placeholder="Начните вводить адрес" />
-                  <datalist id="address-suggest">{addressSuggestions.map((a) => <option key={a} value={a} />)}</datalist>
-                  <div className="text-xs text-gray-500">Подсказки берутся из ваших сохраненных адресов</div>
+                  {hasMeetingAddress ? (
+                    <>
+                      <p className="text-sm text-gray-600">
+                        Подтвердите адрес по умолчанию для встречи с покупателем.
+                      </p>
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800">
+                        {form.meetingAddress}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Если адрес не подходит, добавьте новый адрес доставки.
+                      </div>
+                    </>
+                  ) : (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                      У вас пока нет адреса по умолчанию. Добавьте его в разделе адресов доставки.
+                    </div>
+                  )}
+                  <button type="button" onClick={handleChangeAddress} className="btn-secondary px-4 py-2.5">
+                    {hasMeetingAddress ? "Нет, изменить адрес" : "Добавить адрес"}
+                  </button>
                 </div>
               )}
 
@@ -989,7 +998,14 @@ export function PartnerListingsPage() {
               <div className="flex gap-2">
                 <button type="button" onClick={prevStep} className="btn-secondary px-4 py-2.5">Назад</button>
                 {step < 7 ? (
-                  <button type="button" onClick={nextStep} className="btn-primary flex-1 px-4 py-2.5">Продолжить</button>
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    disabled={step === 6 && !isStep6Ready}
+                    className="btn-primary flex-1 px-4 py-2.5 disabled:opacity-60"
+                  >
+                    Продолжить
+                  </button>
                 ) : (
                   <button type="button" onClick={save} className="btn-primary flex-1 px-4 py-2.5">Опубликовать</button>
                 )}

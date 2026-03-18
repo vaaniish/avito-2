@@ -192,7 +192,7 @@ export function AuditLogsPage() {
           <button
             onClick={() => void loadAuditLogs()}
             disabled={isLoading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[rgb(38,83,141)] px-4 py-2 text-white disabled:opacity-50 md:w-auto"
+            className="btn-primary inline-flex items-center justify-center gap-2 px-4 py-2 text-sm disabled:opacity-50 md:w-auto"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Обновить

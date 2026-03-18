@@ -197,7 +197,7 @@ export function TransactionsPage() {
         </div>
         <button
           onClick={handleExport}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[rgb(38,83,141)] px-4 py-2 text-sm text-white transition-all hover:bg-[rgb(28,63,111)] md:rounded-xl md:px-6 md:py-3 md:text-base sm:w-auto whitespace-nowrap"
+          className="btn-primary flex w-full items-center justify-center gap-2 px-4 py-2 text-sm md:px-6 md:py-3 md:text-base sm:w-auto whitespace-nowrap"
         >
           <Download className="w-4 h-4 md:w-5 md:h-5" /> Экспорт CSV
         </button>
@@ -331,4 +331,3 @@ export function TransactionsPage() {
     </div>
   );
 }
-

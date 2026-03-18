@@ -183,12 +183,14 @@ type ApiOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;
+  headers?: Record<string, string>;
 };
 
 async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const session = getSessionUser();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...(options.headers ?? {}),
   };
 
   if (session?.id) {
@@ -231,16 +233,28 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
   return payload as T;
 }
 
-export function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
-  return request<T>(path, { method: "GET", signal });
+export function apiGet<T>(
+  path: string,
+  signal?: AbortSignal,
+  headers?: Record<string, string>,
+): Promise<T> {
+  return request<T>(path, { method: "GET", signal, headers });
 }
 
-export function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  return request<T>(path, { method: "POST", body });
+export function apiPost<T>(
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<T> {
+  return request<T>(path, { method: "POST", body, headers });
 }
 
-export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
-  return request<T>(path, { method: "PATCH", body });
+export function apiPatch<T>(
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<T> {
+  return request<T>(path, { method: "PATCH", body, headers });
 }
 
 export function apiDelete<T>(path: string): Promise<T> {

@@ -26,18 +26,6 @@ function toDeliveryType(value) {
 function parseCondition(value) {
     return value === "used" ? "USED" : "NEW";
 }
-function parseCityId(value) {
-    if (typeof value === "number" && Number.isInteger(value) && value > 0) {
-        return value;
-    }
-    if (typeof value === "string") {
-        const parsed = Number(value);
-        if (Number.isInteger(parsed) && parsed > 0) {
-            return parsed;
-        }
-    }
-    return undefined;
-}
 function normalizeImageArray(input) {
     if (!Array.isArray(input)) {
         return [];
@@ -397,6 +385,10 @@ async function resolveCatalogItemId(type, rawCategory) {
 function listingImageUrl(images) {
     return images[0]?.url ?? FALLBACK_LISTING_IMAGE;
 }
+function extractSellerCity(seller) {
+    const city = seller.addresses[0]?.city?.trim();
+    return city || null;
+}
 partnerRouter.get("/listings", async (req, res) => {
     try {
         const session = await (0, session_1.requireAnyRole)(req, [ROLE_SELLER, ROLE_ADMIN]);
@@ -420,9 +412,15 @@ partnerRouter.get("/listings", async (req, res) => {
                         },
                     },
                 },
-                city: {
+                seller: {
                     select: {
-                        name: true,
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
                     },
                 },
                 attributes: {
@@ -446,7 +444,7 @@ partnerRouter.get("/listings", async (req, res) => {
             image: listingImageUrl(listing.images),
             images: listing.images.map((image) => image.url),
             description: listing.description,
-            city: listing.city?.name ?? null,
+            city: extractSellerCity(listing.seller),
             category: extractCategoryName(listing.item),
             attributes: listing.attributes.map((attribute) => ({
                 key: attribute.key,
@@ -713,22 +711,13 @@ partnerRouter.post("/listings", async (req, res) => {
                 ? [legacyImage]
                 : [];
         const type = parseListingType(body.type);
-        const cityId = parseCityId(body.cityId);
         const attributes = normalizeAttributes(body.attributes);
-        if (!title || !Number.isFinite(price) || price <= 0 || cityId === undefined) {
-            res.status(400).json({ error: "Provide valid title, price and city" });
+        if (!title || !Number.isFinite(price) || price <= 0) {
+            res.status(400).json({ error: "Provide valid title and price" });
             return;
         }
         if (images.length === 0) {
             res.status(400).json({ error: "Provide at least one image" });
-            return;
-        }
-        const cityExists = await prisma_1.prisma.city.findUnique({
-            where: { id: cityId },
-            select: { id: true },
-        });
-        if (!cityExists) {
-            res.status(400).json({ error: "Unknown cityId" });
             return;
         }
         const itemId = await resolveCatalogItemId(type, category);
@@ -747,12 +736,17 @@ partnerRouter.post("/listings", async (req, res) => {
                     condition,
                     status: LISTING_MODERATION,
                     moderation_status: "PENDING",
-                    city_id: cityId,
                 },
                 include: {
-                    city: {
+                    seller: {
                         select: {
-                            name: true,
+                            addresses: {
+                                select: {
+                                    city: true,
+                                },
+                                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                                take: 1,
+                            },
                         },
                     },
                     attributes: {
@@ -783,9 +777,15 @@ partnerRouter.post("/listings", async (req, res) => {
                     public_id: formatListingPublicId(listing.id),
                 },
                 include: {
-                    city: {
+                    seller: {
                         select: {
-                            name: true,
+                            addresses: {
+                                select: {
+                                    city: true,
+                                },
+                                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                                take: 1,
+                            },
                         },
                     },
                     images: {
@@ -828,7 +828,7 @@ partnerRouter.post("/listings", async (req, res) => {
             images: created.images.map((listingImage) => listingImage.url),
             description: created.description,
             category: extractCategoryName(created.item),
-            city: created.city?.name ?? null,
+            city: extractSellerCity(created.seller),
             attributes: created.attributes.map((attribute) => ({
                 key: attribute.key,
                 value: attribute.value,
@@ -873,7 +873,17 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
                 images: {
                     orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                 },
-                city: true,
+                seller: {
+                    select: {
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
+                    },
+                },
             },
         });
         if (!existing) {
@@ -915,17 +925,6 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
         const nextImageForModeration = nextImages === undefined
             ? existing.images[0]?.url ?? FALLBACK_LISTING_IMAGE
             : nextImages[0];
-        const nextCityId = parseCityId(body.cityId);
-        if (nextCityId !== undefined) {
-            const cityExists = await prisma_1.prisma.city.findUnique({
-                where: { id: nextCityId },
-                select: { id: true },
-            });
-            if (!cityExists) {
-                res.status(400).json({ error: "Unknown cityId" });
-                return;
-            }
-        }
         const updated = await prisma_1.prisma.$transaction(async (tx) => {
             const listing = await tx.marketplaceListing.update({
                 where: { id: existing.id },
@@ -939,7 +938,6 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
                         ? body.description.trim()
                         : undefined,
                     item_id: nextItemId,
-                    city_id: nextCityId,
                     status: LISTING_MODERATION,
                     moderation_status: "PENDING",
                 },
@@ -991,7 +989,17 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
                 images: {
                     orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                 },
-                city: true,
+                seller: {
+                    select: {
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
+                    },
+                },
             },
         });
         if (!reloaded) {
@@ -1020,7 +1028,7 @@ partnerRouter.patch("/listings/:publicId", async (req, res) => {
             images: reloaded.images.map((listingImage) => listingImage.url),
             description: reloaded.description,
             category: extractCategoryName(reloaded.item),
-            city: reloaded.city?.name ?? null,
+            city: extractSellerCity(reloaded.seller),
             attributes: reloaded.attributes.map((attribute) => ({
                 key: attribute.key,
                 value: attribute.value,

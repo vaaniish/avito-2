@@ -3466,6 +3466,29 @@ export function ProfilePage({
     });
   };
 
+  const openAddressCreateModal = useCallback(() => {
+    resetAddressModalState();
+    const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
+    const initialCenter = normalizeAddressDisplay(
+      defaultAddress?.fullAddress ||
+      composeFullAddress({
+        region: sanitizeRegion(defaultAddress?.region || ""),
+        city: sanitizeCityValue(defaultAddress?.city || profile?.city || ""),
+        street: sanitizeStreetValue(defaultAddress?.street || ""),
+        house: sanitizeHouseValue(defaultAddress?.house || ""),
+      }) ||
+      sanitizeCityValue(profile?.city || "") ||
+      "Россия",
+    );
+    setMapCenterQuery(initialCenter || "Россия");
+    setAddressModalOpen(true);
+  }, [addresses, profile]);
+
+  const handleAddressChangeFromListings = useCallback(() => {
+    setActiveTab("addresses");
+    openAddressCreateModal();
+  }, [openAddressCreateModal]);
+
   const renderProfileTab = () => (
     <div className="space-y-5">
       <h3 className="text-lg font-semibold md:text-xl">Настройки профиля</h3>
@@ -3526,23 +3549,7 @@ export function ProfilePage({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold md:text-xl">Адреса доставки</h3>
         <button
-          onClick={() => {
-            resetAddressModalState();
-            const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
-            const initialCenter = normalizeAddressDisplay(
-              defaultAddress?.fullAddress ||
-              composeFullAddress({
-                region: sanitizeRegion(defaultAddress?.region || ""),
-                city: sanitizeCityValue(defaultAddress?.city || profile?.city || ""),
-                street: sanitizeStreetValue(defaultAddress?.street || ""),
-                house: sanitizeHouseValue(defaultAddress?.house || ""),
-              }) ||
-              sanitizeCityValue(profile?.city || "") ||
-              "Россия",
-            );
-            setMapCenterQuery(initialCenter || "Россия");
-            setAddressModalOpen(true);
-          }}
+          onClick={openAddressCreateModal}
           className="btn-primary px-3 py-2 flex items-center gap-1.5 text-sm"
         >
           <Plus className="w-4 h-4" /> Добавить
@@ -3961,7 +3968,7 @@ export function ProfilePage({
     if (activeTab === "partner-listings") {
       return (
         <Suspense fallback={<div className="text-sm text-gray-500">Загрузка объявлений...</div>}>
-          <PartnerListingsPage />
+          <PartnerListingsPage onRequestAddressChange={handleAddressChangeFromListings} />
         </Suspense>
       );
     }

@@ -44,7 +44,6 @@ async function main() {
     await prisma.commissionTier.deleteMany();
     await prisma.userAddress.deleteMany();
     await prisma.appUser.deleteMany();
-    await prisma.city.deleteMany();
     const cities = [
         ["Москва", "Москва"],
         ["Санкт-Петербург", "Ленинградская область"],
@@ -55,13 +54,6 @@ async function main() {
         ["Сочи", "Краснодарский край"],
         ["Нижний Новгород", "Нижегородская область"],
     ];
-    await prisma.city.createMany({
-        data: cities.map(([name, region]) => ({ name, region })),
-    });
-    const cityMap = new Map((await prisma.city.findMany({ select: { id: true, name: true } })).map((c) => [
-        c.name,
-        c.id,
-    ]));
     const cityRegionMap = new Map(cities.map(([name, region]) => [name, region]));
     const users = [
         ["ADM-001", "ADMIN", "ACTIVE", "admin@ecomm.local", "admin123", "Главный администратор", "admin_main", "Москва", 800, "+79001000100", null],
@@ -84,7 +76,6 @@ async function main() {
             password: await bcrypt_1.default.hash(u[4], 10),
             name: u[5],
             username: u[6],
-            city_id: getRequired(cityMap, u[7], "City"),
             joined_at: daysAgo(u[8]),
             phone: u[9],
             block_reason: u[10],
@@ -253,7 +244,6 @@ async function main() {
                 public_id: l[0],
                 seller_id: getRequired(userMap, l[1], "User"),
                 item_id: getRequired(itemMap, l[2], "Item"),
-                city_id: getRequired(cityMap, l[3], "City"),
                 type: l[4],
                 title: l[5],
                 description: `Подробное описание: ${l[5]}`,
@@ -515,8 +505,7 @@ async function main() {
             data: { rating: Math.round((avg._avg.rating ?? 0) * 10) / 10 },
         });
     }
-    const [citiesCount, usersCount, notificationsCount, addressesCount, tiersCount, sellerProfilesCount, categoriesCount, subcategoriesCount, itemsCount, listingsCount, imagesCount, attributesCount, reviewsCount, questionsCount, wishlistCount, ordersCount, orderItemsCount, orderHistoryCount, transactionsCount, complaintsCount, kycCount, partnershipCount, auditCount,] = await Promise.all([
-        prisma.city.count(),
+    const [usersCount, notificationsCount, addressesCount, tiersCount, sellerProfilesCount, categoriesCount, subcategoriesCount, itemsCount, listingsCount, imagesCount, attributesCount, reviewsCount, questionsCount, wishlistCount, ordersCount, orderItemsCount, orderHistoryCount, transactionsCount, complaintsCount, kycCount, partnershipCount, auditCount,] = await Promise.all([
         prisma.appUser.count(),
         prisma.notification.count(),
         prisma.userAddress.count(),
@@ -541,7 +530,7 @@ async function main() {
         prisma.auditLog.count(),
     ]);
     console.log("Сидирование завершено:");
-    console.log(`Города=${citiesCount}, Пользователи=${usersCount}, Уведомления=${notificationsCount}`);
+    console.log(`Пользователи=${usersCount}, Уведомления=${notificationsCount}`);
     console.log(`Адреса=${addressesCount}, УровниКомиссий=${tiersCount}, ПрофилиПродавцов=${sellerProfilesCount}`);
     console.log(`Категории=${categoriesCount}, Подкатегории=${subcategoriesCount}, ПозицииКаталога=${itemsCount}`);
     console.log(`Объявления=${listingsCount}, Изображения=${imagesCount}, Атрибуты=${attributesCount}`);

@@ -309,6 +309,10 @@ function mapUserAddressToDto(address) {
         isDefault: address.is_default,
     };
 }
+function extractPrimaryCityFromAddresses(addresses) {
+    const city = addresses[0]?.city?.trim();
+    return city || null;
+}
 profileRouter.get("/me", async (req, res) => {
     try {
         const session = await (0, session_1.requireAnyRole)(req, [
@@ -323,7 +327,6 @@ profileRouter.get("/me", async (req, res) => {
         const user = await prisma_1.prisma.appUser.findUnique({
             where: { id: session.user.id },
             include: {
-                city: true,
                 addresses: {
                     orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
                 },
@@ -331,11 +334,20 @@ profileRouter.get("/me", async (req, res) => {
                     include: {
                         listing: {
                             include: {
-                                seller: { include: { city: true } },
+                                seller: {
+                                    include: {
+                                        addresses: {
+                                            select: {
+                                                city: true,
+                                            },
+                                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                                            take: 1,
+                                        },
+                                    },
+                                },
                                 images: {
                                     orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                                 },
-                                city: true,
                             },
                         },
                     },
@@ -343,7 +355,17 @@ profileRouter.get("/me", async (req, res) => {
                 },
                 orders_as_buyer: {
                     include: {
-                        seller: { include: { city: true } },
+                        seller: {
+                            include: {
+                                addresses: {
+                                    select: {
+                                        city: true,
+                                    },
+                                    orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                                    take: 1,
+                                },
+                            },
+                        },
                         items: {
                             include: {
                                 listing: {
@@ -374,7 +396,7 @@ profileRouter.get("/me", async (req, res) => {
                 name: userWithRelations.name,
                 email: userWithRelations.email,
                 avatar: userWithRelations.avatar,
-                city: userWithRelations.city?.name ?? null,
+                city: extractPrimaryCityFromAddresses(userWithRelations.addresses),
                 joinDate: userWithRelations.joined_at.getFullYear().toString(),
             },
             addresses: userWithRelations.addresses.map((address) => ({
@@ -394,7 +416,7 @@ profileRouter.get("/me", async (req, res) => {
                     name: order.seller.name,
                     avatar: order.seller.avatar,
                     phone: order.seller.phone ?? "",
-                    address: `${order.seller.city?.name ?? "Город не указан"}`,
+                    address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
                     workingHours: "пн — вс: 9:00-21:00",
                 },
                 items: order.items.map((item) => ({
@@ -411,7 +433,7 @@ profileRouter.get("/me", async (req, res) => {
                 name: item.listing.title,
                 price: item.listing.sale_price ?? item.listing.price,
                 image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-                location: item.listing.city.name,
+                location: extractPrimaryCityFromAddresses(item.listing.seller.addresses) ?? "",
                 condition: (0, format_1.toClientCondition)(item.listing.condition),
                 seller: item.listing.seller.name,
                 addedDate: item.added_at.toISOString().split("T")[0],
@@ -1017,7 +1039,17 @@ profileRouter.get("/orders", async (req, res) => {
         const orders = await prisma_1.prisma.marketOrder.findMany({
             where: { buyer_id: session.user.id },
             include: {
-                seller: { include: { city: true } },
+                seller: {
+                    include: {
+                        addresses: {
+                            select: {
+                                city: true,
+                            },
+                            orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                            take: 1,
+                        },
+                    },
+                },
                 items: true,
             },
             orderBy: [{ created_at: "desc" }],
@@ -1036,7 +1068,7 @@ profileRouter.get("/orders", async (req, res) => {
                 name: order.seller.name,
                 avatar: order.seller.avatar,
                 phone: order.seller.phone ?? "",
-                address: `${order.seller.city?.name ?? "Город не указан"}`,
+                address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
                 workingHours: "пн — вс: 9:00-21:00",
             },
             items: order.items.map((item) => ({
@@ -1069,11 +1101,20 @@ profileRouter.get("/wishlist", async (req, res) => {
             include: {
                 listing: {
                     include: {
-                        seller: true,
+                        seller: {
+                            include: {
+                                addresses: {
+                                    select: {
+                                        city: true,
+                                    },
+                                    orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                                    take: 1,
+                                },
+                            },
+                        },
                         images: {
                             orderBy: [{ sort_order: "asc" }, { id: "asc" }],
                         },
-                        city: true,
                     },
                 },
             },
@@ -1084,7 +1125,7 @@ profileRouter.get("/wishlist", async (req, res) => {
             name: item.listing.title,
             price: item.listing.sale_price ?? item.listing.price,
             image: item.listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE,
-            location: item.listing.city.name,
+            location: extractPrimaryCityFromAddresses(item.listing.seller.addresses) ?? "",
             condition: (0, format_1.toClientCondition)(item.listing.condition),
             seller: item.listing.seller.name,
             addedDate: item.added_at.toISOString().split("T")[0],
