@@ -13,11 +13,11 @@ For existing databases that still run the legacy schema, use this runbook.
 ## Steps
 
 0. Current migration baseline:
-   - Squashed migration folder: `backend/prisma/migrations/20260317201230_init_squashed`
+   - Squashed migration folder: `backend/prisma/migrations/20260323170000_init_squashed`
    - Previous folders were merged into this one:
-     - `20260310120000_init_squashed`
-     - `20260311212000_order_delivery_tracking`
-     - `20260317160000_user_address_without_city`
+     - `20260317201230_init_squashed`
+     - `20260317223000_complaint_case_management`
+     - `20260318001000_drop_city_entity`
 
 1. Run legacy-to-3NF SQL backfill:
    - `psql "$DATABASE_URL" -f scripts/migrate_legacy_to_3nf.sql`
@@ -46,10 +46,11 @@ Rollback is restore-from-backup. This migration changes structure and data shape
   `20260305203605_add_notifications_model`, `20260306193155`,
   `20260308200000_align_legacy_schema`, `20260310120000_init_squashed`,
   `20260311143000_complaint_sanctions`, `20260311212000_order_delivery_tracking`,
-  `20260317160000_user_address_without_city`),
+  `20260317160000_user_address_without_city`, `20260317201230_init_squashed`,
+  `20260317223000_complaint_case_management`, `20260318001000_drop_city_entity`),
   sync Prisma history after starting PostgreSQL:
-  - `DELETE FROM "_prisma_migrations" WHERE migration_name IN ('20260305180721_normalize_city','20260305190350_remove_audit_log','20260305194727_remove_gamification_models','20260305200558_link_reviews_to_users','20260305203605_add_notifications_model','20260306193155','20260308200000_align_legacy_schema','20260310120000_init_squashed','20260311143000_complaint_sanctions','20260311212000_order_delivery_tracking','20260317160000_user_address_without_city');`
-  - `npx prisma migrate resolve --applied 20260317201230_init_squashed`
+  - `DELETE FROM "_prisma_migrations" WHERE migration_name IN ('20260305180721_normalize_city','20260305190350_remove_audit_log','20260305194727_remove_gamification_models','20260305200558_link_reviews_to_users','20260305203605_add_notifications_model','20260306193155','20260308200000_align_legacy_schema','20260310120000_init_squashed','20260311143000_complaint_sanctions','20260311212000_order_delivery_tracking','20260317160000_user_address_without_city','20260317201230_init_squashed','20260317223000_complaint_case_management','20260318001000_drop_city_entity');`
+  - `npx prisma migrate resolve --applied 20260323170000_init_squashed`
   - `npx prisma migrate status`
 - New normalized entities:
   - `seller_profile`

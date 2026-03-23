@@ -1,3 +1,9 @@
+﻿-- Squashed migration generated on 2026-03-23.
+-- Includes historical changes from:
+-- 1) 20260317201230_init_squashed
+-- 2) 20260317223000_complaint_case_management
+-- 3) 20260318001000_drop_city_entity
+
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
@@ -806,3 +812,83 @@ CREATE UNIQUE INDEX "UserAddress_one_default_per_user_idx"
 ON "UserAddress" ("user_id")
 WHERE "is_default" = true;
 
+
+-- Squashed in: complaint case management additions
+
+-- CreateTable
+CREATE TABLE "ComplaintEvent" (
+    "id" SERIAL NOT NULL,
+    "public_id" TEXT NOT NULL,
+    "complaint_id" INTEGER NOT NULL,
+    "actor_user_id" INTEGER,
+    "event_type" TEXT NOT NULL,
+    "from_status" "ComplaintStatus",
+    "to_status" "ComplaintStatus",
+    "note" TEXT,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ComplaintEvent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AdminIdempotencyKey" (
+    "id" SERIAL NOT NULL,
+    "public_id" TEXT NOT NULL,
+    "actor_user_id" INTEGER NOT NULL,
+    "action" TEXT NOT NULL,
+    "idempotency_key" TEXT NOT NULL,
+    "request_hash" TEXT NOT NULL,
+    "response_status" INTEGER,
+    "response_body" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AdminIdempotencyKey_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ComplaintEvent_public_id_key" ON "ComplaintEvent"("public_id");
+
+-- CreateIndex
+CREATE INDEX "ComplaintEvent_complaint_id_created_at_idx" ON "ComplaintEvent"("complaint_id", "created_at");
+
+-- CreateIndex
+CREATE INDEX "ComplaintEvent_actor_user_id_created_at_idx" ON "ComplaintEvent"("actor_user_id", "created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AdminIdempotencyKey_public_id_key" ON "AdminIdempotencyKey"("public_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AdminIdempotency_actor_action_key_unique" ON "AdminIdempotencyKey"("actor_user_id", "action", "idempotency_key");
+
+-- CreateIndex
+CREATE INDEX "AdminIdempotencyKey_created_at_idx" ON "AdminIdempotencyKey"("created_at");
+
+-- AddForeignKey
+ALTER TABLE "ComplaintEvent" ADD CONSTRAINT "ComplaintEvent_complaint_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "Complaint"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ComplaintEvent" ADD CONSTRAINT "ComplaintEvent_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AdminIdempotencyKey" ADD CONSTRAINT "AdminIdempotencyKey_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Squashed in: drop city entity cleanup
+
+-- Remove normalized City entity and all foreign keys to it.
+ALTER TABLE "MarketplaceListing"
+  DROP CONSTRAINT IF EXISTS "MarketplaceListing_city_id_fkey";
+
+DROP INDEX IF EXISTS "MarketplaceListing_city_id_idx";
+
+ALTER TABLE "MarketplaceListing"
+  DROP COLUMN IF EXISTS "city_id";
+
+ALTER TABLE "AppUser"
+  DROP CONSTRAINT IF EXISTS "AppUser_city_id_fkey";
+
+ALTER TABLE "AppUser"
+  DROP COLUMN IF EXISTS "city_id";
+
+DROP TABLE IF EXISTS "City";
