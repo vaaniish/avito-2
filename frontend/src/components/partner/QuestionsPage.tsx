@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, Clock, MessageCircle, Search, Send } from "lucide-react";
 import { apiGet, apiPost } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
+import { notifyError } from "../ui/notifications";
 
 type Question = {
   id: string;
@@ -30,7 +31,7 @@ export function QuestionsPage() {
       const result = await apiGet<Question[]>("/partner/questions");
       setQuestions(result);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить вопросы");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить вопросы");
     }
   };
 
@@ -93,7 +94,7 @@ export function QuestionsPage() {
       setExpandedQuestion(null);
       await loadQuestions();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось отправить ответ");
+      notifyError(error instanceof Error ? error.message : "Не удалось отправить ответ");
     }
   };
 

@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Check, CreditCard, MapPin } from "lucide-react";
+import { Check, CreditCard, MapPin, Search, X } from "lucide-react";
 import type { CartItem, Product } from "../types";
 import { apiGet, apiPost } from "../lib/api";
 import { YandexMapMarker, YandexMapPicker } from "./YandexMapPicker";
+import { notifyError, notifyInfo } from "./ui/notifications";
 
 interface CheckoutPageProps {
   items: CartItem[];
@@ -53,8 +54,81 @@ type DeliveryPoint = {
 
 type DeliveryPointsResponse = {
   city: string;
+  location?: {
+    label: string;
+    lat: number;
+    lng: number;
+  };
   providers: DeliveryProvider[];
   points: DeliveryPoint[];
+};
+
+type LocationSuggestion = {
+  title?: { text?: string } | string;
+  subtitle?: { text?: string } | string;
+  address?: { formatted_address?: string };
+  uri?: string;
+  value?: string;
+  displayName?: string;
+};
+
+type LocationSuggestResponse = {
+  query: string;
+  suggestions: LocationSuggestion[];
+};
+
+const getSuggestionText = (
+  value: { text?: string } | string | null | undefined,
+): string => {
+  if (typeof value === "string") return value.trim();
+  if (value && typeof value === "object" && typeof value.text === "string") {
+    return value.text.trim();
+  }
+  return "";
+};
+
+const getSuggestionTitle = (suggestion: LocationSuggestion): string => {
+  const title = getSuggestionText(suggestion.title);
+  if (title) return title;
+  if (typeof suggestion.displayName === "string" && suggestion.displayName.trim()) {
+    return suggestion.displayName.trim();
+  }
+  if (typeof suggestion.value === "string" && suggestion.value.trim()) {
+    return suggestion.value.trim();
+  }
+  return "";
+};
+
+const getSuggestionSubtitle = (suggestion: LocationSuggestion): string => {
+  const title = getSuggestionTitle(suggestion).toLowerCase();
+  const subtitle = getSuggestionText(suggestion.subtitle);
+  if (subtitle && subtitle.toLowerCase() !== title) return subtitle;
+  if (
+    suggestion.address &&
+    typeof suggestion.address.formatted_address === "string" &&
+    suggestion.address.formatted_address.trim()
+  ) {
+    const formatted = suggestion.address.formatted_address.trim();
+    if (formatted.toLowerCase() !== title) {
+      return formatted;
+    }
+  }
+  return "";
+};
+
+const getSuggestionInputValue = (suggestion: LocationSuggestion): string => {
+  const title = getSuggestionTitle(suggestion);
+  const subtitle = getSuggestionSubtitle(suggestion);
+  return title || subtitle;
+};
+
+const getSuggestionSearchQuery = (suggestion: LocationSuggestion): string => {
+  if (typeof suggestion.uri === "string" && suggestion.uri.trim()) {
+    return suggestion.uri.trim();
+  }
+  const subtitle = getSuggestionSubtitle(suggestion);
+  if (subtitle) return subtitle;
+  return getSuggestionInputValue(suggestion);
 };
 
 const DELIVERY_PVZ_STUB = "Тестовый ПВЗ, Москва, ул. Тестовая, 1";
@@ -68,8 +142,13 @@ export function CheckoutPage({
 }: CheckoutPageProps) {
   const [pickupPoint, setPickupPoint] = useState("");
   const [deliveryCity, setDeliveryCity] = useState("Москва");
+  const [mapCenterQuery, setMapCenterQuery] = useState<string | null>("Москва");
   const [providers, setProviders] = useState<DeliveryProvider[]>([]);
   const [deliveryPoints, setDeliveryPoints] = useState<DeliveryPoint[]>([]);
+  const [searchSuggestions, setSearchSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
+  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+  const [activeSuggestIndex, setActiveSuggestIndex] = useState(-1);
   const [selectedProvider, setSelectedProvider] = useState<
     "all" | DeliveryProvider["code"]
   >("all");
@@ -110,20 +189,25 @@ export function CheckoutPage({
 
   const loadDeliveryPoints = async (city: string) => {
     if (deliveryType !== "delivery") return;
+    const query = city.trim();
+    if (!query) return;
+
     setIsPointsLoading(true);
     try {
       const response = await apiGet<DeliveryPointsResponse>(
-        `/profile/delivery-points?city=${encodeURIComponent(city)}`,
+        `/profile/delivery-points?city=${encodeURIComponent(query)}`,
       );
       setProviders(response.providers);
       setDeliveryPoints(response.points);
+      setDeliveryCity(response.location?.label || query);
+      setMapCenterQuery(response.location?.label || query);
       if (response.points.length > 0) {
         const first = response.points[0];
         setSelectedPointId(first.id);
         setPickupPoint(first.address);
       }
     } catch (error) {
-      alert(
+      notifyError(
         error instanceof Error
           ? error.message
           : "Не удалось загрузить точки доставки",
@@ -136,7 +220,65 @@ export function CheckoutPage({
   useEffect(() => {
     if (deliveryType !== "delivery") return;
     void loadDeliveryPoints(deliveryCity);
+    // Initial load only for current delivery flow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryType]);
+
+  useEffect(() => {
+    if (deliveryType !== "delivery") return;
+
+    const query = deliveryCity.trim();
+    if (query.length < 2) {
+      setSearchSuggestions([]);
+      setIsSuggestLoading(false);
+      setActiveSuggestIndex(-1);
+      return;
+    }
+
+    let cancelled = false;
+    const timeoutId = window.setTimeout(async () => {
+      setIsSuggestLoading(true);
+      try {
+        const response = await apiGet<LocationSuggestResponse>(
+          `/profile/location/suggest?q=${encodeURIComponent(query)}&limit=8`,
+        );
+        if (!cancelled) {
+          const suggestions = response.suggestions ?? [];
+          setSearchSuggestions(suggestions);
+          setActiveSuggestIndex(suggestions.length > 0 ? 0 : -1);
+        }
+      } catch {
+        if (!cancelled) {
+          setSearchSuggestions([]);
+          setActiveSuggestIndex(-1);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSuggestLoading(false);
+        }
+      }
+    }, 220);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [deliveryCity, deliveryType]);
+
+  const applyLocationSearch = async (query: string) => {
+    const value = query.trim();
+    if (!value) return;
+    setIsSuggestOpen(false);
+    await loadDeliveryPoints(value);
+  };
+
+  const applySuggestion = (suggestion: LocationSuggestion) => {
+    const selectedLabel = getSuggestionInputValue(suggestion);
+    const queryValue = getSuggestionSearchQuery(suggestion) || selectedLabel;
+    if (!queryValue) return;
+    setDeliveryCity(selectedLabel || queryValue);
+    void applyLocationSearch(queryValue);
+  };
 
   const handlePlaceOrder = async () => {
     const effectivePickupPoint =
@@ -160,7 +302,7 @@ export function CheckoutPage({
 
       if (unavailableItemIds.length > 0) {
         onRemoveUnavailableItems?.(unavailableItemIds);
-        alert(
+        notifyInfo(
           "Некоторые товары уже недоступны и были удалены из корзины. Проверьте заказ и попробуйте снова.",
         );
         onBack();
@@ -212,7 +354,9 @@ export function CheckoutPage({
         deliveryType,
       });
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось оформить заказ");
+      notifyError(
+        error instanceof Error ? error.message : "Не удалось оформить заказ",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -236,21 +380,149 @@ export function CheckoutPage({
                     Ozon.
                   </p>
 
-                  <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,260px)_1fr]">
-                    <input
-                      value={deliveryCity}
-                      onChange={(event) => setDeliveryCity(event.target.value)}
-                      placeholder="Город для поиска ПВЗ"
-                      className="field-control"
-                    />
-                    <button
-                      onClick={() => {
-                        void loadDeliveryPoints(deliveryCity);
-                      }}
-                      className="btn-secondary py-2.5"
-                    >
-                      Обновить точки
-                    </button>
+                  <div className="mb-4">
+                    <div className="relative">
+                      <div className="flex items-center rounded-xl border border-slate-300 bg-white px-4 py-3 transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                        <Search className="mr-3 h-5 w-5 text-slate-400" />
+                        <input
+                          value={deliveryCity}
+                          onFocus={() => {
+                            setIsSuggestOpen(true);
+                            if (searchSuggestions.length > 0) {
+                              setActiveSuggestIndex(0);
+                            }
+                          }}
+                          onBlur={() => {
+                            window.setTimeout(() => {
+                              setIsSuggestOpen(false);
+                            }, 120);
+                          }}
+                          onKeyDown={(event) => {
+                            if (
+                              event.key === "ArrowDown" &&
+                              isSuggestOpen &&
+                              searchSuggestions.length > 0
+                            ) {
+                              event.preventDefault();
+                              setActiveSuggestIndex((prev) =>
+                                prev < 0
+                                  ? 0
+                                  : Math.min(prev + 1, searchSuggestions.length - 1),
+                              );
+                              return;
+                            }
+                            if (
+                              event.key === "ArrowUp" &&
+                              isSuggestOpen &&
+                              searchSuggestions.length > 0
+                            ) {
+                              event.preventDefault();
+                              setActiveSuggestIndex((prev) =>
+                                prev <= 0 ? 0 : prev - 1,
+                              );
+                              return;
+                            }
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              if (
+                                isSuggestOpen &&
+                                activeSuggestIndex >= 0 &&
+                                activeSuggestIndex < searchSuggestions.length
+                              ) {
+                                applySuggestion(searchSuggestions[activeSuggestIndex]);
+                                return;
+                              }
+                              void applyLocationSearch(deliveryCity);
+                            }
+                            if (event.key === "Escape") {
+                              setIsSuggestOpen(false);
+                            }
+                          }}
+                          onChange={(event) => {
+                            setDeliveryCity(event.target.value);
+                            setIsSuggestOpen(true);
+                          }}
+                          placeholder="Введите адрес, организацию или координаты"
+                          className="h-8 w-full border-0 bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-400"
+                        />
+                        {deliveryCity.trim().length > 0 && (
+                          <button
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => {
+                              setDeliveryCity("");
+                              setSearchSuggestions([]);
+                              setActiveSuggestIndex(-1);
+                              setIsSuggestOpen(false);
+                            }}
+                            className="ml-3 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                            aria-label="Очистить поиск"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {isSuggestOpen && (deliveryCity.trim().length > 0 || isSuggestLoading) && (
+                        <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                          {isSuggestLoading && (
+                            <div className="px-4 py-3 text-sm text-slate-500">Ищем варианты...</div>
+                          )}
+
+                          {!isSuggestLoading && searchSuggestions.length === 0 && (
+                            <div className="px-4 py-3 text-sm text-slate-500">
+                              Ничего не найдено. Попробуйте уточнить запрос.
+                            </div>
+                          )}
+
+                          {!isSuggestLoading &&
+                            searchSuggestions.map((suggestion, index) => {
+                              const title = getSuggestionTitle(suggestion);
+                              const subtitle = getSuggestionSubtitle(suggestion);
+                              const inputValue = getSuggestionInputValue(suggestion);
+                              const queryValue = getSuggestionSearchQuery(suggestion);
+                              const isActive = index === activeSuggestIndex;
+                              const key =
+                                (typeof suggestion.uri === "string" && suggestion.uri.trim()) ||
+                                [title, subtitle, suggestion.value, String(index)]
+                                  .filter(Boolean)
+                                  .join("|");
+
+                              return (
+                              <button
+                                key={key}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onMouseEnter={() => setActiveSuggestIndex(index)}
+                                onClick={() => {
+                                  applySuggestion(suggestion);
+                                }}
+                                className={`flex w-full items-start border-t px-4 py-3 text-left first:border-t-0 ${
+                                  isActive
+                                    ? "border-slate-200 bg-slate-100"
+                                    : "border-slate-200 bg-white hover:bg-slate-50"
+                                }`}
+                              >
+                                <span className="min-w-0">
+                                  <span className="block truncate text-base text-slate-800">
+                                    {title || inputValue}
+                                  </span>
+                                </span>
+                              </button>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        onClick={() => {
+                          void applyLocationSearch(deliveryCity);
+                        }}
+                        className="btn-secondary py-2.5"
+                      >
+                        Найти на карте
+                      </button>
+                    </div>
                   </div>
 
                   <div className="dashboard-chip-row mb-4">
@@ -280,6 +552,7 @@ export function CheckoutPage({
                   <div className="h-[420px]">
                     <YandexMapPicker
                       markers={mapMarkers}
+                      centerQuery={mapCenterQuery}
                       selectedMarkerId={selectedPointId}
                       onMarkerSelect={(marker) => {
                         const point = deliveryPoints.find((item) => item.id === marker.id);
@@ -291,11 +564,14 @@ export function CheckoutPage({
                         const formatted = [address.city, address.street, address.building]
                           .filter(Boolean)
                           .join(", ");
-                        if (address.city) {
-                          setDeliveryCity(address.city);
+                        const query = address.fullAddress || formatted || address.city || "";
+                        if (query) {
+                          setDeliveryCity(query);
+                          setMapCenterQuery(query);
+                          void loadDeliveryPoints(query);
                         }
                         setSelectedPointId(null);
-                        setPickupPoint(formatted);
+                        setPickupPoint(formatted || query);
                       }}
                     />
                   </div>
@@ -484,4 +760,3 @@ export function CheckoutPage({
     </div>
   );
 }
-

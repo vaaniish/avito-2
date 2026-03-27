@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { confirmDialog, notifyError } from "../ui/notifications";
 
 type ComplaintStatus = "new" | "pending" | "approved" | "rejected";
 type ComplaintStatusFilter = ComplaintStatus | "all";
@@ -333,7 +334,7 @@ export function ComplaintsPage() {
 
   useEffect(() => {
     Promise.all([loadComplaints(), loadStats()]).catch((error) => {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить жалобы");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить жалобы");
     });
   }, [loadComplaints, loadStats]);
 
@@ -346,7 +347,7 @@ export function ComplaintsPage() {
     }
 
     loadComplaintDetails(selectedComplaintId).catch((error) => {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить детали жалобы");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить детали жалобы");
     });
   }, [loadComplaintDetails, selectedComplaintId]);
 
@@ -405,7 +406,15 @@ export function ComplaintsPage() {
         ? "Подтвердить нарушение? Это необратимое действие."
         : "Отклонить жалобу?";
 
-    if (!window.confirm(confirmationMessage)) {
+    const isConfirmed = await confirmDialog({
+      title: "Подтвердите действие",
+      description: confirmationMessage,
+      confirmLabel: "Подтвердить",
+      cancelLabel: "Отмена",
+      confirmTone: nextStatus === "approved" ? "danger" : "default",
+    });
+
+    if (!isConfirmed) {
       return;
     }
 
@@ -428,7 +437,7 @@ export function ComplaintsPage() {
         loadComplaintDetails(selectedComplaint.id),
       ]);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось обновить жалобу");
+      notifyError(error instanceof Error ? error.message : "Не удалось обновить жалобу");
     } finally {
       setIsActionLoading(null);
     }

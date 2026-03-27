@@ -3,8 +3,6 @@ import {
   CatalogItem,
   CatalogSubcategory,
   ListingImage,
-  ListingQuestion,
-  MarketplaceListing,
   MarketOrder,
   MarketOrderItem,
 } from "@prisma/client";

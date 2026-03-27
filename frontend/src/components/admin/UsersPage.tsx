@@ -2,6 +2,7 @@
 import { Ban, Search, Shield, ShieldOff } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
+import { notifyError } from "../ui/notifications";
 
 type UserRoleFilter = "all" | "regular" | "partner" | "admin";
 type UserStatusFilter = "all" | "active" | "blocked";
@@ -65,7 +66,7 @@ export function UsersPage() {
       setUsers(result);
       setSelectedUser((prev) => prev ?? result[0]?.id ?? null);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить пользователей");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить пользователей");
     }
   };
 
@@ -102,7 +103,7 @@ export function UsersPage() {
       });
       await loadUsers();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось обновить статус пользователя");
+      notifyError(error instanceof Error ? error.message : "Не удалось обновить статус пользователя");
     }
   };
 

@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect, useMemo, useState, useCallback, useRe
 import { LogOut, MapPin, Package, Plus, Star, Store, User as UserIcon, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { YandexMapPicker } from "../../components/YandexMapPicker";
+import { notifyError, notifyInfo, notifySuccess } from "../ui/notifications";
 
 type UserType = "regular" | "partner";
 
@@ -233,12 +234,16 @@ export function ProfilePage({
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestionOption[]>([]);
   const [isAddressInputFocused, setIsAddressInputFocused] = useState(false);
   const [addressSuggestionActiveIndex, setAddressSuggestionActiveIndex] = useState(-1);
+  const [isNativeAddressSuggestEnabled, setIsNativeAddressSuggestEnabled] = useState(true);
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
   const addressBoundsCacheRef = useRef<Map<string, number[][] | null>>(new Map());
   const addressSuggestionsCacheRef = useRef<Map<string, AddressSuggestionOption[]>>(new Map());
   const addressSuggestionsRequestSeqRef = useRef(0);
   const addressInputBlurTimeoutRef = useRef<number | null>(null);
   const isSelectingAddressSuggestionRef = useRef(false);
+  const addressFullInputRef = useRef<HTMLInputElement | null>(null);
+  const nativeAddressSuggestViewRef = useRef<any>(null);
+  const applyFullAddressValueRef = useRef<(value: string) => Promise<void>>(async () => {});
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [itemToReview, setItemToReview] = useState<OrderItem | null>(null);
@@ -293,8 +298,10 @@ export function ProfilePage({
 
   const resolveCityRegion = useCallback((): string => "", []);
 
-  const loadProfile = useCallback(async () => {
-    setIsLoading(true);
+  const loadProfile = useCallback(async (showGlobalLoader = false) => {
+    if (showGlobalLoader) {
+      setIsLoading(true);
+    }
     try {
       const data = await apiGet<ProfilePayload>("/profile/me");
       setProfile(data.user);
@@ -315,14 +322,16 @@ export function ProfilePage({
         email: data.user.email,
       }));
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить профиль");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить профиль");
     } finally {
-      setIsLoading(false);
+      if (showGlobalLoader) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    void loadProfile();
+    void loadProfile(true);
   }, [loadProfile]);
 
   useEffect(() => {
@@ -332,11 +341,11 @@ export function ProfilePage({
   const handlePostReview = async () => {
     if (!itemToReview) return;
     if (reviewForm.rating === 0) {
-      alert("Пожалуйста, поставьте оценку.");
+      notifyInfo("Пожалуйста, поставьте оценку.");
       return;
     }
     if (reviewForm.comment.trim().length < 3) {
-      alert("Комментарий слишком короткий.");
+      notifyInfo("Комментарий слишком короткий.");
       return;
     }
 
@@ -345,13 +354,13 @@ export function ProfilePage({
         rating: reviewForm.rating,
         comment: reviewForm.comment,
       });
-      alert("Спасибо за ваш отзыв!");
+      notifySuccess("Спасибо за ваш отзыв!");
       setReviewModalOpen(false);
       setItemToReview(null);
       setReviewForm({ rating: 0, comment: "" });
       // Optionally, refetch orders or update state to show "review submitted"
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось отправить отзыв.");
+      notifyError(error instanceof Error ? error.message : "Не удалось отправить отзыв.");
     }
   };
 
@@ -372,9 +381,9 @@ export function ProfilePage({
 
       await apiPatch<{ success: boolean }>("/profile/me", payload);
       await loadProfile();
-      alert("Профиль обновлен");
+      notifySuccess("Профиль обновлен");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось сохранить профиль");
+      notifyError(error instanceof Error ? error.message : "Не удалось сохранить профиль");
     } finally {
       setSaveLoading(false);
     }
@@ -1261,6 +1270,10 @@ export function ProfilePage({
     setAddressMapHint("");
     setMapCenterQuery(nextCenterQuery);
   };
+
+  useEffect(() => {
+    applyFullAddressValueRef.current = applyFullAddressValue;
+  }, [applyFullAddressValue]);
 
   const geocodeAddressWithTimeout = useCallback(async (
     query: string,
@@ -3067,34 +3080,151 @@ export function ProfilePage({
   ]);
 
   useEffect(() => {
-    if (!addressModalOpen || !isAddressInputFocused) return;
+    if (!addressModalOpen) return;
 
-    const rawAddress = addressForm.fullAddress.trim();
-    if (rawAddress.length < 2) {
-      addressSuggestionsRequestSeqRef.current += 1;
-      setAddressSuggestions([]);
-      setAddressSuggestionActiveIndex(-1);
-      return;
-    }
+    let cancelled = false;
+    let retryTimer = 0;
 
-    const requestSeq = addressSuggestionsRequestSeqRef.current + 1;
-    addressSuggestionsRequestSeqRef.current = requestSeq;
-
-    const timer = window.setTimeout(async () => {
+    const destroyNativeSuggest = () => {
+      const current = nativeAddressSuggestViewRef.current;
+      if (!current) return;
       try {
-        const suggestions = await fetchYandexSuggestions(rawAddress, 8);
-        if (addressSuggestionsRequestSeqRef.current !== requestSeq) return;
-        setAddressSuggestions(suggestions);
-        setAddressSuggestionActiveIndex(-1);
+        current.destroy?.();
       } catch {
-        if (addressSuggestionsRequestSeqRef.current !== requestSeq) return;
-        setAddressSuggestions([]);
-        setAddressSuggestionActiveIndex(-1);
+        // no-op
       }
-    }, 120);
+      nativeAddressSuggestViewRef.current = null;
+    };
 
-    return () => window.clearTimeout(timer);
-  }, [addressModalOpen, isAddressInputFocused, addressForm.fullAddress, fetchYandexSuggestions]);
+    const initNativeSuggest = () => {
+      if (cancelled || nativeAddressSuggestViewRef.current) return;
+
+      const ymaps = (window as unknown as { ymaps?: any }).ymaps;
+      const inputEl = addressFullInputRef.current;
+      if (!ymaps?.SuggestView || !inputEl) {
+        retryTimer = window.setTimeout(initNativeSuggest, 120);
+        return;
+      }
+
+      try {
+        const suggestProvider =
+          YANDEX_GEOSUGGEST_API_KEY
+            ? {
+                suggest: (request: unknown, options?: { results?: number }) => {
+                  const query = String(request ?? "").trim();
+                  if (!query) {
+                    return ymaps.vow.resolve([]);
+                  }
+
+                  const limitRaw = Number(options?.results ?? 8);
+                  const limit =
+                    Number.isFinite(limitRaw) && limitRaw > 0
+                      ? Math.min(Math.floor(limitRaw), 10)
+                      : 8;
+
+                  const url = new URL("https://suggest-maps.yandex.ru/v1/suggest");
+                  url.searchParams.set("apikey", YANDEX_GEOSUGGEST_API_KEY);
+                  url.searchParams.set("text", query);
+                  url.searchParams.set("lang", "ru_RU");
+                  url.searchParams.set("results", String(limit));
+                  url.searchParams.set("types", "biz,geo");
+                  url.searchParams.set("attrs", "uri");
+                  url.searchParams.set("print_address", "1");
+                  url.searchParams.set("org_address_kind", "house");
+
+                  return ymaps.vow.resolve(
+                    fetch(url.toString(), { method: "GET" })
+                      .then((response) =>
+                        response.ok
+                          ? response.json()
+                          : Promise.resolve({ results: [] }),
+                      )
+                      .then((payload: unknown) => {
+                        const rawResults =
+                          payload && typeof payload === "object" && Array.isArray((payload as { results?: unknown[] }).results)
+                            ? ((payload as { results: unknown[] }).results)
+                            : [];
+
+                        return rawResults
+                          .map((entry) => {
+                            if (!entry || typeof entry !== "object") return null;
+                            const item = entry as {
+                              title?: { text?: string };
+                              subtitle?: { text?: string };
+                              address?: { formatted_address?: string };
+                              value?: string;
+                              displayName?: string;
+                            };
+                            const title = String(item.title?.text ?? "").trim();
+                            const subtitle = String(
+                              item.subtitle?.text ??
+                                item.address?.formatted_address ??
+                                "",
+                            ).trim();
+                            const singleLine = [title, subtitle]
+                              .filter(Boolean)
+                              .join(", ")
+                              .trim();
+                            const value =
+                              singleLine ||
+                              String(item.value ?? item.displayName ?? "").trim();
+                            if (!value) return null;
+                            return {
+                              value,
+                              displayName: value,
+                            };
+                          })
+                          .filter((item): item is { value: string; displayName: string } => Boolean(item));
+                      })
+                      .catch(() => []),
+                  );
+                },
+              }
+            : "yandex#map";
+
+        const suggestView = new ymaps.SuggestView(inputEl, {
+          provider: suggestProvider,
+          results: 8,
+          boundedBy: RUSSIA_BOUNDS,
+          strictBounds: true,
+        });
+
+        suggestView.events?.add?.("select", (event: any) => {
+          const item = event?.get?.("item");
+          const selectedValue = String(item?.value ?? "").trim();
+          if (!selectedValue) return;
+
+          void (async () => {
+            if (addressInputBlurTimeoutRef.current) {
+              window.clearTimeout(addressInputBlurTimeoutRef.current);
+              addressInputBlurTimeoutRef.current = null;
+            }
+            isSelectingAddressSuggestionRef.current = false;
+            setAddressForm((prev) => ({ ...prev, fullAddress: selectedValue }));
+            setAddressSuggestions([]);
+            setAddressSuggestionActiveIndex(-1);
+            await applyFullAddressValueRef.current(selectedValue);
+            setIsAddressInputFocused(true);
+          })();
+        });
+
+        nativeAddressSuggestViewRef.current = suggestView;
+        setIsNativeAddressSuggestEnabled(true);
+      } catch {
+        // keep one-source suggest mode; hide custom list even on failures
+      }
+    };
+
+    initNativeSuggest();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) {
+        window.clearTimeout(retryTimer);
+      }
+      destroyNativeSuggest();
+    };
+  }, [addressModalOpen]);
 
   useEffect(() => {
     if (!addressModalOpen) return;
@@ -3286,14 +3416,14 @@ export function ProfilePage({
 
       await loadProfile();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось добавить адрес");
+      notifyError(error instanceof Error ? error.message : "Не удалось добавить адрес");
     }
   };
 
   const deleteAddress = async (id: string) => {
     const targetAddress = addresses.find((item) => item.id === id);
     if (targetAddress?.isDefault) {
-      alert("Нельзя удалить адрес по умолчанию");
+      notifyInfo("Нельзя удалить адрес по умолчанию");
       return;
     }
 
@@ -3301,7 +3431,7 @@ export function ProfilePage({
       await apiDelete<{ success: boolean }>(`/profile/addresses/${id}`);
       await loadProfile();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось удалить адрес");
+      notifyError(error instanceof Error ? error.message : "Не удалось удалить адрес");
     }
   };
 
@@ -3310,7 +3440,7 @@ export function ProfilePage({
       await apiPost<{ success: boolean }>(`/profile/addresses/${id}/default`);
       await loadProfile();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось установить адрес по умолчанию");
+      notifyError(error instanceof Error ? error.message : "Не удалось установить адрес по умолчанию");
     }
   };
 
@@ -3409,21 +3539,21 @@ export function ProfilePage({
       // Обновляем глобальное состояние вишлиста
       onWishlistUpdate?.(id, false);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось удалить из избранного");
+      notifyError(error instanceof Error ? error.message : "Не удалось удалить из избранного");
     }
   };
 
   const submitPartnershipRequest = async () => {
     if (!partnershipForm.name || !partnershipForm.email || !partnershipForm.contact || !partnershipForm.link || !partnershipForm.category || !partnershipForm.whyUs) {
-      alert("Заполните обязательные поля заявки");
+      notifyInfo("Заполните обязательные поля заявки");
       return;
     }
 
     try {
       const response = await apiPost<{ success: boolean; request_id: string }>("/profile/partnership-requests", partnershipForm);
-      alert(`Заявка отправлена: ${response.request_id}`);
+      notifySuccess(`Заявка отправлена: ${response.request_id}`);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось отправить заявку");
+      notifyError(error instanceof Error ? error.message : "Не удалось отправить заявку");
     }
   };
 
@@ -3468,6 +3598,7 @@ export function ProfilePage({
 
   const openAddressCreateModal = useCallback(() => {
     resetAddressModalState();
+    setIsNativeAddressSuggestEnabled(true);
     const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
     const initialCenter = normalizeAddressDisplay(
       defaultAddress?.fullAddress ||
@@ -3537,9 +3668,9 @@ export function ProfilePage({
       <button
         onClick={() => void saveProfile()}
         disabled={saveLoading}
-        className="btn-primary px-4 py-2.5 disabled:bg-gray-400"
+        className="btn-primary px-4 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-white/90"
       >
-        {saveLoading ? "Сохраняем..." : "Сохранить изменения"}
+        Сохранить изменения
       </button>
     </div>
   );
@@ -3628,6 +3759,7 @@ export function ProfilePage({
 
                   <div className="relative z-30">
                     <input
+                      ref={addressFullInputRef}
                       value={addressForm.fullAddress}
                       onChange={(event) => {
                         const nextValue = event.target.value;
@@ -3661,42 +3793,10 @@ export function ProfilePage({
                         }, 120);
                       }}
                       onKeyDown={(event) => {
-                        if (event.key === "ArrowDown") {
-                          if (addressSuggestions.length === 0) return;
-                          event.preventDefault();
-                          setAddressSuggestionActiveIndex((prev) => {
-                            const lastIndex = addressSuggestions.length - 1;
-                            if (prev < 0) return 0;
-                            return Math.min(prev + 1, lastIndex);
-                          });
-                          return;
-                        }
-
-                        if (event.key === "ArrowUp") {
-                          if (addressSuggestions.length === 0) return;
-                          event.preventDefault();
-                          setAddressSuggestionActiveIndex((prev) => (prev <= 0 ? 0 : prev - 1));
-                          return;
-                        }
-
                         if (event.key === "Escape") {
                           setAddressSuggestions([]);
                           setAddressSuggestionActiveIndex(-1);
                           setIsAddressInputFocused(false);
-                          return;
-                        }
-
-                        if (event.key === "Tab") {
-                          if (addressSuggestions.length === 0) return;
-                          const tabSuggestion =
-                            addressSuggestionActiveIndex >= 0
-                              ? addressSuggestions[addressSuggestionActiveIndex]
-                              : addressSuggestions[0];
-                          if (!tabSuggestion) return;
-                          event.preventDefault();
-                          void handleAddressSuggestionSelect(tabSuggestion).then(() => {
-                            setIsAddressInputFocused(true);
-                          });
                           return;
                         }
 
@@ -3706,50 +3806,9 @@ export function ProfilePage({
                         const currentValue = addressForm.fullAddress.trim();
                         if (!currentValue) return;
 
-                        const normalizedInput = normalizeSuggestionComparable(currentValue);
-                        const findExactMatch = (items: AddressSuggestionOption[]) =>
-                          items.find((option) => {
-                            const valueNorm = normalizeSuggestionComparable(option.value);
-                            const labelNorm = normalizeSuggestionComparable(option.label);
-                            return valueNorm === normalizedInput || labelNorm === normalizedInput;
-                          });
-
-                        const immediateMatch = findExactMatch(addressSuggestions);
-                        if (immediateMatch) {
-                          void handleAddressSuggestionSelect(immediateMatch);
-                          return;
-                        }
-
                         void (async () => {
                           try {
-                            const fetchedSuggestions = await fetchYandexSuggestions(currentValue, 8);
-                            const exactFetched = findExactMatch(fetchedSuggestions);
-                            if (exactFetched) {
-                              await handleAddressSuggestionSelect(exactFetched);
-                              return;
-                            }
-
-                            const geocodeSeed = currentValue.includes(",")
-                              ? currentValue
-                              : normalizeFreeformAddressForGeocode(currentValue);
-                            const parsed = await geocodeAddressWithTimeout(geocodeSeed, 900);
-                            if (!parsed) {
-                              setAddressMapHint("Адрес не найден. Выберите вариант из подсказок или уточните ввод.");
-                              return;
-                            }
-
-                            const normalizedFromGeocode = normalizeAddressDisplay(
-                              parsed.formatted ||
-                              composeFullAddress({
-                                region: sanitizeRegion(parsed.region),
-                                city: sanitizeCityValue(parsed.city),
-                                street: sanitizeStreetValue(parsed.street),
-                                house: sanitizeHouseValue(parsed.house),
-                              }) ||
-                              currentValue,
-                            );
-
-                            await applyFullAddressValue(normalizedFromGeocode);
+                            await applyFullAddressValueRef.current(currentValue);
                             setAddressMapHint("");
                             setIsAddressInputFocused(true);
                           } catch {
@@ -3761,31 +3820,6 @@ export function ProfilePage({
                       placeholder="Полный адрес: Кировская область, Киров, Октябрьский пр-кт, д. 117, подъезд 2, кв. 220"
                       className="field-control"
                     />
-                    {isAddressInputFocused && addressSuggestions.length > 0 && (
-                      <div className="absolute left-0 right-0 top-[calc(100%+6px)] max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-                        {addressSuggestions.map((suggestion, index) => (
-                          <button
-                            key={suggestion.value}
-                            type="button"
-                            onPointerDown={(event) => {
-                              isSelectingAddressSuggestionRef.current = true;
-                              event.preventDefault();
-                            }}
-                            onMouseDown={(event) => {
-                              isSelectingAddressSuggestionRef.current = true;
-                              event.preventDefault();
-                            }}
-                            onMouseEnter={() => setAddressSuggestionActiveIndex(index)}
-                            onClick={() => void handleAddressSuggestionSelect(suggestion)}
-                            className={`w-full px-3 py-2 text-left text-sm ${
-                              index === addressSuggestionActiveIndex ? "bg-gray-100" : "hover:bg-gray-50"
-                            }`}
-                          >
-                            {suggestion.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   {addressForm.postalCode && (
                     <p className="text-xs text-gray-600">Индекс по адресу: {addressForm.postalCode}</p>

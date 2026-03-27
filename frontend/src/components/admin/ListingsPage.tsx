@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, ExternalLink, Search, XCircle } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
+import { notifyError } from "../ui/notifications";
 
 type ListingStatus = "all" | "pending" | "approved" | "rejected";
 
@@ -40,7 +41,7 @@ export function ListingsPage() {
       const result = await apiGet<AdminListing[]>("/admin/listings");
       setListings(result);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить объявления");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить объявления");
     }
   };
 
@@ -95,7 +96,7 @@ export function ListingsPage() {
       });
       await loadListings();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось обновить модерацию");
+      notifyError(error instanceof Error ? error.message : "Не удалось обновить модерацию");
     }
   };
 
@@ -227,4 +228,3 @@ export function ListingsPage() {
     </div>
   );
 }
-

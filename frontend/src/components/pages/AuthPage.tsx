@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { apiPost, type SessionRole, type SessionUser } from "../../lib/api";
+import { notifyError, notifySuccess } from "../ui/notifications";
 
 interface AuthPageProps {
   onBack: () => void;
@@ -45,7 +46,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           password: formData.password,
         });
 
-        alert("Регистрация успешна");
+        notifySuccess("Регистрация успешна");
         onLoginSuccess?.(response.user.role, response.user, response.profile);
         onBack();
       } else {
@@ -67,7 +68,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
         rememberMe: false,
       });
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Ошибка авторизации");
+      notifyError(error instanceof Error ? error.message : "Ошибка авторизации");
     } finally {
       setIsLoading(false);
     }

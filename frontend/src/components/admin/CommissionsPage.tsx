@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Edit, Users } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { notifyError, notifyInfo } from "../ui/notifications";
 
 type CommissionTier = {
   id: string;
@@ -22,7 +23,7 @@ export function CommissionsPage() {
       const result = await apiGet<CommissionTier[]>("/admin/commission-tiers");
       setTiers(result);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить комиссии");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить комиссии");
     }
   };
 
@@ -47,7 +48,7 @@ export function CommissionsPage() {
   const saveEdit = async (tier: CommissionTier) => {
     const nextRate = Number(editedRate);
     if (!Number.isFinite(nextRate) || nextRate <= 0) {
-      alert("Введите корректную комиссию");
+      notifyInfo("Введите корректную комиссию");
       return;
     }
 
@@ -58,7 +59,7 @@ export function CommissionsPage() {
       setEditingTier(null);
       await loadTiers();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось сохранить комиссию");
+      notifyError(error instanceof Error ? error.message : "Не удалось сохранить комиссию");
     }
   };
 

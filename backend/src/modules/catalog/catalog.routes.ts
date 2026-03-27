@@ -1,14 +1,9 @@
 import {
-  AppUser,
   CatalogCategory,
   CatalogItem,
   CatalogSubcategory,
   ListingAttribute,
-  ListingImage,
-  ListingQuestion,
-  ListingReview,
   MarketplaceListing,
-  SellerProfile,
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";

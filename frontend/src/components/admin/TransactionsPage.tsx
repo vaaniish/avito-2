@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import { apiGet } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
+import { notifyError } from "../ui/notifications";
 
 type TransactionStatus =
   | "all"
@@ -54,7 +55,7 @@ export function TransactionsPage() {
       const result = await apiGet<Transaction[]>("/admin/transactions");
       setTransactions(result);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить сделки");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить сделки");
     }
   };
 

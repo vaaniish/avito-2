@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Product } from "../types";
 import { apiDelete, apiGet, apiPost } from "../lib/api";
+import { notifyError } from "./ui/notifications";
 
 interface ProductDetailProps {
   product: Product;
@@ -122,7 +123,9 @@ export function ProductDetail({
       ]);
       setNewQuestion("");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось отправить вопрос");
+      notifyError(
+        error instanceof Error ? error.message : "Не удалось отправить вопрос",
+      );
     }
   };
 
@@ -136,7 +139,9 @@ export function ProductDetail({
       setIsWishlisted((prev) => !prev);
       onWishlistToggle?.(product.id, !isWishlisted);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось изменить избранное");
+      notifyError(
+        error instanceof Error ? error.message : "Не удалось изменить избранное",
+      );
     }
   };
 

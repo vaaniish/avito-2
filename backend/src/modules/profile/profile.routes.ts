@@ -63,16 +63,6 @@ const DELIVERY_PROVIDER_LABELS: Record<DeliveryProviderCode, string> = {
   ozon: "Ozon Доставка",
 };
 
-const CITY_CENTER_COORDS: Record<string, [number, number]> = {
-  москва: [55.751244, 37.618423],
-  "санкт-петербург": [59.93428, 30.335099],
-  казань: [55.796127, 49.106414],
-  екатеринбург: [56.838011, 60.597465],
-  новосибирск: [55.028739, 82.906927],
-  краснодар: [45.03547, 38.975313],
-  сочи: [43.585472, 39.723098],
-  "нижний новгород": [56.326797, 44.006516],
-};
 
 function isRetryableNetworkError(error: unknown): boolean {
   if (!(error instanceof TypeError)) return false;
@@ -209,112 +199,414 @@ async function createYooKassaPayment(params: {
   return payload as YooKassaPayment;
 }
 
+const YANDEX_GEOCODER_BASE_URL =
+  process.env.YANDEX_GEOCODER_BASE_URL?.trim() ||
+  "https://geocode-maps.yandex.ru/1.x/";
+const YANDEX_GEOCODER_API_KEY =
+  process.env.YANDEX_GEOCODER_API_KEY?.trim() ||
+  process.env.VITE_YANDEX_MAPS_API_KEY?.trim() ||
+  "";
+const YANDEX_GEOCODER_TIMEOUT_MS = Number(
+  process.env.YANDEX_GEOCODER_TIMEOUT_MS ?? "7000",
+);
+const YANDEX_SUGGEST_BASE_URL =
+  process.env.YANDEX_SUGGEST_BASE_URL?.trim() ||
+  "https://suggest-maps.yandex.ru/v1/suggest";
+const YANDEX_SUGGEST_API_KEY =
+  process.env.YANDEX_SUGGEST_API_KEY?.trim() ||
+  process.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.trim() ||
+  process.env.VITE_YANDEX_MAPS_API_KEY?.trim() ||
+  "";
+const YANDEX_SUGGEST_TIMEOUT_MS = Number(
+  process.env.YANDEX_SUGGEST_TIMEOUT_MS ?? "5000",
+);
+
+type GeocodedLocation = {
+  query: string;
+  label: string;
+  city: string;
+  lat: number;
+  lng: number;
+};
+
+type LocationSuggestion = {
+  title?: { text?: string } | string;
+  subtitle?: { text?: string } | string;
+  address?: { formatted_address?: string };
+  uri?: string;
+  value?: string;
+  displayName?: string;
+};
+
+type DeliveryPointTemplate = {
+  provider: DeliveryProviderCode;
+  name: string;
+  addressSuffix: string;
+  workHours: string;
+  etaDays: number;
+  cost: number;
+  latOffset: number;
+  lngOffset: number;
+};
+
+const DELIVERY_POINT_TEMPLATES: DeliveryPointTemplate[] = [
+  {
+    provider: "cdek",
+    name: "CDEK Pickup #1",
+    addressSuffix: "Central st., 12",
+    workHours: "09:00-21:00",
+    etaDays: 2,
+    cost: 280,
+    latOffset: 0.008,
+    lngOffset: 0.006,
+  },
+  {
+    provider: "cdek",
+    name: "CDEK Pickup #2",
+    addressSuffix: "Lenin ave., 54",
+    workHours: "10:00-20:00",
+    etaDays: 3,
+    cost: 260,
+    latOffset: -0.006,
+    lngOffset: 0.01,
+  },
+  {
+    provider: "russian_post",
+    name: "Russian Post Office #1",
+    addressSuffix: "Post st., 7",
+    workHours: "08:00-20:00",
+    etaDays: 4,
+    cost: 220,
+    latOffset: 0.004,
+    lngOffset: -0.009,
+  },
+  {
+    provider: "russian_post",
+    name: "Russian Post Office #2",
+    addressSuffix: "Soviet st., 18",
+    workHours: "09:00-19:00",
+    etaDays: 5,
+    cost: 190,
+    latOffset: -0.01,
+    lngOffset: -0.004,
+  },
+  {
+    provider: "ozon",
+    name: "Ozon Pickup #1",
+    addressSuffix: "Market st., 22",
+    workHours: "10:00-22:00",
+    etaDays: 2,
+    cost: 240,
+    latOffset: 0.011,
+    lngOffset: -0.002,
+  },
+  {
+    provider: "ozon",
+    name: "Ozon Pickup #2",
+    addressSuffix: "Youth st., 5",
+    workHours: "09:00-22:00",
+    etaDays: 1,
+    cost: 310,
+    latOffset: -0.004,
+    lngOffset: 0.014,
+  },
+];
+
 function normalizeCityForMap(city: string): string {
-  return city.trim().toLowerCase();
+  return city
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "") || "location";
 }
 
-function getCityCenter(city: string): [number, number] {
-  return CITY_CENTER_COORDS[normalizeCityForMap(city)] ?? CITY_CENTER_COORDS["москва"];
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<globalThis.Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    Number.isFinite(timeoutMs) ? Math.max(2000, timeoutMs) : 7000,
+  );
+
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
-function buildFallbackDeliveryPoints(city: string): DeliveryPoint[] {
-  const [lat, lng] = getCityCenter(city);
+function parseYandexPos(pos: string): { lat: number; lng: number } | null {
+  const [lngRaw, latRaw] = String(pos).trim().split(/\s+/);
+  const lat = Number(latRaw);
+  const lng = Number(lngRaw);
 
-  return [
-    {
-      id: `${normalizeCityForMap(city)}-cdek-1`,
-      provider: "cdek",
-      providerLabel: DELIVERY_PROVIDER_LABELS.cdek,
-      name: "CDEK ПВЗ №1",
-      address: `${city}, ул. Центральная, 12`,
-      city,
-      lat: lat + 0.008,
-      lng: lng + 0.006,
-      workHours: "09:00-21:00",
-      etaDays: 2,
-      cost: 280,
-    },
-    {
-      id: `${normalizeCityForMap(city)}-cdek-2`,
-      provider: "cdek",
-      providerLabel: DELIVERY_PROVIDER_LABELS.cdek,
-      name: "CDEK ПВЗ №2",
-      address: `${city}, пр-т Ленина, 54`,
-      city,
-      lat: lat - 0.006,
-      lng: lng + 0.01,
-      workHours: "10:00-20:00",
-      etaDays: 3,
-      cost: 260,
-    },
-    {
-      id: `${normalizeCityForMap(city)}-post-1`,
-      provider: "russian_post",
-      providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
-      name: "Почтовое отделение",
-      address: `${city}, ул. Почтовая, 7`,
-      city,
-      lat: lat + 0.004,
-      lng: lng - 0.009,
-      workHours: "08:00-20:00",
-      etaDays: 4,
-      cost: 220,
-    },
-    {
-      id: `${normalizeCityForMap(city)}-post-2`,
-      provider: "russian_post",
-      providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
-      name: "Почта России ПВЗ",
-      address: `${city}, ул. Советская, 18`,
-      city,
-      lat: lat - 0.01,
-      lng: lng - 0.004,
-      workHours: "09:00-19:00",
-      etaDays: 5,
-      cost: 190,
-    },
-    {
-      id: `${normalizeCityForMap(city)}-ozon-1`,
-      provider: "ozon",
-      providerLabel: DELIVERY_PROVIDER_LABELS.ozon,
-      name: "Ozon Пункт выдачи",
-      address: `${city}, ул. Торговая, 22`,
-      city,
-      lat: lat + 0.011,
-      lng: lng - 0.002,
-      workHours: "10:00-22:00",
-      etaDays: 2,
-      cost: 240,
-    },
-    {
-      id: `${normalizeCityForMap(city)}-ozon-2`,
-      provider: "ozon",
-      providerLabel: DELIVERY_PROVIDER_LABELS.ozon,
-      name: "Ozon Express ПВЗ",
-      address: `${city}, ул. Молодежная, 5`,
-      city,
-      lat: lat - 0.004,
-      lng: lng + 0.014,
-      workHours: "09:00-22:00",
-      etaDays: 1,
-      cost: 310,
-    },
-  ];
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null;
+  }
+
+  return { lat, lng };
 }
 
-async function loadExternalDeliveryPoints(_city: string): Promise<DeliveryPoint[]> {
+function extractYandexCity(components: unknown): string {
+  if (!Array.isArray(components)) return "";
+
+  const entries = components.filter(
+    (item): item is { kind?: unknown; name?: unknown } =>
+      Boolean(item) && typeof item === "object",
+  );
+
+  const byKinds = ["locality", "province", "area"];
+  for (const kind of byKinds) {
+    const found = entries.find(
+      (entry) =>
+        typeof entry.kind === "string" &&
+        entry.kind === kind &&
+        typeof entry.name === "string" &&
+        entry.name.trim(),
+    );
+    if (found && typeof found.name === "string") {
+      return found.name.trim();
+    }
+  }
+
+  return "";
+}
+
+function parseCoordinateQuery(query: string): { lat: number; lng: number } | null {
+  const cleaned = query
+    .trim()
+    .replace(/[;|]/g, ",")
+    .replace(/\s+/g, " ");
+  if (!cleaned) return null;
+
+  const parts = cleaned.split(/[,\s]+/).filter(Boolean);
+  if (parts.length !== 2) return null;
+
+  const first = Number(parts[0]);
+  const second = Number(parts[1]);
+  if (!Number.isFinite(first) || !Number.isFinite(second)) {
+    return null;
+  }
+
+  // Lat,Lng
+  if (Math.abs(first) <= 90 && Math.abs(second) <= 180) {
+    return { lat: first, lng: second };
+  }
+
+  // Lng,Lat
+  if (Math.abs(first) <= 180 && Math.abs(second) <= 90) {
+    return { lat: second, lng: first };
+  }
+
+  return null;
+}
+
+function buildGeocodeQueryVariants(normalizedQuery: string): string[] {
+  const query = normalizedQuery.trim();
+  if (!query) return [];
+
+  // Allow direct geocode by Yandex object URI from Suggest API.
+  if (/^(?:ymapsbm1|ymaps):\/\//i.test(query)) {
+    return [query];
+  }
+
+  const variants: string[] = [];
+  const coordinates = parseCoordinateQuery(query);
+  if (coordinates) {
+    variants.push(`${coordinates.lng},${coordinates.lat}`);
+    variants.push(`${coordinates.lat},${coordinates.lng}`);
+    return Array.from(new Set(variants));
+  }
+
+  variants.push(query);
+  if (!/(?:^|\b)(?:russia|\u0440\u043e\u0441\u0441\u0438\u044f)(?:$|\b)/iu.test(query)) {
+    variants.unshift(`${query}, \u0420\u043e\u0441\u0441\u0438\u044f`);
+  }
+
+  return Array.from(new Set(variants));
+}
+
+async function loadLocationSuggestionsByYandex(
+  query: string,
+  limit = 8,
+): Promise<LocationSuggestion[]> {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return [];
+  const safeLimit = Math.min(Math.max(limit, 1), 10);
+
+  try {
+    const url = new URL(YANDEX_SUGGEST_BASE_URL);
+    if (YANDEX_SUGGEST_API_KEY) {
+      url.searchParams.set("apikey", YANDEX_SUGGEST_API_KEY);
+    }
+    url.searchParams.set("text", normalizedQuery);
+    url.searchParams.set("lang", "ru_RU");
+    url.searchParams.set("results", String(safeLimit));
+    url.searchParams.set("types", "biz,geo");
+    url.searchParams.set("attrs", "uri");
+    url.searchParams.set("print_address", "1");
+    url.searchParams.set("org_address_kind", "house");
+
+    const response = await fetchWithTimeout(
+      url.toString(),
+      { method: "GET" },
+      YANDEX_SUGGEST_TIMEOUT_MS,
+    );
+    if (!response.ok) return [];
+
+    const payload = (await response.json()) as {
+      results?: unknown[];
+    };
+    if (!Array.isArray(payload.results)) return [];
+
+    return payload.results
+      .filter(
+        (entry): entry is LocationSuggestion =>
+          Boolean(entry) && typeof entry === "object",
+      )
+      .slice(0, safeLimit);
+  } catch {
+    return [];
+  }
+}
+
+async function geocodeLocationByYandex(
+  query: string,
+): Promise<GeocodedLocation | null> {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return null;
+
+  try {
+    const queryVariants = buildGeocodeQueryVariants(normalizedQuery);
+
+    for (const geocodeQuery of queryVariants) {
+      const url = new URL(YANDEX_GEOCODER_BASE_URL);
+      if (YANDEX_GEOCODER_API_KEY) {
+        url.searchParams.set("apikey", YANDEX_GEOCODER_API_KEY);
+      }
+      url.searchParams.set("format", "json");
+      url.searchParams.set("lang", "ru_RU");
+      url.searchParams.set("results", "1");
+      url.searchParams.set("geocode", geocodeQuery);
+
+      const response = await fetchWithTimeout(
+        url.toString(),
+        { method: "GET" },
+        YANDEX_GEOCODER_TIMEOUT_MS,
+      );
+      if (!response.ok) {
+        continue;
+      }
+
+      const payload = (await response.json()) as {
+        response?: {
+          GeoObjectCollection?: {
+            featureMember?: Array<{
+              GeoObject?: {
+                Point?: { pos?: string };
+                name?: string;
+                description?: string;
+                metaDataProperty?: {
+                  GeocoderMetaData?: {
+                    text?: string;
+                    Address?: {
+                      Components?: unknown;
+                    };
+                  };
+                };
+              };
+            }>;
+          };
+        };
+      };
+
+      const geoObject =
+        payload.response?.GeoObjectCollection?.featureMember?.[0]?.GeoObject;
+      const posRaw = geoObject?.Point?.pos;
+      if (!posRaw) {
+        continue;
+      }
+
+      const coords = parseYandexPos(posRaw);
+      if (!coords) {
+        continue;
+      }
+
+      const components =
+        geoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
+      const parsedCity = extractYandexCity(components);
+
+      const label =
+        geoObject?.metaDataProperty?.GeocoderMetaData?.text?.trim() ||
+        geoObject?.description?.trim() ||
+        geoObject?.name?.trim() ||
+        normalizedQuery;
+
+      return {
+        query: normalizedQuery,
+        label,
+        city: parsedCity || normalizedQuery,
+        lat: coords.lat,
+        lng: coords.lng,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function buildFallbackDeliveryPoints(location: GeocodedLocation): DeliveryPoint[] {
+  const cityLabel = location.city || location.query;
+  const locationSlug = normalizeCityForMap(cityLabel);
+
+  return DELIVERY_POINT_TEMPLATES.map((template, index) => ({
+    id: `${locationSlug}-${template.provider}-${index + 1}`,
+    provider: template.provider,
+    providerLabel: DELIVERY_PROVIDER_LABELS[template.provider],
+    name: template.name,
+    address: `${cityLabel}, ${template.addressSuffix}`,
+    city: cityLabel,
+    lat: location.lat + template.latOffset,
+    lng: location.lng + template.lngOffset,
+    workHours: template.workHours,
+    etaDays: template.etaDays,
+    cost: template.cost,
+  }));
+}
+
+async function loadExternalDeliveryPoints(
+  _location: GeocodedLocation,
+): Promise<DeliveryPoint[]> {
   // Integration hooks for production provider APIs.
-  // If provider credentials are added later, this function can be extended
-  // with real API requests to CDEK/Почта/Ozon and return unified points.
   return [];
 }
 
-async function getDeliveryPoints(city: string): Promise<DeliveryPoint[]> {
-  const externalPoints = await loadExternalDeliveryPoints(city);
-  if (externalPoints.length > 0) {
-    return externalPoints;
+async function getDeliveryPoints(query: string): Promise<{
+  location: GeocodedLocation;
+  points: DeliveryPoint[];
+}> {
+  const location = await geocodeLocationByYandex(query);
+  if (!location) {
+    throw new Error("Location not found");
   }
-  return buildFallbackDeliveryPoints(city);
+
+  const externalPoints = await loadExternalDeliveryPoints(location);
+  if (externalPoints.length > 0) {
+    return { location, points: externalPoints };
+  }
+
+  return {
+    location,
+    points: buildFallbackDeliveryPoints(location),
+  };
 }
 
 function normalizeTextField(value: unknown): string {
@@ -1011,6 +1303,43 @@ profileRouter.post(
   },
 );
 
+profileRouter.get("/location/suggest", async (req: Request, res: Response) => {
+  try {
+    const session = await requireAnyRole(req, [
+      ROLE_BUYER,
+      ROLE_SELLER,
+      ROLE_ADMIN,
+    ]);
+    if (!session.ok) {
+      res.status(session.status).json({ error: session.message });
+      return;
+    }
+
+    const rawQuery =
+      typeof req.query.q === "string" ? req.query.q.trim() : "";
+    const limitRaw =
+      typeof req.query.limit === "string" ? Number(req.query.limit) : 8;
+    const limit =
+      Number.isInteger(limitRaw) && limitRaw > 0
+        ? Math.min(limitRaw, 10)
+        : 8;
+
+    if (!rawQuery) {
+      res.json({ query: "", suggestions: [] });
+      return;
+    }
+
+    const suggestions = await loadLocationSuggestionsByYandex(rawQuery, limit);
+    res.json({
+      query: rawQuery,
+      suggestions,
+    });
+  } catch (error) {
+    console.error("Error loading location suggestions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 profileRouter.get("/delivery-points", async (req: Request, res: Response) => {
   try {
     const session = await requireAnyRole(req, [
@@ -1023,14 +1352,20 @@ profileRouter.get("/delivery-points", async (req: Request, res: Response) => {
       return;
     }
 
-    const cityRaw =
+    const locationRaw =
       typeof req.query.city === "string" ? req.query.city.trim() : "";
-    const city = cityRaw || "Москва";
+    const locationQuery =
+      locationRaw || "\u041c\u043e\u0441\u043a\u0432\u0430";
 
-    const points = await getDeliveryPoints(city);
+    const { location, points } = await getDeliveryPoints(locationQuery);
 
     res.json({
-      city,
+      city: location.city,
+      location: {
+        label: location.label,
+        lat: location.lat,
+        lng: location.lng,
+      },
       providers: Object.entries(DELIVERY_PROVIDER_LABELS).map(
         ([code, label]) => ({
           code,
@@ -1040,6 +1375,10 @@ profileRouter.get("/delivery-points", async (req: Request, res: Response) => {
       points,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "Location not found") {
+      res.status(404).json({ error: "Location not found" });
+      return;
+    }
     console.error("Error loading delivery points:", error);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -1328,23 +1667,6 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       return result;
     });
 
-    // await prisma.auditLog.create({ // Removed AuditLog
-    //   data: {
-    //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-    //     admin_id: session.user.id,
-    //     action: "create_order",
-    //     target_id: createdOrders.map((o: {order_id: string}) => o.order_id).join(", "),
-    //     target_type: "order",
-    //     details: `Пользователь ${
-    //       session.user.email
-    //     } создал ${createdOrders.length} заказ(а/ов) на сумму ${createdOrders.reduce(
-    //       (sum: number, order: { total_price: number }) => sum + order.total_price,
-    //       0,
-    //     )}.`,
-    //     ip_address: req.ip || "127.0.0.1",
-    //   },
-    // });
-
     res.status(201).json({
       success: true,
       orders: createdOrders,
@@ -1545,20 +1867,6 @@ profileRouter.post(
         update: {},
       });
 
-      // await prisma.auditLog.create({ // Removed AuditLog
-      //   data: {
-      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-      //     admin_id: session.user.id,
-      //     action: "add_to_wishlist",
-      //     target_id: String(listingPublicId),
-      //     target_type: "listing",
-      //     details: `Пользователь ${
-      //       session.user.email
-      //     } добавил товар ${listingPublicId} в избранное.`,
-      //     ip_address: req.ip || "127.0.0.1",
-      //   },
-      // });
-
       res.status(201).json({ success: true });
     } catch (error) {
       console.error("Error adding wishlist item:", error);
@@ -1598,19 +1906,6 @@ profileRouter.delete(
         },
       });
 
-      // await prisma.auditLog.create({ // Removed AuditLog
-      //   data: {
-      //     public_id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1_000)}`,
-      //     admin_id: session.user.id,
-      //     action: "remove_from_wishlist",
-      //     target_id: String(listingPublicId),
-      //     target_type: "listing",
-      //     details: `Пользователь ${
-      //       session.user.email
-      //     } удалил товар ${listingPublicId} из избранного.`,
-      //     ip_address: req.ip || "127.0.0.1",
-      //   },
-      // });
 
       res.json({ success: true });
     } catch (error) {

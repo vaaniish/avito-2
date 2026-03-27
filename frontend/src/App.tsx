@@ -33,6 +33,7 @@ import {
   type SessionUser,
 } from "./lib/api";
 import { matchesSearch } from "./lib/search";
+import { notifyError } from "./components/ui/notifications";
 
 const CartPage = lazy(() =>
   import("./components/CartPage").then((module) => ({
@@ -366,7 +367,7 @@ export default function App() {
       });
     } catch (error) {
       console.error("Error toggling wishlist:", error);
-      alert("Не удалось обновить список избранного");
+      notifyError("Не удалось обновить список избранного");
     }
   };
 
@@ -451,7 +452,7 @@ export default function App() {
       setServiceCategories(serviceCategoriesData);
     } catch (error) {
       console.error(error);
-      alert("Не удалось загрузить каталог");
+      notifyError("Не удалось загрузить каталог");
     }
   }, []);
 
@@ -503,7 +504,7 @@ export default function App() {
         }
       } catch (error) {
         console.error(error);
-        alert("Не удалось загрузить каталог");
+        notifyError("Не удалось загрузить каталог");
       } finally {
         if (mode === "products") {
           setIsLoadingProducts(false);

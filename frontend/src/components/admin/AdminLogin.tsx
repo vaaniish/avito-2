@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { apiPost, type SessionUser } from "../../lib/api";
+import { notifyError } from "../ui/notifications";
 
 interface AdminLoginProps {
   onLoginSuccess: (user?: SessionUser) => void;
@@ -23,12 +24,12 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
     try {
       const response = await apiPost<AuthResponse>("/auth/login", formData);
       if (response.user.role !== "admin") {
-        alert("Доступ запрещен. Нужны права администратора");
+        notifyError("Доступ запрещен. Нужны права администратора");
         return;
       }
       onLoginSuccess(response.user);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Ошибка входа");
+      notifyError(error instanceof Error ? error.message : "Ошибка входа");
     } finally {
       setIsLoading(false);
     }

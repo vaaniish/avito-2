@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, Clock, Search, XCircle } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
+import { notifyError } from "../ui/notifications";
 
 type KYCStatus = "all" | "pending" | "approved" | "rejected";
 
@@ -66,7 +67,7 @@ export function SellersPage() {
       setRequests(result);
       setSelectedRequest((prev) => prev ?? result[0]?.id ?? null);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось загрузить KYC");
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить KYC");
     }
   };
 
@@ -132,7 +133,7 @@ export function SellersPage() {
       );
       await loadRequests();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Не удалось обновить статус KYC");
+      notifyError(error instanceof Error ? error.message : "Не удалось обновить статус KYC");
     }
   };
 
@@ -322,4 +323,3 @@ export function SellersPage() {
     </div>
   );
 }
-
