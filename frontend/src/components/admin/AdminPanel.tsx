@@ -158,7 +158,7 @@ export function AdminPanel({
         </section>
 
         <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
-          <aside className="dashboard-sidebar h-fit p-4 lg:w-80">
+          <aside className="dashboard-sidebar h-fit p-4 lg:w-80 lg:shrink-0">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
                 <UserCheck className="h-5 w-5" />
@@ -200,7 +200,7 @@ export function AdminPanel({
             </button>
           </aside>
 
-          <main className="dashboard-sidebar flex-1 p-4 md:p-6">
+          <main className="dashboard-sidebar min-w-0 flex-1 p-4 md:p-6">
             <Suspense
               fallback={
                 <div className="dashboard-empty">Загрузка раздела...</div>

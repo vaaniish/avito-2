@@ -1,4 +1,4 @@
-export type DeliveryProviderCode = "russian_post";
+export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
 
 export type DeliveryValidationResult = {
   valid: boolean;
@@ -11,7 +11,8 @@ export type DeliveryExternalStatus =
   | "UNKNOWN"
   | "IN_TRANSIT"
   | "DELIVERED"
-  | "ISSUED";
+  | "ISSUED"
+  | "CANCELLED";
 
 export type DeliveryStatusResult = {
   status: DeliveryExternalStatus;
@@ -19,7 +20,7 @@ export type DeliveryStatusResult = {
   rawStatus?: string;
 };
 
-const DEFAULT_PROVIDER: DeliveryProviderCode = "russian_post";
+const DEFAULT_PROVIDER: DeliveryProviderCode = "yandex_pvz";
 const DELIVERY_API_BASE_URL = process.env.DELIVERY_TRACKING_API_URL?.trim() ?? "";
 const DELIVERY_API_KEY = process.env.DELIVERY_TRACKING_API_KEY?.trim() ?? "";
 const DELIVERY_API_TIMEOUT_MS = Number(process.env.DELIVERY_TRACKING_API_TIMEOUT_MS ?? "8000");
@@ -34,6 +35,15 @@ const RUSSIAN_POST_SOAP_URL =
   process.env.RUSSIAN_POST_SOAP_URL?.trim() ?? "https://tracking.russianpost.ru/rtm34";
 const RUSSIAN_POST_LOGIN = process.env.RUSSIAN_POST_LOGIN?.trim() ?? "";
 const RUSSIAN_POST_PASSWORD = process.env.RUSSIAN_POST_PASSWORD?.trim() ?? "";
+const YANDEX_DELIVERY_TEST_BASE_URL =
+  process.env.YANDEX_DELIVERY_TEST_BASE_URL?.trim() ??
+  "https://b2b.taxi.tst.yandex.net";
+const YANDEX_DELIVERY_TEST_TOKEN =
+  process.env.YANDEX_DELIVERY_TEST_TOKEN?.trim() ??
+  "";
+const YANDEX_DELIVERY_TEST_TIMEOUT_MS = Number(
+  process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ?? "10000",
+);
 
 function isLikelyRussianPostTrack(value: string): boolean {
   const v = value.trim().toUpperCase();
@@ -47,6 +57,9 @@ function normalizeTrackingNumber(value: string): string {
 }
 
 function buildTrackingUrl(provider: DeliveryProviderCode, trackingNumber: string): string {
+  if (provider === "yandex_pvz") {
+    return `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
+  }
   if (provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
   }
@@ -54,7 +67,9 @@ function buildTrackingUrl(provider: DeliveryProviderCode, trackingNumber: string
 }
 
 function normalizeProvider(value: unknown): DeliveryProviderCode {
-  return value === "russian_post" ? "russian_post" : DEFAULT_PROVIDER;
+  if (value === "russian_post") return "russian_post";
+  if (value === "yandex_pvz") return "yandex_pvz";
+  return DEFAULT_PROVIDER;
 }
 
 function normalizeExternalStatus(value: unknown): DeliveryExternalStatus {
@@ -74,6 +89,9 @@ function normalizeExternalStatus(value: unknown): DeliveryExternalStatus {
     raw === "delivered_to_recipient"
   ) {
     return "ISSUED";
+  }
+  if (raw === "cancelled" || raw === "canceled") {
+    return "CANCELLED";
   }
   return "UNKNOWN";
 }
@@ -290,6 +308,113 @@ async function fetchWithTimeout(
     });
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+function mapYandexStatusToExternal(status: string): DeliveryExternalStatus {
+  const normalized = status.trim().toUpperCase();
+  if (!normalized) return "UNKNOWN";
+
+  if (
+    normalized === "DELIVERY_TRANSMITTED_TO_RECIPIENT" ||
+    normalized === "DELIVERY_DELIVERED" ||
+    normalized === "FINISHED"
+  ) {
+    return "ISSUED";
+  }
+
+  if (
+    normalized === "DELIVERY_ARRIVED_PICKUP_POINT" ||
+    normalized === "DELIVERY_STORAGE_PERIOD_EXTENDED" ||
+    normalized === "CONFIRMATION_CODE_RECEIVED"
+  ) {
+    return "DELIVERED";
+  }
+
+  if (normalized === "CANCELLED" || normalized === "CANCELED") {
+    return "CANCELLED";
+  }
+
+  if (
+    normalized === "CREATED" ||
+    normalized === "DELIVERY_PROCESSING_STARTED" ||
+    normalized === "DELIVERY_TRACK_RECIEVED" ||
+    normalized === "SORTING_CENTER_PROCESSING_STARTED" ||
+    normalized === "SORTING_CENTER_TRACK_RECEIVED" ||
+    normalized === "SORTING_CENTER_TRACK_LOADED" ||
+    normalized === "DELIVERY_LOADED" ||
+    normalized === "SORTING_CENTER_LOADED" ||
+    normalized === "SORTING_CENTER_AT_START" ||
+    normalized === "SORTING_CENTER_PREPARED" ||
+    normalized === "SORTING_CENTER_TRANSMITTED" ||
+    normalized === "DELIVERY_AT_START" ||
+    normalized === "DELIVERY_AT_START_SORT" ||
+    normalized === "DELIVERY_TRANSPORTATION" ||
+    normalized === "DELIVERY_TRANSPORTATION_RECIPIENT"
+  ) {
+    return "IN_TRANSIT";
+  }
+
+  return "UNKNOWN";
+}
+
+async function requestYandexDeliveryRequestInfo(
+  requestId: string,
+): Promise<{
+  status: DeliveryExternalStatus;
+  rawStatus?: string;
+  trackingUrl?: string;
+} | null> {
+  if (!YANDEX_DELIVERY_TEST_TOKEN || !requestId.trim()) {
+    return null;
+  }
+
+  const url = new URL(
+    `${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`,
+  );
+  url.searchParams.set("request_id", requestId);
+  url.searchParams.set("slim", "true");
+
+  try {
+    const response = await fetchWithTimeout(
+      url.toString(),
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
+          "Accept-Language": "ru",
+          "Content-Type": "application/json",
+        },
+      },
+      Number.isFinite(YANDEX_DELIVERY_TEST_TIMEOUT_MS)
+        ? Math.max(2000, YANDEX_DELIVERY_TEST_TIMEOUT_MS)
+        : 10000,
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as {
+      state?: {
+        status?: unknown;
+      };
+      sharing_url?: unknown;
+    };
+    const rawStatus =
+      payload.state && typeof payload.state.status === "string"
+        ? payload.state.status.trim()
+        : "";
+    const sharingUrl =
+      typeof payload.sharing_url === "string" ? payload.sharing_url.trim() : "";
+
+    return {
+      status: mapYandexStatusToExternal(rawStatus),
+      rawStatus: rawStatus || undefined,
+      trackingUrl: sharingUrl || buildTrackingUrl("yandex_pvz", requestId),
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -521,6 +646,18 @@ export async function validateTrackingNumber(params: {
     }
   }
 
+  if (provider === "yandex_pvz") {
+    const yandexInfo = await requestYandexDeliveryRequestInfo(normalizedTrackingNumber);
+    if (yandexInfo) {
+      return {
+        valid: true,
+        normalizedTrackingNumber,
+        trackingUrl: yandexInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
+        source: "api",
+      };
+    }
+  }
+
   const payload = await requestTrackingApi("/validate", {
     method: "POST",
     body: JSON.stringify({
@@ -550,7 +687,7 @@ export async function validateTrackingNumber(params: {
 
   const valid = isLikelyRussianPostTrack(normalizedTrackingNumber);
   return {
-    valid,
+    valid: provider === "yandex_pvz" ? Boolean(normalizedTrackingNumber) : valid,
     normalizedTrackingNumber,
     trackingUrl: buildTrackingUrl(provider, normalizedTrackingNumber),
     source: "fallback",
@@ -576,6 +713,17 @@ export async function fetchTrackingStatus(params: {
         status: detectRussianPostStatus(russianPostPayload),
         trackingUrl: buildTrackingUrl(provider, normalizedTrackingNumber),
         rawStatus: extractRussianPostRawStatus(russianPostPayload),
+      };
+    }
+  }
+
+  if (provider === "yandex_pvz") {
+    const yandexInfo = await requestYandexDeliveryRequestInfo(normalizedTrackingNumber);
+    if (yandexInfo) {
+      return {
+        status: yandexInfo.status,
+        trackingUrl: yandexInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
+        rawStatus: yandexInfo.rawStatus,
       };
     }
   }

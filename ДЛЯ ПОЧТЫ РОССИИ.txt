@@ -1,0 +1,6 @@
+Что нашел по API/«всем ПВЗ» (проверено 27 марта 2026):
+
+В официальной спецификации Почты есть раздел «Поиск ОПС»: https://otpravka.pochta.ru/specification
+Официальный эталонный справочник ОПС/индексов (выгрузки): https://info.pochta.ru/support/database/ops
+Публично на карте pochta.ru/offices используется postoffices.find-from-rectangle (это и подключено у нас), с фильтрами и большим limit.
+Альтернатива через агрегатор (источник данных — Почта России): https://dadata.ru/api/suggest/postal_unit/

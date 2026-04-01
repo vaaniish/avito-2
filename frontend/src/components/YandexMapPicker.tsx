@@ -23,6 +23,9 @@ declare global {
           disable?: (name: string) => void;
         };
         setCenter: (coords: number[], zoom: number) => void;
+        getCenter?: () => number[];
+        getBounds?: () => number[][] | null;
+        getZoom?: () => number;
         geoObjects: {
           add: (item: unknown) => void;
           remove: (item: unknown) => void;
@@ -37,6 +40,10 @@ declare global {
         events: {
           add: (name: string, callback: () => void) => void;
         };
+      };
+      Clusterer: new (options?: Record<string, unknown>) => {
+        add: (items: unknown[] | unknown) => void;
+        removeAll: () => void;
       };
       geocode: (query: string | number[], options?: Record<string, unknown>) => Promise<{
         geoObjects: {
@@ -86,6 +93,8 @@ interface YandexMapPickerProps {
   onMarkerSelect?: (marker: YandexMapMarker) => void;
   height?: number | string;
   centerQuery?: string | null;
+  allowAddressSelect?: boolean;
+  onViewportChange?: (payload: { zoom: number }) => void;
 }
 
 type MapStatus = "loading" | "ready" | "unavailable";
@@ -140,12 +149,22 @@ const sanitizeHouseValue = (value: string | null | undefined) => {
 };
 
 function markerPreset(provider?: string, selected = false): string {
-  if (selected) return "islands#nightIcon";
+  if (selected && provider === "yandex_pvz") return "islands#darkBlueShoppingCircleIcon";
+  if (selected) return "islands#darkBlueIcon";
+  if (provider === "yandex_pvz") return "islands#blueShoppingCircleIcon";
   if (provider === "cdek") return "islands#darkBlueIcon";
   if (provider === "russian_post") return "islands#orangeIcon";
   if (provider === "ozon") return "islands#violetIcon";
   return "islands#blueIcon";
 }
+
+function markerCaption(title: string): string {
+  const normalized = String(title ?? "").trim();
+  if (!normalized) return "";
+  return normalized.length > 36 ? `${normalized.slice(0, 33)}...` : normalized;
+}
+
+const MAX_RENDERED_MARKERS = 800;
 
 export function YandexMapPicker({
   onAddressSelect,
@@ -154,12 +173,18 @@ export function YandexMapPicker({
   onMarkerSelect,
   height = 460,
   centerQuery = null,
+  allowAddressSelect = true,
+  onViewportChange,
 }: YandexMapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const clustererRef = useRef<any>(null);
   const selectedPlacemarkRef = useRef<any>(null);
   const markerPlacemarksRef = useRef<any[]>([]);
+  const selectedMarkerPlacemarkRef = useRef<any>(null);
   const autoGeolocationRequestedRef = useRef(false);
+  const viewportUpdateTimerRef = useRef<number | null>(null);
+  const [viewportTick, setViewportTick] = useState(0);
   const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
   const [locationHint, setLocationHint] = useState("");
 
@@ -224,6 +249,7 @@ export function YandexMapPicker({
   }, []);
 
   const setSelectedPlacemark = useCallback((coords: number[], balloonContent: string) => {
+    if (!allowAddressSelect) return;
     if (!mapInstanceRef.current || !window.ymaps) return;
 
     if (selectedPlacemarkRef.current) {
@@ -238,7 +264,7 @@ export function YandexMapPicker({
 
     mapInstanceRef.current.geoObjects.add(placemark);
     selectedPlacemarkRef.current = placemark;
-  }, []);
+  }, [allowAddressSelect]);
 
   useEffect(() => {
     if (!YANDEX_MAPS_KEY) {
@@ -264,10 +290,31 @@ export function YandexMapPicker({
           map.controls?.remove?.("fullscreenControl");
           map.controls?.remove?.("rulerControl");
           map.behaviors?.enable?.("scrollZoom");
+          const clusterer = new window.ymaps.Clusterer({
+            groupByCoordinates: false,
+            clusterDisableClickZoom: false,
+            clusterOpenBalloonOnClick: true,
+            preset: "islands#invertedBlueClusterIcons",
+          });
+          map.geoObjects.add(clusterer);
+          clustererRef.current = clusterer;
 
           map.events.add("click", (event) => {
+            if (!allowAddressSelect) return;
             const coords = event.get("coords");
             void getAddressByCoords(coords);
+          });
+          map.events.add("boundschange", () => {
+            const zoom = Number(map.getZoom?.() ?? 0);
+            if (zoom > 0) {
+              onViewportChange?.({ zoom });
+            }
+            if (viewportUpdateTimerRef.current) {
+              window.clearTimeout(viewportUpdateTimerRef.current);
+            }
+            viewportUpdateTimerRef.current = window.setTimeout(() => {
+              setViewportTick((prev) => prev + 1);
+            }, 120);
           });
 
           mapInstanceRef.current = map;
@@ -306,37 +353,118 @@ export function YandexMapPicker({
     }
 
     return () => {
+      if (viewportUpdateTimerRef.current) {
+        window.clearTimeout(viewportUpdateTimerRef.current);
+      }
+      clustererRef.current = null;
       if (mapInstanceRef.current) {
         mapInstanceRef.current.destroy();
       }
     };
-  }, []);
+  }, [allowAddressSelect, onViewportChange]);
 
   useEffect(() => {
     if (!window.ymaps || mapStatus !== "ready" || !mapInstanceRef.current) return;
 
-    for (const existing of markerPlacemarksRef.current) {
-      mapInstanceRef.current.geoObjects.remove(existing);
-    }
-    markerPlacemarksRef.current = [];
+    const map = mapInstanceRef.current as {
+      getBounds?: () => number[][] | null;
+      getCenter?: () => number[];
+    };
 
-    for (const marker of markers) {
+    let markersForRender = markers;
+    if (markers.length > MAX_RENDERED_MARKERS) {
+      const bounds = map.getBounds?.();
+      if (Array.isArray(bounds) && bounds.length === 2) {
+        const lower = bounds[0] ?? [];
+        const upper = bounds[1] ?? [];
+        const minLat = Math.min(Number(lower[0] ?? 0), Number(upper[0] ?? 0));
+        const maxLat = Math.max(Number(lower[0] ?? 0), Number(upper[0] ?? 0));
+        const minLng = Math.min(Number(lower[1] ?? 0), Number(upper[1] ?? 0));
+        const maxLng = Math.max(Number(lower[1] ?? 0), Number(upper[1] ?? 0));
+        const latPad = Math.max((maxLat - minLat) * 0.3, 0.05);
+        const lngPad = Math.max((maxLng - minLng) * 0.3, 0.05);
+        const bounded = markers.filter(
+          (marker) =>
+            marker.lat >= minLat - latPad &&
+            marker.lat <= maxLat + latPad &&
+            marker.lng >= minLng - lngPad &&
+            marker.lng <= maxLng + lngPad,
+        );
+
+        if (bounded.length > 0) {
+          markersForRender = bounded;
+        }
+      }
+
+      if (markersForRender.length > MAX_RENDERED_MARKERS) {
+        const center = map.getCenter?.() ?? [55.751574, 37.573856];
+        const centerLat = Number(center[0] ?? 55.751574);
+        const centerLng = Number(center[1] ?? 37.573856);
+        markersForRender = [...markersForRender]
+          .sort((a, b) => {
+            const da = (a.lat - centerLat) ** 2 + (a.lng - centerLng) ** 2;
+            const db = (b.lat - centerLat) ** 2 + (b.lng - centerLng) ** 2;
+            return da - db;
+          })
+          .slice(0, MAX_RENDERED_MARKERS);
+      }
+
+      if (
+        selectedMarkerId &&
+        !markersForRender.some((marker) => marker.id === selectedMarkerId)
+      ) {
+        const selected = markers.find((marker) => marker.id === selectedMarkerId);
+        if (selected) {
+          markersForRender = [...markersForRender.slice(0, MAX_RENDERED_MARKERS - 1), selected];
+        }
+      }
+    }
+
+    const clusterer = clustererRef.current as
+      | { removeAll?: () => void; add?: (items: unknown[] | unknown) => void }
+      | null;
+    clusterer?.removeAll?.();
+    markerPlacemarksRef.current = [];
+    selectedMarkerPlacemarkRef.current = null;
+
+    for (const marker of markersForRender) {
+      const isSelected = marker.id === selectedMarkerId;
       const placemark = new window.ymaps.Placemark(
         [marker.lat, marker.lng],
         {
+          iconCaption: isSelected ? markerCaption(marker.title) : "",
           balloonContent: `<strong>${marker.title}</strong><br/>${marker.subtitle ?? ""}`,
         },
         {
-          preset: markerPreset(marker.provider, marker.id === selectedMarkerId),
+          preset: markerPreset(marker.provider, isSelected),
+          hideIconOnBalloonOpen: false,
         },
       );
       placemark.events.add("click", () => {
         onMarkerSelect?.(marker);
       });
-      mapInstanceRef.current.geoObjects.add(placemark);
       markerPlacemarksRef.current.push(placemark);
+      if (isSelected) {
+        selectedMarkerPlacemarkRef.current = placemark;
+      }
     }
-  }, [mapStatus, markers, onMarkerSelect, selectedMarkerId]);
+    if (markerPlacemarksRef.current.length > 0) {
+      clusterer?.add?.(markerPlacemarksRef.current);
+    }
+  }, [mapStatus, markers, onMarkerSelect, selectedMarkerId, viewportTick]);
+
+  useEffect(() => {
+    if (mapStatus !== "ready") return;
+    const selectedPlacemark = selectedMarkerPlacemarkRef.current as
+      | { balloon?: { open?: () => void } }
+      | null;
+    if (!selectedPlacemark?.balloon?.open) return;
+    try {
+      selectedPlacemark.balloon.open();
+    } catch {
+      // no-op
+    }
+  }, [mapStatus, selectedMarkerId, markers]);
 
   useEffect(() => {
     if (!selectedMarker || !mapInstanceRef.current || mapStatus !== "ready") return;
@@ -356,8 +484,6 @@ export function YandexMapPicker({
         const coords = firstGeoObject.geometry?.getCoordinates?.();
         if (!Array.isArray(coords) || coords.length < 2) return;
         mapInstanceRef.current.setCenter(coords, 14);
-        const parsed = parseGeoObjectAddress(firstGeoObject);
-        setSelectedPlacemark(coords, parsed.fullText);
       })
       .catch(() => {
         // noop
@@ -366,9 +492,10 @@ export function YandexMapPicker({
     return () => {
       cancelled = true;
     };
-  }, [centerQuery, mapStatus, parseGeoObjectAddress, setSelectedPlacemark]);
+  }, [centerQuery, mapStatus]);
 
   const getAddressByCoords = async (coords: number[], options?: { auto?: boolean }) => {
+    if (!allowAddressSelect) return;
     if (!window.ymaps || !mapInstanceRef.current) return;
 
     const geocode = await window.ymaps.geocode(coords);
@@ -426,6 +553,7 @@ export function YandexMapPicker({
   };
 
   const requestCurrentLocation = async () => {
+    if (!allowAddressSelect) return;
     if (!navigator.geolocation) {
       setLocationHint("Браузер не поддерживает геолокацию.");
       return;
@@ -462,6 +590,7 @@ export function YandexMapPicker({
   };
 
   useEffect(() => {
+    if (!allowAddressSelect) return;
     if (mapStatus !== "ready") return;
     if (typeof window === "undefined") return;
     if (!navigator.geolocation) return;
@@ -469,7 +598,7 @@ export function YandexMapPicker({
 
     autoGeolocationRequestedRef.current = true;
     void requestCurrentLocation();
-  }, [mapStatus]);
+  }, [allowAddressSelect, mapStatus]);
 
   useEffect(() => {
     if (mapStatus !== "ready" || !mapInstanceRef.current) return;

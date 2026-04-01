@@ -46,7 +46,7 @@ const LISTING_ACTIVE: ListingStatusValue = "ACTIVE";
 const LISTING_INACTIVE: ListingStatusValue = "INACTIVE";
 const LISTING_MODERATION: ListingStatusValue = "MODERATION";
 const ORDER_DELIVERY_SYNC_INTERVAL_MS = 2 * 60 * 1000;
-const DEFAULT_TRACKING_PROVIDER: DeliveryProviderCode = "russian_post";
+const DEFAULT_TRACKING_PROVIDER: DeliveryProviderCode = "yandex_pvz";
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 
@@ -99,7 +99,9 @@ function parseSellerEditableOrderStatus(value: unknown): SellerEditableOrderStat
 }
 
 function normalizeTrackingProvider(value: unknown): DeliveryProviderCode {
-  return value === "russian_post" ? "russian_post" : DEFAULT_TRACKING_PROVIDER;
+  if (value === "russian_post") return "russian_post";
+  if (value === "yandex_pvz") return "yandex_pvz";
+  return DEFAULT_TRACKING_PROVIDER;
 }
 
 function mapExternalDeliveryStatusToOrderStatus(
@@ -108,6 +110,7 @@ function mapExternalDeliveryStatusToOrderStatus(
   if (status === "IN_TRANSIT") return "SHIPPED";
   if (status === "DELIVERED") return "DELIVERED";
   if (status === "ISSUED") return "COMPLETED";
+  if (status === "CANCELLED") return "CANCELLED";
   return null;
 }
 
@@ -1461,6 +1464,7 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
           tracking_number: order.tracking_number,
           tracking_url: order.tracking_url,
           delivery_ext_status: order.delivery_ext_status,
+          delivery_address: order.delivery_address,
           items: order.items.map((item: MarketOrderItem) => ({
             id: String(item.id),
             name: item.name,
@@ -1515,13 +1519,6 @@ partnerRouter.patch(
       if (existing.status !== "CREATED" && existing.status !== "PREPARED" && existing.status !== "PAID") {
         res.status(409).json({
           error: "This status is updated automatically and cannot be changed manually",
-        });
-        return;
-      }
-
-      if (existing.tracking_number) {
-        res.status(409).json({
-          error: "Tracking number is already set. Shipment status is managed automatically",
         });
         return;
       }

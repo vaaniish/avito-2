@@ -101,7 +101,7 @@ export function FilterPanel({
   };
 
   return (
-    <div className="lg:sticky lg:top-24 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-200 w-full lg:w-80 lg:ml-[10px] pt-12 lg:pt-[21px] px-4 lg:px-[21px] pb-4 lg:pb-[21px]">
+    <div className="lg:sticky lg:top-24 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-200 w-full lg:w-80 pt-12 lg:pt-[21px] px-4 lg:px-[21px] pb-4 lg:pb-[21px]">
       <div className="mb-6 pb-6 border-b border-gray-200">
         <div className="flex rounded-xl bg-gray-50 p-1.5 border border-gray-200">
           <button

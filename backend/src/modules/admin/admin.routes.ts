@@ -242,7 +242,6 @@ function matchesFullText(input: unknown, query: string): boolean {
 
 function buildComplaintEvaluation(params: {
   complaintType: string;
-  evidenceCount: number;
   listingComplaintCount: number;
   sellerComplaintCount: number;
 }): {
@@ -250,29 +249,22 @@ function buildComplaintEvaluation(params: {
   recommendation: "approve" | "reject" | "manual_review";
   reasons: string[];
 } {
-  let score = 0;
+  let rawScore = 0;
   const reasons: string[] = [];
 
-  if (params.evidenceCount > 0) {
-    score += 25;
-    reasons.push("evidence_attached");
-  } else {
-    reasons.push("no_evidence");
-  }
-
   if (params.sellerComplaintCount >= 5) {
-    score += 30;
+    rawScore += 30;
     reasons.push("seller_has_many_complaints");
   } else if (params.sellerComplaintCount >= 2) {
-    score += 15;
+    rawScore += 15;
     reasons.push("seller_has_repeat_complaints");
   }
 
   if (params.listingComplaintCount >= 3) {
-    score += 20;
+    rawScore += 20;
     reasons.push("listing_has_multiple_reports");
   } else if (params.listingComplaintCount >= 2) {
-    score += 10;
+    rawScore += 10;
     reasons.push("listing_has_repeat_reports");
   }
 
@@ -282,10 +274,15 @@ function buildComplaintEvaluation(params: {
     normalizedType.includes("platform") ||
     normalizedType.includes("payment")
   ) {
-    score += 20;
+    rawScore += 20;
     reasons.push("high_risk_type_payment_off_platform");
   }
 
+  if (reasons.length === 0) {
+    reasons.push("insufficient_objective_signals");
+  }
+
+  const score = Math.round((rawScore / 70) * 100);
   const recommendation =
     score >= 60 ? "approve" : score <= 20 ? "reject" : "manual_review";
 
@@ -705,8 +702,6 @@ adminRouter.get("/complaints-legacy", async (req: Request, res: Response) => {
         sellerListingsCount: complaint.seller._count.listings,
         sellerOrdersCount: complaint.seller._count.orders_as_seller,
         description: complaint.description,
-        evidence: complaint.evidence,
-        evidenceFiles: splitEvidenceFiles(complaint.evidence),
         checkedAt: complaint.checked_at,
         checkedBy: complaint.checked_by
           ? {
@@ -748,7 +743,6 @@ adminRouter.get("/complaints-legacy", async (req: Request, res: Response) => {
           : null,
         evaluation: buildComplaintEvaluation({
           complaintType: complaint.complaint_type,
-          evidenceCount: splitEvidenceFiles(complaint.evidence).length,
           listingComplaintCount: complaint.listing._count.complaints,
           sellerComplaintCount: complaint.seller._count.complaints_against,
         }),
@@ -980,8 +974,6 @@ type ComplaintDto = {
   sellerListingsCount: number;
   sellerOrdersCount: number;
   description: string;
-  evidence: string | null;
-  evidenceFiles: string[];
   checkedAt: Date | null;
   checkedBy: { id: string; name: string; email: string } | null;
   actionTaken: string | null;
@@ -1451,7 +1443,6 @@ async function mapComplaintsForAdmin(
   return complaints.map((complaint) => {
     const evaluation = buildComplaintEvaluation({
       complaintType: complaint.complaint_type,
-      evidenceCount: splitEvidenceFiles(complaint.evidence).length,
       listingComplaintCount: complaint.listing._count.complaints,
       sellerComplaintCount: complaint.seller._count.complaints_against,
     });
@@ -1499,8 +1490,6 @@ async function mapComplaintsForAdmin(
       sellerListingsCount: complaint.seller._count.listings,
       sellerOrdersCount: complaint.seller._count.orders_as_seller,
       description: complaint.description,
-      evidence: complaint.evidence,
-      evidenceFiles: splitEvidenceFiles(complaint.evidence),
       checkedAt: complaint.checked_at,
       checkedBy: complaint.checked_by
         ? {

@@ -20,7 +20,7 @@ export function ToastViewport({ notices, onClose }: ToastViewportProps) {
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="pointer-events-none fixed right-4 top-4 z-[80] flex w-full max-w-md flex-col gap-2">
+    <div className="pointer-events-none fixed right-4 top-[calc(var(--header-height,84px)+0.75rem)] z-[80] flex w-full max-w-md flex-col gap-2">
       {notices.map((notice) => {
         const style =
           notice.tone === "success"

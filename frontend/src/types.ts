@@ -4,7 +4,10 @@ export interface Product {
   price: number;
   image: string;
   rating: number;
+  sellerRating?: number;
+  sellerReviewsCount?: number;
   seller: string;
+  sellerId?: string;
   category: string;
   sku?: string; // Article/SKU number
   isNew?: boolean;
@@ -23,6 +26,7 @@ export interface Product {
   sellerResponseTime?: string; // Average response time
   sellerAvatar?: string; // Seller avatar
   sellerListings?: number; // Number of seller listings
+  sellerJoinedAt?: string; // Seller registration date on Ecomm
   breadcrumbs?: string[]; // Category breadcrumbs
   condition?: "new" | "used"; // Condition: new or used
   city?: string; // City name where item is located
@@ -35,6 +39,8 @@ export interface Review {
   date: string;
   comment: string;
   avatar?: string;
+  listingId?: string;
+  listingTitle?: string;
 }
 
 export interface CartItem extends Product {

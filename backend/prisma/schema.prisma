@@ -77,7 +77,6 @@ enum TransactionStatus {
 }
 
 enum PaymentProvider {
-  CASH
   YOOMONEY
   STRIPE
   OTHER

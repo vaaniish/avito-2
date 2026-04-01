@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Check, CreditCard, MapPin, Search, X } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { CreditCard, MapPin, QrCode, Search, X } from "lucide-react";
 import type { CartItem, Product } from "../types";
 import { apiGet, apiPost } from "../lib/api";
 import { YandexMapMarker, YandexMapPicker } from "./YandexMapPicker";
@@ -10,13 +10,20 @@ interface CheckoutPageProps {
   deliveryType: "delivery" | "pickup";
   onBack: () => void;
   onRemoveUnavailableItems?: (itemIds: string[]) => void;
+  onOrderCreated?: (result: {
+    orderIds: string[];
+    total: number;
+    deliveryType: "delivery" | "pickup";
+  }) => void;
   onComplete: (result: {
     orderIds: string[];
     total: number;
-    paymentMethod: "card" | "cash";
     deliveryType: "delivery" | "pickup";
   }) => void;
 }
+
+type PaymentMethod = "card" | "sbp";
+type PaymentStatusSummary = "pending" | "paid" | "failed";
 
 type CreateOrdersResponse = {
   success: boolean;
@@ -33,8 +40,29 @@ type CreateOrdersResponse = {
   } | null;
 };
 
+type PaymentStatusResponse = {
+  summary: PaymentStatusSummary;
+  orders: Array<{
+    orderId: string;
+    orderStatus: string;
+    paymentStatus: string | null;
+    paymentProvider: string | null;
+    paymentIntentId: string | null;
+  }>;
+};
+
+type ActivePayment = {
+  orderIds: string[];
+  total: number;
+  deliveryType: "delivery" | "pickup";
+  paymentMethod: PaymentMethod;
+  confirmationUrl: string;
+  expiresAt: number;
+  summary: PaymentStatusSummary;
+};
+
 type DeliveryProvider = {
-  code: "cdek" | "russian_post" | "ozon";
+  code: "yandex_pvz" | "russian_post" | "cdek";
   label: string;
 };
 
@@ -60,102 +88,90 @@ type DeliveryPointsResponse = {
     lng: number;
   };
   providers: DeliveryProvider[];
+  activeProvider?: DeliveryProvider["code"];
   points: DeliveryPoint[];
+  pagination?: {
+    total: number;
+    cursor: number;
+    nextCursor: number | null;
+    hasMore: boolean;
+  } | null;
 };
 
-type LocationSuggestion = {
-  title?: { text?: string } | string;
-  subtitle?: { text?: string } | string;
-  address?: { formatted_address?: string };
-  uri?: string;
-  value?: string;
-  displayName?: string;
-};
+const DELIVERY_PICKUP_PROVIDER: DeliveryProvider["code"] = "yandex_pvz";
+const DEFAULT_DELIVERY_CITY = "Россия, Москва";
+const YANDEX_GEOSUGGEST_API_KEY =
+  import.meta.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.toString().trim() ?? "";
+const RUSSIA_BOUNDS: number[][] = [
+  [41.185, 19.6389],
+  [81.8587, 180],
+];
+const PAYMENT_TIMEOUT_MS = 30 * 60 * 1000;
+const SBP_UI_ENABLED = false;
+const PAYMENT_RETURN_EVENT_KEY = "ecomm_payment_returned";
+const PAYMENT_RETURN_CHANNEL = "ecomm-payment-channel";
+const DELIVERY_PROVIDER_TABS: Array<{
+  code: DeliveryProvider["code"];
+  label: string;
+  enabled: boolean;
+}> = [
+  { code: "yandex_pvz", label: "Яндекс ПВЗ", enabled: true },
+  { code: "russian_post", label: "Почта России", enabled: true },
+  { code: "cdek", label: "СДЭК", enabled: false },
+];
 
-type LocationSuggestResponse = {
-  query: string;
-  suggestions: LocationSuggestion[];
-};
-
-const getSuggestionText = (
-  value: { text?: string } | string | null | undefined,
-): string => {
-  if (typeof value === "string") return value.trim();
-  if (value && typeof value === "object" && typeof value.text === "string") {
-    return value.text.trim();
-  }
-  return "";
-};
-
-const getSuggestionTitle = (suggestion: LocationSuggestion): string => {
-  const title = getSuggestionText(suggestion.title);
-  if (title) return title;
-  if (typeof suggestion.displayName === "string" && suggestion.displayName.trim()) {
-    return suggestion.displayName.trim();
-  }
-  if (typeof suggestion.value === "string" && suggestion.value.trim()) {
-    return suggestion.value.trim();
-  }
-  return "";
-};
-
-const getSuggestionSubtitle = (suggestion: LocationSuggestion): string => {
-  const title = getSuggestionTitle(suggestion).toLowerCase();
-  const subtitle = getSuggestionText(suggestion.subtitle);
-  if (subtitle && subtitle.toLowerCase() !== title) return subtitle;
-  if (
-    suggestion.address &&
-    typeof suggestion.address.formatted_address === "string" &&
-    suggestion.address.formatted_address.trim()
-  ) {
-    const formatted = suggestion.address.formatted_address.trim();
-    if (formatted.toLowerCase() !== title) {
-      return formatted;
-    }
-  }
-  return "";
-};
-
-const getSuggestionInputValue = (suggestion: LocationSuggestion): string => {
-  const title = getSuggestionTitle(suggestion);
-  const subtitle = getSuggestionSubtitle(suggestion);
-  return title || subtitle;
-};
-
-const getSuggestionSearchQuery = (suggestion: LocationSuggestion): string => {
-  if (typeof suggestion.uri === "string" && suggestion.uri.trim()) {
-    return suggestion.uri.trim();
-  }
-  const subtitle = getSuggestionSubtitle(suggestion);
-  if (subtitle) return subtitle;
-  return getSuggestionInputValue(suggestion);
-};
-
-const DELIVERY_PVZ_STUB = "Тестовый ПВЗ, Москва, ул. Тестовая, 1";
+function formatCountdown(totalSeconds: number): string {
+  const safe = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safe / 60);
+  const seconds = safe % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
 export function CheckoutPage({
   items,
   deliveryType,
   onBack,
   onRemoveUnavailableItems,
+  onOrderCreated,
   onComplete,
 }: CheckoutPageProps) {
-  const [pickupPoint, setPickupPoint] = useState("");
-  const [deliveryCity, setDeliveryCity] = useState("Москва");
-  const [mapCenterQuery, setMapCenterQuery] = useState<string | null>("Москва");
-  const [providers, setProviders] = useState<DeliveryProvider[]>([]);
+  const [deliveryCity, setDeliveryCity] = useState("");
+  const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
+  const [deliveryProviders, setDeliveryProviders] = useState<DeliveryProvider[]>(
+    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled).map((tab) => ({
+      code: tab.code,
+      label: tab.label,
+    })),
+  );
+  const [activeDeliveryProvider, setActiveDeliveryProvider] =
+    useState<DeliveryProvider["code"]>(DELIVERY_PICKUP_PROVIDER);
   const [deliveryPoints, setDeliveryPoints] = useState<DeliveryPoint[]>([]);
-  const [searchSuggestions, setSearchSuggestions] = useState<LocationSuggestion[]>([]);
-  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
-  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
-  const [activeSuggestIndex, setActiveSuggestIndex] = useState(-1);
-  const [selectedProvider, setSelectedProvider] = useState<
-    "all" | DeliveryProvider["code"]
-  >("all");
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [isPointsLoading, setIsPointsLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
+  const [isPointsLoadingMore, setIsPointsLoadingMore] = useState(false);
+  const [russianPostNextCursor, setRussianPostNextCursor] = useState<number | null>(null);
+  const [russianPostHasMore, setRussianPostHasMore] = useState(false);
+  const [mapZoom, setMapZoom] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [activePayment, setActivePayment] = useState<ActivePayment | null>(null);
+  const [lockedSummary, setLockedSummary] = useState<{
+    items: CartItem[];
+    subtotal: number;
+    shipping: number;
+    total: number;
+  } | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [paymentStatusError, setPaymentStatusError] = useState<string | null>(null);
+
+  const isPlacingOrderRef = useRef(false);
+  const hasCompletedRef = useRef(false);
+  const paymentWindowRef = useRef<Window | null>(null);
+  const deliverySearchInputRef = useRef<HTMLInputElement | null>(null);
+  const nativeAddressSuggestViewRef = useRef<any>(null);
+  const activeDeliveryProviderRef = useRef<DeliveryProvider["code"]>(
+    DELIVERY_PICKUP_PROVIDER,
+  );
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -169,125 +185,504 @@ export function CheckoutPage({
     [deliveryPoints, selectedPointId],
   );
 
-  const filteredPoints = useMemo(() => {
-    if (selectedProvider === "all") return deliveryPoints;
-    return deliveryPoints.filter((point) => point.provider === selectedProvider);
-  }, [deliveryPoints, selectedProvider]);
-
-  const mapMarkers = useMemo<YandexMapMarker[]>(
+  const visibleDeliveryPoints = useMemo(
     () =>
-      filteredPoints.map((point) => ({
-        id: point.id,
-        title: point.name,
-        subtitle: `${point.providerLabel} · ${point.address}`,
-        provider: point.provider,
-        lat: point.lat,
-        lng: point.lng,
-      })),
-    [filteredPoints],
+      deliveryPoints.filter(
+        (point) => point.provider === activeDeliveryProvider,
+      ),
+    [deliveryPoints, activeDeliveryProvider],
   );
 
-  const loadDeliveryPoints = async (city: string) => {
+  const mapMarkers = useMemo<YandexMapMarker[]>(
+    () => {
+      const byId = new Map<string, YandexMapMarker>();
+      for (const point of visibleDeliveryPoints) {
+        if (
+          !Number.isFinite(point.lat) ||
+          !Number.isFinite(point.lng) ||
+          Math.abs(point.lat) > 90 ||
+          Math.abs(point.lng) > 180
+        ) {
+          continue;
+        }
+
+        byId.set(point.id, {
+          id: point.id,
+          title: point.name,
+          subtitle: `${point.providerLabel} - ${point.address}`,
+          provider: point.provider,
+          lat: point.lat,
+          lng: point.lng,
+        });
+      }
+      return Array.from(byId.values());
+    },
+    [visibleDeliveryPoints],
+  );
+
+  const canSelectDeliveryPoint = deliveryType !== "delivery" || Boolean(selectedPoint);
+  const canCheckoutWithSelectedPoint =
+    deliveryType !== "delivery" || Boolean(selectedPoint);
+  const hasActivePayment = Boolean(activePayment);
+  const paymentIsPaid = activePayment?.summary === "paid";
+  const summaryItems = lockedSummary?.items ?? items;
+  const summarySubtotal = lockedSummary?.subtotal ?? subtotal;
+  const summaryShipping = lockedSummary?.shipping ?? shipping;
+  const summaryTotal = lockedSummary?.total ?? total;
+
+  useEffect(() => {
+    activeDeliveryProviderRef.current = activeDeliveryProvider;
+  }, [activeDeliveryProvider]);
+
+  const loadDeliveryPoints = async (
+    city: string,
+    recenter = true,
+    provider: DeliveryProvider["code"] | "all",
+    options?: { cursor?: number; append?: boolean; silent?: boolean },
+  ) => {
     if (deliveryType !== "delivery") return;
     const query = city.trim();
     if (!query) return;
 
-    setIsPointsLoading(true);
+    const cursor = Number(options?.cursor ?? 0);
+    const append = Boolean(options?.append);
+    const silent = Boolean(options?.silent);
+    if (append || silent) {
+      setIsPointsLoadingMore(true);
+    } else {
+      setIsPointsLoading(true);
+    }
     try {
+      const params = new URLSearchParams({
+        city: query,
+      });
+      if (provider && provider !== "all") {
+        params.set("provider", provider);
+      }
+      if (provider === "russian_post") {
+        params.set("cursor", String(Math.max(0, cursor)));
+        params.set("limit", "250");
+      }
       const response = await apiGet<DeliveryPointsResponse>(
-        `/profile/delivery-points?city=${encodeURIComponent(query)}`,
+        `/profile/delivery-points?${params.toString()}`,
       );
-      setProviders(response.providers);
-      setDeliveryPoints(response.points);
-      setDeliveryCity(response.location?.label || query);
-      setMapCenterQuery(response.location?.label || query);
-      if (response.points.length > 0) {
-        const first = response.points[0];
-        setSelectedPointId(first.id);
-        setPickupPoint(first.address);
+      const nextCursor = response.pagination?.nextCursor ?? null;
+      const hasMore = Boolean(response.pagination?.hasMore);
+      if (append && provider === "russian_post") {
+        setDeliveryPoints((prev) => {
+          const byId = new Map(prev.map((point) => [point.id, point]));
+          for (const point of response.points) {
+            byId.set(point.id, point);
+          }
+          return Array.from(byId.values());
+        });
+      } else {
+        setDeliveryPoints(response.points);
+      }
+      setDeliveryProviders(response.providers);
+      setActiveDeliveryProvider(
+        provider === "all"
+          ? response.activeProvider ?? DELIVERY_PICKUP_PROVIDER
+          : provider,
+      );
+      if (!append) {
+        setSelectedPointId(null);
+      }
+      setDeliveryCity(query);
+      if (provider === "russian_post") {
+        setRussianPostNextCursor(nextCursor);
+        setRussianPostHasMore(hasMore);
+      } else {
+        setRussianPostNextCursor(null);
+        setRussianPostHasMore(false);
+      }
+      if (recenter) {
+        setMapCenterQuery(query);
       }
     } catch (error) {
       notifyError(
         error instanceof Error
           ? error.message
-          : "Не удалось загрузить точки доставки",
+          : "Не удалось загрузить точки выдачи",
       );
     } finally {
-      setIsPointsLoading(false);
+      if (append || silent) {
+        setIsPointsLoadingMore(false);
+      } else {
+        setIsPointsLoading(false);
+      }
     }
   };
-
-  useEffect(() => {
-    if (deliveryType !== "delivery") return;
-    void loadDeliveryPoints(deliveryCity);
-    // Initial load only for current delivery flow.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deliveryType]);
-
-  useEffect(() => {
-    if (deliveryType !== "delivery") return;
-
-    const query = deliveryCity.trim();
-    if (query.length < 2) {
-      setSearchSuggestions([]);
-      setIsSuggestLoading(false);
-      setActiveSuggestIndex(-1);
-      return;
-    }
-
-    let cancelled = false;
-    const timeoutId = window.setTimeout(async () => {
-      setIsSuggestLoading(true);
-      try {
-        const response = await apiGet<LocationSuggestResponse>(
-          `/profile/location/suggest?q=${encodeURIComponent(query)}&limit=8`,
-        );
-        if (!cancelled) {
-          const suggestions = response.suggestions ?? [];
-          setSearchSuggestions(suggestions);
-          setActiveSuggestIndex(suggestions.length > 0 ? 0 : -1);
-        }
-      } catch {
-        if (!cancelled) {
-          setSearchSuggestions([]);
-          setActiveSuggestIndex(-1);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsSuggestLoading(false);
-        }
-      }
-    }, 220);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
-  }, [deliveryCity, deliveryType]);
 
   const applyLocationSearch = async (query: string) => {
     const value = query.trim();
     if (!value) return;
-    setIsSuggestOpen(false);
-    await loadDeliveryPoints(value);
+    setMapCenterQuery(value);
+    await loadDeliveryPoints(value, true, activeDeliveryProvider);
   };
 
-  const applySuggestion = (suggestion: LocationSuggestion) => {
-    const selectedLabel = getSuggestionInputValue(suggestion);
-    const queryValue = getSuggestionSearchQuery(suggestion) || selectedLabel;
-    if (!queryValue) return;
-    setDeliveryCity(selectedLabel || queryValue);
-    void applyLocationSearch(queryValue);
+  useEffect(() => {
+    if (deliveryType !== "delivery") return;
+    void loadDeliveryPoints(
+      deliveryCity.trim() || DEFAULT_DELIVERY_CITY,
+      true,
+      activeDeliveryProvider,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryType]);
+
+  const openOrReusePaymentTab = (url: string) => {
+    let paymentWindow = paymentWindowRef.current;
+    if (!paymentWindow || paymentWindow.closed) {
+      paymentWindow = window.open("", "_blank");
+      if (!paymentWindow) {
+        throw new Error(
+          "Браузер заблокировал новую вкладку. Разрешите pop-up для сайта.",
+        );
+      }
+      paymentWindowRef.current = paymentWindow;
+      paymentWindow.opener = null;
+    }
+    paymentWindow.location.href = url;
+    paymentWindow.focus();
+  };
+
+  useEffect(() => {
+    if (deliveryType !== "delivery") return;
+
+    let cancelled = false;
+    let retryTimer = 0;
+
+    const destroyNativeSuggest = () => {
+      const current = nativeAddressSuggestViewRef.current;
+      if (!current) return;
+      try {
+        current.destroy?.();
+      } catch {
+        // no-op
+      }
+      nativeAddressSuggestViewRef.current = null;
+    };
+
+    const initNativeSuggest = () => {
+      if (cancelled || nativeAddressSuggestViewRef.current) return;
+
+      const ymaps = (window as unknown as { ymaps?: any }).ymaps;
+      const inputEl = deliverySearchInputRef.current;
+      if (!ymaps?.SuggestView || !inputEl) {
+        retryTimer = window.setTimeout(initNativeSuggest, 120);
+        return;
+      }
+
+      try {
+        const suggestProvider =
+          YANDEX_GEOSUGGEST_API_KEY
+            ? {
+                suggest: (request: unknown, options?: { results?: number }) => {
+                  const query = String(request ?? "").trim();
+                  if (!query) {
+                    return ymaps.vow.resolve([]);
+                  }
+
+                  const limitRaw = Number(options?.results ?? 8);
+                  const limit =
+                    Number.isFinite(limitRaw) && limitRaw > 0
+                      ? Math.min(Math.floor(limitRaw), 10)
+                      : 8;
+
+                  const url = new URL("https://suggest-maps.yandex.ru/v1/suggest");
+                  url.searchParams.set("apikey", YANDEX_GEOSUGGEST_API_KEY);
+                  url.searchParams.set("text", query);
+                  url.searchParams.set("lang", "ru_RU");
+                  url.searchParams.set("results", String(limit));
+                  url.searchParams.set("types", "biz,geo");
+                  url.searchParams.set("attrs", "uri");
+                  url.searchParams.set("print_address", "1");
+                  url.searchParams.set("org_address_kind", "house");
+
+                  return ymaps.vow.resolve(
+                    fetch(url.toString(), { method: "GET" })
+                      .then((response) =>
+                        response.ok
+                          ? response.json()
+                          : Promise.resolve({ results: [] }),
+                      )
+                      .then((payload: unknown) => {
+                        const rawResults =
+                          payload &&
+                          typeof payload === "object" &&
+                          Array.isArray((payload as { results?: unknown[] }).results)
+                            ? (payload as { results: unknown[] }).results
+                            : [];
+
+                        return rawResults
+                          .map((entry) => {
+                            if (!entry || typeof entry !== "object") return null;
+                            const item = entry as {
+                              title?: { text?: string };
+                              subtitle?: { text?: string };
+                              address?: { formatted_address?: string };
+                              value?: string;
+                              displayName?: string;
+                            };
+                            const title = String(item.title?.text ?? "").trim();
+                            const subtitle = String(
+                              item.subtitle?.text ??
+                                item.address?.formatted_address ??
+                                "",
+                            ).trim();
+                            const singleLine = [title, subtitle]
+                              .filter(Boolean)
+                              .join(", ")
+                              .trim();
+                            const value =
+                              singleLine ||
+                              String(item.value ?? item.displayName ?? "").trim();
+                            if (!value) return null;
+                            return {
+                              value,
+                              displayName: value,
+                            };
+                          })
+                          .filter(
+                            (item): item is { value: string; displayName: string } =>
+                              Boolean(item),
+                          );
+                      })
+                      .catch(() => []),
+                  );
+                },
+              }
+            : "yandex#map";
+
+        const suggestView = new ymaps.SuggestView(inputEl, {
+          provider: suggestProvider,
+          results: 8,
+          boundedBy: RUSSIA_BOUNDS,
+          strictBounds: true,
+        });
+
+        suggestView.events?.add?.("select", (event: any) => {
+          const item = event?.get?.("item");
+          const selectedValue = String(item?.value ?? "").trim();
+          if (!selectedValue) return;
+          setDeliveryCity(selectedValue);
+          setMapCenterQuery(selectedValue);
+          void loadDeliveryPoints(
+            selectedValue,
+            true,
+            activeDeliveryProviderRef.current,
+          );
+        });
+
+        nativeAddressSuggestViewRef.current = suggestView;
+      } catch {
+        // no-op
+      }
+    };
+
+    initNativeSuggest();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) {
+        window.clearTimeout(retryTimer);
+      }
+      destroyNativeSuggest();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryType]);
+
+  useEffect(() => {
+    if (!activePayment) {
+      setSecondsLeft(0);
+      return;
+    }
+
+    const update = () => {
+      const remain = Math.max(
+        0,
+        Math.floor((activePayment.expiresAt - Date.now()) / 1000),
+      );
+      setSecondsLeft(remain);
+      if (remain === 0) {
+        setActivePayment((prev) => {
+          if (!prev || prev.summary !== "pending") return prev;
+          return { ...prev, summary: "failed" };
+        });
+      }
+    };
+
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [activePayment]);
+
+  useEffect(() => {
+    if (!activePayment || activePayment.summary !== "pending") {
+      return;
+    }
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const encodedOrderIds = encodeURIComponent(activePayment.orderIds.join(","));
+
+    const poll = async () => {
+      try {
+        if (cancelled) return;
+        const response = await apiGet<PaymentStatusResponse>(
+          `/profile/orders/payment-status?orderIds=${encodedOrderIds}`,
+        );
+        if (cancelled) return;
+        setPaymentStatusError(null);
+        setActivePayment((prev) => (prev ? { ...prev, summary: response.summary } : prev));
+
+        if (response.summary === "paid" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          onComplete({
+            orderIds: activePayment.orderIds,
+            total: activePayment.total,
+            deliveryType: activePayment.deliveryType,
+          });
+          return;
+        }
+      } catch (error) {
+        if (cancelled) return;
+        setPaymentStatusError(
+          error instanceof Error
+            ? error.message
+            : "Не удалось обновить статус оплаты",
+        );
+      } finally {}
+
+      if (!cancelled) {
+        timer = setTimeout(() => {
+          void poll();
+        }, 4000);
+      }
+    };
+
+    void poll();
+
+    return () => {
+      cancelled = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [activePayment, onComplete]);
+
+  useEffect(() => {
+    if (!activePayment || activePayment.summary !== "pending") {
+      return;
+    }
+
+    let cancelled = false;
+    let channel: BroadcastChannel | null = null;
+    const encodedOrderIds = encodeURIComponent(activePayment.orderIds.join(","));
+
+    const refreshPaymentStatusNow = async () => {
+      try {
+        const response = await apiGet<PaymentStatusResponse>(
+          `/profile/orders/payment-status?orderIds=${encodedOrderIds}`,
+        );
+        if (cancelled) return;
+
+        setPaymentStatusError(null);
+        setActivePayment((prev) => (prev ? { ...prev, summary: response.summary } : prev));
+
+        if (response.summary === "paid" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          onComplete({
+            orderIds: activePayment.orderIds,
+            total: activePayment.total,
+            deliveryType: activePayment.deliveryType,
+          });
+        }
+      } catch (error) {
+        if (cancelled) return;
+        setPaymentStatusError(
+          error instanceof Error ? error.message : "Не удалось обновить статус оплаты",
+        );
+      }
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== PAYMENT_RETURN_EVENT_KEY) return;
+      void refreshPaymentStatusNow();
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    try {
+      channel = new BroadcastChannel(PAYMENT_RETURN_CHANNEL);
+      channel.onmessage = (event) => {
+        if (event.data?.type === "payment_returned") {
+          void refreshPaymentStatusNow();
+        }
+      };
+    } catch {
+      channel = null;
+    }
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("storage", onStorage);
+      channel?.close();
+    };
+  }, [activePayment, onComplete]);
+
+  const handleOpenPayment = () => {
+    if (!activePayment?.confirmationUrl) {
+      notifyError("Ссылка на оплату не найдена");
+      return;
+    }
+    try {
+      openOrReusePaymentTab(activePayment.confirmationUrl);
+    } catch (error) {
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : "Не удалось открыть страницу оплаты",
+      );
+    }
   };
 
   const handlePlaceOrder = async () => {
+    if (isPlacingOrderRef.current || hasActivePayment) {
+      return;
+    }
+
+    if (paymentMethod === "sbp" && !SBP_UI_ENABLED) {
+      notifyInfo("СБП пока недоступна в текущем тестовом контуре. Используйте оплату картой.");
+      return;
+    }
+
+    if (!canSelectDeliveryPoint) {
+      notifyInfo(
+        "Выберите точку на карте перед оформлением заказа.",
+      );
+      return;
+    }
     const effectivePickupPoint =
       deliveryType === "delivery"
-        ? selectedPoint?.address || pickupPoint.trim() || DELIVERY_PVZ_STUB
+        ? `${selectedPoint?.name || ""}, ${selectedPoint?.address || ""}`
         : "Самовывоз";
 
+    let paymentWindow: Window | null = null;
+    isPlacingOrderRef.current = true;
     setIsSubmitting(true);
     try {
+      paymentWindow = window.open("", "_blank");
+      if (!paymentWindow) {
+        throw new Error("Браузер заблокировал новую вкладку. Разрешите pop-up для сайта.");
+      }
+      paymentWindowRef.current = paymentWindow;
+      paymentWindow.opener = null;
+      paymentWindow.document.title = "Переход к оплате";
+      paymentWindow.document.body.innerHTML =
+        "<p style='font-family:Arial,sans-serif;padding:16px'>Подготавливаем страницу оплаты...</p>";
+
       const [productListings, serviceListings] = await Promise.all([
         apiGet<Product[]>("/catalog/listings?type=products"),
         apiGet<Product[]>("/catalog/listings?type=services"),
@@ -305,6 +700,10 @@ export function CheckoutPage({
         notifyInfo(
           "Некоторые товары уже недоступны и были удалены из корзины. Проверьте заказ и попробуйте снова.",
         );
+        if (paymentWindow && !paymentWindow.closed) {
+          paymentWindow.close();
+        }
+        paymentWindowRef.current = null;
         onBack();
         return;
       }
@@ -313,6 +712,8 @@ export function CheckoutPage({
         items: items.map((item) => ({ listingId: item.id, quantity: item.quantity })),
         addressId: null,
         customAddress: effectivePickupPoint,
+        pickupPointId: selectedPoint?.id ?? null,
+        pickupPointProvider: selectedPoint?.provider ?? null,
         deliveryType,
         paymentMethod,
       });
@@ -322,231 +723,180 @@ export function CheckoutPage({
         throw new Error("Сервер не вернул созданные заказы");
       }
 
-      if (paymentMethod === "card") {
-        const confirmationUrl = response.payment?.confirmationUrl;
-        if (!confirmationUrl) {
-          throw new Error("Не удалось получить ссылку на оплату YooMoney");
-        }
-
-        const paymentWindow = window.open(
-          confirmationUrl,
-          "_blank",
-          "noopener,noreferrer",
-        );
-
-        onComplete({
-          orderIds,
-          total: response.total,
-          paymentMethod,
-          deliveryType,
-        });
-
-        if (!paymentWindow) {
-          window.location.assign(confirmationUrl);
-        }
-        return;
+      const confirmationUrl = response.payment?.confirmationUrl;
+      if (!confirmationUrl) {
+        throw new Error("Не удалось получить ссылку на оплату");
       }
 
-      onComplete({
+      const createdResult = {
         orderIds,
         total: response.total,
-        paymentMethod,
         deliveryType,
+      } as const;
+
+      onOrderCreated?.(createdResult);
+      hasCompletedRef.current = false;
+      setPaymentStatusError(null);
+      setLockedSummary({
+        items: items.map((item) => ({ ...item })),
+        subtotal,
+        shipping,
+        total,
       });
+      setActivePayment({
+        ...createdResult,
+        paymentMethod,
+        confirmationUrl,
+        expiresAt: Date.now() + PAYMENT_TIMEOUT_MS,
+        summary: "pending",
+      });
+
+      paymentWindow.location.href = confirmationUrl;
+      notifyInfo("Заказ создан. Ожидаем подтверждение оплаты.");
     } catch (error) {
+      if (paymentWindow && !paymentWindow.closed) {
+        paymentWindow.close();
+      }
+      paymentWindowRef.current = null;
       notifyError(
         error instanceof Error ? error.message : "Не удалось оформить заказ",
       );
     } finally {
+      isPlacingOrderRef.current = false;
       setIsSubmitting(false);
     }
   };
 
+  const paymentStatusMeta = useMemo(() => {
+    if (!activePayment) return null;
+    if (activePayment.summary === "paid") {
+      return {
+        className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+        title: "Оплата подтверждена",
+        description: "Спасибо за оплату. Перенаправляем на страницу заказа...",
+      };
+    }
+    if (activePayment.summary === "failed") {
+      return {
+        className: "border-rose-200 bg-rose-50 text-rose-800",
+        title: "Ожидаем оплату",
+        description: "Платёж не завершён. Можно повторно открыть страницу оплаты.",
+      };
+    }
+    return {
+      className: "border-amber-200 bg-amber-50 text-amber-800",
+      title: "Ожидаем оплату",
+      description: "Статус обновляется автоматически. Заказ ожидает оплату.",
+    };
+  }, [activePayment]);
+
   return (
-    <div className="min-h-screen app-shell pb-16 pt-[calc(var(--header-height,84px)+1rem)] md:pt-[calc(var(--header-height,84px)+1.4rem)]">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-        <h1 className="text-3xl md:text-5xl text-gray-900 mb-8 md:mb-12 text-center">
+    <div className="min-h-screen app-shell pb-16 pt-6 md:pt-8">
+      <div className="mx-auto max-w-[1200px] px-4 md:px-6">
+        <h1 className="mb-8 text-center text-3xl text-gray-900 md:mb-12 md:text-5xl">
           Оформление заказа
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 md:gap-8">
+        <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[1fr_400px]">
           <div className="space-y-6 md:space-y-8">
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
               {deliveryType === "delivery" ? (
                 <>
-                  <h2 className="text-xl md:text-2xl text-gray-900 mb-4">Выберите ПВЗ</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    На карте показываются все доступные ПВЗ по провайдерам CDEK, Почта России и
-                    Ozon.
+                  <h2 className="mb-4 text-xl text-gray-900 md:text-2xl">Выберите ПВЗ</h2>
+                  <p className="mb-4 text-sm text-gray-600">
+                    На карте показаны доступные точки выдачи выбранного провайдера.
+                    Введите адрес или название ПВЗ, затем выберите нужную метку на карте.
                   </p>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {DELIVERY_PROVIDER_TABS.map((tab) => (
+                      <button
+                        key={tab.code}
+                        type="button"
+                        disabled={
+                          !tab.enabled ||
+                          !deliveryProviders.some(
+                            (provider) => provider.code === tab.code,
+                          )
+                        }
+                        onClick={() => {
+                          if (
+                            !tab.enabled ||
+                            !deliveryProviders.some(
+                              (provider) => provider.code === tab.code,
+                            )
+                          ) {
+                            return;
+                          }
+                          setActiveDeliveryProvider(tab.code);
+                          setSelectedPointId(null);
+                          const query = deliveryCity.trim();
+                          if (query) {
+                            void loadDeliveryPoints(query, false, tab.code);
+                          } else {
+                            setDeliveryPoints([]);
+                            setMapCenterQuery(null);
+                          }
+                        }}
+                        className={`rounded-full border px-3 py-1.5 text-xs md:text-sm ${
+                          !tab.enabled ||
+                          !deliveryProviders.some(
+                            (provider) => provider.code === tab.code,
+                          )
+                            ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                            : activeDeliveryProvider === tab.code
+                              ? "border-blue-300 bg-blue-100 text-blue-700"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
 
                   <div className="mb-4">
-                    <div className="relative">
-                      <div className="flex items-center rounded-xl border border-slate-300 bg-white px-4 py-3 transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                        <Search className="mr-3 h-5 w-5 text-slate-400" />
-                        <input
-                          value={deliveryCity}
-                          onFocus={() => {
-                            setIsSuggestOpen(true);
-                            if (searchSuggestions.length > 0) {
-                              setActiveSuggestIndex(0);
-                            }
-                          }}
-                          onBlur={() => {
-                            window.setTimeout(() => {
-                              setIsSuggestOpen(false);
-                            }, 120);
-                          }}
-                          onKeyDown={(event) => {
-                            if (
-                              event.key === "ArrowDown" &&
-                              isSuggestOpen &&
-                              searchSuggestions.length > 0
-                            ) {
-                              event.preventDefault();
-                              setActiveSuggestIndex((prev) =>
-                                prev < 0
-                                  ? 0
-                                  : Math.min(prev + 1, searchSuggestions.length - 1),
-                              );
-                              return;
-                            }
-                            if (
-                              event.key === "ArrowUp" &&
-                              isSuggestOpen &&
-                              searchSuggestions.length > 0
-                            ) {
-                              event.preventDefault();
-                              setActiveSuggestIndex((prev) =>
-                                prev <= 0 ? 0 : prev - 1,
-                              );
-                              return;
-                            }
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              if (
-                                isSuggestOpen &&
-                                activeSuggestIndex >= 0 &&
-                                activeSuggestIndex < searchSuggestions.length
-                              ) {
-                                applySuggestion(searchSuggestions[activeSuggestIndex]);
-                                return;
-                              }
-                              void applyLocationSearch(deliveryCity);
-                            }
-                            if (event.key === "Escape") {
-                              setIsSuggestOpen(false);
-                            }
-                          }}
-                          onChange={(event) => {
-                            setDeliveryCity(event.target.value);
-                            setIsSuggestOpen(true);
-                          }}
-                          placeholder="Введите адрес, организацию или координаты"
-                          className="h-8 w-full border-0 bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-400"
-                        />
-                        {deliveryCity.trim().length > 0 && (
-                          <button
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => {
-                              setDeliveryCity("");
-                              setSearchSuggestions([]);
-                              setActiveSuggestIndex(-1);
-                              setIsSuggestOpen(false);
-                            }}
-                            className="ml-3 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-                            aria-label="Очистить поиск"
-                          >
-                            <X className="h-5 w-5" />
-                          </button>
-                        )}
-                      </div>
-
-                      {isSuggestOpen && (deliveryCity.trim().length > 0 || isSuggestLoading) && (
-                        <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-                          {isSuggestLoading && (
-                            <div className="px-4 py-3 text-sm text-slate-500">Ищем варианты...</div>
-                          )}
-
-                          {!isSuggestLoading && searchSuggestions.length === 0 && (
-                            <div className="px-4 py-3 text-sm text-slate-500">
-                              Ничего не найдено. Попробуйте уточнить запрос.
-                            </div>
-                          )}
-
-                          {!isSuggestLoading &&
-                            searchSuggestions.map((suggestion, index) => {
-                              const title = getSuggestionTitle(suggestion);
-                              const subtitle = getSuggestionSubtitle(suggestion);
-                              const inputValue = getSuggestionInputValue(suggestion);
-                              const queryValue = getSuggestionSearchQuery(suggestion);
-                              const isActive = index === activeSuggestIndex;
-                              const key =
-                                (typeof suggestion.uri === "string" && suggestion.uri.trim()) ||
-                                [title, subtitle, suggestion.value, String(index)]
-                                  .filter(Boolean)
-                                  .join("|");
-
-                              return (
-                              <button
-                                key={key}
-                                onMouseDown={(event) => event.preventDefault()}
-                                onMouseEnter={() => setActiveSuggestIndex(index)}
-                                onClick={() => {
-                                  applySuggestion(suggestion);
-                                }}
-                                className={`flex w-full items-start border-t px-4 py-3 text-left first:border-t-0 ${
-                                  isActive
-                                    ? "border-slate-200 bg-slate-100"
-                                    : "border-slate-200 bg-white hover:bg-slate-50"
-                                }`}
-                              >
-                                <span className="min-w-0">
-                                  <span className="block truncate text-base text-slate-800">
-                                    {title || inputValue}
-                                  </span>
-                                </span>
-                              </button>
-                              );
-                            })}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-3 flex justify-end">
+                    <div className="flex items-center rounded-xl border border-slate-300 bg-white px-4 py-3 transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                      <Search className="mr-3 h-5 w-5 text-slate-400" />
+                      <input
+                        ref={deliverySearchInputRef}
+                        value={deliveryCity}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            void applyLocationSearch(deliveryCity);
+                          }
+                        }}
+                        onChange={(event) => {
+                          setDeliveryCity(event.target.value);
+                        }}
+                        placeholder="Введите адрес или название ПВЗ"
+                        className="h-8 w-full border-0 bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-400"
+                      />
                       <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
                         onClick={() => {
                           void applyLocationSearch(deliveryCity);
                         }}
-                        className="btn-secondary py-2.5"
+                        className="ml-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 md:text-sm"
                       >
-                        Найти на карте
+                        Найти
                       </button>
+                      {deliveryCity.trim().length > 0 && (
+                        <button
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => {
+                            setDeliveryCity("");
+                            setMapCenterQuery(null);
+                            setDeliveryPoints([]);
+                            setSelectedPointId(null);
+                          }}
+                          className="ml-3 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                          aria-label="Очистить поиск"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="dashboard-chip-row mb-4">
-                    <button
-                      onClick={() => setSelectedProvider("all")}
-                      className={`dashboard-chip ${
-                        selectedProvider === "all" ? "dashboard-chip--active" : ""
-                      }`}
-                    >
-                      Все провайдеры
-                    </button>
-                    {providers.map((provider) => (
-                      <button
-                        key={provider.code}
-                        onClick={() => setSelectedProvider(provider.code)}
-                        className={`dashboard-chip ${
-                          selectedProvider === provider.code
-                            ? "dashboard-chip--active"
-                            : ""
-                        }`}
-                      >
-                        {provider.label}
-                      </button>
-                    ))}
                   </div>
 
                   <div className="h-[420px]">
@@ -555,68 +905,52 @@ export function CheckoutPage({
                       centerQuery={mapCenterQuery}
                       selectedMarkerId={selectedPointId}
                       onMarkerSelect={(marker) => {
-                        const point = deliveryPoints.find((item) => item.id === marker.id);
+                        const point = visibleDeliveryPoints.find(
+                          (item) => item.id === marker.id,
+                        );
                         if (!point) return;
                         setSelectedPointId(point.id);
-                        setPickupPoint(point.address);
                       }}
-                      onAddressSelect={(address) => {
-                        const formatted = [address.city, address.street, address.building]
-                          .filter(Boolean)
-                          .join(", ");
-                        const query = address.fullAddress || formatted || address.city || "";
-                        if (query) {
-                          setDeliveryCity(query);
-                          setMapCenterQuery(query);
-                          void loadDeliveryPoints(query);
-                        }
-                        setSelectedPointId(null);
-                        setPickupPoint(formatted || query);
-                      }}
+                      allowAddressSelect={false}
+                      onAddressSelect={() => {}}
                     />
                   </div>
 
-                  <div className="mt-4 space-y-2">
-                    {isPointsLoading && (
-                      <div className="text-sm text-gray-500">Загрузка ПВЗ...</div>
-                    )}
+                  <div className="mt-4 text-sm text-gray-500">
+                    {isPointsLoading && <div>Загрузка ПВЗ...</div>}
                     {!isPointsLoading &&
-                      filteredPoints.slice(0, 6).map((point) => (
-                        <button
-                          key={point.id}
-                          onClick={() => {
-                            setSelectedPointId(point.id);
-                            setPickupPoint(point.address);
-                          }}
-                          className={`w-full rounded-lg border p-3 text-left text-sm transition-colors ${
-                            selectedPointId === point.id
-                              ? "border-[rgb(38,83,141)] bg-blue-50"
-                              : "border-gray-200 bg-white hover:bg-gray-50"
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900">{point.name}</div>
-                          <div className="text-xs text-gray-600">
-                            {point.providerLabel} · {point.address}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {point.workHours} · {point.etaDays} дн. · {point.cost} ₽
-                          </div>
-                        </button>
-                      ))}
+                      visibleDeliveryPoints.length === 0 &&
+                      deliveryCity.trim().length === 0 && (
+                        <div>Введите адрес или название ПВЗ, чтобы загрузить метки на карте.</div>
+                      )}
+                    {!isPointsLoading &&
+                      visibleDeliveryPoints.length === 0 &&
+                      deliveryCity.trim().length > 0 && <div>По вашему запросу ПВЗ не найдены.</div>}
+                    {!isPointsLoading &&
+                      visibleDeliveryPoints.length > 0 &&
+                      !selectedPoint && (
+                      <div>Нажмите на метку на карте, чтобы выбрать конкретный ПВЗ.</div>
+                    )}
                   </div>
 
                   <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-                    {pickupPoint
-                      ? `Выбранный адрес/ПВЗ: ${pickupPoint}`
-                      : `ПВЗ еще не выбран. Будет использована заглушка: ${DELIVERY_PVZ_STUB}`}
+                    {selectedPoint
+                      ? `Выбранная точка (${selectedPoint.providerLabel}): ${selectedPoint.name} - ${selectedPoint.address}`
+                      : "ПВЗ еще не выбран. Выберите метку на карте."}
+                    {selectedPoint && (
+                      <div className="mt-1 text-xs text-gray-600">
+                        Город: {selectedPoint.city}. Режим работы:{" "}
+                        {selectedPoint.workHours || "По расписанию"}.
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl md:text-2xl text-gray-900 mb-4">Самовывоз</h2>
+                  <h2 className="mb-4 text-xl text-gray-900 md:text-2xl">Самовывоз</h2>
                   <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <div className="flex items-center gap-2 text-gray-900 mb-2">
-                      <MapPin className="w-4 h-4" />
+                    <div className="mb-2 flex items-center gap-2 text-gray-900">
+                      <MapPin className="h-4 w-4" />
                       <span className="font-medium">Вы выбрали самовывоз</span>
                     </div>
                     <p className="text-sm text-gray-600">
@@ -628,83 +962,59 @@ export function CheckoutPage({
               )}
             </div>
 
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200">
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-6">Способ оплаты</h2>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
+              <h2 className="mb-6 text-xl text-gray-900 md:text-2xl">Способ оплаты</h2>
 
-              <div className="space-y-3 mb-6">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod("card")}
-                  className={`w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center justify-between ${
+                  disabled={hasActivePayment}
+                  className={`rounded-xl border p-4 text-left transition ${
                     paymentMethod === "card"
                       ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:border-gray-400"
-                  }`}
+                      : "border-gray-200 hover:border-gray-300"
+                  } ${hasActivePayment ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm md:text-base text-gray-900">Оплата картой</span>
+                  <div className="mb-1 flex items-center gap-2 text-gray-900">
+                    <CreditCard className="h-4 w-4" />
+                    <span className="text-sm font-medium md:text-base">Банковская карта</span>
                   </div>
-                  {paymentMethod === "card" && (
-                    <div className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-600">Любая карта Мир</div>
                 </button>
 
                 <button
-                  onClick={() => setPaymentMethod("cash")}
-                  className={`w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center justify-between ${
-                    paymentMethod === "cash"
+                  type="button"
+                  onClick={() => setPaymentMethod("sbp")}
+                  disabled={hasActivePayment || !SBP_UI_ENABLED}
+                  className={`rounded-xl border p-4 text-left transition ${
+                    paymentMethod === "sbp"
                       ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:border-gray-400"
-                  }`}
+                      : "border-gray-200 hover:border-gray-300"
+                  } ${hasActivePayment || !SBP_UI_ENABLED ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  <span className="text-sm md:text-base text-gray-900">
-                    Наличными при получении
-                  </span>
-                  {paymentMethod === "cash" && (
-                    <div className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
+                  <div className="mb-1 flex items-center gap-2 text-gray-900">
+                    <QrCode className="h-4 w-4" />
+                    <span className="text-sm font-medium md:text-base">Система быстрых платежей</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Оплата по QR-коду через приложение банка</div>
                 </button>
               </div>
-
-              {paymentMethod === "card" && (
-                <div className="space-y-4 pt-6 border-t border-gray-200">
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                    <p className="font-medium text-gray-900 mb-2">
-                      Оплата через YooMoney (тестовый режим)
-                    </p>
-                    <p className="mb-2">
-                      После нажатия кнопки вы перейдете на защищенную страницу YooMoney для
-                      ввода данных карты.
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Тестовая карта: 5555 5555 5555 4477, срок 01/30, CVC 123.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
-          <div className="lg:sticky lg:top-32 h-fit">
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200">
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-6">Ваш заказ</h2>
+          <div className="h-fit lg:sticky lg:top-32">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
+              <h2 className="mb-6 text-xl text-gray-900 md:text-2xl">Ваш заказ</h2>
 
-              <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
-                {items.map((item) => (
+              <div className="mb-6 space-y-4 border-b border-gray-200 pb-6">
+                {summaryItems.map((item) => (
                   <div key={item.id} className="flex gap-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 mb-1 truncate">{item.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="mb-1 truncate text-sm text-gray-900">{item.title}</p>
                       <p className="text-xs text-gray-600">Количество: {item.quantity}</p>
                     </div>
                     <div className="text-sm text-gray-900">
@@ -714,45 +1024,78 @@ export function CheckoutPage({
                 ))}
               </div>
 
-              <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
+              <div className="mb-6 space-y-3 border-b border-gray-200 pb-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Подытог</span>
-                  <span className="text-gray-900">{subtotal.toLocaleString("ru-RU")} ₽</span>
+                  <span className="text-gray-900">{summarySubtotal.toLocaleString("ru-RU")} ₽</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">
                     {deliveryType === "delivery" ? "Доставка до ПВЗ" : "Самовывоз"}
                   </span>
                   <span className={deliveryType === "delivery" ? "text-gray-900" : "text-green-600"}>
-                    {shipping > 0 ? `${shipping.toLocaleString("ru-RU")} ₽` : "Бесплатно"}
+                    {summaryShipping > 0 ? `${summaryShipping.toLocaleString("ru-RU")} ₽` : "Бесплатно"}
                   </span>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mb-6">
+              <div className="mb-6 flex items-center justify-between">
                 <span className="text-lg text-gray-900">Итого</span>
-                <span className="text-2xl text-gray-900">{total.toLocaleString("ru-RU")} ₽</span>
+                <span className="text-2xl text-gray-900">{summaryTotal.toLocaleString("ru-RU")} ₽</span>
               </div>
 
               <div className="space-y-3">
                 <button
-                  onClick={() => void handlePlaceOrder()}
-                  disabled={isSubmitting}
+                  onClick={() => {
+                    if (hasActivePayment) {
+                      handleOpenPayment();
+                      return;
+                    }
+                    void handlePlaceOrder();
+                  }}
+                  disabled={isSubmitting || (!hasActivePayment && !canCheckoutWithSelectedPoint) || paymentIsPaid}
                   className="btn-primary w-full py-4 text-sm disabled:bg-gray-400 md:text-base"
                 >
                   {isSubmitting
                     ? "Оформляем..."
-                    : paymentMethod === "card"
-                      ? "Перейти к оплате YooMoney"
-                      : "Оформить заказ"}
+                    : paymentIsPaid
+                      ? "Оплата подтверждена"
+                      : hasActivePayment
+                        ? "Открыть страницу оплаты"
+                        : `Оплатить ${summaryTotal.toLocaleString("ru-RU")} ₽`}
                 </button>
-                <button
-                  onClick={onBack}
-                  className="btn-secondary w-full py-4 text-sm md:text-base"
-                >
-                  Вернуться в корзину
-                </button>
+                {!hasActivePayment && (
+                  <button onClick={onBack} className="btn-secondary w-full py-4 text-sm md:text-base">
+                    Вернуться в корзину
+                  </button>
+                )}
               </div>
+
+              {activePayment && paymentStatusMeta && (
+                <div className={`mt-4 rounded-xl border p-4 ${paymentStatusMeta.className}`}>
+                  <div className="text-sm font-semibold md:text-base">{paymentStatusMeta.title}</div>
+                  <div className="mt-1 text-xs md:text-sm">{paymentStatusMeta.description}</div>
+                  <div className="mt-3 space-y-1 text-xs md:text-sm">
+                    <div>
+                      Заказы: <span className="font-medium">{activePayment.orderIds.join(", ")}</span>
+                    </div>
+                    <div>
+                      Способ оплаты:{" "}
+                      <span className="font-medium">
+                        {activePayment.paymentMethod === "sbp" ? "СБП" : "Карта Мир"}
+                      </span>
+                    </div>
+                    <div>
+                      До отмены оплаты: <span className="font-medium">{formatCountdown(secondsLeft)}</span>
+                    </div>
+                  </div>
+
+                  {paymentStatusError && (
+                    <div className="mt-2 text-xs text-red-700">{paymentStatusError}</div>
+                  )}
+
+                </div>
+              )}
             </div>
           </div>
         </div>

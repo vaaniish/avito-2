@@ -193,38 +193,35 @@ function matchesFullText(input, query) {
     return toSearchText(input).includes(normalized);
 }
 function buildComplaintEvaluation(params) {
-    let score = 0;
+    let rawScore = 0;
     const reasons = [];
-    if (params.evidenceCount > 0) {
-        score += 25;
-        reasons.push("evidence_attached");
-    }
-    else {
-        reasons.push("no_evidence");
-    }
     if (params.sellerComplaintCount >= 5) {
-        score += 30;
+        rawScore += 30;
         reasons.push("seller_has_many_complaints");
     }
     else if (params.sellerComplaintCount >= 2) {
-        score += 15;
+        rawScore += 15;
         reasons.push("seller_has_repeat_complaints");
     }
     if (params.listingComplaintCount >= 3) {
-        score += 20;
+        rawScore += 20;
         reasons.push("listing_has_multiple_reports");
     }
     else if (params.listingComplaintCount >= 2) {
-        score += 10;
+        rawScore += 10;
         reasons.push("listing_has_repeat_reports");
     }
     const normalizedType = params.complaintType.toLowerCase();
     if (normalizedType.includes("вне") ||
         normalizedType.includes("platform") ||
         normalizedType.includes("payment")) {
-        score += 20;
+        rawScore += 20;
         reasons.push("high_risk_type_payment_off_platform");
     }
+    if (reasons.length === 0) {
+        reasons.push("insufficient_objective_signals");
+    }
+    const score = Math.round((rawScore / 70) * 100);
     const recommendation = score >= 60 ? "approve" : score <= 20 ? "reject" : "manual_review";
     return {
         score,
@@ -593,8 +590,6 @@ adminRouter.get("/complaints-legacy", async (req, res) => {
                 sellerListingsCount: complaint.seller._count.listings,
                 sellerOrdersCount: complaint.seller._count.orders_as_seller,
                 description: complaint.description,
-                evidence: complaint.evidence,
-                evidenceFiles: splitEvidenceFiles(complaint.evidence),
                 checkedAt: complaint.checked_at,
                 checkedBy: complaint.checked_by
                     ? {
@@ -628,7 +623,6 @@ adminRouter.get("/complaints-legacy", async (req, res) => {
                     : null,
                 evaluation: buildComplaintEvaluation({
                     complaintType: complaint.complaint_type,
-                    evidenceCount: splitEvidenceFiles(complaint.evidence).length,
                     listingComplaintCount: complaint.listing._count.complaints,
                     sellerComplaintCount: complaint.seller._count.complaints_against,
                 }),
@@ -1166,7 +1160,6 @@ async function mapComplaintsForAdmin(complaints) {
     return complaints.map((complaint) => {
         const evaluation = buildComplaintEvaluation({
             complaintType: complaint.complaint_type,
-            evidenceCount: splitEvidenceFiles(complaint.evidence).length,
             listingComplaintCount: complaint.listing._count.complaints,
             sellerComplaintCount: complaint.seller._count.complaints_against,
         });
@@ -1211,8 +1204,6 @@ async function mapComplaintsForAdmin(complaints) {
             sellerListingsCount: complaint.seller._count.listings,
             sellerOrdersCount: complaint.seller._count.orders_as_seller,
             description: complaint.description,
-            evidence: complaint.evidence,
-            evidenceFiles: splitEvidenceFiles(complaint.evidence),
             checkedAt: complaint.checked_at,
             checkedBy: complaint.checked_by
                 ? {

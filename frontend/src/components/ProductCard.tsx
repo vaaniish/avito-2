@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Star,
   Heart,
@@ -28,7 +28,7 @@ export function ProductCard({
   onAddToCart,
   onUpdateQuantity,
   cartQuantity = 0,
-  viewMode,
+  viewMode: _viewMode,
   displayMode = "grid",
   isWishlisted = false,
   onWishlistToggle,
@@ -53,133 +53,99 @@ export function ProductCard({
     onWishlistToggle?.(product.id, !isWishlisted);
   };
 
-  const displayPrice =
-    product.isSale && product.salePrice
-      ? product.salePrice
-      : product.price;
-
+  const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
   const discountPercent =
     product.isSale && product.salePrice
-      ? Math.round(
-          ((product.price - product.salePrice) /
-            product.price) *
-            100,
-        )
+      ? Math.round(((product.price - product.salePrice) / product.price) * 100)
       : 0;
 
   const city = product.city || "Не указан";
-  const reviewsCount = product.reviews?.length ?? 0;
+  const sellerReviewsCount = product.sellerReviewsCount ?? product.reviews?.length ?? 0;
+  const sellerRating = product.sellerRating ?? (sellerReviewsCount > 0 ? product.rating : 0);
+  const sellerRatingValue = sellerReviewsCount > 0 ? sellerRating.toFixed(1) : "—";
+  const sellerReviewsCountValue = Math.max(0, sellerReviewsCount);
 
-  // === LIST VIEW ===
   if (displayMode === "list") {
     return (
       <div
         onClick={onClick}
-        className="group relative bg-white rounded-xl overflow-hidden cursor-pointer transition-shadow duration-200 hover:shadow-lg border border-gray-200 p-4"
+        className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 transition-shadow duration-200 hover:shadow-lg"
       >
-        <div className="flex gap-4 items-start">
-          <div className="relative w-[220px] h-[220px] flex-shrink-0 overflow-hidden bg-gray-50 rounded-xl border border-gray-200">
+        <div className="flex items-start gap-4">
+          <div className="relative h-[220px] w-[220px] flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
             <img
               src={product.image}
               alt={product.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <button
               onClick={handleWishlist}
-              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-sm"
+              className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm"
               aria-label="wishlist"
             >
-              <Heart
-                className={`w-4 h-4 ${
-                  isWishlisted
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-600"
-                }`}
-              />
+              <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
             </button>
           </div>
 
-          <div className="flex-1 max-w-[500px] flex flex-col">
-            <h3 className="text-[18px] font-medium text-black line-clamp-1 leading-tight">
-              {product.title}
-            </h3>
+          <div className="flex max-w-[500px] flex-1 flex-col">
+            <h3 className="line-clamp-1 text-[18px] leading-tight text-black">{product.title}</h3>
 
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-[24px] font-bold text-black">
-                {displayPrice.toLocaleString("ru-RU")} ₽
-              </span>
+              <span className="text-[24px] font-bold text-black">{displayPrice.toLocaleString("ru-RU")} ₽</span>
 
-              {product.isSale &&
-                product.salePrice &&
-                discountPercent > 0 && (
-                  <>
-                    <span className="text-[13px] text-gray-400 line-through">
-                      {product.price.toLocaleString("ru-RU")} ₽
-                    </span>
-                    <span className="text-[13px] text-red-500 font-medium">
-                      -{discountPercent}%
-                    </span>
-                  </>
-                )}
+              {product.isSale && product.salePrice && discountPercent > 0 ? (
+                <>
+                  <span className="text-[13px] text-gray-400 line-through">{product.price.toLocaleString("ru-RU")} ₽</span>
+                  <span className="text-[13px] font-medium text-red-500">-{discountPercent}%</span>
+                </>
+              ) : null}
             </div>
 
             <div className="mt-3 flex items-center gap-2 text-[13px] text-[rgb(68,68,68)]">
-              <span>{product.seller}</span>
-              <span className="text-gray-300">·</span>
-              <div className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" />
+              <div className="flex min-w-0 items-center gap-1">
+                <span className="max-w-[240px] truncate">{product.seller}</span>
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="tabular-nums">{sellerRatingValue}</span>
+                <span className="tabular-nums text-gray-500">({sellerReviewsCountValue})</span>
+              </div>
+              <div className="flex items-center gap-1 text-gray-500">
+                <MapPin className="h-3.5 w-3.5" />
                 <span>{city}</span>
               </div>
             </div>
 
-            <p className="mt-2 text-[14px] text-[#888888] line-clamp-2">
-              {product.title}. Высокое качество, быстрая
-              доставка. Гарантия производителя.
+            <p className="mt-2 line-clamp-2 text-[14px] text-[#888888]">
+              {product.title}. Высокое качество, быстрая доставка. Гарантия производителя.
             </p>
-
-            <div className="mt-3 flex items-center gap-2 text-[rgb(68,68,68)]">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-[14px]">
-                {product.rating}
-              </span>
-              <span className="text-[14px]">
-                ({reviewsCount} отзывов)
-              </span>
-            </div>
           </div>
 
-          <div className="flex-shrink-0 w-[180px] ml-auto">
-            {/* FIXED CTA HEIGHT to avoid layout shifts */}
+          <div className="ml-auto w-[180px] flex-shrink-0">
             <div className="h-11">
               {cartQuantity > 0 ? (
-                <div className="h-full w-full flex items-center justify-between gap-2 bg-black rounded-xl px-2">
+                <div className="flex h-full w-full items-center justify-between gap-2 rounded-xl bg-black px-2">
                   <button
                     onClick={handleDecrement}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-800 transition-colors duration-200"
+                    className="flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-200 hover:bg-gray-800"
                     aria-label="decrement"
                   >
-                    <Minus className="w-4 h-4 text-white" />
+                    <Minus className="h-4 w-4 text-white" />
                   </button>
-                  <span className="text-white text-sm px-2">
-                    {cartQuantity}
-                  </span>
+                  <span className="px-2 text-sm text-white">{cartQuantity}</span>
                   <button
                     onClick={handleIncrement}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-800 transition-colors duration-200"
+                    className="flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-200 hover:bg-gray-800"
                     aria-label="increment"
                   >
-                    <Plus className="w-4 h-4 text-white" />
+                    <Plus className="h-4 w-4 text-white" />
                   </button>
                 </div>
               ) : (
                 <GlowButton
                   onClick={handleAddToCart}
-                  className="relative h-full w-full rounded-xl overflow-hidden bg-[rgb(38,83,141)] text-white flex items-center justify-center gap-1.5 text-[15px]"
+                  className="relative flex h-full w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-[rgb(38,83,141)] text-[15px] text-white"
                 >
-                  <ShoppingCart className="w-4 h-4 relative z-10" />
-                  <span className="relative z-10">
-                    В Корзину
-                  </span>
+                  <ShoppingCart className="relative z-10 h-4 w-4" />
+                  <span className="relative z-10">В Корзину</span>
                 </GlowButton>
               )}
             </div>
@@ -189,104 +155,81 @@ export function ProductCard({
     );
   }
 
-  // === GRID VIEW ===
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white rounded-xl overflow-hidden cursor-pointer transition-shadow duration-200 hover:shadow-lg border border-gray-200"
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow duration-200 hover:shadow-lg"
     >
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
           src={product.image}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute top-2 right-2">
+        <div className="absolute right-2 top-2">
           <button
             onClick={handleWishlist}
-            className="w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-sm"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm"
             aria-label="wishlist"
           >
-            <Heart
-              className={`w-4 h-4 ${
-                isWishlisted
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-600"
-              }`}
-            />
+            <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
           </button>
         </div>
       </div>
 
       <div className="flex flex-col p-2">
-        <h3 className="text-[17px] font-semibold text-black line-clamp-2 h-14">
-          {product.title}
-        </h3>
+        <h3 className="h-14 line-clamp-2 text-[17px] font-semibold text-black">{product.title}</h3>
 
         <div className="flex-grow" />
 
         <div className="mt-2">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[22px] font-bold text-black">
-              {displayPrice.toLocaleString("ru-RU")} ₽
-            </span>
-            {product.isSale &&
-              product.salePrice &&
-              discountPercent > 0 && (
-                <>
-                  <span className="text-xs text-gray-400 line-through">
-                    {product.price.toLocaleString("ru-RU")} ₽
-                  </span>
-                  <span className="text-xs text-red-500">
-                    -{discountPercent}%
-                  </span>
-                </>
-              )}
+            <span className="text-[22px] font-bold text-black">{displayPrice.toLocaleString("ru-RU")} ₽</span>
+            {product.isSale && product.salePrice && discountPercent > 0 ? (
+              <>
+                <span className="text-xs text-gray-400 line-through">{product.price.toLocaleString("ru-RU")} ₽</span>
+                <span className="text-xs text-red-500">-{discountPercent}%</span>
+              </>
+            ) : null}
           </div>
 
-          <div className="mt-1 flex items-center gap-1 text-[13px] text-[rgb(68,68,68)]">
-            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-            <span>{product.rating}</span>
-            <span>({reviewsCount} отзывов)</span>
+          <div className="mt-1 flex min-w-0 items-center gap-1 text-[12px] text-[rgb(68,68,68)]">
+            <span className="max-w-[62%] truncate">{product.seller}</span>
+            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+            <span className="tabular-nums">{sellerRatingValue}</span>
+            <span className="tabular-nums text-gray-500">({sellerReviewsCountValue})</span>
           </div>
 
-          <div className="text-[12px] text-[rgb(68,68,68)] mt-1">
-            {product.seller}
-          </div>
-
-          <div className="flex items-center gap-1 text-[12px] text-[rgb(119,119,119)] mt-1 mb-2">
-            <MapPin className="w-3.5 h-3.5" />
+          <div className="mb-2 mt-1 flex items-center gap-1 text-[12px] text-[rgb(119,119,119)]">
+            <MapPin className="h-3.5 w-3.5" />
             <span>{city}</span>
           </div>
 
-          {/* FIXED CTA HEIGHT */}
           <div className="h-11">
             {cartQuantity > 0 ? (
-              <div className="h-full w-full flex items-center justify-between gap-2 bg-[rgb(38,83,141)] rounded-[12px] px-2">
+              <div className="flex h-full w-full items-center justify-between gap-2 rounded-[12px] bg-[rgb(38,83,141)] px-2">
                 <button
                   onClick={handleDecrement}
-                  className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[rgba(255,255,255,0.2)] transition-colors duration-200"
+                  className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
                   aria-label="decrement"
                 >
-                  <Minus className="w-3.5 h-3.5 text-white" />
+                  <Minus className="h-3.5 w-3.5 text-white" />
                 </button>
-                <span className="text-white text-[16px] text-center min-w-[2rem]">
-                  В корзине: {cartQuantity}
-                </span>
+                <span className="min-w-[2rem] text-center text-[16px] text-white">В корзине: {cartQuantity}</span>
                 <button
                   onClick={handleIncrement}
-                  className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[rgba(255,255,255,0.2)] transition-colors duration-200"
+                  className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
                   aria-label="increment"
                 >
-                  <Plus className="w-3.5 h-3.5 text-white" />
+                  <Plus className="h-3.5 w-3.5 text-white" />
                 </button>
               </div>
             ) : (
               <GlowButton
                 onClick={handleAddToCart}
-                className="h-full w-full rounded-[12px] bg-[rgb(38,83,141)] text-white text-[16px]"
+                className="h-full w-full rounded-[12px] bg-[rgb(38,83,141)] text-[16px] text-white"
               >
-                <ShoppingCart className="w-3.5 h-3.5" />
+                <ShoppingCart className="h-3.5 w-3.5" />
                 <span>В Корзину</span>
               </GlowButton>
             )}

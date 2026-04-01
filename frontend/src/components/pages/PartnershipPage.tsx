@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { ArrowLeft, Building, User, CheckCircle } from 'lucide-react';
 
 interface PartnershipPageProps {
@@ -50,21 +50,21 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
 
   return (
     <div className="min-h-screen app-shell">
-      <div className="page-container pb-12 pt-[calc(var(--header-height,84px)+1.1rem)] sm:pb-16">
+      <div className="page-container pb-12 pt-6 md:pt-8 sm:pb-16">
         {/* Back Button */}
         <button
           onClick={onBack}
           className="back-link mb-7 text-sm sm:text-base"
         >
           <ArrowLeft className="w-6 h-6" />
-          Назад
+          РќР°Р·Р°Рґ
         </button>
 
         {/* Header */}
         <div className="content-page text-center mb-10 sm:mb-12">
-          <h1 className="text-3xl sm:text-5xl text-gray-900 mb-6">Партнёрство</h1>
+          <h1 className="text-3xl sm:text-5xl text-gray-900 mb-6">РџР°СЂС‚РЅС‘СЂСЃС‚РІРѕ</h1>
           <p className="text-lg sm:text-2xl text-gray-600">
-            Станьте частью экосистемы качественной торговли
+            РЎС‚Р°РЅСЊС‚Рµ С‡Р°СЃС‚СЊСЋ СЌРєРѕСЃРёСЃС‚РµРјС‹ РєР°С‡РµСЃС‚РІРµРЅРЅРѕР№ С‚РѕСЂРіРѕРІР»Рё
           </p>
         </div>
 
@@ -73,49 +73,49 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Question 1 */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">Кому можно?</h2>
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">РљРѕРјСѓ РјРѕР¶РЅРѕ?</h2>
               <ul className="space-y-3 text-sm sm:text-lg text-gray-700">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Бренды
+                  Р‘СЂРµРЅРґС‹
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Магазины
+                  РњР°РіР°Р·РёРЅС‹
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Доверенные частные продавцы
+                  Р”РѕРІРµСЂРµРЅРЅС‹Рµ С‡Р°СЃС‚РЅС‹Рµ РїСЂРѕРґР°РІС†С‹
                 </li>
               </ul>
             </div>
 
             {/* Question 2 */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">Что вы получаете?</h2>
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">Р§С‚Рѕ РІС‹ РїРѕР»СѓС‡Р°РµС‚Рµ?</h2>
               <ul className="space-y-3 text-sm sm:text-lg text-gray-700">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Платёжеспособную аудиторию
+                  РџР»Р°С‚С‘Р¶РµСЃРїРѕСЃРѕР±РЅСѓСЋ Р°СѓРґРёС‚РѕСЂРёСЋ
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Доверие покупателей
+                  Р”РѕРІРµСЂРёРµ РїРѕРєСѓРїР°С‚РµР»РµР№
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
-                  Отсутствие мусора
+                  РћС‚СЃСѓС‚СЃС‚РІРёРµ РјСѓСЃРѕСЂР°
                 </li>
               </ul>
             </div>
 
             {/* Question 3 */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">Как войти?</h2>
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-4">РљР°Рє РІРѕР№С‚Рё?</h2>
               <ol className="space-y-3 text-sm sm:text-lg text-gray-700 list-decimal list-inside">
-                <li>Заполните заявку</li>
-                <li>Пройдите проверку</li>
-                <li>Получите доступ</li>
+                <li>Р—Р°РїРѕР»РЅРёС‚Рµ Р·Р°СЏРІРєСѓ</li>
+                <li>РџСЂРѕР№РґРёС‚Рµ РїСЂРѕРІРµСЂРєСѓ</li>
+                <li>РџРѕР»СѓС‡РёС‚Рµ РґРѕСЃС‚СѓРї</li>
               </ol>
             </div>
           </div>
@@ -124,19 +124,19 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
         {/* Application Form */}
         <div className="content-page">
           <div className="bg-gray-50 rounded-2xl p-8 sm:p-12 border border-gray-200">
-            <h2 className="text-2xl sm:text-4xl text-gray-900 mb-8 text-center">Форма заявки</h2>
+            <h2 className="text-2xl sm:text-4xl text-gray-900 mb-8 text-center">Р¤РѕСЂРјР° Р·Р°СЏРІРєРё</h2>
             
             {submitted ? (
               <div className="text-center py-12">
                 <CheckCircle className="w-16 h-16 text-gray-900 mx-auto mb-4" />
-                <h3 className="text-2xl sm:text-3xl text-gray-900 mb-2">Заявка отправлена!</h3>
-                <p className="text-base sm:text-xl text-gray-600">Мы свяжемся с вами в ближайшее время</p>
+                <h3 className="text-2xl sm:text-3xl text-gray-900 mb-2">Р—Р°СЏРІРєР° РѕС‚РїСЂР°РІР»РµРЅР°!</h3>
+                <p className="text-base sm:text-xl text-gray-600">РњС‹ СЃРІСЏР¶РµРјСЃСЏ СЃ РІР°РјРё РІ Р±Р»РёР¶Р°Р№С€РµРµ РІСЂРµРјСЏ</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Seller Type */}
                 <div>
-                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">Тип продавца *</label>
+                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">РўРёРї РїСЂРѕРґР°РІС†Р° *</label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
@@ -148,7 +148,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                       }`}
                     >
                       <Building className="w-6 h-6" />
-                      <span className="text-sm sm:text-lg">Компания</span>
+                      <span className="text-sm sm:text-lg">РљРѕРјРїР°РЅРёСЏ</span>
                     </button>
                     <button
                       type="button"
@@ -160,7 +160,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                       }`}
                     >
                       <User className="w-6 h-6" />
-                      <span className="text-sm sm:text-lg">Частное лицо</span>
+                      <span className="text-sm sm:text-lg">Р§Р°СЃС‚РЅРѕРµ Р»РёС†Рѕ</span>
                     </button>
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                 {/* Name */}
                 <div>
                   <label className="block text-sm sm:text-lg text-gray-900 mb-3">
-                    {formData.sellerType === 'company' ? 'Название компании *' : 'Ваше имя *'}
+                    {formData.sellerType === 'company' ? 'РќР°Р·РІР°РЅРёРµ РєРѕРјРїР°РЅРёРё *' : 'Р’Р°С€Рµ РёРјСЏ *'}
                   </label>
                   <input
                     type="text"
@@ -176,7 +176,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg"
-                    placeholder={formData.sellerType === 'company' ? 'ООО "Пример"' : 'Иван Петров'}
+                    placeholder={formData.sellerType === 'company' ? 'РћРћРћ "РџСЂРёРјРµСЂ"' : 'РРІР°РЅ РџРµС‚СЂРѕРІ'}
                   />
                 </div>
 
@@ -195,21 +195,21 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
 
                 {/* Contact */}
                 <div>
-                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">Телефон / Telegram *</label>
+                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">РўРµР»РµС„РѕРЅ / Telegram *</label>
                   <input
                     type="text"
                     required
                     value={formData.contact}
                     onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                     className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg"
-                    placeholder="+7 900 123-45-67 или @username"
+                    placeholder="+7 900 123-45-67 РёР»Рё @username"
                   />
                 </div>
 
                 {/* Link */}
                 <div>
                   <label className="block text-sm sm:text-lg text-gray-900 mb-3">
-                    Ссылка на сайт / соцсеть / маркетплейс *
+                    РЎСЃС‹Р»РєР° РЅР° СЃР°Р№С‚ / СЃРѕС†СЃРµС‚СЊ / РјР°СЂРєРµС‚РїР»РµР№СЃ *
                   </label>
                   <input
                     type="url"
@@ -223,21 +223,21 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">Категория товаров *</label>
+                  <label className="block text-sm sm:text-lg text-gray-900 mb-3">РљР°С‚РµРіРѕСЂРёСЏ С‚РѕРІР°СЂРѕРІ *</label>
                   <select
                     required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg"
                   >
-                    <option value="">Выберите категорию</option>
-                    <option value="Электроника">Электроника</option>
-                    <option value="Одежда">Одежда и обувь</option>
-                    <option value="Мебель">Мебель и интерьер</option>
-                    <option value="Красота">Красота и здоровье</option>
-                    <option value="Спорт">Спорт и отдых</option>
-                    <option value="Услуги">Услуги</option>
-                    <option value="Другое">Другое</option>
+                    <option value="">Р’С‹Р±РµСЂРёС‚Рµ РєР°С‚РµРіРѕСЂРёСЋ</option>
+                    <option value="Р­Р»РµРєС‚СЂРѕРЅРёРєР°">Р­Р»РµРєС‚СЂРѕРЅРёРєР°</option>
+                    <option value="РћРґРµР¶РґР°">РћРґРµР¶РґР° Рё РѕР±СѓРІСЊ</option>
+                    <option value="РњРµР±РµР»СЊ">РњРµР±РµР»СЊ Рё РёРЅС‚РµСЂСЊРµСЂ</option>
+                    <option value="РљСЂР°СЃРѕС‚Р°">РљСЂР°СЃРѕС‚Р° Рё Р·РґРѕСЂРѕРІСЊРµ</option>
+                    <option value="РЎРїРѕСЂС‚">РЎРїРѕСЂС‚ Рё РѕС‚РґС‹С…</option>
+                    <option value="РЈСЃР»СѓРіРё">РЈСЃР»СѓРіРё</option>
+                    <option value="Р”СЂСѓРіРѕРµ">Р”СЂСѓРіРѕРµ</option>
                   </select>
                 </div>
 
@@ -245,7 +245,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                 {formData.sellerType === 'company' && (
                   <>
                     <div>
-                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">ИНН / Рег. номер (опционально)</label>
+                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">РРќРќ / Р РµРі. РЅРѕРјРµСЂ (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)</label>
                       <input
                         type="text"
                         value={formData.inn}
@@ -256,13 +256,13 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                     </div>
 
                     <div>
-                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">География работы</label>
+                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">Р“РµРѕРіСЂР°С„РёСЏ СЂР°Р±РѕС‚С‹</label>
                       <input
                         type="text"
                         value={formData.geography}
                         onChange={(e) => setFormData({ ...formData, geography: e.target.value })}
                         className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg"
-                        placeholder="Москва и область / Вся Россия"
+                        placeholder="РњРѕСЃРєРІР° Рё РѕР±Р»Р°СЃС‚СЊ / Р’СЃСЏ Р РѕСЃСЃРёСЏ"
                       />
                     </div>
                   </>
@@ -272,7 +272,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                 {formData.sellerType === 'private' && (
                   <>
                     <div>
-                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">Ссылка на соцсеть с историей *</label>
+                      <label className="block text-sm sm:text-lg text-gray-900 mb-3">РЎСЃС‹Р»РєР° РЅР° СЃРѕС†СЃРµС‚СЊ СЃ РёСЃС‚РѕСЂРёРµР№ *</label>
                       <input
                         type="url"
                         required={formData.sellerType === 'private'}
@@ -285,7 +285,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
 
                     <div>
                       <label className="block text-sm sm:text-lg text-gray-900 mb-3">
-                        Чем вы известны / почему вам можно доверять? *
+                        Р§РµРј РІС‹ РёР·РІРµСЃС‚РЅС‹ / РїРѕС‡РµРјСѓ РІР°Рј РјРѕР¶РЅРѕ РґРѕРІРµСЂСЏС‚СЊ? *
                       </label>
                       <textarea
                         required={formData.sellerType === 'private'}
@@ -293,7 +293,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                         onChange={(e) => setFormData({ ...formData, credibility: e.target.value })}
                         rows={4}
                         className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg resize-none"
-                        placeholder="Расскажите о себе и своей репутации..."
+                        placeholder="Р Р°СЃСЃРєР°Р¶РёС‚Рµ Рѕ СЃРµР±Рµ Рё СЃРІРѕРµР№ СЂРµРїСѓС‚Р°С†РёРё..."
                       />
                     </div>
                   </>
@@ -302,7 +302,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                 {/* Golden Question */}
                 <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-300">
                   <label className="block text-sm sm:text-lg text-gray-900 mb-3">
-                    ⭐ Почему вы хотите продавать именно у нас? *
+                    в­ђ РџРѕС‡РµРјСѓ РІС‹ С…РѕС‚РёС‚Рµ РїСЂРѕРґР°РІР°С‚СЊ РёРјРµРЅРЅРѕ Сѓ РЅР°СЃ? *
                   </label>
                   <textarea
                     required
@@ -310,7 +310,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                     onChange={(e) => setFormData({ ...formData, whyUs: e.target.value })}
                     rows={4}
                     className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm sm:text-lg resize-none"
-                    placeholder="Поделитесь вашей мотивацией..."
+                    placeholder="РџРѕРґРµР»РёС‚РµСЃСЊ РІР°С€РµР№ РјРѕС‚РёРІР°С†РёРµР№..."
                   />
                 </div>
 
@@ -319,11 +319,11 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                   type="submit"
                   className="w-full py-5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 text-base sm:text-xl"
                 >
-                  Отправить заявку
+                  РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІРєСѓ
                 </button>
 
                 <p className="text-gray-500 text-center text-sm">
-                  * — обязательные поля
+                  * вЂ” РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ
                 </p>
               </form>
             )}

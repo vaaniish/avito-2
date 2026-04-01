@@ -36,6 +36,7 @@ type PartnerOrder = {
   tracking_number: string | null;
   tracking_url: string | null;
   delivery_ext_status: string | null;
+  delivery_address: string | null;
   items: Array<{
     id: string;
     name: string;
@@ -50,7 +51,6 @@ type StatusMeta = {
   icon: typeof Clock;
 };
 
-const DELIVERY_PROVIDER_RUSSIAN_POST = "russian_post";
 const FILTER_STATUSES: OrderStatus[] = [
   "CREATED",
   "PREPARED",
@@ -79,9 +79,53 @@ function canMarkPrepared(order: PartnerOrder): boolean {
   return order.status === "CREATED" || order.status === "PAID";
 }
 
-function canApplyTracking(order: PartnerOrder): boolean {
-  if (order.delivery_type !== "delivery") return false;
-  return order.status !== "CANCELLED" && order.status !== "COMPLETED";
+function formatExternalDeliveryStatus(value: string | null): string {
+  if (!value) return "Оформлено, ожидает передачу в ПВЗ";
+
+  const key = value.trim().toUpperCase();
+  const labels: Record<string, string> = {
+    DRAFT: "Черновик",
+    VALIDATING: "Проверка заявки",
+    VALIDATING_ERROR: "Ошибка проверки заявки",
+    CREATED: "Оформлено, ожидает передачу в ПВЗ",
+    DELIVERY_PROCESSING_STARTED: "Заявка обрабатывается",
+    DELIVERY_TRACK_RECIEVED: "Трек сформирован",
+    SORTING_CENTER_PROCESSING_STARTED: "В сортировочном центре",
+    SORTING_CENTER_TRACK_RECEIVED: "Обработано сортировочным центром",
+    SORTING_CENTER_TRACK_LOADED: "Подготовлено к отгрузке",
+    DELIVERY_LOADED: "Добавлено в отгрузку",
+    SORTING_CENTER_LOADED: "Подтверждено сортировочным центром",
+    SORTING_CENTER_AT_START: "Принято в точке отправки",
+    SORTING_CENTER_PREPARED: "Готово к передаче в доставку",
+    SORTING_CENTER_TRANSMITTED: "В пути до города получателя",
+    DELIVERY_AT_START: "В городе получателя",
+    DELIVERY_AT_START_SORT: "Сортировка в городе получателя",
+    DELIVERY_TRANSPORTATION: "В пути до ПВЗ",
+    DELIVERY_TRANSPORTATION_RECIPIENT: "В пути до получателя",
+    DELIVERY_ARRIVED_PICKUP_POINT: "Доставлен в ПВЗ",
+    DELIVERY_STORAGE_PERIOD_EXTENDED: "Срок хранения продлен",
+    DELIVERY_STORAGE_PERIOD_EXPIRED: "Срок хранения истек",
+    CONFIRMATION_CODE_RECEIVED: "Код подтверждения получен",
+    DELIVERY_TRANSMITTED_TO_RECIPIENT: "Выдан получателю",
+    DELIVERY_DELIVERED: "Доставка завершена",
+    FINISHED: "Подтверждено",
+    CANCELLED: "Отменено",
+  };
+
+  return labels[key] ?? value;
+}
+
+function stripPickupPointTag(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.replace(/\s*\[PICKUP_ID:[^\]]+\]\s*/giu, "").trim();
+}
+
+function formatPickupPointLabel(order: PartnerOrder): string {
+  const cleanAddress = stripPickupPointTag(order.delivery_address);
+  if (cleanAddress) return cleanAddress;
+  if (order.tracking_provider === "russian_post") return "Отделение Почты России";
+  if (order.tracking_provider === "yandex_pvz") return "ПВЗ Яндекса";
+  return "Пункт выдачи уточняется";
 }
 
 export function PartnerOrdersPage() {
@@ -89,8 +133,6 @@ export function PartnerOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [trackingDrafts, setTrackingDrafts] = useState<Record<string, string>>({});
-  const [applyingTracking, setApplyingTracking] = useState<Record<string, boolean>>({});
   const [preparingOrderId, setPreparingOrderId] = useState<string | null>(null);
   const [prepareDialogOrderId, setPrepareDialogOrderId] = useState<string | null>(null);
   const [notices, setNotices] = useState<AppNotice[]>([]);
@@ -107,32 +149,27 @@ export function PartnerOrdersPage() {
     setNotices((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  const loadOrders = useCallback(async (silent = false) => {
-    if (!silent) {
-      setIsLoading(true);
-    }
-    try {
-      const result = await apiGet<PartnerOrder[]>("/partner/orders");
-      setOrders(result);
-      setTrackingDrafts((prev) => {
-        const next = { ...prev };
-        for (const order of result) {
-          if (order.tracking_number) {
-            next[order.id] = order.tracking_number;
-          } else if (!(order.id in next)) {
-            next[order.id] = "";
-          }
-        }
-        return next;
-      });
-    } catch (error) {
-      showNotice(error instanceof Error ? error.message : "Не удалось загрузить заказы", "error");
-    } finally {
+  const loadOrders = useCallback(
+    async (silent = false) => {
       if (!silent) {
-        setIsLoading(false);
+        setIsLoading(true);
       }
-    }
-  }, [showNotice]);
+      try {
+        const result = await apiGet<PartnerOrder[]>("/partner/orders");
+        setOrders(result);
+      } catch (error) {
+        showNotice(
+          error instanceof Error ? error.message : "Не удалось загрузить заказы",
+          "error",
+        );
+      } finally {
+        if (!silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [showNotice],
+  );
 
   useEffect(() => {
     void loadOrders();
@@ -182,36 +219,13 @@ export function PartnerOrdersPage() {
       showNotice(`Заказ ${target.id} отмечен как подготовленный`, "success");
       await loadOrders(true);
     } catch (error) {
-      showNotice(error instanceof Error ? error.message : "Не удалось изменить статус заказа", "error");
+      showNotice(
+        error instanceof Error ? error.message : "Не удалось изменить статус заказа",
+        "error",
+      );
     } finally {
       setPreparingOrderId(null);
       setPrepareDialogOrderId(null);
-    }
-  };
-
-  const applyTracking = async (orderId: string) => {
-    const order = orders.find((item) => item.id === orderId);
-    if (!order) return;
-    if (!canApplyTracking(order)) return;
-
-    const trackingNumber = (trackingDrafts[orderId] ?? "").trim();
-    if (!trackingNumber) {
-      showNotice("Введите трек-номер", "info");
-      return;
-    }
-
-    setApplyingTracking((prev) => ({ ...prev, [orderId]: true }));
-    try {
-      await apiPatch<{ success: boolean }>(`/partner/orders/${orderId}/tracking`, {
-        provider: DELIVERY_PROVIDER_RUSSIAN_POST,
-        tracking_number: trackingNumber,
-      });
-      showNotice(`Трек-номер применён для заказа ${orderId}`, "success");
-      await loadOrders(true);
-    } catch (error) {
-      showNotice(error instanceof Error ? error.message : "Не удалось применить трек-номер", "error");
-    } finally {
-      setApplyingTracking((prev) => ({ ...prev, [orderId]: false }));
     }
   };
 
@@ -288,9 +302,6 @@ export function PartnerOrdersPage() {
           {filteredOrders.map((order) => {
             const statusMeta = getStatusMeta(order.status);
             const StatusIcon = statusMeta.icon;
-            const trackingDraft = trackingDrafts[order.id] ?? "";
-            const isTrackingApplying = Boolean(applyingTracking[order.id]);
-            const trackingEditable = canApplyTracking(order);
             const preparedButtonDisabled =
               order.status === "PREPARED" || !canMarkPrepared(order) || preparingOrderId === order.id;
             const preparedButtonHint =
@@ -307,8 +318,7 @@ export function PartnerOrdersPage() {
                     <div className="font-semibold text-gray-900">{order.id}</div>
                     <div className="text-sm text-gray-600">Покупатель: {order.buyer_name}</div>
                     <div className="text-xs text-gray-500">
-                      {new Date(order.created_at).toLocaleString("ru-RU")} •{" "}
-                      {order.delivery_type === "pickup" ? "Самовывоз" : "Доставка"}
+                      {new Date(order.created_at).toLocaleString("ru-RU")} • ПВЗ
                     </div>
                     <div className="mt-1 text-sm text-gray-700 break-words">
                       {order.items.map((item) => `${item.name} x${item.quantity}`).join(", ")}
@@ -370,47 +380,44 @@ export function PartnerOrdersPage() {
                         Для самовывоза трек-номер не требуется.
                       </p>
                     ) : (
-                      <>
-                        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                          <input
-                            value={trackingDraft}
-                            onChange={(event) =>
-                              setTrackingDrafts((prev) => ({
-                                ...prev,
-                                [order.id]: event.target.value,
-                              }))
-                            }
-                            disabled={!trackingEditable || isTrackingApplying}
-                            placeholder="Введите трек-номер"
-                            className="field-control py-2 text-sm sm:flex-1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => void applyTracking(order.id)}
-                            disabled={!trackingEditable || isTrackingApplying}
-                            className="btn-secondary inline-flex items-center justify-center gap-2 px-4 py-2 text-sm disabled:opacity-60"
+                      <div className="mt-2 space-y-2 text-sm">
+                        {order.tracking_number ? (
+                          <p className="text-slate-700">
+                            Текущий трек: <span className="font-medium">{order.tracking_number}</span>
+                          </p>
+                        ) : (
+                          <p className="text-slate-600">
+                            Трек-номер формируется автоматически после подтверждения оплаты.
+                          </p>
+                        )}
+
+                        <p className="text-slate-600">
+                          Пункт выдачи:{" "}
+                          <span className="font-medium text-slate-700">
+                            {formatPickupPointLabel(order)}
+                          </span>
+                        </p>
+                        {order.delivery_ext_status && (
+                          <p className="text-slate-600">
+                            Статус логистики:{" "}
+                            <span className="font-medium text-slate-700">
+                              {formatExternalDeliveryStatus(order.delivery_ext_status)}
+                            </span>
+                          </p>
+                        )}
+
+                        {order.tracking_url && (
+                          <a
+                            href={order.tracking_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-800"
                           >
-                            {isTrackingApplying && <Loader2 className="h-4 w-4 animate-spin" />}
-                            Применить
-                          </button>
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                          {order.tracking_number && (
-                            <span className="font-medium text-slate-700">Текущий трек: {order.tracking_number}</span>
-                          )}
-                          {order.tracking_url && (
-                            <a
-                              href={order.tracking_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-800"
-                            >
-                              Отследить
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          )}
-                        </div>
-                      </>
+                            Отследить
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </section>
                 </div>

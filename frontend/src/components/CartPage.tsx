@@ -13,9 +13,7 @@ export function CartPage({
   onUpdateQuantity,
   onCheckout,
 }: CartPageProps) {
-  const [shippingMethod, setShippingMethod] = useState<
-    "delivery" | "pickup"
-  >("delivery");
+  const shippingMethod: "delivery" = "delivery";
   const [couponCode, setCouponCode] = useState("");
   const [editingQuantities, setEditingQuantities] = useState<{
     [key: string]: string;
@@ -91,12 +89,7 @@ export function CartPage({
     0,
   );
 
-  const shippingCosts = {
-    delivery: 500,
-    pickup: 0,
-  };
-
-  const shippingCost = shippingCosts[shippingMethod];
+  const shippingCost = 500;
   const total = subtotal + shippingCost;
 
   const handleApplyCoupon = () => {
@@ -422,43 +415,21 @@ export function CartPage({
 
                 {/* Shipping Options */}
                 <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-200">
-                  <label className="flex items-center justify-between p-3 md:p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-colors">
+                  <label className="flex items-center justify-between p-3 md:p-4 border border-gray-900 rounded-xl bg-gray-50">
                     <div className="flex items-center gap-3">
                       <input
                         type="radio"
                         name="shipping"
-                        checked={shippingMethod === "delivery"}
-                        onChange={() =>
-                          setShippingMethod("delivery")
-                        }
+                        checked
+                        readOnly
                         className="w-4 h-4 md:w-5 md:h-5 accent-gray-900"
                       />
                       <span className="text-sm md:text-base">
-                        Доставка до ПВЗ платформы
+                        Самовывоз из ПВЗ Яндекса
                       </span>
                     </div>
                     <span className="text-sm md:text-base">
                       +500 ₽
-                    </span>
-                  </label>
-
-                  <label className="flex items-center justify-between p-3 md:p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="shipping"
-                        checked={shippingMethod === "pickup"}
-                        onChange={() =>
-                          setShippingMethod("pickup")
-                        }
-                        className="w-4 h-4 md:w-5 md:h-5 accent-gray-900"
-                      />
-                      <span className="text-sm md:text-base">
-                        Самовывоз
-                      </span>
-                    </div>
-                    <span className="text-sm md:text-base">
-                      0 ₽
                     </span>
                   </label>
                 </div>

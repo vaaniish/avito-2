@@ -18,7 +18,6 @@ const FALLBACK_LISTING_IMAGE =
 const COMPLAINT_RATE_LIMIT_PER_HOUR = 20;
 const COMPLAINT_DEDUP_WINDOW_MINUTES = 45;
 const MAX_COMPLAINT_DESCRIPTION_LENGTH = 3000;
-const MAX_COMPLAINT_EVIDENCE_FILES = 10;
 
 const CP1251_SPECIAL_CHAR_TO_BYTE: Record<number, number> = {
   0x0402: 0x80,
@@ -173,25 +172,6 @@ function makeComplaintEventPublicId(): string {
   return `CME-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 }
 
-function normalizeEvidenceFiles(raw: unknown): string[] {
-  if (typeof raw === "string") {
-    return raw
-      .split(/[,\n;|]/g)
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .slice(0, MAX_COMPLAINT_EVIDENCE_FILES);
-  }
-
-  if (Array.isArray(raw)) {
-    return raw
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter(Boolean)
-      .slice(0, MAX_COMPLAINT_EVIDENCE_FILES);
-  }
-
-  return [];
-}
-
 function listingCategoryName(
   listing: MarketplaceListing & {
     item: (CatalogItem & {
@@ -237,6 +217,117 @@ function listingSpecifications(
 
 function extractSellerCity(seller: { addresses: Array<{ city: string }> }): string {
   return seller.addresses[0]?.city?.trim() ?? "";
+}
+
+type SellerReviewMetrics = {
+  rating: number;
+  reviewsCount: number;
+};
+
+async function loadSellerReviewMetrics(
+  sellerIds: number[],
+): Promise<Map<number, SellerReviewMetrics>> {
+  const map = new Map<number, SellerReviewMetrics>();
+  const uniqueSellerIds = Array.from(new Set(sellerIds));
+  if (uniqueSellerIds.length === 0) return map;
+
+  const rows = await prisma.listingReview.findMany({
+    where: {
+      listing: {
+        seller_id: {
+          in: uniqueSellerIds,
+        },
+      },
+    },
+    select: {
+      rating: true,
+      listing: {
+        select: {
+          seller_id: true,
+        },
+      },
+    },
+  });
+
+  const totals = new Map<number, { sum: number; count: number }>();
+  for (const row of rows) {
+    const key = row.listing.seller_id;
+    const current = totals.get(key) ?? { sum: 0, count: 0 };
+    current.sum += row.rating;
+    current.count += 1;
+    totals.set(key, current);
+  }
+
+  for (const sellerId of uniqueSellerIds) {
+    const item = totals.get(sellerId);
+    if (!item || item.count === 0) {
+      map.set(sellerId, { rating: 0, reviewsCount: 0 });
+      continue;
+    }
+    map.set(sellerId, {
+      rating: Number((item.sum / item.count).toFixed(1)),
+      reviewsCount: item.count,
+    });
+  }
+
+  return map;
+}
+
+async function loadSellerReviews(sellerId: number, limit = 50): Promise<
+  Array<{
+    id: string;
+    author: string;
+    avatar: string | null;
+    rating: number;
+    comment: string;
+    date: string;
+    listingId: string;
+    listingTitle: string;
+  }>
+> {
+  const rows = await prisma.listingReview.findMany({
+    where: {
+      listing: {
+        seller_id: sellerId,
+      },
+    },
+    orderBy: [{ created_at: "desc" }, { id: "desc" }],
+    take: Math.max(1, Math.min(limit, 100)),
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      created_at: true,
+      author: {
+        select: {
+          display_name: true,
+          avatar: true,
+        },
+      },
+      listing: {
+        select: {
+          public_id: true,
+          title: true,
+        },
+      },
+    },
+  });
+
+  return rows.map((review) => ({
+    id: String(review.id),
+    author: normalizeDisplayText(review.author.display_name ?? "", "Покупатель"),
+    avatar: review.author.avatar,
+    rating: review.rating,
+    comment: normalizeDisplayText(review.comment, ""),
+    date: review.created_at.toLocaleString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    listingId: review.listing.public_id,
+    listingTitle: normalizeDisplayText(review.listing.title, "Объявление"),
+  }));
 }
 
 catalogRouter.get("/categories", async (req: Request, res: Response) => {
@@ -302,8 +393,10 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
       include: {
         seller: {
           select: {
+            public_id: true,
             name: true,
             avatar: true,
+            joined_at: true,
             addresses: {
               select: {
                 city: true,
@@ -339,21 +432,14 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
         attributes: {
           orderBy: [{ sort_order: "asc" }, { id: "asc" }],
         },
-        reviews: {
-          orderBy: [{ created_at: "desc" }],
-          include: {
-            author: {
-              select: {
-                display_name: true,
-                avatar: true,
-              },
-            },
-          },
-        },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
       ...(typeof take === "number" ? { take, skip } : {}),
     });
+
+    const sellerReviewMetricsBySellerId = await loadSellerReviewMetrics(
+      listings.map((listing) => listing.seller_id),
+    );
 
     return res.json(
       listings.map((listing) => {
@@ -370,9 +456,16 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             salePrice,
             image: primaryImage,
             images: listing.images.map((image) => image.url),
-            rating: listing.rating,
+            rating:
+              sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? 0,
+            sellerRating:
+              sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? 0,
+            sellerReviewsCount:
+              sellerReviewMetricsBySellerId.get(listing.seller_id)?.reviewsCount ?? 0,
             seller: normalizeDisplayText(listing.seller.name, "Продавец"),
+            sellerId: listing.seller.public_id,
             sellerAvatar: listing.seller.avatar,
+            sellerJoinedAt: listing.seller.joined_at,
             category: listingCategoryName(listing),
             sku: listing.sku,
             isNew: listing.condition === "NEW",
@@ -391,14 +484,6 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             specifications: listingSpecifications(listing.attributes),
             isPriceLower: salePrice !== null,
             condition: toClientCondition(listing.condition),
-            reviews: listing.reviews.map((review) => ({
-              id: String(review.id),
-              author: normalizeDisplayText(review.author.display_name, "Аноним"),
-              rating: review.rating,
-              date: formatPublishDate(review.created_at),
-              comment: normalizeDisplayText(review.comment, review.comment),
-              avatar: review.author.avatar,
-            })),
           };
         },
       ),
@@ -425,8 +510,10 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       include: {
         seller: {
           select: {
+            public_id: true,
             name: true,
             avatar: true,
+            joined_at: true,
             addresses: {
               select: {
                 city: true,
@@ -461,17 +548,6 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
         },
         attributes: {
           orderBy: [{ sort_order: "asc" }, { id: "asc" }],
-        },
-        reviews: {
-          orderBy: [{ created_at: "desc" }],
-          include: {
-            author: {
-              select: {
-                display_name: true,
-                avatar: true,
-              },
-            },
-          },
         },
       },
     });
@@ -521,6 +597,14 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       listing.sale_price !== null && listing.sale_price < listing.price
         ? listing.sale_price
         : null;
+    const [sellerReviewMetricsBySellerId, sellerReviews] = await Promise.all([
+      loadSellerReviewMetrics([listing.seller_id]),
+      loadSellerReviews(listing.seller_id, 50),
+    ]);
+    const sellerReviewMetrics = sellerReviewMetricsBySellerId.get(listing.seller_id) ?? {
+      rating: 0,
+      reviewsCount: 0,
+    };
 
     return res.json({
       id: listing.public_id,
@@ -529,9 +613,13 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       salePrice,
       image: primaryImage,
       images: listing.images.map((image) => image.url),
-      rating: listing.rating,
+      rating: sellerReviewMetrics.rating,
+      sellerRating: sellerReviewMetrics.rating,
+      sellerReviewsCount: sellerReviewMetrics.reviewsCount,
       seller: normalizeDisplayText(listing.seller.name, "Продавец"),
+      sellerId: listing.seller.public_id,
       sellerAvatar: listing.seller.avatar,
+      sellerJoinedAt: listing.seller.joined_at,
       category: listingCategoryName(listing),
       sku: listing.sku,
       isNew: listing.condition === "NEW",
@@ -550,22 +638,220 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       breadcrumbs: listingBreadcrumbs(listing),
       condition: toClientCondition(listing.condition),
       specifications: listingSpecifications(listing.attributes),
-      reviews: listing.reviews.map((review) => ({
-        id: String(review.id),
-        author: normalizeDisplayText(review.author.display_name ?? "", "Покупатель"),
-        avatar: review.author.avatar,
-        rating: review.rating,
-        comment: normalizeDisplayText(review.comment, ""),
-        date: review.created_at.toLocaleString("ru-RU", {
-          day: "numeric",
-          month: "long",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      })),
+      reviews: sellerReviews,
     });
   } catch (error) {
     console.error("Error fetching listing by id:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+catalogRouter.post("/listings/:publicId/view", async (req: Request, res: Response) => {
+  try {
+    const publicId = String(req.params.publicId ?? "").trim();
+    if (!publicId) {
+      return res.status(400).json({ error: "Invalid listing ID" });
+    }
+
+    const updated = await prisma.marketplaceListing.updateMany({
+      where: {
+        public_id: publicId,
+        status: "ACTIVE",
+        moderation_status: "APPROVED",
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+
+    if (!updated.count) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+
+    const listing = await prisma.marketplaceListing.findUnique({
+      where: {
+        public_id: publicId,
+      },
+      select: {
+        views: true,
+      },
+    });
+
+    return res.json({
+      success: true,
+      views: listing?.views ?? 0,
+    });
+  } catch (error) {
+    console.error("Error incrementing listing views:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Response) => {
+  try {
+    const sellerPublicId = String(req.params.publicId ?? "").trim();
+    if (!sellerPublicId) {
+      return res.status(400).json({ error: "Invalid seller ID" });
+    }
+
+    const limitRaw = req.query.limit ? Number(req.query.limit) : 24;
+    const offsetRaw = req.query.offset ? Number(req.query.offset) : 0;
+    if (!Number.isInteger(limitRaw) || limitRaw <= 0) {
+      return res.status(400).json({ error: "Invalid limit" });
+    }
+    if (!Number.isInteger(offsetRaw) || offsetRaw < 0) {
+      return res.status(400).json({ error: "Invalid offset" });
+    }
+
+    const take = Math.min(limitRaw, 100);
+    const skip = offsetRaw;
+
+    const seller = await prisma.appUser.findFirst({
+      where: {
+        public_id: sellerPublicId,
+        role: "SELLER",
+      },
+      select: {
+        id: true,
+        public_id: true,
+        name: true,
+        avatar: true,
+        joined_at: true,
+        addresses: {
+          select: {
+            city: true,
+          },
+          orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+          take: 1,
+        },
+        _count: {
+          select: {
+            listings: true,
+          },
+        },
+        seller_profile: {
+          select: {
+            is_verified: true,
+            average_response_minutes: true,
+          },
+        },
+      },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ error: "Seller not found" });
+    }
+
+    const listingWhere = {
+      seller_id: seller.id,
+      status: "ACTIVE" as const,
+      moderation_status: "APPROVED" as const,
+    };
+
+    const [total, listings] = await Promise.all([
+      prisma.marketplaceListing.count({
+        where: listingWhere,
+      }),
+      prisma.marketplaceListing.findMany({
+        where: listingWhere,
+        include: {
+          item: {
+            include: {
+              subcategory: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          },
+          images: {
+            orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+          },
+          attributes: {
+            orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+          },
+        },
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        take,
+        skip,
+      }),
+    ]);
+
+    const sellerName = normalizeDisplayText(seller.name, "Продавец");
+    const sellerCity = normalizeDisplayText(extractSellerCity(seller), "");
+    const sellerResponseTime = formatResponseTime(
+      seller.seller_profile?.average_response_minutes,
+    );
+    const sellerListings = seller._count.listings;
+    const sellerVerified = Boolean(seller.seller_profile?.is_verified);
+    const sellerReviewMetrics = (await loadSellerReviewMetrics([seller.id])).get(seller.id) ?? {
+      rating: 0,
+      reviewsCount: 0,
+    };
+
+    return res.json({
+      seller: {
+        id: seller.public_id,
+        name: sellerName,
+        avatar: seller.avatar,
+        city: sellerCity,
+        isVerified: sellerVerified,
+        responseTime: sellerResponseTime,
+        rating: sellerReviewMetrics.rating,
+        reviewsCount: sellerReviewMetrics.reviewsCount,
+        listingsCount: sellerListings,
+        joinedAt: seller.joined_at,
+      },
+      items: listings.map((listing) => {
+        const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+        const salePrice =
+          listing.sale_price !== null && listing.sale_price < listing.price
+            ? listing.sale_price
+            : null;
+
+        return {
+          id: listing.public_id,
+          title: normalizeDisplayText(listing.title, "Без названия"),
+          price: listing.price,
+          salePrice,
+          image: primaryImage,
+          images: listing.images.map((image) => image.url),
+          rating: sellerReviewMetrics.rating,
+          sellerRating: sellerReviewMetrics.rating,
+          sellerReviewsCount: sellerReviewMetrics.reviewsCount,
+          seller: sellerName,
+          sellerId: seller.public_id,
+          sellerAvatar: seller.avatar,
+          sellerJoinedAt: seller.joined_at,
+          category: listingCategoryName(listing),
+          sku: listing.sku,
+          isNew: listing.condition === "NEW",
+          isSale: salePrice !== null,
+          isVerified: sellerVerified,
+          description: normalizeDisplayText(listing.description ?? "", ""),
+          shippingBySeller: listing.shipping_by_seller,
+          city: sellerCity,
+          publishDate: formatPublishDate(listing.created_at),
+          views: listing.views,
+          sellerResponseTime,
+          sellerListings,
+          breadcrumbs: listingBreadcrumbs(listing),
+          specifications: listingSpecifications(listing.attributes),
+          isPriceLower: salePrice !== null,
+          condition: toClientCondition(listing.condition),
+        };
+      }),
+      pagination: {
+        limit: take,
+        offset: skip,
+        total,
+        hasMore: skip + listings.length < total,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching seller listings:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -715,28 +1001,83 @@ catalogRouter.get(
         return;
       }
 
-      const questions = await prisma.listingQuestion.findMany({
-        where: { listing_id: listing.id },
-        include: {
-          buyer: {
-            select: { name: true },
-          },
-        },
-        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      const usePagination =
+        req.query.paginated === "1" ||
+        req.query.limit !== undefined ||
+        req.query.offset !== undefined;
+
+      const mapQuestion = (question: {
+        public_id: string;
+        created_at: Date;
+        question: string;
+        answer: string | null;
+        answered_at: Date | null;
+        buyer: { name: string };
+      }) => ({
+        id: question.public_id,
+        user: question.buyer.name,
+        date: question.created_at,
+        question: question.question,
+        answer: question.answer,
+        answerDate: question.answered_at,
+        helpful: 0,
       });
 
-      res.json(
-        questions.map((question) => ({
-            id: question.public_id,
-            user: question.buyer.name,
-            date: question.created_at,
-            question: question.question,
-            answer: question.answer,
-            answerDate: question.answered_at,
-            helpful: 0,
-          }),
-        ),
-      );
+      if (!usePagination) {
+        const questions = await prisma.listingQuestion.findMany({
+          where: { listing_id: listing.id },
+          include: {
+            buyer: {
+              select: { name: true },
+            },
+          },
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        });
+
+        res.json(questions.map(mapQuestion));
+        return;
+      }
+
+      const limitRaw = req.query.limit ? Number(req.query.limit) : 6;
+      const offsetRaw = req.query.offset ? Number(req.query.offset) : 0;
+      if (!Number.isInteger(limitRaw) || limitRaw <= 0) {
+        res.status(400).json({ error: "Invalid limit" });
+        return;
+      }
+      if (!Number.isInteger(offsetRaw) || offsetRaw < 0) {
+        res.status(400).json({ error: "Invalid offset" });
+        return;
+      }
+
+      const take = Math.min(limitRaw, 50);
+      const skip = offsetRaw;
+
+      const [total, questions] = await Promise.all([
+        prisma.listingQuestion.count({
+          where: { listing_id: listing.id },
+        }),
+        prisma.listingQuestion.findMany({
+          where: { listing_id: listing.id },
+          include: {
+            buyer: {
+              select: { name: true },
+            },
+          },
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take,
+          skip,
+        }),
+      ]);
+
+      res.json({
+        items: questions.map(mapQuestion),
+        pagination: {
+          limit: take,
+          offset: skip,
+          total,
+          hasMore: skip + questions.length < total,
+        },
+      });
     } catch (error) {
       console.error("Error fetching listing questions:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -819,7 +1160,7 @@ catalogRouter.post(
   "/listings/:publicId/complaints",
   async (req: Request, res: Response) => {
     try {
-      const access = await requireAnyRole(req, ["BUYER"]);
+      const access = await requireAnyRole(req, ["BUYER", "SELLER", "ADMIN"]);
       if (!access.ok) {
         res.status(access.status).json({ error: access.message });
         return;
@@ -834,8 +1175,6 @@ catalogRouter.post(
       const body = (req.body ?? {}) as {
         complaintType?: unknown;
         description?: unknown;
-        evidenceFiles?: unknown;
-        evidence?: unknown;
       };
 
       const complaintType =
@@ -852,7 +1191,6 @@ catalogRouter.post(
         return;
       }
 
-      const evidenceFiles = normalizeEvidenceFiles(body.evidenceFiles ?? body.evidence);
       const listing = await prisma.marketplaceListing.findUnique({
         where: { public_id: listingPublicId },
         select: {
@@ -865,11 +1203,6 @@ catalogRouter.post(
 
       if (!listing) {
         res.status(404).json({ error: "Listing not found" });
-        return;
-      }
-
-      if (listing.seller_id === access.user.id) {
-        res.status(400).json({ error: "Cannot submit complaint for own listing" });
         return;
       }
 
@@ -927,7 +1260,7 @@ catalogRouter.post(
             seller_id: listing.seller_id,
             reporter_id: access.user.id,
             description,
-            evidence: evidenceFiles.length > 0 ? evidenceFiles.join(", ") : null,
+            evidence: null,
           },
         });
 
@@ -941,7 +1274,6 @@ catalogRouter.post(
             note: description.slice(0, 280),
             metadata: {
               source: "catalog_listing_complaint",
-              evidenceCount: evidenceFiles.length,
             },
           },
         });

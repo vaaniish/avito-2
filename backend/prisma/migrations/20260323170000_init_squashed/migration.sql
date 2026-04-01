@@ -1,4 +1,4 @@
-﻿-- Squashed migration generated on 2026-03-23.
+-- Squashed migration generated on 2026-03-23.
 -- Includes historical changes from:
 -- 1) 20260317201230_init_squashed
 -- 2) 20260317223000_complaint_case_management
@@ -41,7 +41,7 @@ CREATE TYPE "DeliveryType" AS ENUM ('PICKUP', 'DELIVERY');
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'HELD', 'SUCCESS', 'FAILED', 'CANCELLED', 'REFUNDED');
 
 -- CreateEnum
-CREATE TYPE "PaymentProvider" AS ENUM ('CASH', 'YOOMONEY', 'STRIPE', 'OTHER');
+CREATE TYPE "PaymentProvider" AS ENUM ('YOOMONEY', 'STRIPE', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "ComplaintStatus" AS ENUM ('NEW', 'PENDING', 'APPROVED', 'REJECTED');

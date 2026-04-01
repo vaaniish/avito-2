@@ -234,6 +234,26 @@ async function main() {
         ["LST-008", "SLR-004", "ITM-010", "Краснодар", "SERVICE", "Установка кондиционера", 8900, 8200, "NEW", "ACTIVE", "APPROVED", 262, false],
         ["LST-009", "SLR-003", "ITM-005", "Екатеринбург", "PRODUCT", "Coffee Machine CM-500", 23500, 22000, "NEW", "ACTIVE", "APPROVED", 382, true],
         ["LST-010", "SLR-002", "ITM-008", "Нижний Новгород", "PRODUCT", "Running Shoes RS-10", 6800, 6500, "NEW", "ACTIVE", "APPROVED", 214, true],
+        ["LST-011", "SLR-001", "ITM-002", "Москва", "PRODUCT", "Samsung S24 256GB", 89900, 85900, "NEW", "ACTIVE", "APPROVED", 512, true],
+        ["LST-012", "SLR-002", "ITM-001", "Казань", "PRODUCT", "iPhone 15 128GB", 73900, 70900, "NEW", "ACTIVE", "APPROVED", 468, true],
+        ["LST-013", "SLR-003", "ITM-003", "Екатеринбург", "PRODUCT", "MacBook Air M2 8/256", 119900, 114900, "NEW", "ACTIVE", "APPROVED", 355, true],
+        ["LST-014", "SLR-004", "ITM-004", "Краснодар", "PRODUCT", "ThinkPad X1 Carbon Gen 9", 129000, null, "USED", "ACTIVE", "APPROVED", 227, true],
+        ["LST-015", "SLR-001", "ITM-006", "Москва", "PRODUCT", "Robot Vacuum R8", 21900, 19900, "NEW", "ACTIVE", "APPROVED", 301, true],
+        ["LST-016", "SLR-002", "ITM-005", "Казань", "PRODUCT", "Coffee Machine CM-300", 16500, 14900, "NEW", "ACTIVE", "APPROVED", 286, true],
+        ["LST-017", "SLR-003", "ITM-007", "Екатеринбург", "PRODUCT", "City Bicycle 26", 14500, null, "USED", "ACTIVE", "APPROVED", 192, false],
+        ["LST-018", "SLR-004", "ITM-008", "Краснодар", "PRODUCT", "Running Shoes RS-12", 7400, 6900, "NEW", "ACTIVE", "APPROVED", 178, true],
+        ["LST-019", "SLR-001", "ITM-010", "Москва", "SERVICE", "Монтаж ТВ на стену + кабель-канал", 4500, null, "NEW", "ACTIVE", "APPROVED", 255, false],
+        ["LST-020", "SLR-002", "ITM-009", "Казань", "SERVICE", "Замена экрана смартфона за 1 час", 3900, null, "NEW", "ACTIVE", "APPROVED", 311, false],
+        ["LST-021", "SLR-003", "ITM-010", "Екатеринбург", "SERVICE", "Подключение и настройка ТВ", 3700, null, "NEW", "ACTIVE", "APPROVED", 173, false],
+        ["LST-022", "SLR-004", "ITM-009", "Краснодар", "SERVICE", "Замена аккумулятора смартфона", 2900, null, "NEW", "ACTIVE", "APPROVED", 142, false],
+        ["LST-023", "SLR-001", "ITM-004", "Москва", "PRODUCT", "ThinkPad X1 16/512", 146000, 139900, "NEW", "ACTIVE", "APPROVED", 264, true],
+        ["LST-024", "SLR-002", "ITM-003", "Казань", "PRODUCT", "MacBook Air M3 8/256", 134900, 129900, "NEW", "ACTIVE", "APPROVED", 245, true],
+        ["LST-025", "SLR-003", "ITM-002", "Екатеринбург", "PRODUCT", "Samsung S24 512GB", 99900, 94900, "NEW", "ACTIVE", "APPROVED", 221, true],
+        ["LST-026", "SLR-004", "ITM-001", "Краснодар", "PRODUCT", "iPhone 15 Pro Max 256GB", 134900, 129900, "NEW", "ACTIVE", "APPROVED", 338, true],
+        ["LST-027", "SLR-001", "ITM-006", "Москва", "PRODUCT", "Robot Vacuum R10", 32900, 30900, "NEW", "ACTIVE", "APPROVED", 154, true],
+        ["LST-028", "SLR-002", "ITM-005", "Казань", "PRODUCT", "Coffee Machine CM-700", 28900, 26900, "NEW", "ACTIVE", "APPROVED", 147, true],
+        ["LST-029", "SLR-003", "ITM-007", "Екатеринбург", "PRODUCT", "City Bicycle Pro 28", 27500, 25900, "NEW", "ACTIVE", "APPROVED", 136, false],
+        ["LST-030", "SLR-004", "ITM-008", "Краснодар", "PRODUCT", "Running Shoes RS-15", 8200, 7900, "NEW", "ACTIVE", "APPROVED", 121, true],
     ];
     const listingMap = new Map();
     const listingTitleMap = new Map();
@@ -269,41 +289,50 @@ async function main() {
                 },
             ],
         });
-        await prisma.listingAttribute.createMany({
-            data: [
-                { listing_id: created.id, key: "характеристика_1", value: `Параметр для ${l[5]}`, sort_order: 0 },
-            ],
-        });
+        const attributes = l[4] === "SERVICE"
+            ? [
+                { listing_id: created.id, key: "meeting_address", value: `${l[3]}, выезд в пределах города`, sort_order: 0 },
+                { listing_id: created.id, key: "График", value: "Ежедневно 10:00-20:00", sort_order: 1 },
+            ]
+            : [
+                { listing_id: created.id, key: "Состояние", value: l[8] === "NEW" ? "Новое" : "Б/У", sort_order: 0 },
+                { listing_id: created.id, key: "Город", value: l[3], sort_order: 1 },
+            ];
+        await prisma.listingAttribute.createMany({ data: attributes });
     }
     await prisma.listingReview.createMany({
         data: listings.map((l, idx) => ({
             listing_id: getRequired(listingMap, l[0], "Listing"),
             author_id: getRequired(userMap, `BUY-00${(idx % 4) + 1}`, "User"),
-            rating: [5, 5, 4, 5, 4, 5, 2, 5, 4, 5][idx] ?? 4,
+            rating: [5, 5, 4, 5, 4, 5, 2, 5, 4, 5][idx % 10] ?? 4,
             comment: `Отзыв по объявлению ${l[0]}`,
             created_at: daysAgo(20 - idx),
         })),
     });
+    const questionTemplates = [
+        { text: "Актуально ли объявление?", answer: "Да, актуально." },
+        { text: "Можно ли забрать сегодня?", answer: "Да, договоримся на сегодня вечером." },
+        { text: "Есть ли гарантия?", answer: "Да, гарантия от продавца 14 дней." },
+        { text: "Возможен небольшой торг?", answer: null },
+    ];
+    const listingQuestionsSeed = listings.flatMap((listing, listingIndex) => questionTemplates.map((template, templateIndex) => {
+        const id = `QST-${String(listingIndex * questionTemplates.length + templateIndex + 1).padStart(3, "0")}`;
+        const buyerPublicId = `BUY-00${((listingIndex + templateIndex) % 4) + 1}`;
+        const createdDaysAgo = 2 + listingIndex + templateIndex;
+        const answeredDaysAgo = template.answer ? Math.max(1, createdDaysAgo - 1) : null;
+        return {
+            public_id: id,
+            listing_id: getRequired(listingMap, listing[0], "Listing"),
+            buyer_id: getRequired(userMap, buyerPublicId, "User"),
+            question: template.text,
+            answer: template.answer,
+            status: template.answer ? "ANSWERED" : "PENDING",
+            created_at: daysAgo(createdDaysAgo),
+            answered_at: answeredDaysAgo === null ? null : daysAgo(answeredDaysAgo),
+        };
+    }));
     await prisma.listingQuestion.createMany({
-        data: [
-            ["QST-001", "LST-001", "BUY-002", "Сможете отправить сегодня?", "Да, отправим до вечера", "ANSWERED", 11, 10],
-            ["QST-002", "LST-002", "BUY-003", "Есть русская раскладка?", "Нет, стандартная раскладка", "ANSWERED", 10, 9],
-            ["QST-003", "LST-003", "BUY-004", "Поддерживает две SIM-карты?", "Да, поддерживает", "ANSWERED", 8, 8],
-            ["QST-004", "LST-004", "BUY-001", "Какой уровень шума при работе?", null, "PENDING", 6, null],
-            ["QST-005", "LST-006", "BUY-004", "Инструменты привозите с собой?", "Да, весь инструмент с мастером", "ANSWERED", 4, 4],
-            ["QST-006", "LST-008", "BUY-003", "Есть доплата за 10 этаж?", null, "PENDING", 3, null],
-            ["QST-007", "LST-009", "BUY-002", "Контейнер можно мыть в посудомойке?", "Да, можно", "ANSWERED", 2, 2],
-            ["QST-008", "LST-010", "BUY-004", "Сделаете скидку за две пары?", null, "PENDING", 1, null],
-        ].map((q) => ({
-            public_id: q[0],
-            listing_id: getRequired(listingMap, q[1], "Listing"),
-            buyer_id: getRequired(userMap, q[2], "User"),
-            question: q[3],
-            answer: q[4],
-            status: q[5],
-            created_at: daysAgo(q[6]),
-            answered_at: q[7] === null ? null : daysAgo(q[7]),
-        })),
+        data: listingQuestionsSeed,
     });
     await prisma.wishlistItem.createMany({
         data: [
@@ -387,7 +416,7 @@ async function main() {
             ["TXN-1001", "ORD-1001", "BUY-001", "SLR-001", 114400, "SUCCESS", 3.5, 4004, "YOOMONEY", "pi_1001", 14],
             ["TXN-1002", "ORD-1002", "BUY-002", "SLR-002", 98000, "HELD", 4.5, 4410, "STRIPE", "pi_1002", 9],
             ["TXN-1003", "ORD-1003", "BUY-003", "SLR-003", 24700, "PENDING", 4.5, 1112, "OTHER", "pi_1003", 7],
-            ["TXN-1004", "ORD-1004", "BUY-004", "SLR-004", 18600, "SUCCESS", 6, 1116, "CASH", "pi_1004", 6],
+            ["TXN-1004", "ORD-1004", "BUY-004", "SLR-004", 18600, "SUCCESS", 6, 1116, "YOOMONEY", "pi_1004", 6],
             ["TXN-1005", "ORD-1005", "BUY-001", "SLR-005", 3500, "CANCELLED", 6, 210, "YOOMONEY", "pi_1005", 5],
             ["TXN-1006", "ORD-1006", "BUY-004", "SLR-002", 3600, "FAILED", 4.5, 162, "STRIPE", "pi_1006", 4],
             ["TXN-1007", "ORD-1007", "BUY-002", "SLR-003", 22000, "REFUNDED", 4.5, 990, "OTHER", "pi_1007", 3],

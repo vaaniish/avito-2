@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Search, ShoppingCart, User, Menu, X, Bell } from "lucide-react";
 import { apiGet, apiPatch } from "../lib/api";
 
@@ -35,6 +35,7 @@ export function Header({
   onProfileClick,
   isAuthenticated,
 }: HeaderProps) {
+  const headerRef = useRef<HTMLElement | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -95,6 +96,32 @@ export function Header({
     };
   }, [canQuerySuggestions, searchQuery]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const node = headerRef.current;
+    if (!node) return;
+
+    const syncHeight = () => {
+      const height = Math.ceil(node.getBoundingClientRect().height);
+      if (height > 0) {
+        root.style.setProperty("--header-height", `${height}px`);
+      }
+    };
+
+    syncHeight();
+    window.addEventListener("resize", syncHeight);
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => syncHeight())
+        : null;
+    observer?.observe(node);
+
+    return () => {
+      window.removeEventListener("resize", syncHeight);
+      observer?.disconnect();
+    };
+  }, []);
+
   const handleSearchSubmit = (query: string) => {
     const normalized = query.trim();
     setShowSuggestions(false);
@@ -134,7 +161,7 @@ export function Header({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white text-gray-900 shadow-sm border-b border-gray-200">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-white text-gray-900 shadow-sm border-b border-gray-200">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6">
         <div className="hidden md:block">
           <div className="flex items-center justify-between h-24">

@@ -34,6 +34,7 @@ import {
 } from "./lib/api";
 import { matchesSearch } from "./lib/search";
 import { notifyError } from "./components/ui/notifications";
+import { initYandexMetrika } from "./lib/metrika";
 
 const CartPage = lazy(() =>
   import("./components/CartPage").then((module) => ({
@@ -50,9 +51,19 @@ const OrderCompletePage = lazy(() =>
     default: module.OrderCompletePage,
   })),
 );
+const PaymentReturnPage = lazy(() =>
+  import("./components/PaymentReturnPage").then((module) => ({
+    default: module.PaymentReturnPage,
+  })),
+);
 const ProductDetail = lazy(() =>
   import("./components/ProductDetail").then((module) => ({
     default: module.ProductDetail,
+  })),
+);
+const SellerStorePage = lazy(() =>
+  import("./components/SellerStorePage").then((module) => ({
+    default: module.SellerStorePage,
   })),
 );
 const AboutPage = lazy(() =>
@@ -106,7 +117,9 @@ type AppView =
   | "cart"
   | "checkout"
   | "orderComplete"
+  | "paymentReturn"
   | "product"
+  | "sellerStore"
   | "about"
   | "partnership"
   | "faq"
@@ -141,6 +154,7 @@ const PROFILE_ROUTE_TABS: ProfileTab[] = [
 type ParsedRoute = {
   view: AppView;
   listingId: string | null;
+  sellerId: string | null;
   adminPage: AdminPage;
   profileTab: ProfileTab;
 };
@@ -165,6 +179,7 @@ function parseRoute(pathname: string, search: string): ParsedRoute {
   const defaultRoute: ParsedRoute = {
     view: "home",
     listingId: listingIdFromQuery || null,
+    sellerId: null,
     adminPage: "transactions",
     profileTab: "profile",
   };
@@ -175,6 +190,8 @@ function parseRoute(pathname: string, search: string): ParsedRoute {
     return { ...defaultRoute, view: "checkout" };
   if (normalizedPath === "/order-complete")
     return { ...defaultRoute, view: "orderComplete" };
+  if (normalizedPath === "/payment-return")
+    return { ...defaultRoute, view: "paymentReturn" };
   if (normalizedPath === "/about") return { ...defaultRoute, view: "about" };
   if (normalizedPath === "/partnership")
     return { ...defaultRoute, view: "partnership" };
@@ -230,16 +247,26 @@ function parseRoute(pathname: string, search: string): ParsedRoute {
     };
   }
 
+  if (normalizedPath.startsWith("/sellers/")) {
+    const sellerId = normalizedPath.slice("/sellers/".length).trim();
+    return {
+      ...defaultRoute,
+      view: "sellerStore",
+      sellerId: sellerId || null,
+    };
+  }
+
   return defaultRoute;
 }
 
 function buildPathForView(params: {
   view: AppView;
   listingId: string | null;
+  sellerId: string | null;
   adminPage: AdminPage;
   profileTab: ProfileTab;
 }): string {
-  const { view, listingId, adminPage, profileTab } = params;
+  const { view, listingId, sellerId, adminPage, profileTab } = params;
   switch (view) {
     case "home":
       return "/";
@@ -249,8 +276,12 @@ function buildPathForView(params: {
       return "/checkout";
     case "orderComplete":
       return "/order-complete";
+    case "paymentReturn":
+      return "/payment-return";
     case "product":
       return listingId ? `/products/${listingId}` : "/";
+    case "sellerStore":
+      return sellerId ? `/sellers/${sellerId}` : "/";
     case "about":
       return "/about";
     case "partnership":
@@ -297,6 +328,12 @@ export default function App() {
   const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(
     initialRoute.listingId,
   );
+  const [deepLinkSellerId, setDeepLinkSellerId] = useState<string | null>(
+    initialRoute.sellerId,
+  );
+  const [productBackSellerId, setProductBackSellerId] = useState<string | null>(
+    null,
+  );
   const [currentView, setCurrentView] = useState<AppView>(initialRoute.view);
   const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>(
     initialRoute.adminPage,
@@ -310,9 +347,6 @@ export default function App() {
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [lastOrderTotal, setLastOrderTotal] = useState(0);
-  const [lastPaymentMethod, setLastPaymentMethod] = useState<"card" | "cash">(
-    "card",
-  );
   const [lastOrderIds, setLastOrderIds] = useState<string[]>([]);
   const [selectedDeliveryType, setSelectedDeliveryType] = useState<
     "delivery" | "pickup"
@@ -384,6 +418,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    initYandexMetrika();
+  }, []);
+
+  useEffect(() => {
     const handlePopState = () => {
       const parsedRoute = parseRoute(
         window.location.pathname,
@@ -393,6 +431,7 @@ export default function App() {
       setCurrentAdminPage(parsedRoute.adminPage);
       setCurrentProfileTab(parsedRoute.profileTab);
       setDeepLinkListingId(parsedRoute.listingId);
+      setDeepLinkSellerId(parsedRoute.sellerId);
       if (parsedRoute.view !== "product") {
         setSelectedProduct(null);
       }
@@ -408,6 +447,7 @@ export default function App() {
     const targetPath = buildPathForView({
       view: currentView,
       listingId: selectedProduct?.id ?? deepLinkListingId,
+      sellerId: deepLinkSellerId,
       adminPage: currentAdminPage,
       profileTab: currentProfileTab,
     });
@@ -420,6 +460,7 @@ export default function App() {
     currentProfileTab,
     currentView,
     deepLinkListingId,
+    deepLinkSellerId,
     selectedProduct?.id,
   ]);
 
@@ -684,6 +725,8 @@ export default function App() {
     setCurrentProfileTab("profile");
     setCurrentAdminPage("transactions");
     setDeepLinkListingId(null);
+    setDeepLinkSellerId(null);
+    setProductBackSellerId(null);
     setSelectedProduct(null);
     setIsSearchActive(false);
     setFilters(DEFAULT_FILTERS);
@@ -715,9 +758,18 @@ export default function App() {
   };
 
   const handleProductClick = (product: Product) => {
+    setProductBackSellerId(currentView === "sellerStore" ? deepLinkSellerId : null);
     setSelectedProduct(product);
     setDeepLinkListingId(product.id);
     setCurrentView("product");
+    scrollToTop();
+  };
+
+  const handleOpenSellerStore = (sellerId: string) => {
+    const normalized = sellerId.trim();
+    if (!normalized) return;
+    setDeepLinkSellerId(normalized);
+    setCurrentView("sellerStore");
     scrollToTop();
   };
 
@@ -734,8 +786,8 @@ export default function App() {
     scrollToTop();
   };
 
-  const handleCheckout = (deliveryType: "delivery" | "pickup") => {
-    setSelectedDeliveryType(deliveryType);
+  const handleCheckout = (_deliveryType: "delivery" | "pickup") => {
+    setSelectedDeliveryType("delivery");
     setCurrentView("checkout");
     scrollToTop();
   };
@@ -882,8 +934,6 @@ export default function App() {
 
     return (
       <div className="min-h-screen app-shell">
-        <div className="app-header-spacer" aria-hidden="true" />
-
         <Header
           isAuthenticated={isAuthenticated}
           cartItemCount={cartItems.reduce(
@@ -900,8 +950,15 @@ export default function App() {
             product={selectedProduct}
             onBack={() => {
               setSelectedProduct(null);
+              if (productBackSellerId) {
+                setCurrentView("sellerStore");
+                setDeepLinkSellerId(productBackSellerId);
+                setProductBackSellerId(null);
+                return;
+              }
               setCurrentView("home");
             }}
+            onOpenSellerStore={handleOpenSellerStore}
             onAddToCart={addToCart}
             onBuyNow={handleBuyNow}
             onUpdateQuantity={updateQuantity}
@@ -940,6 +997,65 @@ export default function App() {
           {isDeepLinkListingLoading
             ? "Загрузка объявления..."
             : "Объявление не найдено"}
+        </div>
+        <Footer onNavigate={handleFooterNavigation} />
+      </>
+    );
+  }
+
+  if (currentView === "sellerStore" && deepLinkSellerId) {
+    return (
+      <>
+        <Header
+          isAuthenticated={isAuthenticated}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
+          onCartClick={handleCartClick}
+          onSearchSubmit={handleSearchSubmit}
+          onLogoClick={handleLogoClick}
+          onProfileClick={handleProfileClick}
+        />
+        <Suspense fallback={lazyFallback}>
+          <SellerStorePage
+            sellerId={deepLinkSellerId}
+            onBack={handleLogoClick}
+            onOpenListing={(product) => {
+              setProductBackSellerId(deepLinkSellerId);
+              setSelectedProduct(product);
+              setDeepLinkListingId(product.id);
+              setCurrentView("product");
+              scrollToTop();
+            }}
+            onAddToCart={addToCart}
+            onUpdateQuantity={updateQuantity}
+            cartItems={cartItems}
+            wishlistProductIds={wishlistProductIds}
+            onWishlistToggle={handleWishlistToggle}
+          />
+        </Suspense>
+        <Footer onNavigate={handleFooterNavigation} />
+      </>
+    );
+  }
+
+  if (currentView === "sellerStore" && !deepLinkSellerId) {
+    return (
+      <>
+        <Header
+          isAuthenticated={isAuthenticated}
+          cartItemCount={cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          )}
+          onCartClick={handleCartClick}
+          onSearchSubmit={handleSearchSubmit}
+          onLogoClick={handleLogoClick}
+          onProfileClick={handleProfileClick}
+        />
+        <div className="page-container py-16 text-center text-gray-600">
+          Профиль продавца не найден
         </div>
         <Footer onNavigate={handleFooterNavigation} />
       </>
@@ -985,9 +1101,13 @@ export default function App() {
                 prev.filter((item) => !itemIds.includes(item.id)),
               );
             }}
+            onOrderCreated={(result) => {
+              setLastOrderTotal(result.total);
+              setLastOrderIds(result.orderIds);
+              setLastDeliveryType(result.deliveryType);
+            }}
             onComplete={(result) => {
               setLastOrderTotal(result.total);
-              setLastPaymentMethod(result.paymentMethod);
               setLastOrderIds(result.orderIds);
               setLastDeliveryType(result.deliveryType);
               setCartItems([]);
@@ -1018,7 +1138,6 @@ export default function App() {
           <OrderCompletePage
             orderTotal={lastOrderTotal}
             orderIds={lastOrderIds}
-            paymentMethod={lastPaymentMethod}
             deliveryType={lastDeliveryType}
             onViewHistory={() => {
               setCurrentProfileTab("orders");
@@ -1030,6 +1149,14 @@ export default function App() {
         </Suspense>
         <Footer onNavigate={handleFooterNavigation} />
       </>
+    );
+  }
+
+  if (currentView === "paymentReturn") {
+    return (
+      <Suspense fallback={lazyFallback}>
+        <PaymentReturnPage />
+      </Suspense>
     );
   }
 
@@ -1249,8 +1376,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen app-shell">
-      <div className="app-header-spacer" aria-hidden="true" />
-
       <Header
         isAuthenticated={isAuthenticated}
         cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
@@ -1301,8 +1426,8 @@ export default function App() {
           </Sheet>
         </div>
 
-        <div className="mt-6 flex gap-4 lg:mt-8 lg:gap-7">
-          <aside className="w-80 flex-shrink-0 hidden lg:block self-start">
+        <div className="mt-6 flex gap-6 lg:mt-8 lg:items-start lg:gap-12 xl:gap-14">
+          <aside className="hidden w-80 flex-shrink-0 self-start lg:block">
             <FilterPanel
               filters={filters}
               onFilterChange={(newFilters) => {
@@ -1317,7 +1442,7 @@ export default function App() {
             />
           </aside>
 
-          <main className="flex-1 min-w-0">
+          <main className="min-w-0 flex-1">
             <ProductGrid
               products={sortedItems}
               hasMore={hasMoreItems}

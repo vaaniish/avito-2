@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.profileRouter = void 0;
 const crypto_1 = require("crypto");
+const fs_1 = require("fs");
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
@@ -13,10 +14,37 @@ const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
 const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 const DELIVERY_PROVIDER_LABELS = {
-    cdek: "CDEK",
-    russian_post: "Почта России",
-    ozon: "Ozon Доставка",
+    russian_post: "РџРѕС‡С‚Р° Р РѕСЃСЃРёРё",
+    yandex_pvz: "Яндекс ПВЗ",
 };
+DELIVERY_PROVIDER_LABELS.russian_post = "Почта России";
+DELIVERY_PROVIDER_LABELS.yandex_pvz = "Яндекс ПВЗ";
+const DELIVERY_PROVIDERS = [
+    {
+        code: "yandex_pvz",
+        label: DELIVERY_PROVIDER_LABELS.yandex_pvz,
+    },
+    {
+        code: "russian_post",
+        label: DELIVERY_PROVIDER_LABELS.russian_post,
+    },
+];
+function parseDeliveryProviderFilter(value) {
+    if (typeof value !== "string")
+        return "all";
+    const normalized = value.trim();
+    if (normalized === "all" ||
+        normalized === "yandex_pvz" ||
+        normalized === "russian_post") {
+        return normalized;
+    }
+    return "all";
+}
+function normalizePickupProvider(value) {
+    if (value === "russian_post")
+        return "russian_post";
+    return "yandex_pvz";
+}
 function isRetryableNetworkError(error) {
     if (!(error instanceof TypeError))
         return false;
@@ -47,7 +75,8 @@ function getYooKassaConfig() {
     return {
         shopId,
         secretKey,
-        returnUrl: process.env.YOOKASSA_RETURN_URL?.trim() || "http://127.0.0.1:3000",
+        returnUrl: process.env.YOOKASSA_RETURN_URL?.trim() ||
+            "http://localhost:3000/payment-return",
         apiUrl: process.env.YOOKASSA_API_URL?.trim() || "https://api.yookassa.ru/v3",
     };
 }
@@ -61,7 +90,7 @@ async function createYooKassaPayment(params) {
         },
         capture: true,
         payment_method_data: {
-            type: "bank_card",
+            type: params.paymentMethod === "sbp" ? "sbp" : "bank_card",
         },
         save_payment_method: false,
         confirmation: {
@@ -74,6 +103,7 @@ async function createYooKassaPayment(params) {
     let response = null;
     let lastError = null;
     const maxAttempts = 3;
+    const idempotenceKey = (0, crypto_1.randomUUID)();
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         try {
             response = await fetch(`${config.apiUrl}/payments`, {
@@ -81,7 +111,7 @@ async function createYooKassaPayment(params) {
                 headers: {
                     Authorization: `Basic ${authToken}`,
                     "Content-Type": "application/json",
-                    "Idempotence-Key": (0, crypto_1.randomUUID)(),
+                    "Idempotence-Key": idempotenceKey,
                 },
                 body: payloadBody,
             });
@@ -120,6 +150,39 @@ async function createYooKassaPayment(params) {
     }
     return payload;
 }
+function extractYooKassaPaymentBaseId(paymentIntentId) {
+    const normalized = paymentIntentId.trim();
+    if (!normalized)
+        return "";
+    const separatorIndex = normalized.indexOf(":");
+    if (separatorIndex <= 0)
+        return normalized;
+    return normalized.slice(0, separatorIndex).trim();
+}
+async function fetchYooKassaPaymentById(paymentId) {
+    if (!paymentId.trim()) {
+        return null;
+    }
+    const config = getYooKassaConfig();
+    const authToken = Buffer.from(`${config.shopId}:${config.secretKey}`, "utf8").toString("base64");
+    const response = await fetch(`${config.apiUrl}/payments/${encodeURIComponent(paymentId)}`, {
+        method: "GET",
+        headers: {
+            Authorization: `Basic ${authToken}`,
+        },
+    });
+    if (!response.ok) {
+        return null;
+    }
+    const payload = (await response.json());
+    if (typeof payload !== "object" ||
+        payload === null ||
+        typeof payload.id !== "string" ||
+        typeof payload.status !== "string") {
+        return null;
+    }
+    return payload;
+}
 const YANDEX_GEOCODER_BASE_URL = process.env.YANDEX_GEOCODER_BASE_URL?.trim() ||
     "https://geocode-maps.yandex.ru/1.x/";
 const YANDEX_GEOCODER_API_KEY = process.env.YANDEX_GEOCODER_API_KEY?.trim() ||
@@ -133,75 +196,40 @@ const YANDEX_SUGGEST_API_KEY = process.env.YANDEX_SUGGEST_API_KEY?.trim() ||
     process.env.VITE_YANDEX_MAPS_API_KEY?.trim() ||
     "";
 const YANDEX_SUGGEST_TIMEOUT_MS = Number(process.env.YANDEX_SUGGEST_TIMEOUT_MS ?? "5000");
-const DELIVERY_POINT_TEMPLATES = [
-    {
-        provider: "cdek",
-        name: "CDEK Pickup #1",
-        addressSuffix: "Central st., 12",
-        workHours: "09:00-21:00",
-        etaDays: 2,
-        cost: 280,
-        latOffset: 0.008,
-        lngOffset: 0.006,
-    },
-    {
-        provider: "cdek",
-        name: "CDEK Pickup #2",
-        addressSuffix: "Lenin ave., 54",
-        workHours: "10:00-20:00",
-        etaDays: 3,
-        cost: 260,
-        latOffset: -0.006,
-        lngOffset: 0.01,
-    },
-    {
-        provider: "russian_post",
-        name: "Russian Post Office #1",
-        addressSuffix: "Post st., 7",
-        workHours: "08:00-20:00",
-        etaDays: 4,
-        cost: 220,
-        latOffset: 0.004,
-        lngOffset: -0.009,
-    },
-    {
-        provider: "russian_post",
-        name: "Russian Post Office #2",
-        addressSuffix: "Soviet st., 18",
-        workHours: "09:00-19:00",
-        etaDays: 5,
-        cost: 190,
-        latOffset: -0.01,
-        lngOffset: -0.004,
-    },
-    {
-        provider: "ozon",
-        name: "Ozon Pickup #1",
-        addressSuffix: "Market st., 22",
-        workHours: "10:00-22:00",
-        etaDays: 2,
-        cost: 240,
-        latOffset: 0.011,
-        lngOffset: -0.002,
-    },
-    {
-        provider: "ozon",
-        name: "Ozon Pickup #2",
-        addressSuffix: "Youth st., 5",
-        workHours: "09:00-22:00",
-        etaDays: 1,
-        cost: 310,
-        latOffset: -0.004,
-        lngOffset: 0.014,
-    },
+const RUSSIAN_POST_POINTS_API_URL = process.env.RUSSIAN_POST_POINTS_API_URL?.trim() ||
+    "https://www.pochta.ru/suggestions/v2/postoffices.find-from-rectangle";
+const RUSSIAN_POST_POINTS_TIMEOUT_MS = Number(process.env.RUSSIAN_POST_POINTS_TIMEOUT_MS ?? "15000");
+const RUSSIAN_POST_PAGE_LIMIT = Number(process.env.RUSSIAN_POST_PAGE_LIMIT ?? "50000");
+const RUSSIAN_POST_MAX_PAGES = Number(process.env.RUSSIAN_POST_MAX_PAGES ?? "50");
+const RUSSIAN_POST_SEARCH_PADDING_DEG = Number(process.env.RUSSIAN_POST_SEARCH_PADDING_DEG ?? "0.05");
+const RUSSIAN_POST_FALLBACK_SPAN_LAT = Number(process.env.RUSSIAN_POST_FALLBACK_SPAN_LAT ?? "0.3");
+const RUSSIAN_POST_FALLBACK_SPAN_LNG = Number(process.env.RUSSIAN_POST_FALLBACK_SPAN_LNG ?? "0.3");
+const RUSSIAN_POST_EXT_FILTERS = [
+    "NOT_TEMPORARY_CLOSED",
+    "NOT_PRIVATE",
+    "NOT_CLOSED",
 ];
-function normalizeCityForMap(city) {
-    return city
-        .trim()
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}]+/gu, "-")
-        .replace(/^-+|-+$/g, "") || "location";
-}
+const RUSSIAN_POST_DBF_PATH = process.env.RUSSIAN_POST_DBF_PATH?.trim() || "backend/data/PIndx05.dbf";
+const RUSSIAN_POST_DBF_ENCODING = process.env.RUSSIAN_POST_DBF_ENCODING?.trim() || "ibm866";
+const RUSSIAN_POST_DBF_CITY_MATCH_LIMIT = Number(process.env.RUSSIAN_POST_DBF_CITY_MATCH_LIMIT ?? "5000");
+const RUSSIAN_POST_DBF_GEOCODE_LIMIT = Number(process.env.RUSSIAN_POST_DBF_GEOCODE_LIMIT ?? "2000");
+const RUSSIAN_POST_DBF_GEOCODE_CONCURRENCY = Number(process.env.RUSSIAN_POST_DBF_GEOCODE_CONCURRENCY ?? "20");
+const RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT = Number(process.env.RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT ?? "1500");
+const RUSSIAN_POST_OFFICE_PAGE_BASE_URL = process.env.RUSSIAN_POST_OFFICE_PAGE_BASE_URL?.trim() ||
+    "https://www.pochta.ru/offices";
+const RUSSIAN_POST_OFFICE_TIMEOUT_MS = Number(process.env.RUSSIAN_POST_OFFICE_TIMEOUT_MS ?? "12000");
+const RUSSIAN_POST_OFFICE_CONCURRENCY = Number(process.env.RUSSIAN_POST_OFFICE_CONCURRENCY ?? "12");
+const RUSSIAN_POST_PAGE_SIZE_DEFAULT = Number(process.env.RUSSIAN_POST_PAGE_SIZE_DEFAULT ?? "250");
+const RUSSIAN_POST_PAGE_SIZE_MAX = Number(process.env.RUSSIAN_POST_PAGE_SIZE_MAX ?? "600");
+const YANDEX_DELIVERY_TEST_BASE_URL = process.env.YANDEX_DELIVERY_TEST_BASE_URL?.trim() ||
+    "https://b2b.taxi.tst.yandex.net";
+const YANDEX_DELIVERY_TEST_TOKEN = process.env.YANDEX_DELIVERY_TEST_TOKEN?.trim() ||
+    "";
+const YANDEX_DELIVERY_TEST_TIMEOUT_MS = Number(process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ?? "10000");
+const YANDEX_DELIVERY_TEST_SOURCE_STATION_ID = process.env.YANDEX_DELIVERY_TEST_SOURCE_STATION_ID?.trim() ||
+    "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924";
+const YANDEX_DELIVERY_TEST_MERCHANT_ID = process.env.YANDEX_DELIVERY_TEST_MERCHANT_ID?.trim() ||
+    "290587090cfc4943856851c8c3b2eebf";
 async function fetchWithTimeout(url, init, timeoutMs) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), Number.isFinite(timeoutMs) ? Math.max(2000, timeoutMs) : 7000);
@@ -223,6 +251,30 @@ function parseYandexPos(pos) {
         return null;
     }
     return { lat, lng };
+}
+function parseYandexBounds(rawBounds) {
+    const lowerRaw = rawBounds?.Envelope?.lowerCorner;
+    const upperRaw = rawBounds?.Envelope?.upperCorner;
+    if (!lowerRaw || !upperRaw)
+        return null;
+    const lower = parseYandexPos(lowerRaw);
+    const upper = parseYandexPos(upperRaw);
+    if (!lower || !upper)
+        return null;
+    const minLat = Math.min(lower.lat, upper.lat);
+    const maxLat = Math.max(lower.lat, upper.lat);
+    const minLng = Math.min(lower.lng, upper.lng);
+    const maxLng = Math.max(lower.lng, upper.lng);
+    if (!Number.isFinite(minLat) ||
+        !Number.isFinite(maxLat) ||
+        !Number.isFinite(minLng) ||
+        !Number.isFinite(maxLng)) {
+        return null;
+    }
+    return { minLat, maxLat, minLng, maxLng };
+}
+function clampNumber(value, min, max) {
+    return Math.min(Math.max(value, min), max);
 }
 function extractYandexCity(components) {
     if (!Array.isArray(components))
@@ -349,12 +401,14 @@ async function geocodeLocationByYandex(query) {
                 geoObject?.description?.trim() ||
                 geoObject?.name?.trim() ||
                 normalizedQuery;
+            const bounds = parseYandexBounds(geoObject?.metaDataProperty?.GeocoderMetaData?.boundedBy);
             return {
                 query: normalizedQuery,
                 label,
                 city: parsedCity || normalizedQuery,
                 lat: coords.lat,
                 lng: coords.lng,
+                bounds: bounds ?? undefined,
             };
         }
         return null;
@@ -363,38 +417,1132 @@ async function geocodeLocationByYandex(query) {
         return null;
     }
 }
-function buildFallbackDeliveryPoints(location) {
-    const cityLabel = location.city || location.query;
-    const locationSlug = normalizeCityForMap(cityLabel);
-    return DELIVERY_POINT_TEMPLATES.map((template, index) => ({
-        id: `${locationSlug}-${template.provider}-${index + 1}`,
-        provider: template.provider,
-        providerLabel: DELIVERY_PROVIDER_LABELS[template.provider],
-        name: template.name,
-        address: `${cityLabel}, ${template.addressSuffix}`,
-        city: cityLabel,
-        lat: location.lat + template.latOffset,
-        lng: location.lng + template.lngOffset,
-        workHours: template.workHours,
-        etaDays: template.etaDays,
-        cost: template.cost,
-    }));
+function toFiniteCoordinate(value) {
+    if (typeof value === "number" && Number.isFinite(value))
+        return value;
+    if (typeof value !== "string")
+        return null;
+    const normalized = value.trim().replace(",", ".");
+    if (!normalized)
+        return null;
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
 }
-async function loadExternalDeliveryPoints(_location) {
-    return [];
+function buildRussianPostBounds(location) {
+    const baseBounds = location.bounds ?? {
+        minLat: location.lat - RUSSIAN_POST_FALLBACK_SPAN_LAT,
+        maxLat: location.lat + RUSSIAN_POST_FALLBACK_SPAN_LAT,
+        minLng: location.lng - RUSSIAN_POST_FALLBACK_SPAN_LNG,
+        maxLng: location.lng + RUSSIAN_POST_FALLBACK_SPAN_LNG,
+    };
+    const latHalfSpan = Math.max(Math.abs(baseBounds.maxLat - baseBounds.minLat) / 2 + RUSSIAN_POST_SEARCH_PADDING_DEG, RUSSIAN_POST_FALLBACK_SPAN_LAT);
+    const lngHalfSpan = Math.max(Math.abs(baseBounds.maxLng - baseBounds.minLng) / 2 + RUSSIAN_POST_SEARCH_PADDING_DEG, RUSSIAN_POST_FALLBACK_SPAN_LNG);
+    return {
+        minLat: clampNumber(location.lat - latHalfSpan, -90, 90),
+        maxLat: clampNumber(location.lat + latHalfSpan, -90, 90),
+        minLng: clampNumber(location.lng - lngHalfSpan, -180, 180),
+        maxLng: clampNumber(location.lng + lngHalfSpan, -180, 180),
+    };
 }
-async function getDeliveryPoints(query) {
-    const location = await geocodeLocationByYandex(query);
+let russianPostDbfRowsCache = null;
+const russianPostIndexGeoCache = new Map();
+const russianPostOfficeDetailsCache = new Map();
+const RUSSIAN_MATCH_STOP_WORDS = new Set([
+    "россия",
+    "рф",
+    "область",
+    "обл",
+    "край",
+    "республика",
+    "респ",
+    "город",
+    "г",
+    "район",
+    "рн",
+    "почта",
+    "почтовой",
+    "почтовое",
+    "отделение",
+    "связи",
+    "пункт",
+    "выдачи",
+    "индекс",
+    "пвз",
+]);
+const RUSSIAN_MATCH_STOP_WORDS_NORMALIZED = new Set([
+    "\u0440\u043e\u0441\u0441\u0438\u044f",
+    "\u0440\u0444",
+    "\u043e\u0431\u043b\u0430\u0441\u0442\u044c",
+    "\u043e\u0431\u043b",
+    "\u043a\u0440\u0430\u0439",
+    "\u0440\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+    "\u0440\u0435\u0441\u043f",
+    "\u0433\u043e\u0440\u043e\u0434",
+    "\u0433",
+    "\u0440\u0430\u0439\u043e\u043d",
+    "\u0440\u043d",
+    "\u043f\u043e\u0447\u0442\u0430",
+    "\u043f\u043e\u0447\u0442\u043e\u0432\u043e\u0439",
+    "\u043f\u043e\u0447\u0442\u043e\u0432\u043e\u0435",
+    "\u043e\u0442\u0434\u0435\u043b\u0435\u043d\u0438\u0435",
+    "\u0441\u0432\u044f\u0437\u0438",
+    "\u043f\u0443\u043d\u043a\u0442",
+    "\u0432\u044b\u0434\u0430\u0447\u0438",
+    "\u0438\u043d\u0434\u0435\u043a\u0441",
+    "\u043f\u0432\u0437",
+]);
+function normalizeSearchToken(value) {
+    return value
+        .toLowerCase()
+        .replace(/ё/giu, "е")
+        .replace(/[^\p{L}\p{N}]+/gu, " ")
+        .trim();
+}
+function cleanRussianPostText(value) {
+    return value.replace(/\u0000/gu, "").replace(/\s+/gu, " ").trim();
+}
+function toDbfFieldName(value) {
+    return value.trim().toUpperCase();
+}
+async function loadRussianPostDbfRows() {
+    if (russianPostDbfRowsCache) {
+        return russianPostDbfRowsCache;
+    }
+    try {
+        const fileBuffer = await fs_1.promises.readFile(RUSSIAN_POST_DBF_PATH);
+        if (fileBuffer.length < 64) {
+            russianPostDbfRowsCache = [];
+            return [];
+        }
+        const recordsCount = fileBuffer.readUInt32LE(4);
+        const headerLength = fileBuffer.readUInt16LE(8);
+        const recordLength = fileBuffer.readUInt16LE(10);
+        if (recordsCount <= 0 || headerLength <= 0 || recordLength <= 1) {
+            russianPostDbfRowsCache = [];
+            return [];
+        }
+        const decoder = new TextDecoder(RUSSIAN_POST_DBF_ENCODING, { fatal: false });
+        const fields = [];
+        let cursor = 32;
+        let offset = 1;
+        while (cursor + 32 <= headerLength) {
+            const firstByte = fileBuffer[cursor];
+            if (firstByte === 0x0d)
+                break;
+            const descriptor = fileBuffer.subarray(cursor, cursor + 32);
+            const rawName = descriptor.subarray(0, 11).toString("ascii");
+            const name = toDbfFieldName(rawName.replace(/\u0000/gu, ""));
+            const length = descriptor[16];
+            if (name && length > 0) {
+                fields.push({ name, offset, length });
+            }
+            offset += length;
+            cursor += 32;
+        }
+        const required = {
+            index: fields.find((field) => field.name === "INDEX"),
+            opsName: fields.find((field) => field.name === "OPSNAME"),
+            opsType: fields.find((field) => field.name === "OPSTYPE"),
+            region: fields.find((field) => field.name === "REGION"),
+            area: fields.find((field) => field.name === "AREA"),
+            city: fields.find((field) => field.name === "CITY"),
+            city1: fields.find((field) => field.name === "CITY_1"),
+        };
+        if (!required.index) {
+            russianPostDbfRowsCache = [];
+            return [];
+        }
+        const rows = [];
+        for (let i = 0; i < recordsCount; i += 1) {
+            const base = headerLength + i * recordLength;
+            if (base + recordLength > fileBuffer.length)
+                break;
+            const deletedFlag = fileBuffer[base];
+            if (deletedFlag === 0x2a)
+                continue;
+            const readField = (field) => {
+                if (!field)
+                    return "";
+                const raw = fileBuffer.subarray(base + field.offset, base + field.offset + field.length);
+                return cleanRussianPostText(decoder.decode(raw));
+            };
+            const index = readField(required.index);
+            if (!/^\d{6}$/u.test(index))
+                continue;
+            rows.push({
+                index,
+                opsName: readField(required.opsName),
+                opsType: readField(required.opsType),
+                region: readField(required.region),
+                area: readField(required.area),
+                city: readField(required.city),
+                city1: readField(required.city1),
+            });
+        }
+        russianPostDbfRowsCache = rows;
+        return rows;
+    }
+    catch (error) {
+        console.warn("Failed to read Russian Post DBF indexes:", error);
+        russianPostDbfRowsCache = [];
+        return [];
+    }
+}
+function selectRussianPostDbfRowsByLocation(rows, locationQuery, cityHint = "") {
+    const tokenize = (value) => normalizeSearchToken(value)
+        .split(/\s+/u)
+        .map((token) => token.trim())
+        .filter((token) => token.length >= 3 &&
+        !RUSSIAN_MATCH_STOP_WORDS_NORMALIZED.has(token) &&
+        !RUSSIAN_MATCH_STOP_WORDS.has(token));
+    const normalizedQuery = String(locationQuery ?? "").trim();
+    const embeddedIndexMatch = normalizedQuery.match(/(?:^|\D)(\d{6})(?:\D|$)/u);
+    const indexQuery = /^\d{6}$/u.test(normalizedQuery)
+        ? normalizedQuery
+        : embeddedIndexMatch?.[1] ?? "";
+    if (indexQuery) {
+        return rows.filter((row) => row.index === indexQuery && isRussianPostOfficeType(row.opsType));
+    }
+    const queryTokens = tokenize(normalizedQuery);
+    const hintTokens = tokenize(cityHint);
+    const tokens = Array.from(new Set([...hintTokens, ...queryTokens]));
+    if (tokens.length === 0) {
+        return [];
+    }
+    const exactCityMatches = [];
+    const cityContainsMatches = [];
+    const areaMatches = [];
+    const allowAreaFallback = /(?:\u043e\u0431\u043b|(?:\u043a\u0440\u0430\u0439)|(?:\u0440\u0435\u0441\u043f)|(?:\u0440\u0430\u0439\u043e\u043d)|(?:\u043e\u043a\u0440\u0443\u0433))/iu.test(normalizedQuery);
+    for (const row of rows) {
+        if (!isRussianPostOfficeType(row.opsType)) {
+            continue;
+        }
+        const city = normalizeSearchToken(row.city);
+        const city1 = normalizeSearchToken(row.city1);
+        const area = normalizeSearchToken(row.area);
+        const region = normalizeSearchToken(row.region);
+        const hasExactCity = tokens.some((token) => city === token || city1 === token);
+        if (hasExactCity) {
+            exactCityMatches.push(row);
+            continue;
+        }
+        const hasCityContains = tokens.some((token) => city.startsWith(`${token} `) ||
+            city1.startsWith(`${token} `) ||
+            city.includes(` ${token} `) ||
+            city1.includes(` ${token} `) ||
+            city.endsWith(` ${token}`) ||
+            city1.endsWith(` ${token}`) ||
+            city.includes(token) ||
+            city1.includes(token));
+        if (hasCityContains) {
+            cityContainsMatches.push(row);
+            continue;
+        }
+        const hasAreaMatch = tokens.some((token) => area === token ||
+            area.startsWith(`${token} `) ||
+            region === token ||
+            region.startsWith(`${token} `));
+        if (hasAreaMatch) {
+            areaMatches.push(row);
+        }
+    }
+    const matched = exactCityMatches.length > 0
+        ? exactCityMatches
+        : cityContainsMatches.length > 0
+            ? cityContainsMatches
+            : allowAreaFallback
+                ? areaMatches
+                : [];
+    const uniqueByIndex = new Map();
+    for (const row of matched) {
+        if (!uniqueByIndex.has(row.index)) {
+            uniqueByIndex.set(row.index, row);
+        }
+    }
+    const deduped = Array.from(uniqueByIndex.values()).sort((a, b) => a.index.localeCompare(b.index, "ru"));
+    const limit = Number.isFinite(RUSSIAN_POST_DBF_CITY_MATCH_LIMIT) &&
+        RUSSIAN_POST_DBF_CITY_MATCH_LIMIT > 0
+        ? Math.floor(RUSSIAN_POST_DBF_CITY_MATCH_LIMIT)
+        : 5000;
+    return deduped.slice(0, limit);
+}
+function buildRussianPostDbfAddress(row, fallbackCity) {
+    const city = row.city || row.city1 || fallbackCity;
+    return [row.region, row.area, city, row.opsName]
+        .map((value) => cleanRussianPostText(value))
+        .filter(Boolean)
+        .join(", ");
+}
+function buildRussianPostDbfName(row) {
+    const type = cleanRussianPostText(row.opsType).toLowerCase();
+    const prefix = type.includes("почтомат")
+        ? "Почтомат"
+        : type.includes("пункт")
+            ? "Пункт выдачи"
+            : "Отделение";
+    return `${prefix} № ${row.index}`;
+}
+function isRussianPostOfficeType(value) {
+    const normalized = cleanRussianPostText(value).toUpperCase();
+    if (!normalized)
+        return false;
+    if (normalized.includes("POSTAMAT") ||
+        normalized.includes("PICKUP") ||
+        normalized.includes("PVZ") ||
+        normalized.includes("POINT")) {
+        return false;
+    }
+    if (normalized === "OPS" || normalized === "GOPS" || normalized === "SOPS") {
+        return true;
+    }
+    if (normalized.includes("ПОЧТОМАТ") || normalized.includes("ПУНКТ")) {
+        return false;
+    }
+    return (normalized === "О" ||
+        normalized === "ОПС" ||
+        normalized === "ГОПС" ||
+        normalized === "СОПС");
+}
+function isLikelyRussianCoordinate(lat, lng) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng))
+        return false;
+    if (lat < 41 || lat > 82)
+        return false;
+    return lng >= 19 || lng <= -160;
+}
+function parseRussianPostOfficeName(index, typeCode) {
+    const normalizedType = cleanRussianPostText(typeCode).toUpperCase();
+    if (normalizedType.includes("ПОЧТОМАТ")) {
+        return `Почтомат № ${index}`;
+    }
+    if (normalizedType.includes("ПУНКТ")) {
+        return `Пункт выдачи № ${index}`;
+    }
+    return `Отделение № ${index}`;
+}
+function extractNextDataJsonFromHtml(html) {
+    const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/u);
+    if (!match?.[1])
+        return null;
+    try {
+        return JSON.parse(match[1]);
+    }
+    catch {
+        return null;
+    }
+}
+async function loadRussianPostOfficeDetailsByIndex(index) {
+    if (russianPostOfficeDetailsCache.has(index)) {
+        return russianPostOfficeDetailsCache.get(index) ?? null;
+    }
+    const officeUrl = `${RUSSIAN_POST_OFFICE_PAGE_BASE_URL}/${encodeURIComponent(index)}`;
+    try {
+        const response = await fetchWithTimeout(officeUrl, {
+            method: "GET",
+            headers: {
+                Accept: "text/html",
+            },
+        }, RUSSIAN_POST_OFFICE_TIMEOUT_MS);
+        if (!response.ok) {
+            if (response.status === 404) {
+                russianPostOfficeDetailsCache.set(index, null);
+            }
+            return null;
+        }
+        const html = await response.text();
+        const payload = extractNextDataJsonFromHtml(html);
+        const office = payload?.props?.pageProps?.office;
+        if (!office || typeof office !== "object") {
+            return null;
+        }
+        const lat = toFiniteCoordinate(office.latitude);
+        const lng = toFiniteCoordinate(office.longitude);
+        if (lat === null || lng === null || !isLikelyRussianCoordinate(lat, lng)) {
+            return null;
+        }
+        const postalCode = normalizeTextField(office.postalCode) || index;
+        const city = normalizeTextField(office.settlement) ||
+            normalizeTextField(office.address?.settlementOrCity) ||
+            normalizeTextField(office.address?.city);
+        const address = normalizeTextField(office.address?.fullAddress) ||
+            normalizeTextField(office.addressSource) ||
+            normalizeTextField(office.address?.shortAddress);
+        const details = {
+            index: postalCode,
+            typeCode: normalizeTextField(office.typeCode),
+            name: parseRussianPostOfficeName(postalCode, normalizeTextField(office.typeCode)),
+            address,
+            city,
+            lat,
+            lng,
+            workHours: mapRussianPostWorkHoursSafe(office.workingHours),
+        };
+        russianPostOfficeDetailsCache.set(index, details);
+        return details;
+    }
+    catch {
+        return null;
+    }
+}
+async function geocodeRussianPostIndex(index, cityHint) {
+    const cached = russianPostIndexGeoCache.get(index);
+    if (cached)
+        return cached;
+    const query = cityHint
+        ? `${index}, ${cityHint}, Россия`
+        : `${index}, Россия`;
+    const fallbackQuery = cityHint
+        ? `${index}, ${cityHint}, Russia`
+        : `${index}, Russia`;
+    const location = (await geocodeLocationByYandex(query)) ??
+        (query === fallbackQuery ? null : await geocodeLocationByYandex(fallbackQuery));
+    if (!location)
+        return null;
+    if (!isLikelyRussianCoordinate(location.lat, location.lng))
+        return null;
+    const mapped = {
+        lat: location.lat,
+        lng: location.lng,
+        city: location.city,
+        label: location.label,
+    };
+    russianPostIndexGeoCache.set(index, mapped);
+    return mapped;
+}
+async function mapWithConcurrency(items, concurrency, worker) {
+    if (items.length === 0)
+        return;
+    const safeConcurrency = Number.isFinite(concurrency) && concurrency > 0
+        ? Math.floor(concurrency)
+        : 10;
+    let nextIndex = 0;
+    const runners = Array.from({ length: Math.min(safeConcurrency, items.length) }, async () => {
+        while (nextIndex < items.length) {
+            const current = items[nextIndex];
+            nextIndex += 1;
+            await worker(current);
+        }
+    });
+    await Promise.all(runners);
+}
+function mapRussianPostWorkHours(value) {
+    if (!Array.isArray(value) || value.length === 0)
+        return "";
+    const currentWeekday = (() => {
+        const day = new Date().getDay();
+        return day === 0 ? 7 : day;
+    })();
+    const today = value.find((item) => item &&
+        typeof item === "object" &&
+        Number(item.weekDayId) === currentWeekday);
+    const begin = normalizeTextField(today?.beginWorkTime);
+    const end = normalizeTextField(today?.endWorkTime);
+    if (begin && end) {
+        if ((begin === "00:00" || begin === "00:00:00") &&
+            (end === "00:00" || end === "00:00:00")) {
+            return "РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ";
+        }
+        return `${begin}-${end}`;
+    }
+    if (begin || end)
+        return begin || end;
+    return "РџРѕ СЂР°СЃРїРёСЃР°РЅРёСЋ";
+}
+function mapRussianPostWorkHoursSafe(value) {
+    if (!Array.isArray(value) || value.length === 0)
+        return "По расписанию";
+    const currentWeekday = (() => {
+        const day = new Date().getDay();
+        return day === 0 ? 7 : day;
+    })();
+    const today = value.find((item) => item &&
+        typeof item === "object" &&
+        Number(item.weekDayId) === currentWeekday);
+    const begin = normalizeTextField(today?.beginWorkTime);
+    const end = normalizeTextField(today?.endWorkTime);
+    if (begin && end) {
+        if ((begin === "00:00" || begin === "00:00:00") &&
+            (end === "00:00" || end === "00:00:00")) {
+            return "Круглосуточно";
+        }
+        return `${begin}-${end}`;
+    }
+    if (begin || end)
+        return begin || end;
+    return "По расписанию";
+}
+function buildRussianPostOfficeName(postalCode) {
+    return postalCode
+        ? `Отделение № ${postalCode}`
+        : "Отделение Почты России";
+}
+async function loadRussianPostDeliveryPoints(location) {
+    const bounds = buildRussianPostBounds(location);
+    const safeLimit = Number.isFinite(RUSSIAN_POST_PAGE_LIMIT) && RUSSIAN_POST_PAGE_LIMIT > 0
+        ? Math.min(Math.floor(RUSSIAN_POST_PAGE_LIMIT), 50000)
+        : 50000;
+    const maxPages = Number.isFinite(RUSSIAN_POST_MAX_PAGES) && RUSSIAN_POST_MAX_PAGES > 0
+        ? Math.floor(RUSSIAN_POST_MAX_PAGES)
+        : 50;
+    const points = [];
+    const seen = new Set();
+    let offset = 0;
+    for (let page = 0; page < maxPages; page += 1) {
+        const response = await fetchWithTimeout(RUSSIAN_POST_POINTS_API_URL, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                topLeftPoint: {
+                    latitude: bounds.maxLat,
+                    longitude: bounds.minLng,
+                },
+                bottomRightPoint: {
+                    latitude: bounds.minLat,
+                    longitude: bounds.maxLng,
+                },
+                precision: 11,
+                onlyCoordinate: false,
+                extFilters: RUSSIAN_POST_EXT_FILTERS,
+                offset,
+                limit: safeLimit,
+            }),
+        }, RUSSIAN_POST_POINTS_TIMEOUT_MS);
+        if (!response.ok) {
+            throw new Error(`Failed to load Russian Post points (${response.status})`);
+        }
+        const payload = (await response.json());
+        const postOffices = Array.isArray(payload.postOffices) ? payload.postOffices : [];
+        if (postOffices.length === 0)
+            break;
+        for (const rawOffice of postOffices) {
+            if (!rawOffice || typeof rawOffice !== "object")
+                continue;
+            const office = rawOffice;
+            const lat = toFiniteCoordinate(office.latitude) ??
+                toFiniteCoordinate(office.lat);
+            const lng = toFiniteCoordinate(office.longitude) ??
+                toFiniteCoordinate(office.lng);
+            if (lat === null || lng === null || !isLikelyRussianCoordinate(lat, lng))
+                continue;
+            const postalCode = normalizeTextField(office.postalCode);
+            const address = normalizeTextField(office.addressSource) ||
+                normalizeTextField(office.address?.fullAddress) ||
+                normalizeTextField(office.address?.shortAddress);
+            if (!address)
+                continue;
+            const city = normalizeTextField(office.settlement) ||
+                normalizeTextField(office.address?.settlementOrCity) ||
+                normalizeTextField(office.address?.city) ||
+                location.city ||
+                location.query;
+            const officeId = normalizeTextField(office.officeId) || normalizeTextField(office.id);
+            const id = postalCode || officeId || `${lat.toFixed(6)}:${lng.toFixed(6)}`;
+            const dedupeKey = postalCode
+                ? `postal:${postalCode}`
+                : officeId
+                    ? `office:${officeId}`
+                    : `${lat.toFixed(6)}|${lng.toFixed(6)}`;
+            if (seen.has(dedupeKey))
+                continue;
+            seen.add(dedupeKey);
+            points.push({
+                id,
+                provider: "russian_post",
+                providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+                name: postalCode ? `РћС‚РґРµР»РµРЅРёРµ в„– ${postalCode}` : "РћС‚РґРµР»РµРЅРёРµ РџРѕС‡С‚С‹ Р РѕСЃСЃРёРё",
+                address,
+                city,
+                lat,
+                lng,
+                workHours: mapRussianPostWorkHoursSafe(office.workingHours),
+                etaDays: 2,
+                cost: 0,
+            });
+            const createdPoint = points[points.length - 1];
+            if (createdPoint) {
+                createdPoint.providerLabel = DELIVERY_PROVIDER_LABELS.russian_post;
+                createdPoint.name = buildRussianPostOfficeName(postalCode);
+            }
+        }
+        if (postOffices.length < safeLimit) {
+            break;
+        }
+        offset += postOffices.length;
+    }
+    const dbfRows = await loadRussianPostDbfRows();
+    if (dbfRows.length === 0) {
+        return points;
+    }
+    const matchedDbfRows = selectRussianPostDbfRowsByLocation(dbfRows, location.query || location.city, location.city);
+    if (matchedDbfRows.length === 0) {
+        return points;
+    }
+    const byIndex = new Map();
+    const extraPoints = [];
+    for (const point of points) {
+        if (/^\d{6}$/u.test(point.id)) {
+            byIndex.set(point.id, point);
+        }
+        else {
+            extraPoints.push(point);
+        }
+    }
+    const missingRows = [];
+    for (const row of matchedDbfRows) {
+        const existing = byIndex.get(row.index);
+        if (existing) {
+            existing.name = buildRussianPostDbfName(row);
+            if (!existing.address || existing.address.length < 8) {
+                existing.address = buildRussianPostDbfAddress(row, location.city);
+            }
+            continue;
+        }
+        missingRows.push(row);
+    }
+    const officeFetchLimit = Number.isFinite(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT) &&
+        RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT > 0
+        ? Math.floor(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT)
+        : 1500;
+    const rowsForOfficeFetch = missingRows.slice(0, officeFetchLimit);
+    const unresolvedRows = [];
+    await mapWithConcurrency(rowsForOfficeFetch, RUSSIAN_POST_OFFICE_CONCURRENCY, async (row) => {
+        const office = await loadRussianPostOfficeDetailsByIndex(row.index);
+        if (!office) {
+            unresolvedRows.push(row);
+            return;
+        }
+        byIndex.set(row.index, {
+            id: row.index,
+            provider: "russian_post",
+            providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+            name: office.name || buildRussianPostDbfName(row),
+            address: office.address ||
+                buildRussianPostDbfAddress(row, office.city || location.city),
+            city: office.city || row.city || row.city1 || location.city,
+            lat: office.lat,
+            lng: office.lng,
+            workHours: office.workHours || "По расписанию",
+            etaDays: 2,
+            cost: 0,
+        });
+    });
+    const geocodeLimit = Number.isFinite(RUSSIAN_POST_DBF_GEOCODE_LIMIT) &&
+        RUSSIAN_POST_DBF_GEOCODE_LIMIT > 0
+        ? Math.floor(RUSSIAN_POST_DBF_GEOCODE_LIMIT)
+        : 2000;
+    const rowsForGeocoding = unresolvedRows.slice(0, geocodeLimit);
+    await mapWithConcurrency(rowsForGeocoding, RUSSIAN_POST_DBF_GEOCODE_CONCURRENCY, async (row) => {
+        const locationByIndex = await geocodeRussianPostIndex(row.index, row.city || row.city1 || location.city);
+        if (!locationByIndex)
+            return;
+        const point = {
+            id: row.index,
+            provider: "russian_post",
+            providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+            name: buildRussianPostDbfName(row),
+            address: buildRussianPostDbfAddress(row, locationByIndex.city || location.city) ||
+                locationByIndex.label,
+            city: row.city || row.city1 || locationByIndex.city || location.city,
+            lat: locationByIndex.lat,
+            lng: locationByIndex.lng,
+            workHours: "По расписанию",
+            etaDays: 2,
+            cost: 0,
+        };
+        byIndex.set(row.index, point);
+    });
+    const merged = [...byIndex.values(), ...extraPoints];
+    merged.sort((a, b) => a.id.localeCompare(b.id, "ru"));
+    return merged;
+}
+async function loadRussianPostDeliveryPointsDbf(params) {
+    const dbfRows = await loadRussianPostDbfRows();
+    if (dbfRows.length === 0) {
+        return { points: [], total: 0, nextCursor: null };
+    }
+    const matchedDbfRows = selectRussianPostDbfRowsByLocation(dbfRows, params.query, params.cityHint ?? "");
+    if (matchedDbfRows.length === 0) {
+        return { points: [], total: 0, nextCursor: null };
+    }
+    const safeCursorRaw = Number(params.cursor ?? 0);
+    const safeCursor = Number.isFinite(safeCursorRaw) && safeCursorRaw > 0
+        ? Math.floor(safeCursorRaw)
+        : 0;
+    const defaultPageSize = Number.isFinite(RUSSIAN_POST_PAGE_SIZE_DEFAULT) && RUSSIAN_POST_PAGE_SIZE_DEFAULT > 0
+        ? Math.floor(RUSSIAN_POST_PAGE_SIZE_DEFAULT)
+        : 250;
+    const maxPageSize = Number.isFinite(RUSSIAN_POST_PAGE_SIZE_MAX) && RUSSIAN_POST_PAGE_SIZE_MAX > 0
+        ? Math.floor(RUSSIAN_POST_PAGE_SIZE_MAX)
+        : 600;
+    const requestedLimitRaw = Number(params.limit ?? defaultPageSize);
+    const safeLimit = Number.isFinite(requestedLimitRaw) && requestedLimitRaw > 0
+        ? Math.min(Math.floor(requestedLimitRaw), maxPageSize)
+        : defaultPageSize;
+    const start = Math.min(safeCursor, matchedDbfRows.length);
+    const end = Math.min(start + safeLimit, matchedDbfRows.length);
+    const rowsChunk = matchedDbfRows.slice(start, end);
+    const officeFetchLimit = Number.isFinite(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT) &&
+        RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT > 0
+        ? Math.floor(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT)
+        : 1500;
+    const rowsForOfficeFetch = rowsChunk.slice(0, officeFetchLimit);
+    const pointsByIndex = new Map();
+    await mapWithConcurrency(rowsForOfficeFetch, RUSSIAN_POST_OFFICE_CONCURRENCY, async (row) => {
+        const office = await loadRussianPostOfficeDetailsByIndex(row.index);
+        if (!office)
+            return;
+        if (!isRussianPostOfficeType(office.typeCode || row.opsType))
+            return;
+        pointsByIndex.set(row.index, {
+            id: row.index,
+            provider: "russian_post",
+            providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+            name: office.name || buildRussianPostDbfName(row),
+            address: office.address || buildRussianPostDbfAddress(row, office.city || params.cityHint || ""),
+            city: office.city || row.city || row.city1 || params.cityHint || "",
+            lat: office.lat,
+            lng: office.lng,
+            workHours: office.workHours || "По расписанию",
+            etaDays: 2,
+            cost: 0,
+        });
+    });
+    const points = Array.from(pointsByIndex.values()).sort((a, b) => a.id.localeCompare(b.id, "ru"));
+    const nextCursor = end < matchedDbfRows.length ? end : null;
+    return {
+        points,
+        total: matchedDbfRows.length,
+        nextCursor,
+    };
+}
+function formatYandexScheduleRestriction(rawRestriction) {
+    if (!rawRestriction || typeof rawRestriction !== "object")
+        return "";
+    const restriction = rawRestriction;
+    const days = Array.isArray(restriction.days)
+        ? restriction.days
+            .map((day) => Number(day))
+            .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7)
+        : [];
+    const fromHours = Number(restriction.time_from?.hours);
+    const fromMinutes = Number(restriction.time_from?.minutes);
+    const toHours = Number(restriction.time_to?.hours);
+    const toMinutes = Number(restriction.time_to?.minutes);
+    if (!Number.isFinite(fromHours) ||
+        !Number.isFinite(fromMinutes) ||
+        !Number.isFinite(toHours) ||
+        !Number.isFinite(toMinutes)) {
+        return "";
+    }
+    const dayLabel = days.length > 0
+        ? `${Math.min(...days)}-${Math.max(...days)}`
+        : "1-7";
+    const fromLabel = `${String(fromHours).padStart(2, "0")}:${String(fromMinutes).padStart(2, "0")}`;
+    const toLabel = `${String(toHours).padStart(2, "0")}:${String(toMinutes).padStart(2, "0")}`;
+    return `${dayLabel} ${fromLabel}-${toLabel}`;
+}
+function mapYandexPickupPoints(rawPoints, location) {
+    const entries = Array.isArray(rawPoints) ? rawPoints : [];
+    const points = [];
+    const seen = new Set();
+    for (const rawPoint of entries) {
+        if (!rawPoint || typeof rawPoint !== "object")
+            continue;
+        const point = rawPoint;
+        if (point.available_for_dropoff !== true)
+            continue;
+        const id = normalizeTextField(point.id);
+        if (!id || seen.has(id))
+            continue;
+        const lat = toFiniteCoordinate(point.position?.latitude);
+        const lng = toFiniteCoordinate(point.position?.longitude);
+        const address = normalizeTextField(point.address?.full_address);
+        if (lat === null || lng === null || !address)
+            continue;
+        seen.add(id);
+        const city = normalizeTextField(point.address?.locality) ||
+            location.city ||
+            location.query;
+        const restrictions = Array.isArray(point.schedule?.restrictions)
+            ? point.schedule?.restrictions ?? []
+            : [];
+        const workHours = restrictions
+            .map((entry) => formatYandexScheduleRestriction(entry))
+            .filter(Boolean)
+            .slice(0, 3)
+            .join("; ") || "По расписанию ПВЗ";
+        points.push({
+            id,
+            provider: "yandex_pvz",
+            providerLabel: DELIVERY_PROVIDER_LABELS.yandex_pvz,
+            name: normalizeTextField(point.name) || "Пункт выдачи заказов Яндекса",
+            address,
+            city,
+            lat: lat ?? 0,
+            lng: lng ?? 0,
+            workHours,
+            etaDays: 1,
+            cost: 500,
+        });
+    }
+    return points;
+}
+async function loadYandexPickupPoints(location) {
+    if (!YANDEX_DELIVERY_TEST_TOKEN) {
+        throw new Error("Yandex delivery test token is not configured");
+    }
+    const response = await fetchWithTimeout(`${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/pickup-points/list`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
+            "Accept-Language": "ru",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            type: "pickup_point",
+            payment_method: "already_paid",
+            available_for_dropoff: true,
+            operator_ids: ["market_l4g"],
+        }),
+    }, YANDEX_DELIVERY_TEST_TIMEOUT_MS);
+    if (!response.ok) {
+        throw new Error(`Failed to load Yandex pickup points (${response.status})`);
+    }
+    const payload = (await response.json());
+    return mapYandexPickupPoints(payload.points, location);
+}
+const PICKUP_POINT_TAG_RE = /\[PICKUP_ID:([^\]]+)\]/u;
+const PICKUP_PROVIDER_TAG_RE = /\[PICKUP_PROVIDER:([^\]]+)\]/u;
+function createYandexDeliveryHeaders() {
+    return {
+        Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
+        "Accept-Language": "ru",
+        "Content-Type": "application/json",
+    };
+}
+function formatUtcIsoWithMicros(value) {
+    const base = value.toISOString().replace("Z", "");
+    return `${base.replace(/\.\d{3}$/u, ".000000")}Z`;
+}
+async function fetchYandexRequestInfoById(requestId) {
+    if (!requestId.trim())
+        return null;
+    if (!YANDEX_DELIVERY_TEST_TOKEN)
+        return null;
+    const url = new URL(`${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`);
+    url.searchParams.set("request_id", requestId);
+    url.searchParams.set("slim", "true");
+    const response = await fetchWithTimeout(url.toString(), {
+        method: "GET",
+        headers: createYandexDeliveryHeaders(),
+    }, YANDEX_DELIVERY_TEST_TIMEOUT_MS);
+    if (!response.ok)
+        return null;
+    const payload = (await response.json());
+    return {
+        requestId: typeof payload.request_id === "string" ? payload.request_id.trim() : null,
+        status: payload.state && typeof payload.state.status === "string"
+            ? payload.state.status.trim()
+            : "CREATED",
+        sharingUrl: typeof payload.sharing_url === "string"
+            ? payload.sharing_url.trim()
+            : null,
+    };
+}
+async function createYandexDeliveryRequestForOrder(params) {
+    if (!YANDEX_DELIVERY_TEST_TOKEN)
+        return null;
+    const now = new Date();
+    const intervalFrom = new Date(now.getTime() + 10 * 60 * 1000);
+    const intervalTo = new Date(intervalFrom.getTime() + 60 * 60 * 1000);
+    const buyerNameParts = params.buyerName
+        .split(/\s+/u)
+        .map((part) => part.trim())
+        .filter(Boolean);
+    const firstName = buyerNameParts[0] || "Покупатель";
+    const lastName = buyerNameParts.slice(1).join(" ") || "Ecomm";
+    const createBody = {
+        info: {
+            operator_request_id: params.orderPublicId,
+            merchant_id: YANDEX_DELIVERY_TEST_MERCHANT_ID,
+            comment: `Order ${params.orderPublicId} (sandbox)`,
+        },
+        source: {
+            platform_station: {
+                platform_id: YANDEX_DELIVERY_TEST_SOURCE_STATION_ID,
+            },
+            interval_utc: {
+                from: formatUtcIsoWithMicros(intervalFrom),
+                to: formatUtcIsoWithMicros(intervalTo),
+            },
+        },
+        destination: {
+            type: "platform_station",
+            platform_station: {
+                platform_id: params.pickupPointId,
+            },
+            custom_location: null,
+            interval_utc: null,
+        },
+        items: [
+            {
+                count: 1,
+                name: `Order ${params.orderPublicId}`,
+                article: params.orderPublicId,
+                billing_details: {
+                    inn: "9715386101",
+                    nds: 22,
+                    unit_price: params.totalPrice,
+                    assessed_unit_price: params.totalPrice,
+                },
+                physical_dims: {
+                    dx: 10,
+                    dy: 10,
+                    dz: 10,
+                    predefined_volume: 20,
+                },
+                place_barcode: `PL-${params.orderPublicId}`,
+                cargo_types: "[\"80\"]",
+                fitting: false,
+            },
+        ],
+        places: [
+            {
+                physical_dims: {
+                    weight_gross: 100,
+                    dx: 10,
+                    dy: 10,
+                    dz: 10,
+                },
+                barcode: `PL-${params.orderPublicId}`,
+            },
+        ],
+        billing_info: {
+            payment_method: "already_paid",
+            delivery_cost: 0,
+        },
+        recipient_info: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: "+79990000000",
+            email: params.buyerEmail || "buyer@example.com",
+        },
+        last_mile_policy: "self_pickup",
+        particular_items_refuse: false,
+        forbid_unboxing: false,
+    };
+    const createResponse = await fetchWithTimeout(`${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/create?send_unix=false`, {
+        method: "POST",
+        headers: createYandexDeliveryHeaders(),
+        body: JSON.stringify(createBody),
+    }, YANDEX_DELIVERY_TEST_TIMEOUT_MS);
+    if (!createResponse.ok) {
+        return null;
+    }
+    const createPayload = (await createResponse.json());
+    const requestId = typeof createPayload.request_id === "string"
+        ? createPayload.request_id.trim()
+        : "";
+    if (!requestId)
+        return null;
+    const info = await fetchYandexRequestInfoById(requestId);
+    if (info)
+        return info;
+    return {
+        requestId,
+        status: createPayload.state && typeof createPayload.state.status === "string"
+            ? createPayload.state.status.trim()
+            : "CREATED",
+        sharingUrl: typeof createPayload.sharing_url === "string"
+            ? createPayload.sharing_url.trim()
+            : null,
+    };
+}
+function appendPickupPointMetaToAddress(address, pickupPointId, pickupProvider) {
+    const base = address.trim();
+    const pointId = (pickupPointId ?? "").trim();
+    const tags = [];
+    if (pointId) {
+        tags.push(`[PICKUP_ID:${pointId}]`);
+    }
+    tags.push(`[PICKUP_PROVIDER:${pickupProvider}]`);
+    const cleanBase = base
+        .replace(PICKUP_POINT_TAG_RE, "")
+        .replace(PICKUP_PROVIDER_TAG_RE, "")
+        .trim();
+    return [cleanBase, ...tags].filter(Boolean).join(" ").trim();
+}
+function extractPickupPointIdFromAddress(address) {
+    const raw = normalizeTextField(address);
+    if (!raw)
+        return "";
+    const match = raw.match(PICKUP_POINT_TAG_RE);
+    if (!match)
+        return "";
+    return String(match[1] ?? "").trim();
+}
+function extractPickupProviderFromAddress(address) {
+    const raw = normalizeTextField(address);
+    if (!raw)
+        return "yandex_pvz";
+    const match = raw.match(PICKUP_PROVIDER_TAG_RE);
+    if (!match)
+        return "yandex_pvz";
+    return normalizePickupProvider(String(match[1] ?? "").trim());
+}
+function stripPickupPointTag(address) {
+    const raw = normalizeTextField(address);
+    if (!raw)
+        return "";
+    return raw
+        .replace(PICKUP_POINT_TAG_RE, "")
+        .replace(PICKUP_PROVIDER_TAG_RE, "")
+        .trim();
+}
+async function ensureYandexTrackingForOrders(orderIds) {
+    if (orderIds.length === 0)
+        return;
+    const orders = await prisma_1.prisma.marketOrder.findMany({
+        where: {
+            id: { in: orderIds },
+            delivery_type: "DELIVERY",
+            tracking_number: null,
+            status: { in: ["PAID", "PREPARED", "PROCESSING"] },
+        },
+        include: {
+            buyer: {
+                select: {
+                    name: true,
+                    email: true,
+                },
+            },
+        },
+    });
+    for (const order of orders) {
+        const pickupProvider = extractPickupProviderFromAddress(order.delivery_address);
+        if (pickupProvider !== "yandex_pvz") {
+            await prisma_1.prisma.marketOrder.update({
+                where: { id: order.id },
+                data: {
+                    tracking_provider: pickupProvider,
+                },
+            });
+            continue;
+        }
+        const pickupPointId = extractPickupPointIdFromAddress(order.delivery_address);
+        if (!pickupPointId) {
+            continue;
+        }
+        let createdRequest = null;
+        try {
+            createdRequest = await createYandexDeliveryRequestForOrder({
+                orderPublicId: order.public_id,
+                totalPrice: order.total_price,
+                pickupPointId,
+                buyerName: order.buyer.name,
+                buyerEmail: order.buyer.email,
+            });
+        }
+        catch (error) {
+            console.warn(`Unable to create Yandex delivery request for ${order.public_id}:`, error);
+        }
+        const fallbackTrackingNumber = `YND-${order.public_id}`;
+        const trackingNumber = createdRequest?.requestId || fallbackTrackingNumber;
+        const trackingUrl = createdRequest?.sharingUrl ||
+            `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
+        await prisma_1.prisma.marketOrder.update({
+            where: { id: order.id },
+            data: {
+                tracking_provider: "yandex_pvz",
+                tracking_number: trackingNumber,
+                tracking_url: trackingUrl,
+                delivery_ext_status: createdRequest?.status || "CREATED",
+            },
+        });
+    }
+}
+async function getDeliveryPoints(query, providerFilter = "all", options) {
+    const normalizedQuery = query.trim();
+    if (providerFilter === "russian_post") {
+        const cursorRaw = Number(options?.cursor ?? 0);
+        const safeCursor = Number.isFinite(cursorRaw) && cursorRaw > 0 ? Math.floor(cursorRaw) : 0;
+        const russianPost = await loadRussianPostDeliveryPointsDbf({
+            query: normalizedQuery,
+            cityHint: normalizedQuery,
+            cursor: safeCursor,
+            limit: options?.limit,
+        });
+        if (russianPost.total === 0) {
+            throw new Error("Delivery points not available");
+        }
+        return {
+            location: {
+                query: normalizedQuery,
+                label: normalizedQuery,
+                city: russianPost.points[0]?.city || normalizedQuery,
+                lat: russianPost.points[0]?.lat ?? 55.751574,
+                lng: russianPost.points[0]?.lng ?? 37.573856,
+            },
+            points: russianPost.points,
+            pagination: {
+                total: russianPost.total,
+                cursor: safeCursor,
+                nextCursor: russianPost.nextCursor,
+                hasMore: russianPost.nextCursor !== null,
+            },
+        };
+    }
+    const geocodeQuery = /^\d{6}$/u.test(normalizedQuery)
+        ? `Россия, ${normalizedQuery}`
+        : normalizedQuery;
+    const location = await geocodeLocationByYandex(geocodeQuery);
     if (!location) {
         throw new Error("Location not found");
     }
-    const externalPoints = await loadExternalDeliveryPoints(location);
-    if (externalPoints.length > 0) {
-        return { location, points: externalPoints };
+    const loaders = [];
+    if (providerFilter === "all" || providerFilter === "yandex_pvz") {
+        loaders.push({
+            provider: "yandex_pvz",
+            run: () => loadYandexPickupPoints(location),
+        });
+    }
+    if (providerFilter === "all") {
+        loaders.push({
+            provider: "russian_post",
+            run: async () => (await loadRussianPostDeliveryPointsDbf({
+                query: normalizedQuery,
+                cityHint: location.city,
+                cursor: 0,
+                limit: Math.min(Number.isFinite(RUSSIAN_POST_PAGE_SIZE_DEFAULT)
+                    ? Math.floor(RUSSIAN_POST_PAGE_SIZE_DEFAULT)
+                    : 250, 300),
+            })).points,
+        });
+    }
+    const results = await Promise.allSettled(loaders.map((loader) => loader.run()));
+    const points = [];
+    for (let index = 0; index < results.length; index += 1) {
+        const result = results[index];
+        const loader = loaders[index];
+        if (result.status === "fulfilled") {
+            points.push(...result.value);
+            continue;
+        }
+        if (loader.provider === "yandex_pvz") {
+            console.warn("Failed to load Yandex pickup points:", result.reason);
+            continue;
+        }
+        console.warn("Failed to load Russian Post pickup points:", result.reason);
+    }
+    if (points.length === 0) {
+        throw new Error("Delivery points not available");
     }
     return {
         location,
-        points: buildFallbackDeliveryPoints(location),
+        points,
     };
 }
 function normalizeTextField(value) {
@@ -409,9 +1557,9 @@ function parseLegacyBuilding(value) {
             entrance: "",
         };
     }
-    const houseMatch = raw.match(/(?:^|,\s*)(?:д(?:ом)?\.?)\s*([^,]+)/iu);
-    const apartmentMatch = raw.match(/(?:^|,\s*)(?:кв(?:артира)?\.?)\s*([^,]+)/iu);
-    const entranceMatch = raw.match(/(?:^|,\s*)(?:под[ъь]?езд)\s*([^,]+)/iu);
+    const houseMatch = raw.match(/(?:^|,\s*)(?:Рґ(?:РѕРј)?\.?)\s*([^,]+)/iu);
+    const apartmentMatch = raw.match(/(?:^|,\s*)(?:РєРІ(?:Р°СЂС‚РёСЂР°)?\.?)\s*([^,]+)/iu);
+    const entranceMatch = raw.match(/(?:^|,\s*)(?:РїРѕРґ[СЉСЊ]?РµР·Рґ)\s*([^,]+)/iu);
     const fallbackHouse = raw.split(",")[0]?.trim() ?? "";
     return {
         house: (houseMatch?.[1] ?? fallbackHouse).trim(),
@@ -426,9 +1574,9 @@ function buildAddressFullAddress(parts) {
     const house = normalizeTextField(parts.house);
     const apartment = normalizeTextField(parts.apartment);
     const entrance = normalizeTextField(parts.entrance);
-    const housePart = house ? `д. ${house}` : "";
-    const entrancePart = entrance ? `подъезд ${entrance}` : "";
-    const apartmentPart = apartment ? `кв. ${apartment}` : "";
+    const housePart = house ? `Рґ. ${house}` : "";
+    const entrancePart = entrance ? `РїРѕРґСЉРµР·Рґ ${entrance}` : "";
+    const apartmentPart = apartment ? `РєРІ. ${apartment}` : "";
     return [region, city, street, housePart, entrancePart, apartmentPart]
         .filter(Boolean)
         .join(", ");
@@ -438,9 +1586,9 @@ function buildAddressBuildingLabel(parts) {
     const apartment = normalizeTextField(parts.apartment);
     const entrance = normalizeTextField(parts.entrance);
     return [
-        house ? `д. ${house}` : "",
-        entrance ? `подъезд ${entrance}` : "",
-        apartment ? `кв. ${apartment}` : "",
+        house ? `Рґ. ${house}` : "",
+        entrance ? `РїРѕРґСЉРµР·Рґ ${entrance}` : "",
+        apartment ? `РєРІ. ${apartment}` : "",
     ]
         .filter(Boolean)
         .join(", ");
@@ -577,15 +1725,15 @@ profileRouter.get("/me", async (req, res) => {
                 status: (0, format_1.toProfileOrderStatus)(order.status),
                 total: order.total_price,
                 deliveryDate: toLocalizedDeliveryDate(order.created_at),
-                deliveryAddress: order.delivery_address ?? "Адрес не указан",
+                deliveryAddress: stripPickupPointTag(order.delivery_address) || "РђРґСЂРµСЃ РЅРµ СѓРєР°Р·Р°РЅ",
                 deliveryCost: order.delivery_cost,
                 discount: order.discount,
                 seller: {
                     name: order.seller.name,
                     avatar: order.seller.avatar,
                     phone: order.seller.phone ?? "",
-                    address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
-                    workingHours: "пн — вс: 9:00-21:00",
+                    address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Р“РѕСЂРѕРґ РЅРµ СѓРєР°Р·Р°РЅ"}`,
+                    workingHours: "РїРЅ вЂ” РІСЃ: 9:00-21:00",
                 },
                 items: order.items.map((item) => ({
                     id: String(item.id),
@@ -644,7 +1792,7 @@ profileRouter.patch("/me", async (req, res) => {
         const oldPassword = typeof body.oldPassword === "string" ? body.oldPassword : "";
         const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
         if (newPassword && oldPassword !== user.password) {
-            res.status(400).json({ error: "Старый пароль указан неверно" });
+            res.status(400).json({ error: "РЎС‚Р°СЂС‹Р№ РїР°СЂРѕР»СЊ СѓРєР°Р·Р°РЅ РЅРµРІРµСЂРЅРѕ" });
             return;
         }
         const updated = await prisma_1.prisma.appUser.update({
@@ -981,9 +2129,19 @@ profileRouter.get("/delivery-points", async (req, res) => {
             res.status(session.status).json({ error: session.message });
             return;
         }
-        const locationRaw = typeof req.query.city === "string" ? req.query.city.trim() : "";
-        const locationQuery = locationRaw || "\u041c\u043e\u0441\u043a\u0432\u0430";
-        const { location, points } = await getDeliveryPoints(locationQuery);
+        const locationQuery = typeof req.query.city === "string" ? req.query.city.trim() : "";
+        if (!locationQuery) {
+            res.status(400).json({ error: "City query is required" });
+            return;
+        }
+        const providerFilter = parseDeliveryProviderFilter(req.query.provider);
+        const cursorRaw = typeof req.query.cursor === "string" ? Number(req.query.cursor) : 0;
+        const limitRaw = typeof req.query.limit === "string" ? Number(req.query.limit) : undefined;
+        const cursor = Number.isFinite(cursorRaw) && cursorRaw > 0 ? Math.floor(cursorRaw) : 0;
+        const limit = typeof limitRaw === "number" && Number.isFinite(limitRaw) && limitRaw > 0
+            ? Math.floor(limitRaw)
+            : undefined;
+        const { location, points, pagination } = await getDeliveryPoints(locationQuery, providerFilter, { cursor, limit });
         res.json({
             city: location.city,
             location: {
@@ -991,11 +2149,10 @@ profileRouter.get("/delivery-points", async (req, res) => {
                 lat: location.lat,
                 lng: location.lng,
             },
-            providers: Object.entries(DELIVERY_PROVIDER_LABELS).map(([code, label]) => ({
-                code,
-                label,
-            })),
+            providers: DELIVERY_PROVIDERS,
+            activeProvider: providerFilter === "all" ? "yandex_pvz" : providerFilter,
             points,
+            pagination: pagination ?? null,
         });
     }
     catch (error) {
@@ -1003,7 +2160,265 @@ profileRouter.get("/delivery-points", async (req, res) => {
             res.status(404).json({ error: "Location not found" });
             return;
         }
+        if (error instanceof Error &&
+            error.message === "Delivery points not available") {
+            res.status(503).json({ error: "Delivery points are temporarily unavailable" });
+            return;
+        }
         console.error("Error loading delivery points:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+profileRouter.post("/payments/yookassa/webhook", async (req, res) => {
+    try {
+        const payload = (req.body ?? {});
+        const event = typeof payload.event === "string" ? payload.event.trim() : "";
+        const paymentId = payload.object && typeof payload.object.id === "string"
+            ? payload.object.id.trim()
+            : "";
+        const webhookStatus = payload.object && typeof payload.object.status === "string"
+            ? payload.object.status.trim()
+            : "";
+        if (!paymentId) {
+            res.status(200).json({ success: true, ignored: true });
+            return;
+        }
+        let effectiveStatus = webhookStatus;
+        try {
+            const remotePayment = await fetchYooKassaPaymentById(paymentId);
+            if (remotePayment?.status) {
+                effectiveStatus = remotePayment.status;
+            }
+        }
+        catch (error) {
+            console.warn("Unable to validate YooKassa payment in webhook:", error);
+        }
+        const isSucceeded = event === "payment.succeeded" || effectiveStatus === "succeeded";
+        const isCanceled = event === "payment.canceled" || effectiveStatus === "canceled";
+        if (!isSucceeded && !isCanceled) {
+            res.status(200).json({ success: true, ignored: true });
+            return;
+        }
+        const txStatus = isSucceeded ? "SUCCESS" : "FAILED";
+        const orderStatus = isSucceeded ? "PAID" : "CANCELLED";
+        let affectedOrderIds = [];
+        await prisma_1.prisma.$transaction(async (tx) => {
+            const matched = await tx.platformTransaction.findMany({
+                where: {
+                    payment_provider: "YOOMONEY",
+                    OR: [
+                        { payment_intent_id: paymentId },
+                        { payment_intent_id: { startsWith: `${paymentId}:` } },
+                    ],
+                },
+                select: {
+                    id: true,
+                    order_id: true,
+                },
+            });
+            if (matched.length === 0) {
+                return;
+            }
+            const txIds = matched.map((row) => row.id);
+            const orderIds = matched.map((row) => row.order_id);
+            affectedOrderIds = orderIds;
+            await tx.platformTransaction.updateMany({
+                where: {
+                    id: { in: txIds },
+                    status: { in: ["HELD", "PENDING"] },
+                },
+                data: {
+                    status: txStatus,
+                },
+            });
+            await tx.marketOrder.updateMany({
+                where: {
+                    id: { in: orderIds },
+                    status: "CREATED",
+                },
+                data: {
+                    status: orderStatus,
+                },
+            });
+        });
+        if (isSucceeded && affectedOrderIds.length > 0) {
+            await ensureYandexTrackingForOrders(affectedOrderIds);
+        }
+        res.status(200).json({ success: true });
+    }
+    catch (error) {
+        console.error("Error in YooKassa webhook:", error);
+        res.status(200).json({ success: false });
+    }
+});
+profileRouter.get("/orders/payment-status", async (req, res) => {
+    try {
+        const session = await (0, session_1.requireAnyRole)(req, [
+            ROLE_BUYER,
+            ROLE_SELLER,
+            ROLE_ADMIN,
+        ]);
+        if (!session.ok) {
+            res.status(session.status).json({ error: session.message });
+            return;
+        }
+        const rawOrderIds = Array.isArray(req.query.orderIds)
+            ? req.query.orderIds.join(",")
+            : typeof req.query.orderIds === "string"
+                ? req.query.orderIds
+                : "";
+        const orderPublicIds = [
+            ...new Set(rawOrderIds
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean)),
+        ];
+        if (orderPublicIds.length === 0) {
+            res.status(400).json({ error: "orderIds query is required" });
+            return;
+        }
+        let orders = await prisma_1.prisma.marketOrder.findMany({
+            where: {
+                buyer_id: session.user.id,
+                public_id: { in: orderPublicIds },
+            },
+            include: {
+                transactions: {
+                    orderBy: [{ created_at: "desc" }],
+                    take: 1,
+                },
+            },
+        });
+        const latestTransactions = orders
+            .map((order) => order.transactions[0] ?? null)
+            .filter((tx) => tx !== null &&
+            tx.payment_provider === "YOOMONEY" &&
+            (tx.status === "HELD" || tx.status === "PENDING"));
+        if (latestTransactions.length > 0) {
+            const groupedByBasePaymentId = new Map();
+            for (const tx of latestTransactions) {
+                const basePaymentId = extractYooKassaPaymentBaseId(tx.payment_intent_id);
+                if (!basePaymentId) {
+                    continue;
+                }
+                const current = groupedByBasePaymentId.get(basePaymentId) ?? [];
+                current.push({ txId: tx.id, orderId: tx.order_id });
+                groupedByBasePaymentId.set(basePaymentId, current);
+            }
+            const succeededTxIds = [];
+            const succeededOrderIds = [];
+            const failedTxIds = [];
+            const failedOrderIds = [];
+            const lookupResults = await Promise.all(Array.from(groupedByBasePaymentId.entries()).map(async ([basePaymentId, refs]) => {
+                try {
+                    const payment = await fetchYooKassaPaymentById(basePaymentId);
+                    return {
+                        refs,
+                        status: payment?.status ?? "",
+                    };
+                }
+                catch {
+                    return {
+                        refs,
+                        status: "",
+                    };
+                }
+            }));
+            for (const result of lookupResults) {
+                if (result.status === "succeeded") {
+                    for (const ref of result.refs) {
+                        succeededTxIds.push(ref.txId);
+                        succeededOrderIds.push(ref.orderId);
+                    }
+                    continue;
+                }
+                if (result.status === "canceled") {
+                    for (const ref of result.refs) {
+                        failedTxIds.push(ref.txId);
+                        failedOrderIds.push(ref.orderId);
+                    }
+                }
+            }
+            if (succeededTxIds.length > 0 || failedTxIds.length > 0) {
+                await prisma_1.prisma.$transaction(async (tx) => {
+                    if (succeededTxIds.length > 0) {
+                        await tx.platformTransaction.updateMany({
+                            where: {
+                                id: { in: succeededTxIds },
+                                status: { in: ["HELD", "PENDING"] },
+                            },
+                            data: {
+                                status: "SUCCESS",
+                            },
+                        });
+                        await tx.marketOrder.updateMany({
+                            where: {
+                                id: { in: succeededOrderIds },
+                                status: "CREATED",
+                            },
+                            data: {
+                                status: "PAID",
+                            },
+                        });
+                    }
+                    if (failedTxIds.length > 0) {
+                        await tx.platformTransaction.updateMany({
+                            where: {
+                                id: { in: failedTxIds },
+                                status: { in: ["HELD", "PENDING"] },
+                            },
+                            data: {
+                                status: "FAILED",
+                            },
+                        });
+                        await tx.marketOrder.updateMany({
+                            where: {
+                                id: { in: failedOrderIds },
+                                status: "CREATED",
+                            },
+                            data: {
+                                status: "CANCELLED",
+                            },
+                        });
+                    }
+                });
+                if (succeededOrderIds.length > 0) {
+                    await ensureYandexTrackingForOrders(succeededOrderIds);
+                }
+                orders = await prisma_1.prisma.marketOrder.findMany({
+                    where: {
+                        buyer_id: session.user.id,
+                        public_id: { in: orderPublicIds },
+                    },
+                    include: {
+                        transactions: {
+                            orderBy: [{ created_at: "desc" }],
+                            take: 1,
+                        },
+                    },
+                });
+            }
+        }
+        const paymentOrders = orders.map((order) => ({
+            orderId: order.public_id,
+            orderStatus: order.status,
+            paymentStatus: order.transactions[0]?.status ?? null,
+            paymentProvider: order.transactions[0]?.payment_provider ?? null,
+            paymentIntentId: order.transactions[0]?.payment_intent_id ?? null,
+        }));
+        const hasFailed = paymentOrders.some((order) => order.orderStatus === "CANCELLED" ||
+            order.paymentStatus === "FAILED" ||
+            order.paymentStatus === "CANCELLED");
+        const isPaid = paymentOrders.length > 0 &&
+            paymentOrders.every((order) => order.orderStatus === "PAID" || order.paymentStatus === "SUCCESS");
+        const summary = hasFailed ? "failed" : isPaid ? "paid" : "pending";
+        res.json({
+            summary,
+            orders: paymentOrders,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching order payment status:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -1032,7 +2447,7 @@ profileRouter.post("/orders", async (req, res) => {
         if (parsedItems.length === 0) {
             res
                 .status(400)
-                .json({ error: "Корзина пуста или содержит некорректные позиции" });
+                .json({ error: "РљРѕСЂР·РёРЅР° РїСѓСЃС‚Р° РёР»Рё СЃРѕРґРµСЂР¶РёС‚ РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Рµ РїРѕР·РёС†РёРё" });
             return;
         }
         const listingPublicIds = [
@@ -1055,7 +2470,7 @@ profileRouter.post("/orders", async (req, res) => {
         if (listings.length !== listingPublicIds.length) {
             res
                 .status(400)
-                .json({ error: "Некоторые товары недоступны для заказа" });
+                .json({ error: "РќРµРєРѕС‚РѕСЂС‹Рµ С‚РѕРІР°СЂС‹ РЅРµРґРѕСЃС‚СѓРїРЅС‹ РґР»СЏ Р·Р°РєР°Р·Р°" });
             return;
         }
         const listingByPublicId = new Map(listings.map((listing) => [listing.public_id, listing]));
@@ -1063,7 +2478,7 @@ profileRouter.post("/orders", async (req, res) => {
         for (const item of parsedItems) {
             const listing = listingByPublicId.get(item.listingId);
             if (!listing) {
-                res.status(400).json({ error: `Товар ${item.listingId} не найден` });
+                res.status(400).json({ error: `РўРѕРІР°СЂ ${item.listingId} РЅРµ РЅР°Р№РґРµРЅ` });
                 return;
             }
             const current = groupedBySeller.get(listing.seller_id) ?? [];
@@ -1077,8 +2492,14 @@ profileRouter.post("/orders", async (req, res) => {
             groupedBySeller.set(listing.seller_id, current);
         }
         const deliveryType = body.deliveryType === "pickup" ? "PICKUP" : "DELIVERY";
-        const paymentMethod = body.paymentMethod === "cash" ? "cash" : "card";
+        const requestedPaymentMethod = typeof body.paymentMethod === "string" ? body.paymentMethod : "card";
+        if (requestedPaymentMethod !== "card" && requestedPaymentMethod !== "sbp") {
+            res.status(400).json({ error: "Unsupported payment method" });
+            return;
+        }
         const customAddress = typeof body.customAddress === "string" ? body.customAddress.trim() : "";
+        const pickupPointId = typeof body.pickupPointId === "string" ? body.pickupPointId.trim() : "";
+        const pickupPointProvider = normalizePickupProvider(body.pickupPointProvider);
         const addressId = Number(body.addressId ?? 0);
         let deliveryAddress = customAddress;
         if (!deliveryAddress && Number.isInteger(addressId) && addressId > 0) {
@@ -1122,7 +2543,11 @@ profileRouter.post("/orders", async (req, res) => {
             }
         }
         if (deliveryType === "DELIVERY" && !deliveryAddress) {
-            res.status(400).json({ error: "Укажите адрес доставки" });
+            res.status(400).json({ error: "РЈРєР°Р¶РёС‚Рµ Р°РґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё" });
+            return;
+        }
+        if (deliveryType === "DELIVERY" && !pickupPointId) {
+            res.status(400).json({ error: "Pickup point id is required for delivery" });
             return;
         }
         const preparedOrders = Array.from(groupedBySeller.entries()).map(([sellerId, items], index) => {
@@ -1142,19 +2567,17 @@ profileRouter.post("/orders", async (req, res) => {
             };
         });
         const totalAmount = preparedOrders.reduce((sum, order) => sum + order.totalPrice, 0);
-        const yookassaPayment = paymentMethod === "card"
-            ? await createYooKassaPayment({
-                amountRub: totalAmount,
-                description: `Оплата заказа в Ecomm (${preparedOrders.length} шт.)`,
-                metadata: {
-                    source: "avito-2",
-                    buyer_id: String(session.user.id),
-                    orders_count: String(preparedOrders.length),
-                },
-            })
-            : null;
-        if (paymentMethod === "card" &&
-            !yookassaPayment?.confirmation?.confirmation_url) {
+        const yookassaPayment = await createYooKassaPayment({
+            amountRub: totalAmount,
+            description: `РћРїР»Р°С‚Р° Р·Р°РєР°Р·Р° РІ Ecomm (${preparedOrders.length} С€С‚.)`,
+            metadata: {
+                source: "avito-2",
+                buyer_id: String(session.user.id),
+                orders_count: String(preparedOrders.length),
+            },
+            paymentMethod: requestedPaymentMethod,
+        });
+        if (!yookassaPayment?.confirmation?.confirmation_url) {
             throw new Error("YooKassa did not return confirmation URL for redirect payment");
         }
         const createdOrders = await prisma_1.prisma.$transaction(async (tx) => {
@@ -1169,7 +2592,7 @@ profileRouter.post("/orders", async (req, res) => {
                         seller_id: preparedOrder.sellerId,
                         status: "CREATED",
                         delivery_type: deliveryType,
-                        delivery_address: deliveryType === "DELIVERY" ? deliveryAddress : "Самовывоз",
+                        delivery_address: deliveryType === "DELIVERY" ? deliveryAddress : "РЎР°РјРѕРІС‹РІРѕР·",
                         total_price: preparedOrder.totalPrice,
                         delivery_cost: preparedOrder.deliveryCost,
                         discount: preparedOrder.discount,
@@ -1184,8 +2607,18 @@ profileRouter.post("/orders", async (req, res) => {
                         },
                     },
                 });
+                if (deliveryType === "DELIVERY") {
+                    await tx.marketOrder.update({
+                        where: { id: order.id },
+                        data: {
+                            delivery_address: appendPickupPointMetaToAddress(order.delivery_address ?? deliveryAddress, pickupPointId, pickupPointProvider),
+                        },
+                    });
+                }
                 const commissionRate = 3.5;
                 const commission = Math.round((preparedOrder.totalPrice * commissionRate) / 100);
+                const paymentIntentIdBase = yookassaPayment?.id ?? `pay_${Date.now()}`;
+                const paymentIntentId = `${paymentIntentIdBase}:${sequence}`;
                 await tx.platformTransaction.create({
                     data: {
                         public_id: `TXN-${Date.now()}-${sequence}`,
@@ -1193,16 +2626,15 @@ profileRouter.post("/orders", async (req, res) => {
                         buyer_id: session.user.id,
                         seller_id: preparedOrder.sellerId,
                         amount: preparedOrder.totalPrice,
-                        status: paymentMethod === "cash" ? "SUCCESS" : "HELD",
+                        status: "HELD",
                         commission_rate: commissionRate,
                         commission,
-                        payment_provider: paymentMethod === "cash" ? "CASH" : "YOOMONEY",
-                        payment_intent_id: paymentMethod === "cash"
-                            ? `pay_${Date.now()}_${sequence}`
-                            : yookassaPayment?.id ?? `pay_${Date.now()}_${sequence}`,
+                        payment_provider: "YOOMONEY",
+                        payment_intent_id: paymentIntentId,
                     },
                 });
                 result.push({
+                    db_id: order.id,
                     order_id: order.public_id,
                     total_price: preparedOrder.totalPrice,
                 });
@@ -1211,16 +2643,17 @@ profileRouter.post("/orders", async (req, res) => {
         });
         res.status(201).json({
             success: true,
-            orders: createdOrders,
+            orders: createdOrders.map((order) => ({
+                order_id: order.order_id,
+                total_price: order.total_price,
+            })),
             total: createdOrders.reduce((sum, order) => sum + order.total_price, 0),
-            payment: paymentMethod === "card"
-                ? {
-                    provider: "yoomoney",
-                    paymentId: yookassaPayment?.id ?? null,
-                    status: yookassaPayment?.status ?? null,
-                    confirmationUrl: yookassaPayment?.confirmation?.confirmation_url ?? null,
-                }
-                : null,
+            payment: {
+                provider: "yoomoney",
+                paymentId: yookassaPayment?.id ?? null,
+                status: yookassaPayment?.status ?? null,
+                confirmationUrl: yookassaPayment?.confirmation?.confirmation_url ?? null,
+            },
         });
     }
     catch (error) {
@@ -1269,15 +2702,15 @@ profileRouter.get("/orders", async (req, res) => {
             status: (0, format_1.toProfileOrderStatus)(order.status),
             total: order.total_price,
             deliveryDate: toLocalizedDeliveryDate(order.created_at),
-            deliveryAddress: order.delivery_address ?? "Адрес не указан",
+            deliveryAddress: stripPickupPointTag(order.delivery_address) || "РђРґСЂРµСЃ РЅРµ СѓРєР°Р·Р°РЅ",
             deliveryCost: order.delivery_cost,
             discount: order.discount,
             seller: {
                 name: order.seller.name,
                 avatar: order.seller.avatar,
                 phone: order.seller.phone ?? "",
-                address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
-                workingHours: "пн — вс: 9:00-21:00",
+                address: `${extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Р“РѕСЂРѕРґ РЅРµ СѓРєР°Р·Р°РЅ"}`,
+                workingHours: "РїРЅ вЂ” РІСЃ: 9:00-21:00",
             },
             items: order.items.map((item) => ({
                 id: String(item.id),
@@ -1358,7 +2791,7 @@ profileRouter.post("/wishlist/:listingPublicId", async (req, res) => {
         const { listingPublicId } = req.params;
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
             where: { public_id: String(listingPublicId) },
-            select: { id: true },
+            select: { id: true, seller_id: true },
         });
         if (!listing) {
             res.status(404).json({ error: "Listing not found" });
@@ -1398,7 +2831,7 @@ profileRouter.delete("/wishlist/:listingPublicId", async (req, res) => {
         const { listingPublicId } = req.params;
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
             where: { public_id: String(listingPublicId) },
-            select: { id: true },
+            select: { id: true, seller_id: true },
         });
         if (!listing) {
             res.status(404).json({ error: "Listing not found" });
@@ -1438,7 +2871,7 @@ profileRouter.post("/partnership-requests", async (req, res) => {
         const category = typeof body.category === "string" ? body.category.trim() : "";
         const whyUs = typeof body.whyUs === "string" ? body.whyUs.trim() : "";
         if (!name || !email || !contact || !link || !category || !whyUs) {
-            res.status(400).json({ error: "Заполните обязательные поля заявки" });
+            res.status(400).json({ error: "Р—Р°РїРѕР»РЅРёС‚Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ Р·Р°СЏРІРєРё" });
             return;
         }
         const created = await prisma_1.prisma.partnershipRequest.create({
@@ -1493,7 +2926,7 @@ profileRouter.post("/listings/:listingPublicId/review", async (req, res) => {
         }
         const listing = await prisma_1.prisma.marketplaceListing.findUnique({
             where: { public_id: String(listingPublicId) },
-            select: { id: true },
+            select: { id: true, seller_id: true },
         });
         if (!listing) {
             res.status(404).json({ error: "Listing not found" });
@@ -1542,23 +2975,29 @@ profileRouter.post("/listings/:listingPublicId/review", async (req, res) => {
                 },
             },
         });
-        const avgRating = await prisma_1.prisma.listingReview.aggregate({
-            _avg: {
+        const sellerReviews = await prisma_1.prisma.listingReview.findMany({
+            where: {
+                listing: {
+                    seller_id: listing.seller_id,
+                },
+            },
+            select: {
                 rating: true,
             },
-            where: {
-                listing_id: listing.id,
-            },
         });
-        await prisma_1.prisma.marketplaceListing.update({
-            where: { id: listing.id },
+        const sellerRating = sellerReviews.length === 0
+            ? 0
+            : Number((sellerReviews.reduce((sum, item) => sum + item.rating, 0) /
+                sellerReviews.length).toFixed(1));
+        await prisma_1.prisma.marketplaceListing.updateMany({
+            where: { seller_id: listing.seller_id },
             data: {
-                rating: avgRating._avg.rating ?? 0,
+                rating: sellerRating,
             },
         });
         res.status(201).json({
             id: String(newReview.id),
-            author: newReview.author.display_name ?? "Аноним",
+            author: newReview.author.display_name ?? "РђРЅРѕРЅРёРј",
             rating: newReview.rating,
             date: newReview.created_at,
             comment: newReview.comment,
