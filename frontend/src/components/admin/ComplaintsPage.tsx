@@ -1,4 +1,5 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowDown,
   ArrowUp,
@@ -17,7 +18,7 @@ type ComplaintStatusFilter = ComplaintStatus | "all";
 type ComplaintPriority = "low" | "medium" | "high";
 type ComplaintSortBy = "queueScore" | "riskScore" | "createdAt";
 type ComplaintSortOrder = "asc" | "desc";
-type DetailTab = "overview" | "history" | "sanctions";
+type DetailTab = "overview" | "sanctions";
 type StatusAction = "approved" | "rejected";
 
 type ComplaintHistoryItem = {
@@ -155,6 +156,11 @@ type SellerSummaryResponse = {
     new: number;
     rejected: number;
   };
+  cases: {
+    total: number;
+    approved: number;
+    rejected: number;
+  };
   activeSanctionsCount: number;
   recentCases: Array<{
     id: string;
@@ -180,6 +186,10 @@ type ComplaintStatusUpdateResponse = {
     listingModerationStatus: "rejected";
     message: string;
   } | null;
+  cascade?: {
+    updatedCount: number;
+    cascadedComplaintIds: string[];
+  };
 };
 
 type FiltersState = {
@@ -212,22 +222,27 @@ function getStatusClass(status: ComplaintStatus): string {
   return "bg-green-100 text-green-700 border-green-300";
 }
 
-function getPriorityLabel(priority: ComplaintPriority): string {
-  if (priority === "high") return "Высокий";
-  if (priority === "medium") return "Средний";
-  return "Низкий";
-}
-
-function getPriorityClass(priority: ComplaintPriority): string {
-  if (priority === "high") return "bg-red-100 text-red-700 border-red-300";
-  if (priority === "medium") return "bg-amber-100 text-amber-700 border-amber-300";
-  return "bg-slate-100 text-slate-700 border-slate-300";
-}
-
 function getSortLabel(sortBy: ComplaintSortBy): string {
-  if (sortBy === "queueScore") return "Приоритет";
+  if (sortBy === "queueScore") return "Балл очереди";
   if (sortBy === "riskScore") return "Риск";
   return "Дата";
+}
+
+function getComplaintTypeLabel(type: string): string {
+  const normalized = type.trim().toLowerCase();
+  if (normalized === "suspicious_listing") return "Подозрительное объявление";
+  if (normalized === "fraud") return "Мошенничество";
+  if (normalized === "other") return "Другая причина";
+  if (normalized === "payment_off_platform") return "Оплата вне платформы";
+  return type;
+}
+
+function buildComplaintListingHref(listingId: string, fallbackUrl: string): string {
+  const normalizedId = listingId.trim();
+  if (normalizedId) {
+    return `/products/${encodeURIComponent(normalizedId)}`;
+  }
+  return fallbackUrl || "/";
 }
 
 function makeIdempotencyKey(complaintId: string, status: StatusAction): string {
@@ -397,7 +412,7 @@ export function ComplaintsPage() {
   };
 
   const handleUpdateStatus = async (nextStatus: StatusAction) => {
-    if (!selectedComplaint || isActionLoading) return;
+    if (!selectedComplaint || isActionLoading || isComplaintDecisionLocked) return;
 
     const confirmationMessage =
       nextStatus === "approved"
@@ -449,10 +464,26 @@ export function ComplaintsPage() {
   ];
 
   const detailTabs: Array<{ id: DetailTab; label: string }> = [
-    { id: "overview", label: "Обзор" },
-    { id: "history", label: "История" },
-    { id: "sanctions", label: "Санкции" },
+    { id: "overview", label: "Жалоба" },
+    { id: "sanctions", label: "Заявитель и санкции" },
   ];
+  const isComplaintDecisionLocked =
+    selectedComplaint?.status === "approved" || selectedComplaint?.status === "rejected";
+  const sellerApprovalRate =
+    sellerSummary && sellerSummary.cases.total > 0
+      ? Math.round((sellerSummary.cases.approved / sellerSummary.cases.total) * 100)
+      : 0;
+  const sellerStatusValue =
+    sellerSummary?.seller.status ?? (selectedComplaint?.sellerStatus ?? "active");
+  const sellerBlockedUntilValue =
+    sellerSummary?.seller.blockedUntil ?? selectedComplaint?.sellerBlockedUntil ?? null;
+  const sellerBlockReasonValue =
+    sellerSummary?.seller.blockReason ?? selectedComplaint?.sellerBlockReason ?? null;
+  const hasSellerRestrictions =
+    sellerStatusValue === "blocked" ||
+    Boolean(sellerBlockedUntilValue) ||
+    Boolean(sellerBlockReasonValue) ||
+    (sellerSummary?.activeSanctionsCount ?? 0) > 0;
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -587,13 +618,8 @@ export function ComplaintsPage() {
                 <div className="text-xs text-gray-500">{formatDateTime(complaint.createdAt)}</div>
                 <div className="mt-1 text-sm">{complaint.listingTitle}</div>
                 <div className="mt-1 flex flex-wrap gap-1 text-xs">
-                  <span
-                    className={`rounded-full border px-2 py-0.5 ${getPriorityClass(complaint.priority)}`}
-                  >
-                    {getPriorityLabel(complaint.priority)}
-                  </span>
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
-                    Queue {complaint.queueScore}
+                    Балл очереди {complaint.queueScore}
                   </span>
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
                     Риск {complaint.riskScore}
@@ -651,25 +677,46 @@ export function ComplaintsPage() {
         ) : null}
       </div>
 
-      {isDetailOpen ? (
+      {isDetailOpen && typeof document !== "undefined"
+        ? createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-3 backdrop-blur-[2px] sm:p-4"
+          className="fixed inset-0 z-[1000] flex items-center justify-center"
+          style={{
+            backgroundColor: "rgba(15, 23, 42, 0.45)",
+            padding: "24px",
+          }}
           onClick={handleCloseDetail}
         >
           <div
-            className="w-[min(940px,100%)] max-h-[90dvh] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_28px_80px_-30px_rgba(15,23,42,0.45)]"
+            className="w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_28px_80px_-30px_rgba(15,23,42,0.45)] ring-1 ring-slate-300/60"
+            style={{
+              maxWidth: "760px",
+              maxHeight: "80vh",
+            }}
             onClick={(event) => event.stopPropagation()}
           >
             {!selectedComplaint ? (
               <div className="p-8 text-center text-sm text-slate-500">Загрузка деталей жалобы...</div>
             ) : (
-              <div className="flex max-h-[90dvh] flex-col">
+              <div className="flex flex-col" style={{ maxHeight: "80vh" }}>
                 <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white px-5 py-4 md:px-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-slate-900">{selectedComplaint.id}</div>
-                      <div className="mt-1 truncate text-sm text-slate-600">
-                        {selectedComplaint.listingTitle}
+                      <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                        <span className="truncate">{selectedComplaint.listingTitle}</span>
+                        <span className="shrink-0 text-slate-400">·</span>
+                        <a
+                          href={buildComplaintListingHref(
+                            selectedComplaint.listingId,
+                            selectedComplaint.listingUrl,
+                          )}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex shrink-0 items-center gap-1 font-medium text-[rgb(38,83,141)] hover:underline"
+                        >
+                          Открыть объявление <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -690,16 +737,11 @@ export function ComplaintsPage() {
                     >
                       {getStatusLabel(selectedComplaint.status)}
                     </span>
-                    <span
-                      className={`rounded-full border px-2.5 py-1 font-medium ${getPriorityClass(selectedComplaint.priority)}`}
-                    >
-                      Приоритет: {getPriorityLabel(selectedComplaint.priority)}
-                    </span>
                     <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
                       Риск {selectedComplaint.riskScore}
                     </span>
                     <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-                      Queue {selectedComplaint.queueScore}
+                      Балл очереди {selectedComplaint.queueScore}
                     </span>
                   </div>
 
@@ -719,55 +761,15 @@ export function ComplaintsPage() {
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 md:px-6 md:py-5">
                   {activeTab === "overview" ? (
                     <div className="space-y-4 text-sm">
-                      <div className="grid gap-3 md:grid-cols-[1.35fr_1fr]">
-                        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                            Объявление
-                          </div>
-                          <div className="mt-2 text-sm font-semibold text-slate-900">
-                            {selectedComplaint.listingTitle}
-                          </div>
-                          <div className="mt-1 text-xs text-slate-600">
-                            {selectedComplaint.listingPrice.toLocaleString("ru-RU")} ₽ · {selectedComplaint.listingCity},{" "}
-                            {selectedComplaint.listingRegion}
-                          </div>
-                          <a
-                            href={selectedComplaint.listingUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[rgb(38,83,141)] hover:underline"
-                          >
-                            Открыть объявление <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
-                        </div>
-
-                        <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                            Заявитель
-                          </div>
-                          <div className="mt-2 text-sm font-medium text-slate-900">
-                            {selectedComplaint.reporterName}
-                          </div>
-                          <div className="text-xs text-slate-600">{selectedComplaint.reporterEmail}</div>
-                          <div className="mt-3 text-xs text-slate-500">
-                            Жалоба создана: {formatDateTime(selectedComplaint.createdAt)}
-                          </div>
-                        </div>
-                      </div>
-
                       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                         <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                           Суть жалобы
                         </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                          <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-700">
-                            Тип: {selectedComplaint.complaintType}
-                          </span>
+                        <div className="mt-2 text-sm text-slate-800">
+                          Тип: {getComplaintTypeLabel(selectedComplaint.complaintType)}
                         </div>
-                        <div className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-800">
-                          <div className="whitespace-pre-wrap break-words">
-                            {selectedComplaint.description || "Описание не указано."}
-                          </div>
+                        <div className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-800">
+                          {selectedComplaint.description || "Описание не указано."}
                         </div>
                       </div>
 
@@ -791,7 +793,8 @@ export function ComplaintsPage() {
                               }`}
                               onClick={() => handleSelectRelatedComplaint(relatedItem.id)}
                             >
-                              {relatedItem.id} · {relatedItem.complaintType} · {relatedItem.reporterName}
+                              {relatedItem.id} · {getComplaintTypeLabel(relatedItem.complaintType)} ·{" "}
+                              {relatedItem.reporterName}
                             </button>
                           ))}
                           {relatedListingComplaints.length === 0 ? (
@@ -804,52 +807,66 @@ export function ComplaintsPage() {
                     </div>
                   ) : null}
 
-                  {activeTab === "history" ? (
-                    <div className="space-y-2">
-                      {selectedComplaint.history.map((event) => (
-                        <div
-                          key={event.id}
-                          className="rounded-xl border border-slate-200 bg-white p-3 text-xs shadow-sm"
-                        >
-                          <div className="font-semibold text-slate-900">{event.type}</div>
-                          <div className="text-slate-500">{formatDateTime(event.createdAt)}</div>
-                          <div className="text-slate-600">
-                            {event.fromStatus ? getStatusLabel(event.fromStatus) : "—"} →{" "}
-                            {event.toStatus ? getStatusLabel(event.toStatus) : "—"}
-                          </div>
-                          {event.note ? <div className="text-slate-700">{event.note}</div> : null}
-                        </div>
-                      ))}
-                      {selectedComplaint.history.length === 0 ? (
-                        <div className="dashboard-empty">История пуста</div>
-                      ) : null}
-                    </div>
-                  ) : null}
-
                   {activeTab === "sanctions" ? (
                     <div className="space-y-3 text-sm">
-                      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-xs">
-                        <div>Статус продавца: {selectedComplaint.sellerStatus}</div>
-                        <div>Блокировка до: {formatDateTime(selectedComplaint.sellerBlockedUntil)}</div>
-                        <div>Причина: {selectedComplaint.sellerBlockReason || "—"}</div>
-                        <div>
-                          Санкция по жалобе: {selectedComplaint.sanction ? `${selectedComplaint.sanction.level} (${selectedComplaint.sanction.status})` : "нет"}
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-xs">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                          Заявитель
+                        </div>
+                        <div className="mt-2 text-sm font-medium text-slate-900">
+                          {selectedComplaint.reporterName}
+                        </div>
+                        <div className="text-xs text-slate-600">{selectedComplaint.reporterEmail}</div>
+                        <div className="mt-3 text-xs text-slate-500">
+                          Жалоба создана: {formatDateTime(selectedComplaint.createdAt)}
                         </div>
                       </div>
 
-                      {sellerSummary ? (
-                        <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs shadow-sm">
-                          <div className="font-semibold text-slate-900">
-                            {sellerSummary.seller.name} ({sellerSummary.seller.email})
-                          </div>
-                          <div className="mt-1 text-slate-700">
-                            Жалобы: {sellerSummary.complaints.total}, подтверждено: {sellerSummary.complaints.approved}
-                          </div>
-                          <div className="text-slate-700">
-                            Активные санкции: {sellerSummary.activeSanctionsCount}
-                          </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-xs">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                          Продавец
                         </div>
-                      ) : null}
+                        <div className="mt-2 font-semibold text-slate-900">
+                          {sellerSummary
+                            ? `${sellerSummary.seller.name} (${sellerSummary.seller.email})`
+                            : `${selectedComplaint.sellerName} (${selectedComplaint.sellerEmail})`}
+                        </div>
+                        {sellerSummary ? (
+                          <>
+                            <div className="mt-1 text-slate-700">
+                              Жалобы: {sellerSummary.complaints.total} · Подтверждено:{" "}
+                              {sellerSummary.complaints.approved} · Отклонено:{" "}
+                              {sellerSummary.complaints.rejected}
+                            </div>
+                            <div className="text-slate-700">
+                              Кейсы (уникальные объявления): {sellerSummary.cases.total} · Подтверждено:{" "}
+                              {sellerSummary.cases.approved} · Отклонено: {sellerSummary.cases.rejected}
+                            </div>
+                            <div className="text-slate-700">
+                              Доля подтвержденных (по кейсам): {sellerApprovalRate}%
+                            </div>
+                            {sellerSummary.activeSanctionsCount > 0 ? (
+                              <div className="text-slate-700">
+                                Активные санкции: {sellerSummary.activeSanctionsCount}
+                              </div>
+                            ) : null}
+                          </>
+                        ) : (
+                          <div className="mt-1 text-slate-700">Статистика по продавцу недоступна.</div>
+                        )}
+                        {hasSellerRestrictions ? (
+                          <div className="mt-2 border-t border-slate-200 pt-2 text-slate-700">
+                            <div>
+                              Статус продавца:{" "}
+                              {sellerStatusValue === "blocked" ? "заблокирован" : "активен"}
+                            </div>
+                            {sellerBlockedUntilValue ? (
+                              <div>Блокировка до: {formatDateTime(sellerBlockedUntilValue)}</div>
+                            ) : null}
+                            {sellerBlockReasonValue ? <div>Причина: {sellerBlockReasonValue}</div> : null}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -859,17 +876,26 @@ export function ComplaintsPage() {
                   <textarea
                     className="field-control mt-2 min-h-[88px] rounded-xl border-slate-200 bg-slate-50/40 focus:bg-white"
                     rows={3}
-                    placeholder="Добавьте комментарий к решению"
+                    placeholder={
+                      isComplaintDecisionLocked
+                        ? "Жалоба закрыта, редактирование недоступно"
+                        : "Добавьте комментарий к решению"
+                    }
                     value={moderatorComment}
                     onChange={(event) => setModeratorComment(event.target.value)}
+                    disabled={isComplaintDecisionLocked}
                   />
-                  <div className="mt-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         void handleUpdateStatus("rejected");
                       }}
-                      className="btn-success-soft flex items-center justify-center gap-1 py-2 text-sm sm:w-44"
-                      disabled={isActionLoading !== null || selectedComplaint.status === "approved"}
+                      className={
+                        isComplaintDecisionLocked
+                          ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
+                          : "btn-success-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
+                      }
+                      disabled={isActionLoading !== null || isComplaintDecisionLocked}
                     >
                       <CircleX className="h-4 w-4" /> Отклонить
                     </button>
@@ -877,23 +903,30 @@ export function ComplaintsPage() {
                       onClick={() => {
                         void handleUpdateStatus("approved");
                       }}
-                      className="btn-danger-soft flex items-center justify-center gap-1 py-2 text-sm sm:w-44"
-                      disabled={isActionLoading !== null || selectedComplaint.status === "approved"}
+                      className={
+                        isComplaintDecisionLocked
+                          ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
+                          : "btn-danger-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
+                      }
+                      disabled={isActionLoading !== null || isComplaintDecisionLocked}
                     >
                       <CheckCircle className="h-4 w-4" /> Подтвердить
                     </button>
                   </div>
-                  {selectedComplaint.status === "approved" ? (
+                  {isComplaintDecisionLocked ? (
                     <div className="mt-2 text-xs text-amber-700">
-                      Подтвержденная жалоба фиксируется и не переводится назад.
+                      Жалоба зафиксирована со статусом «{getStatusLabel(selectedComplaint.status)}».
+                      Изменение решения недоступно.
                     </div>
                   ) : null}
                 </div>
               </div>
             )}
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
     </div>
   );
 }

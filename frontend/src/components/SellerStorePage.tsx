@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, MapPin, Star, User, X } from "lucide-react";
 import { apiGet } from "../lib/api";
 import type { CartItem, Product, Review } from "../types";
@@ -291,9 +292,6 @@ export function SellerStorePage({
                   </div>
                 </div>
               </div>
-              <div className="text-xs text-gray-600">
-                {seller.isVerified ? "Проверенный продавец" : "Продавец без верификации"}
-              </div>
             </div>
           ) : (
             <div className="text-sm text-gray-500">Продавец не найден</div>
@@ -348,13 +346,14 @@ export function SellerStorePage({
         </div>
       </div>
 
-      {isReviewsModalOpen ? (
+      {isReviewsModalOpen && typeof document !== "undefined"
+        ? createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 md:p-4"
+          className="fixed inset-0 z-[1600] flex items-center justify-center bg-black/50 p-3 md:p-4"
           onClick={() => setIsReviewsModalOpen(false)}
         >
           <div
-            className="w-[min(680px,96vw)] max-h-[86vh] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="flex max-h-[90vh] w-[min(760px,96vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
@@ -369,7 +368,7 @@ export function SellerStorePage({
               </button>
             </div>
 
-            <div className="max-h-[calc(86vh-72px)] overflow-y-auto px-5 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
               <div className="grid grid-cols-1 gap-6 border-b border-gray-200 pb-6 md:grid-cols-[180px_1fr]">
                 <div>
                   <div className="text-6xl font-semibold leading-none text-gray-900">{sellerRatingValue}</div>
@@ -484,8 +483,10 @@ export function SellerStorePage({
               </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
     </div>
   );
 }

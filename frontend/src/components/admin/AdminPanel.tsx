@@ -1,4 +1,4 @@
-﻿import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import {
   AlertTriangle,
   ClipboardList,

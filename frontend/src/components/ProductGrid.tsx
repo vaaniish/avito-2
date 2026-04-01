@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import type { Product, CartItem } from "../types";

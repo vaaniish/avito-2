@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Building, User, CheckCircle } from 'lucide-react';
 
 interface PartnershipPageProps {

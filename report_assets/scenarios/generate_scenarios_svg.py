@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 import html
 
 OUT = Path(r"c:\Study\diploma\avito-2\report_assets\scenarios")

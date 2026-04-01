@@ -1470,9 +1470,9 @@ async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
             res.status(404).json(payload);
             return;
         }
-        if (existing.status === "APPROVED" && parsedStatus !== "APPROVED") {
+        if (existing.status === "APPROVED" || existing.status === "REJECTED") {
             const payload = {
-                error: "Approved complaint cannot be moved back. Create a separate compensating admin action.",
+                error: "Complaint decision is locked for approved/rejected cases. Use Users tab for unblocking actions.",
             };
             await completeAdminIdempotency({
                 recordId: idempotencyStart.recordId,
@@ -1483,35 +1483,66 @@ async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
             return;
         }
         const txResult = await prisma_1.prisma.$transaction(async (tx) => {
-            const nextUpdate = await tx.complaint.updateMany({
+            const decisionAt = new Date();
+            const relatedOpenComplaints = await tx.complaint.findMany({
                 where: {
-                    id: existing.id,
-                    status: existing.status,
-                },
-                data: {
-                    status: parsedStatus,
-                    checked_at: new Date(),
-                    checked_by_id: access.user.id,
-                    action_taken: actionTaken,
-                },
-            });
-            if (nextUpdate.count !== 1) {
-                throw new Error("COMPLAINT_STATUS_CONFLICT");
-            }
-            await tx.complaintEvent.create({
-                data: {
-                    public_id: makePublicId("CME"),
-                    complaint_id: existing.id,
-                    actor_user_id: access.user.id,
-                    event_type: "STATUS_CHANGED",
-                    from_status: existing.status,
-                    to_status: parsedStatus,
-                    note: actionTaken,
-                    metadata: {
-                        source: "admin_panel",
+                    listing_id: existing.listing_id,
+                    status: {
+                        in: ["NEW", "PENDING"],
                     },
                 },
+                select: {
+                    id: true,
+                    public_id: true,
+                    status: true,
+                },
+                orderBy: [{ created_at: "asc" }, { id: "asc" }],
             });
+            const primaryComplaint = relatedOpenComplaints.find((item) => item.id === existing.id);
+            if (!primaryComplaint) {
+                throw new Error("COMPLAINT_STATUS_CONFLICT");
+            }
+            const cascadedComplaintIds = [];
+            for (const relatedComplaint of relatedOpenComplaints) {
+                const nextUpdate = await tx.complaint.updateMany({
+                    where: {
+                        id: relatedComplaint.id,
+                        status: relatedComplaint.status,
+                    },
+                    data: {
+                        status: parsedStatus,
+                        checked_at: decisionAt,
+                        checked_by_id: access.user.id,
+                        action_taken: actionTaken,
+                    },
+                });
+                if (nextUpdate.count !== 1) {
+                    throw new Error("COMPLAINT_STATUS_CONFLICT");
+                }
+                const isPrimary = relatedComplaint.id === existing.id;
+                if (!isPrimary) {
+                    cascadedComplaintIds.push(relatedComplaint.public_id);
+                }
+                await tx.complaintEvent.create({
+                    data: {
+                        public_id: makePublicId("CME"),
+                        complaint_id: relatedComplaint.id,
+                        actor_user_id: access.user.id,
+                        event_type: "STATUS_CHANGED",
+                        from_status: relatedComplaint.status,
+                        to_status: parsedStatus,
+                        note: actionTaken,
+                        metadata: isPrimary
+                            ? {
+                                source: "admin_panel",
+                            }
+                            : {
+                                source: "admin_panel_cascade",
+                                triggerComplaintId: existing.public_id,
+                            },
+                    },
+                });
+            }
             let enforcement = null;
             if (parsedStatus === "APPROVED" && existing.status !== "APPROVED") {
                 const enforcementResult = await (0, complaint_sanctions_1.applyApprovedComplaintConsequences)(tx, {
@@ -1563,6 +1594,10 @@ async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
             return {
                 updated,
                 enforcement,
+                cascade: {
+                    updatedCount: relatedOpenComplaints.length,
+                    cascadedComplaintIds,
+                },
             };
         });
         await writeAudit({
@@ -1576,6 +1611,8 @@ async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
                 afterStatus: txResult.updated.status,
                 beforeActionTaken: existing.action_taken,
                 afterActionTaken: txResult.updated.action_taken,
+                cascadeUpdatedCount: txResult.cascade.updatedCount,
+                cascadedComplaintIds: txResult.cascade.cascadedComplaintIds,
             },
         });
         if (txResult.enforcement) {
@@ -1619,6 +1656,10 @@ async function handleComplaintStatusUpdate(req, res, complaintPublicId) {
             success: true,
             status: txResult.updated.status.toLowerCase(),
             enforcement: txResult.enforcement,
+            cascade: {
+                updatedCount: txResult.cascade.updatedCount,
+                cascadedComplaintIds: txResult.cascade.cascadedComplaintIds,
+            },
         };
         await completeAdminIdempotency({
             recordId: idempotencyStart.recordId,
@@ -1820,7 +1861,7 @@ adminRouter.get("/complaints/:id/seller-summary", async (req, res) => {
             res.status(404).json({ error: "Complaint not found" });
             return;
         }
-        const [countsRaw, activeSanctionsCount, recentCasesRaw] = await Promise.all([
+        const [countsRaw, activeSanctionsCount, recentCasesRaw, uniqueCasesTotalRaw, uniqueCasesApprovedRaw, uniqueCasesRejectedRaw,] = await Promise.all([
             prisma_1.prisma.complaint.groupBy({
                 by: ["status"],
                 where: {
@@ -1850,6 +1891,26 @@ adminRouter.get("/complaints/:id/seller-summary", async (req, res) => {
                 },
                 orderBy: [{ created_at: "desc" }, { id: "desc" }],
                 take: 8,
+            }),
+            prisma_1.prisma.complaint.groupBy({
+                by: ["listing_id"],
+                where: {
+                    seller_id: complaint.seller_id,
+                },
+            }),
+            prisma_1.prisma.complaint.groupBy({
+                by: ["listing_id"],
+                where: {
+                    seller_id: complaint.seller_id,
+                    status: "APPROVED",
+                },
+            }),
+            prisma_1.prisma.complaint.groupBy({
+                by: ["listing_id"],
+                where: {
+                    seller_id: complaint.seller_id,
+                    status: "REJECTED",
+                },
             }),
         ]);
         const counts = {
@@ -1888,6 +1949,11 @@ adminRouter.get("/complaints/:id/seller-summary", async (req, res) => {
                 pending: counts.pending,
                 new: counts.new,
                 rejected: counts.rejected,
+            },
+            cases: {
+                total: uniqueCasesTotalRaw.length,
+                approved: uniqueCasesApprovedRaw.length,
+                rejected: uniqueCasesRejectedRaw.length,
             },
             activeSanctionsCount,
             recentCases: recentCasesRaw.map((item) => ({

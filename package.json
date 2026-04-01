@@ -11,6 +11,8 @@
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "tsc -p backend/tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
+    "encoding:check": "node scripts/encoding-no-bom.mjs --check",
+    "encoding:fix": "node scripts/encoding-no-bom.mjs --fix",
     "start": "node dist/backend/src/server.js",
     "start:dev": "tsx backend/src/server.ts",
     "db:generate": "prisma generate --schema backend/prisma/schema.prisma",

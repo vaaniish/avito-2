@@ -1,4 +1,4 @@
-﻿type ListingStatusValue = "ACTIVE" | "INACTIVE" | "MODERATION";
+type ListingStatusValue = "ACTIVE" | "INACTIVE" | "MODERATION";
 type ModerationStatusValue = "APPROVED" | "PENDING" | "REJECTED";
 
 export type SellerModerationContext = {

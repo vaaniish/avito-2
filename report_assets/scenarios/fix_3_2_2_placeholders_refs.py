@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph

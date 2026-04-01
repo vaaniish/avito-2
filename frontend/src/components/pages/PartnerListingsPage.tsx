@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Edit2, Eye, EyeOff, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";

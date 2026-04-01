@@ -1,4 +1,4 @@
-﻿import { Prisma, type ComplaintSanctionLevel } from "@prisma/client";
+import { Prisma, type ComplaintSanctionLevel } from "@prisma/client";
 
 const SANCTION_PUBLIC_ID_PREFIX = "SNC";
 
@@ -79,12 +79,15 @@ export async function applyApprovedComplaintConsequences(
   params: EnforcementParams,
 ): Promise<ComplaintEnforcementResult> {
   const now = params.now ?? new Date();
-  const approvedViolationsCount = await tx.complaint.count({
+  // Count unique approved cases by listing to avoid over-penalizing cascaded complaints.
+  const approvedViolationCases = await tx.complaint.groupBy({
+    by: ["listing_id"],
     where: {
       seller_id: params.sellerId,
       status: "APPROVED",
     },
   });
+  const approvedViolationsCount = approvedViolationCases.length;
   const level = resolveSanctionLevel(approvedViolationsCount);
   const reason = buildSanctionReason({
     complaintPublicId: params.complaintPublicId,

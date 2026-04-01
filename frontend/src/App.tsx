@@ -172,6 +172,14 @@ function normalizePathname(pathname: string): string {
   return pathname.replace(/\/+$/, "") || "/";
 }
 
+function decodeRouteSegment(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function parseRoute(pathname: string, search: string): ParsedRoute {
   const normalizedPath = normalizePathname(pathname);
   const query = new URLSearchParams(search);
@@ -248,7 +256,9 @@ function parseRoute(pathname: string, search: string): ParsedRoute {
   }
 
   if (normalizedPath.startsWith("/sellers/")) {
-    const sellerId = normalizedPath.slice("/sellers/".length).trim();
+    const sellerId = decodeRouteSegment(
+      normalizedPath.slice("/sellers/".length).trim(),
+    );
     return {
       ...defaultRoute,
       view: "sellerStore",
@@ -281,7 +291,7 @@ function buildPathForView(params: {
     case "product":
       return listingId ? `/products/${listingId}` : "/";
     case "sellerStore":
-      return sellerId ? `/sellers/${sellerId}` : "/";
+      return sellerId ? `/sellers/${encodeURIComponent(sellerId)}` : "/";
     case "about":
       return "/about";
     case "partnership":
@@ -330,6 +340,9 @@ export default function App() {
   );
   const [deepLinkSellerId, setDeepLinkSellerId] = useState<string | null>(
     initialRoute.sellerId,
+  );
+  const [sellerBackListingId, setSellerBackListingId] = useState<string | null>(
+    null,
   );
   const [productBackSellerId, setProductBackSellerId] = useState<string | null>(
     null,
@@ -726,6 +739,7 @@ export default function App() {
     setCurrentAdminPage("transactions");
     setDeepLinkListingId(null);
     setDeepLinkSellerId(null);
+    setSellerBackListingId(null);
     setProductBackSellerId(null);
     setSelectedProduct(null);
     setIsSearchActive(false);
@@ -768,6 +782,7 @@ export default function App() {
   const handleOpenSellerStore = (sellerId: string) => {
     const normalized = sellerId.trim();
     if (!normalized) return;
+    setSellerBackListingId(currentView === "product" ? selectedProduct?.id ?? null : null);
     setDeepLinkSellerId(normalized);
     setCurrentView("sellerStore");
     scrollToTop();
@@ -1020,7 +1035,24 @@ export default function App() {
         <Suspense fallback={lazyFallback}>
           <SellerStorePage
             sellerId={deepLinkSellerId}
-            onBack={handleLogoClick}
+            onBack={() => {
+              if (!sellerBackListingId) {
+                handleLogoClick();
+                return;
+              }
+
+              const listingId = sellerBackListingId;
+              const knownListing = [...products, ...services].find((item) => item.id === listingId) ?? null;
+
+              setCurrentView("product");
+              setDeepLinkListingId(listingId);
+              setSelectedProduct((prev) => {
+                if (prev?.id === listingId) return prev;
+                return knownListing;
+              });
+              setSellerBackListingId(null);
+              scrollToTop();
+            }}
             onOpenListing={(product) => {
               setProductBackSellerId(deepLinkSellerId);
               setSelectedProduct(product);
