@@ -69,6 +69,7 @@ type QuestionSort = "useful" | "newest" | "with_answer" | "without_answer";
 type ComplaintModalStep = "category" | "details" | "success";
 type ComplaintCategoryKey = "listing_info" | "communication" | "fraud";
 type ComplaintApiType = "suspicious_listing" | "other" | "fraud";
+type SelectedImageFitMode = "fit-height" | "fit-width";
 
 type ComplaintCategoryConfig = {
   key: ComplaintCategoryKey;
@@ -285,6 +286,7 @@ export function ProductDetail({
   onWishlistToggle,
 }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedImageFitMode, setSelectedImageFitMode] = useState<SelectedImageFitMode>("fit-width");
   const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
 
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -350,6 +352,7 @@ export function ProductDetail({
     const raw = (product.images ?? []).filter(Boolean);
     return raw.length > 0 ? raw : [product.image];
   }, [product.image, product.images]);
+  const selectedImageSrc = images[selectedImage] ?? images[0];
 
   const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
   const isInCart = cartQuantity > 0;
@@ -395,6 +398,32 @@ export function ProductDetail({
       [],
     );
   }, [product.specifications]);
+
+  useEffect(() => {
+    if (!selectedImageSrc || typeof Image === "undefined") {
+      setSelectedImageFitMode("fit-width");
+      return;
+    }
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.onload = () => {
+      if (cancelled) return;
+      setSelectedImageFitMode(image.naturalHeight >= image.naturalWidth ? "fit-height" : "fit-width");
+    };
+
+    image.onerror = () => {
+      if (cancelled) return;
+      setSelectedImageFitMode("fit-width");
+    };
+
+    image.src = selectedImageSrc;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedImageSrc]);
   const specificationColumns = useMemo(() => {
     const mid = Math.ceil(specificationRows.length / 2);
     return [specificationRows.slice(0, mid), specificationRows.slice(mid)];
@@ -757,45 +786,83 @@ export function ProductDetail({
       </div>
 
       <div className="page-container grid grid-cols-1 gap-8 pb-8 md:pb-16 lg:grid-cols-[1fr_400px]">
-        <div>
+        <div className="min-w-0">
           <h1 className="mb-6 text-2xl text-black md:text-4xl">{product.title}</h1>
 
           <div className="mb-8">
-            <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 md:aspect-[4/3]">
-              <img src={images[selectedImage]} alt={product.title} className="h-full w-full object-cover" />
+            <div
+              className="relative mb-3 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100"
+              style={{ maxWidth: 760 }}
+            >
+              <div className="relative w-full" style={{ aspectRatio: "4 / 3" }}>
+                <img
+                  src={images[selectedImage]}
+                  alt=""
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                  style={{ objectFit: "cover", filter: "blur(28px)", transform: "scale(1.12)" }}
+                />
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, rgba(15,23,42,0.18) 0%, rgba(15,23,42,0.06) 24%, rgba(15,23,42,0.06) 76%, rgba(15,23,42,0.18) 100%)",
+                  }}
+                />
+                <div className="relative z-[1] flex h-full w-full items-center justify-center">
+                  <img
+                    src={images[selectedImage]}
+                    alt={product.title}
+                    draggable={false}
+                    className="block select-none rounded-md"
+                    style={
+                      selectedImageFitMode === "fit-height"
+                        ? { width: "auto", height: "100%", maxWidth: "none", maxHeight: "none" }
+                        : { width: "100%", height: "auto", maxWidth: "none", maxHeight: "none" }
+                    }
+                  />
+                </div>
+              </div>
 
               {images.length > 1 ? (
                 <>
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/55"
+                    className="group/prev absolute inset-y-0 left-0 z-10 flex w-16 items-center justify-center md:w-20"
                     aria-label="Предыдущее фото"
                   >
-                    <ChevronLeft className="h-5 w-5" />
+                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/35 via-black/15 to-transparent opacity-0 transition-opacity duration-200 group-hover/prev:opacity-100" />
+                    <span className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/60 text-white shadow-[0_2px_10px_rgba(0,0,0,0.45)] transition group-hover/prev:scale-105 group-hover/prev:bg-black/75">
+                      <ChevronLeft className="h-6 w-6" />
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/55"
+                    className="group/next absolute inset-y-0 right-0 z-10 flex w-16 items-center justify-center md:w-20"
                     aria-label="Следующее фото"
                   >
-                    <ChevronRight className="h-5 w-5" />
+                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-l from-black/35 via-black/15 to-transparent opacity-0 transition-opacity duration-200 group-hover/next:opacity-100" />
+                    <span className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/60 text-white shadow-[0_2px_10px_rgba(0,0,0,0.45)] transition group-hover/next:scale-105 group-hover/next:bg-black/75">
+                      <ChevronRight className="h-6 w-6" />
+                    </span>
                   </button>
                 </>
               ) : null}
             </div>
 
             {images.length > 1 ? (
-              <div className="grid grid-cols-6 gap-2 md:grid-cols-8">
+              <div className="flex gap-2 overflow-x-auto pb-1">
                 {images.map((image, index) => (
                   <button
                     key={`${image}-${index}`}
                     type="button"
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square overflow-hidden rounded-lg border-2 ${
+                    className={`shrink-0 overflow-hidden rounded-lg border-2 ${
                       selectedImage === index ? "border-gray-900" : "border-gray-200"
                     }`}
+                    style={{ width: 84, height: 64 }}
                     aria-label={`Открыть фото ${index + 1}`}
                   >
                     <img src={image} alt={`preview-${index}`} className="h-full w-full object-cover" />
@@ -830,7 +897,7 @@ export function ProductDetail({
 
           <div className="mb-8">
             <h2 className="mb-2 text-xl text-gray-900 md:text-2xl">Описание</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700 md:text-base">
+            <p className="whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-relaxed text-gray-700 md:text-base">
               {product.description || "Описание отсутствует"}
             </p>
           </div>
@@ -953,7 +1020,7 @@ export function ProductDetail({
           </div>
         </div>
 
-        <div className="h-fit lg:sticky lg:top-32">
+        <div className="min-w-0 h-fit lg:sticky lg:top-32">
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <div className="mb-4 flex items-start justify-between">
               <div>

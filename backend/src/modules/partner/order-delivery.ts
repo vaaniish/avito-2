@@ -35,14 +35,18 @@ const RUSSIAN_POST_SOAP_URL =
   process.env.RUSSIAN_POST_SOAP_URL?.trim() ?? "https://tracking.russianpost.ru/rtm34";
 const RUSSIAN_POST_LOGIN = process.env.RUSSIAN_POST_LOGIN?.trim() ?? "";
 const RUSSIAN_POST_PASSWORD = process.env.RUSSIAN_POST_PASSWORD?.trim() ?? "";
-const YANDEX_DELIVERY_TEST_BASE_URL =
+const YANDEX_DELIVERY_BASE_URL =
+  process.env.YANDEX_DELIVERY_BASE_URL?.trim() ??
   process.env.YANDEX_DELIVERY_TEST_BASE_URL?.trim() ??
   "https://b2b.taxi.tst.yandex.net";
-const YANDEX_DELIVERY_TEST_TOKEN =
+const YANDEX_DELIVERY_TOKEN =
+  process.env.YANDEX_DELIVERY_TOKEN?.trim() ??
   process.env.YANDEX_DELIVERY_TEST_TOKEN?.trim() ??
   "";
-const YANDEX_DELIVERY_TEST_TIMEOUT_MS = Number(
-  process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ?? "10000",
+const YANDEX_DELIVERY_TIMEOUT_MS = Number(
+  process.env.YANDEX_DELIVERY_TIMEOUT_MS ??
+    process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ??
+    "10000",
 );
 
 function isLikelyRussianPostTrack(value: string): boolean {
@@ -365,12 +369,12 @@ async function requestYandexDeliveryRequestInfo(
   rawStatus?: string;
   trackingUrl?: string;
 } | null> {
-  if (!YANDEX_DELIVERY_TEST_TOKEN || !requestId.trim()) {
+  if (!YANDEX_DELIVERY_TOKEN || !requestId.trim()) {
     return null;
   }
 
   const url = new URL(
-    `${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`,
+    `${YANDEX_DELIVERY_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`,
   );
   url.searchParams.set("request_id", requestId);
   url.searchParams.set("slim", "true");
@@ -381,13 +385,13 @@ async function requestYandexDeliveryRequestInfo(
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
+          Authorization: `Bearer ${YANDEX_DELIVERY_TOKEN}`,
           "Accept-Language": "ru",
           "Content-Type": "application/json",
         },
       },
-      Number.isFinite(YANDEX_DELIVERY_TEST_TIMEOUT_MS)
-        ? Math.max(2000, YANDEX_DELIVERY_TEST_TIMEOUT_MS)
+      Number.isFinite(YANDEX_DELIVERY_TIMEOUT_MS)
+        ? Math.max(2000, YANDEX_DELIVERY_TIMEOUT_MS)
         : 10000,
     );
 

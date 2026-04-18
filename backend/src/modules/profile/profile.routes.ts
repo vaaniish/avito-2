@@ -68,7 +68,7 @@ type DeliveryPoint = {
 };
 
 const DELIVERY_PROVIDER_LABELS: Record<DeliveryProviderCode, string> = {
-  russian_post: "РџРѕС‡С‚Р° Р РѕСЃСЃРёРё",
+  russian_post: "Почта России",
   yandex_pvz: "Яндекс ПВЗ",
 };
 
@@ -370,21 +370,38 @@ const RUSSIAN_POST_PAGE_SIZE_DEFAULT = Number(
 const RUSSIAN_POST_PAGE_SIZE_MAX = Number(
   process.env.RUSSIAN_POST_PAGE_SIZE_MAX ?? "600",
 );
-const YANDEX_DELIVERY_TEST_BASE_URL =
+const YANDEX_DELIVERY_BASE_URL =
+  process.env.YANDEX_DELIVERY_BASE_URL?.trim() ||
   process.env.YANDEX_DELIVERY_TEST_BASE_URL?.trim() ||
   "https://b2b.taxi.tst.yandex.net";
-const YANDEX_DELIVERY_TEST_TOKEN =
+const YANDEX_DELIVERY_TOKEN =
+  process.env.YANDEX_DELIVERY_TOKEN?.trim() ||
   process.env.YANDEX_DELIVERY_TEST_TOKEN?.trim() ||
   "";
-const YANDEX_DELIVERY_TEST_TIMEOUT_MS = Number(
-  process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ?? "10000",
+const YANDEX_DELIVERY_TIMEOUT_MS = Number(
+  process.env.YANDEX_DELIVERY_TIMEOUT_MS ??
+    process.env.YANDEX_DELIVERY_TEST_TIMEOUT_MS ??
+    "10000",
 );
-const YANDEX_DELIVERY_TEST_SOURCE_STATION_ID =
+const YANDEX_DELIVERY_SOURCE_STATION_ID =
+  process.env.YANDEX_DELIVERY_SOURCE_STATION_ID?.trim() ||
   process.env.YANDEX_DELIVERY_TEST_SOURCE_STATION_ID?.trim() ||
   "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924";
-const YANDEX_DELIVERY_TEST_MERCHANT_ID =
+const YANDEX_DELIVERY_MERCHANT_ID =
+  process.env.YANDEX_DELIVERY_MERCHANT_ID?.trim() ||
   process.env.YANDEX_DELIVERY_TEST_MERCHANT_ID?.trim() ||
-  "290587090cfc4943856851c8c3b2eebf";
+  "";
+const YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID =
+  process.env.YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID?.trim() ||
+  "e1139f6d-e34f-47a9-a55f-31f032a861a6";
+const YANDEX_DELIVERY_OPERATOR_IDS = (
+  process.env.YANDEX_DELIVERY_OPERATOR_IDS?.trim() ||
+  process.env.YANDEX_DELIVERY_TEST_OPERATOR_IDS?.trim() ||
+  "market_l4g"
+)
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 type GeoBounds = {
   minLat: number;
@@ -1716,6 +1733,7 @@ function mapYandexPickupPoints(
       id?: unknown;
       name?: unknown;
       available_for_dropoff?: unknown;
+      available_for_pickup?: unknown;
       position?: { latitude?: unknown; longitude?: unknown };
       address?: {
         full_address?: unknown;
@@ -1726,7 +1744,9 @@ function mapYandexPickupPoints(
       };
     };
 
-    if (point.available_for_dropoff !== true) continue;
+    const canUseForPickup =
+      point.available_for_dropoff === true || point.available_for_pickup === true;
+    if (!canUseForPickup) continue;
 
     const id = normalizeTextField(point.id);
     if (!id || seen.has(id)) continue;
@@ -1773,35 +1793,117 @@ function mapYandexPickupPoints(
 async function loadYandexPickupPoints(
   location: GeocodedLocation,
 ): Promise<DeliveryPoint[]> {
-  if (!YANDEX_DELIVERY_TEST_TOKEN) {
-    throw new Error("Yandex delivery test token is not configured");
+  if (!YANDEX_DELIVERY_TOKEN) {
+    throw new Error(
+      "Yandex delivery token is not configured (YANDEX_DELIVERY_TOKEN)",
+    );
   }
 
-  const response = await fetchWithTimeout(
-    `${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/pickup-points/list`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
-        "Accept-Language": "ru",
-        "Content-Type": "application/json",
+  const runRequest = async (
+    includeOperatorIds: boolean,
+    availabilityMode: "pickup" | "dropoff" | "any",
+  ): Promise<DeliveryPoint[]> => {
+    const body: Record<string, unknown> = {
+      type: "pickup_point",
+      payment_method: "already_paid",
+    };
+    if (availabilityMode === "pickup") {
+      body.available_for_pickup = true;
+    } else if (availabilityMode === "dropoff") {
+      body.available_for_dropoff = true;
+    }
+    if (includeOperatorIds && YANDEX_DELIVERY_OPERATOR_IDS.length > 0) {
+      body.operator_ids = YANDEX_DELIVERY_OPERATOR_IDS;
+    }
+
+    const response = await fetchWithTimeout(
+      `${YANDEX_DELIVERY_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/pickup-points/list`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${YANDEX_DELIVERY_TOKEN}`,
+          "Accept-Language": "ru",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify({
-        type: "pickup_point",
-        payment_method: "already_paid",
-        available_for_dropoff: true,
-        operator_ids: ["market_l4g"],
-      }),
-    },
-    YANDEX_DELIVERY_TEST_TIMEOUT_MS,
-  );
+      YANDEX_DELIVERY_TIMEOUT_MS,
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to load Yandex pickup points (${response.status})`);
+    if (!response.ok) {
+      throw new Error(`Failed to load Yandex pickup points (${response.status})`);
+    }
+
+    const payload = (await response.json()) as { points?: unknown[] };
+    return mapYandexPickupPoints(payload.points, location);
+  };
+
+  const attempts: Array<{
+    includeOperatorIds: boolean;
+    availabilityMode: "pickup" | "dropoff" | "any";
+    label: string;
+  }> = [
+    {
+      includeOperatorIds: true,
+      availabilityMode: "pickup",
+      label: "operator_ids + available_for_pickup",
+    },
+    {
+      includeOperatorIds: false,
+      availabilityMode: "pickup",
+      label: "available_for_pickup",
+    },
+    {
+      includeOperatorIds: true,
+      availabilityMode: "dropoff",
+      label: "operator_ids + available_for_dropoff",
+    },
+    {
+      includeOperatorIds: false,
+      availabilityMode: "dropoff",
+      label: "available_for_dropoff",
+    },
+    {
+      includeOperatorIds: false,
+      availabilityMode: "any",
+      label: "without availability filter",
+    },
+  ];
+
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    if (
+      attempt.includeOperatorIds &&
+      YANDEX_DELIVERY_OPERATOR_IDS.length === 0
+    ) {
+      continue;
+    }
+    try {
+      const points = await runRequest(
+        attempt.includeOperatorIds,
+        attempt.availabilityMode,
+      );
+      if (points.length > 0) {
+        return points;
+      }
+      console.warn(
+        `Yandex pickup points request returned empty list (${attempt.label})`,
+      );
+    } catch (error) {
+      lastError = error;
+      console.warn(
+        `Yandex pickup points request failed (${attempt.label}):`,
+        error,
+      );
+    }
   }
 
-  const payload = (await response.json()) as { points?: unknown[] };
-  return mapYandexPickupPoints(payload.points, location);
+  if (lastError) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("Failed to load Yandex pickup points");
+  }
+  return [];
 
   /* legacy parser (disabled, kept only for reference)
   const points: DeliveryPoint[] = [];
@@ -1878,7 +1980,7 @@ const PICKUP_PROVIDER_TAG_RE = /\[PICKUP_PROVIDER:([^\]]+)\]/u;
 
 function createYandexDeliveryHeaders(): Record<string, string> {
   return {
-    Authorization: `Bearer ${YANDEX_DELIVERY_TEST_TOKEN}`,
+    Authorization: `Bearer ${YANDEX_DELIVERY_TOKEN}`,
     "Accept-Language": "ru",
     "Content-Type": "application/json",
   };
@@ -1893,10 +1995,10 @@ async function fetchYandexRequestInfoById(
   requestId: string,
 ): Promise<YandexRequestCreateResult | null> {
   if (!requestId.trim()) return null;
-  if (!YANDEX_DELIVERY_TEST_TOKEN) return null;
+  if (!YANDEX_DELIVERY_TOKEN) return null;
 
   const url = new URL(
-    `${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`,
+    `${YANDEX_DELIVERY_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/info`,
   );
   url.searchParams.set("request_id", requestId);
   url.searchParams.set("slim", "true");
@@ -1907,7 +2009,7 @@ async function fetchYandexRequestInfoById(
       method: "GET",
       headers: createYandexDeliveryHeaders(),
     },
-    YANDEX_DELIVERY_TEST_TIMEOUT_MS,
+    YANDEX_DELIVERY_TIMEOUT_MS,
   );
 
   if (!response.ok) return null;
@@ -1940,7 +2042,7 @@ async function createYandexDeliveryRequestForOrder(params: {
   buyerName: string;
   buyerEmail: string;
 }): Promise<YandexRequestCreateResult | null> {
-  if (!YANDEX_DELIVERY_TEST_TOKEN) return null;
+  if (!YANDEX_DELIVERY_TOKEN) return null;
 
   const now = new Date();
   const intervalFrom = new Date(now.getTime() + 10 * 60 * 1000);
@@ -1952,119 +2054,187 @@ async function createYandexDeliveryRequestForOrder(params: {
     .filter(Boolean);
   const firstName = buyerNameParts[0] || "Покупатель";
   const lastName = buyerNameParts.slice(1).join(" ") || "Ecomm";
-
-  const createBody = {
-    info: {
-      operator_request_id: params.orderPublicId,
-      merchant_id: YANDEX_DELIVERY_TEST_MERCHANT_ID,
-      comment: `Order ${params.orderPublicId} (sandbox)`,
-    },
-    source: {
-      platform_station: {
-        platform_id: YANDEX_DELIVERY_TEST_SOURCE_STATION_ID,
-      },
-      interval_utc: {
-        from: formatUtcIsoWithMicros(intervalFrom),
-        to: formatUtcIsoWithMicros(intervalTo),
-      },
-    },
-    destination: {
-      type: "platform_station",
-      platform_station: {
-        platform_id: params.pickupPointId,
-      },
-      custom_location: null,
-      interval_utc: null,
-    },
-    items: [
-      {
-        count: 1,
-        name: `Order ${params.orderPublicId}`,
-        article: params.orderPublicId,
-        billing_details: {
-          inn: "9715386101",
-          nds: 22,
-          unit_price: params.totalPrice,
-          assessed_unit_price: params.totalPrice,
-        },
-        physical_dims: {
-          dx: 10,
-          dy: 10,
-          dz: 10,
-          predefined_volume: 20,
-        },
-        place_barcode: `PL-${params.orderPublicId}`,
-        cargo_types: "[\"80\"]",
-        fitting: false,
-      },
-    ],
-    places: [
-      {
-        physical_dims: {
-          weight_gross: 100,
-          dx: 10,
-          dy: 10,
-          dz: 10,
-        },
-        barcode: `PL-${params.orderPublicId}`,
-      },
-    ],
-    billing_info: {
-      payment_method: "already_paid",
-      delivery_cost: 0,
-    },
-    recipient_info: {
-      first_name: firstName,
-      last_name: lastName,
-      phone: "+79990000000",
-      email: params.buyerEmail || "buyer@example.com",
-    },
-    last_mile_policy: "self_pickup",
-    particular_items_refuse: false,
-    forbid_unboxing: false,
-  };
-
-  const createResponse = await fetchWithTimeout(
-    `${YANDEX_DELIVERY_TEST_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/create?send_unix=false`,
-    {
-      method: "POST",
-      headers: createYandexDeliveryHeaders(),
-      body: JSON.stringify(createBody),
-    },
-    YANDEX_DELIVERY_TEST_TIMEOUT_MS,
-  );
-
-  if (!createResponse.ok) {
-    return null;
+  const isSandboxHost = YANDEX_DELIVERY_BASE_URL.includes(".tst.yandex.net");
+  const sourceStationCandidates = [YANDEX_DELIVERY_SOURCE_STATION_ID];
+  if (isSandboxHost && YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID) {
+    if (!sourceStationCandidates.includes(YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID)) {
+      sourceStationCandidates.push(YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID);
+    }
   }
 
-  const createPayload = (await createResponse.json()) as {
-    request_id?: unknown;
-    state?: {
-      status?: unknown;
+  let lastError: unknown = null;
+
+  for (const sourceStationId of sourceStationCandidates) {
+    const infoBlock: {
+      operator_request_id: string;
+      merchant_id?: string;
+      comment: string;
+    } = {
+      operator_request_id: params.orderPublicId,
+      comment: `Order ${params.orderPublicId} (sandbox)`,
     };
-    sharing_url?: unknown;
-  };
-  const requestId =
-    typeof createPayload.request_id === "string"
-      ? createPayload.request_id.trim()
-      : "";
-  if (!requestId) return null;
+    if (YANDEX_DELIVERY_MERCHANT_ID) {
+      infoBlock.merchant_id = YANDEX_DELIVERY_MERCHANT_ID;
+    }
 
-  const info = await fetchYandexRequestInfoById(requestId);
-  if (info) return info;
+    const createBody = {
+      info: infoBlock,
+      source: {
+        platform_station: {
+          platform_id: sourceStationId,
+        },
+        interval_utc: {
+          from: formatUtcIsoWithMicros(intervalFrom),
+          to: formatUtcIsoWithMicros(intervalTo),
+        },
+      },
+      destination: {
+        type: "platform_station",
+        platform_station: {
+          platform_id: params.pickupPointId,
+        },
+        custom_location: null,
+        interval_utc: null,
+      },
+      items: [
+        {
+          count: 1,
+          name: `Order ${params.orderPublicId}`,
+          article: params.orderPublicId,
+          billing_details: {
+            inn: "9715386101",
+            nds: 22,
+            unit_price: params.totalPrice,
+            assessed_unit_price: params.totalPrice,
+          },
+          physical_dims: {
+            dx: 10,
+            dy: 10,
+            dz: 10,
+            predefined_volume: 20,
+          },
+          place_barcode: `PL-${params.orderPublicId}`,
+          cargo_types: [80],
+          fitting: false,
+        },
+      ],
+      places: [
+        {
+          physical_dims: {
+            weight_gross: 100,
+            dx: 10,
+            dy: 10,
+            dz: 10,
+          },
+          barcode: `PL-${params.orderPublicId}`,
+        },
+      ],
+      billing_info: {
+        payment_method: "already_paid",
+        delivery_cost: 0,
+      },
+      recipient_info: {
+        first_name: firstName,
+        last_name: lastName,
+        phone: "+79990000000",
+        email: params.buyerEmail || "buyer@example.com",
+      },
+      last_mile_policy: "self_pickup",
+      particular_items_refuse: false,
+      forbid_unboxing: false,
+    };
 
-  return {
-    requestId,
-    status:
-      createPayload.state && typeof createPayload.state.status === "string"
-        ? createPayload.state.status.trim()
-        : "CREATED",
-    sharingUrl:
-      typeof createPayload.sharing_url === "string"
-        ? createPayload.sharing_url.trim()
-        : null,
-  };
+    try {
+      const createResponse = await fetchWithTimeout(
+        `${YANDEX_DELIVERY_BASE_URL.replace(/\/+$/u, "")}/api/b2b/platform/request/create?send_unix=false`,
+        {
+          method: "POST",
+          headers: createYandexDeliveryHeaders(),
+          body: JSON.stringify(createBody),
+        },
+        YANDEX_DELIVERY_TIMEOUT_MS,
+      );
+
+      const responseText = await createResponse.text();
+      const responseJson = responseText
+        ? (() => {
+            try {
+              return JSON.parse(responseText) as {
+                request_id?: unknown;
+                state?: { status?: unknown };
+                sharing_url?: unknown;
+                code?: unknown;
+                message?: unknown;
+              };
+            } catch {
+              return null;
+            }
+          })()
+        : null;
+
+      if (!createResponse.ok) {
+        const error = new Error(
+          `Yandex request/create failed: ${createResponse.status} ${createResponse.statusText}${
+            responseText ? ` | ${responseText}` : ""
+          }`,
+        ) as Error & { yandexCode?: string; yandexMessage?: string };
+        error.yandexCode =
+          responseJson && typeof responseJson.code === "string"
+            ? responseJson.code
+            : undefined;
+        error.yandexMessage =
+          responseJson && typeof responseJson.message === "string"
+            ? responseJson.message
+            : undefined;
+        throw error;
+      }
+
+      const requestId =
+        responseJson && typeof responseJson.request_id === "string"
+          ? responseJson.request_id.trim()
+          : "";
+      if (!requestId) return null;
+
+      const info = await fetchYandexRequestInfoById(requestId);
+      if (info) return info;
+
+      return {
+        requestId,
+        status:
+          responseJson &&
+          responseJson.state &&
+          typeof responseJson.state.status === "string"
+            ? responseJson.state.status.trim()
+            : "CREATED",
+        sharingUrl:
+          responseJson && typeof responseJson.sharing_url === "string"
+            ? responseJson.sharing_url.trim()
+            : null,
+      };
+    } catch (error) {
+      lastError = error;
+      const yandexCode =
+        typeof error === "object" &&
+        error !== null &&
+        "yandexCode" in error &&
+        typeof (error as { yandexCode?: unknown }).yandexCode === "string"
+          ? ((error as { yandexCode?: string }).yandexCode ?? "")
+          : "";
+      if (
+        isSandboxHost &&
+        yandexCode === "pickups_not_configured" &&
+        sourceStationId !== YANDEX_DELIVERY_SANDBOX_SOURCE_STATION_ID
+      ) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+  return null;
 }
 
 function appendPickupPointMetaToAddress(
@@ -2118,7 +2288,10 @@ async function ensureYandexTrackingForOrders(orderIds: number[]): Promise<void> 
     where: {
       id: { in: orderIds },
       delivery_type: "DELIVERY",
-      tracking_number: null,
+      OR: [
+        { tracking_number: null },
+        { tracking_number: { startsWith: "YND-ORD-" } },
+      ],
       status: { in: ["PAID", "PREPARED", "PROCESSING"] },
     },
     include: {
@@ -2164,19 +2337,32 @@ async function ensureYandexTrackingForOrders(orderIds: number[]): Promise<void> 
       );
     }
 
-    const fallbackTrackingNumber = `YND-${order.public_id}`;
-    const trackingNumber = createdRequest?.requestId || fallbackTrackingNumber;
-    const trackingUrl =
-      createdRequest?.sharingUrl ||
-      `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
+    const hasLegacyTracking =
+      typeof order.tracking_number === "string" &&
+      order.tracking_number.trim().startsWith("YND-ORD-");
+
+    if (!createdRequest?.requestId) {
+      if (hasLegacyTracking || order.tracking_url) {
+        await prisma.marketOrder.update({
+          where: { id: order.id },
+          data: {
+            tracking_number: null,
+            tracking_url: null,
+          },
+        });
+      }
+      continue;
+    }
 
     await prisma.marketOrder.update({
       where: { id: order.id },
       data: {
         tracking_provider: "yandex_pvz",
-        tracking_number: trackingNumber,
-        tracking_url: trackingUrl,
-        delivery_ext_status: createdRequest?.status || "CREATED",
+        tracking_number: createdRequest.requestId,
+        tracking_url:
+          createdRequest.sharingUrl ||
+          `https://dostavka.yandex.ru/route/${encodeURIComponent(createdRequest.requestId)}`,
+        delivery_ext_status: createdRequest.status || "CREATED",
       },
     });
   }
@@ -3589,6 +3775,9 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       return;
     }
 
+    const hasCheckoutDelivery = deliveryType === "DELIVERY";
+    const checkoutDeliveryCost = hasCheckoutDelivery ? 500 : 0;
+
     const preparedOrders = Array.from(groupedBySeller.entries()).map(
       ([sellerId, items], index) => {
         const subtotal = items.reduce(
@@ -3596,7 +3785,8 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
             sum + item.price * item.quantity,
           0,
         );
-        const deliveryCost = deliveryType === "DELIVERY" ? 500 : 0;
+        // Delivery is charged once per checkout, not once per seller order.
+        const deliveryCost = hasCheckoutDelivery && index === 0 ? checkoutDeliveryCost : 0;
         const discount = 0;
         const totalPrice = subtotal + deliveryCost - discount;
         const publicId = `ORD-${Date.now()}-${index + 1}`;
@@ -3643,6 +3833,10 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
       let sequence = 0;
       for (const preparedOrder of preparedOrders) {
         sequence += 1;
+        const initialTrackingProvider =
+          deliveryType === "DELIVERY" ? pickupPointProvider : null;
+        const initialTrackingNumber = null;
+        const initialDeliveryExternalStatus = null;
         const order = await tx.marketOrder.create({
           data: {
             public_id: preparedOrder.publicId,
@@ -3652,6 +3846,10 @@ profileRouter.post("/orders", async (req: Request, res: Response) => {
             delivery_type: deliveryType,
             delivery_address:
               deliveryType === "DELIVERY" ? deliveryAddress : "РЎР°РјРѕРІС‹РІРѕР·",
+            tracking_provider: initialTrackingProvider,
+            tracking_number: initialTrackingNumber,
+            tracking_url: null,
+            delivery_ext_status: initialDeliveryExternalStatus,
             total_price: preparedOrder.totalPrice,
             delivery_cost: preparedOrder.deliveryCost,
             discount: preparedOrder.discount,

@@ -425,7 +425,10 @@ export default function App() {
     setCurrentUser(existingSession);
     setUserType(existingSession.role);
     setIsAuthenticated(true);
-    if (existingSession.role === "admin") {
+    const shouldAutoOpenAdminPanel =
+      existingSession.role === "admin" &&
+      (initialRoute.view === "home" || initialRoute.view === "adminLogin");
+    if (shouldAutoOpenAdminPanel) {
       setCurrentView("adminPanel");
     }
   }, []);
@@ -1102,6 +1105,7 @@ export default function App() {
             items={cartItems}
             onUpdateQuantity={updateQuantity}
             onCheckout={handleCheckout}
+            onBackToHome={handleLogoClick}
           />
         </Suspense>
         <Footer onNavigate={handleFooterNavigation} />

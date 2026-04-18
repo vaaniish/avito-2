@@ -117,7 +117,11 @@ function formatExternalDeliveryStatus(value: string | null): string {
 
 function stripPickupPointTag(value: string | null | undefined): string {
   if (!value) return "";
-  return value.replace(/\s*\[PICKUP_ID:[^\]]+\]\s*/giu, "").trim();
+  return value
+    .replace(/\s*\[PICKUP_ID:[^\]]+\]\s*/giu, " ")
+    .replace(/\s*\[PICKUP_PROVIDER:[^\]]+\]\s*/giu, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function formatPickupPointLabel(order: PartnerOrder): string {
@@ -126,6 +130,30 @@ function formatPickupPointLabel(order: PartnerOrder): string {
   if (order.tracking_provider === "russian_post") return "Отделение Почты России";
   if (order.tracking_provider === "yandex_pvz") return "ПВЗ Яндекса";
   return "Пункт выдачи уточняется";
+}
+
+function formatLogisticsStatus(order: PartnerOrder): string {
+  if (order.status === "CREATED" || order.status === "PAID") {
+    return "Не отправлено в доставку: нажмите «Подготовлен».";
+  }
+  return formatExternalDeliveryStatus(order.delivery_ext_status);
+}
+
+function buildTrackingLink(order: PartnerOrder): string | null {
+  const trackingNumber = order.tracking_number?.trim() ?? "";
+  const isLegacySyntheticYandexTrack =
+    order.tracking_provider === "yandex_pvz" && trackingNumber.startsWith("YND-ORD-");
+  if (isLegacySyntheticYandexTrack) return null;
+
+  const trackingUrl = order.tracking_url?.trim();
+  if (trackingUrl) return trackingUrl;
+  if (trackingNumber && order.tracking_provider === "yandex_pvz") {
+    return `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
+  }
+  if (trackingNumber && order.tracking_provider === "russian_post") {
+    return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
+  }
+  return null;
 }
 
 export function PartnerOrdersPage() {
@@ -302,6 +330,7 @@ export function PartnerOrdersPage() {
           {filteredOrders.map((order) => {
             const statusMeta = getStatusMeta(order.status);
             const StatusIcon = statusMeta.icon;
+            const trackingLink = buildTrackingLink(order);
             const preparedButtonDisabled =
               order.status === "PREPARED" || !canMarkPrepared(order) || preparingOrderId === order.id;
             const preparedButtonHint =
@@ -373,52 +402,48 @@ export function PartnerOrdersPage() {
 
                   <section className="rounded-xl border border-slate-200 p-3">
                     <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
-                      Трек-номер доставки
+                      Данные по доставке
                     </div>
-                    {order.delivery_type === "pickup" ? (
-                      <p className="mt-2 text-sm text-slate-600">
-                        Для самовывоза трек-номер не требуется.
-                      </p>
-                    ) : (
-                      <div className="mt-2 space-y-2 text-sm">
-                        {order.tracking_number ? (
-                          <p className="text-slate-700">
-                            Текущий трек: <span className="font-medium">{order.tracking_number}</span>
-                          </p>
-                        ) : (
-                          <p className="text-slate-600">
-                            Трек-номер формируется автоматически после подтверждения оплаты.
-                          </p>
-                        )}
-
-                        <p className="text-slate-600">
-                          Пункт выдачи:{" "}
-                          <span className="font-medium text-slate-700">
-                            {formatPickupPointLabel(order)}
-                          </span>
+                    <div className="mt-2 space-y-2 text-sm">
+                      {order.tracking_number &&
+                      !(order.tracking_provider === "yandex_pvz" &&
+                        order.tracking_number.trim().startsWith("YND-ORD-")) ? (
+                        <p className="text-slate-700">
+                          Текущий трек: <span className="font-medium">{order.tracking_number}</span>
                         </p>
-                        {order.delivery_ext_status && (
-                          <p className="text-slate-600">
-                            Статус логистики:{" "}
-                            <span className="font-medium text-slate-700">
-                              {formatExternalDeliveryStatus(order.delivery_ext_status)}
-                            </span>
-                          </p>
-                        )}
+                      ) : (
+                        <p className="text-slate-600">
+                          Трек-номер формируется автоматически после подтверждения оплаты.
+                        </p>
+                      )}
 
-                        {order.tracking_url && (
-                          <a
-                            href={order.tracking_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-800"
-                          >
-                            Отследить
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
-                        )}
-                      </div>
-                    )}
+                      <p className="text-slate-600">
+                        Пункт выдачи:{" "}
+                        <span className="font-medium text-slate-700">{formatPickupPointLabel(order)}</span>
+                      </p>
+
+                      <p className="text-slate-600">
+                        Статус логистики:{" "}
+                        <span className="font-medium text-slate-700">{formatLogisticsStatus(order)}</span>
+                      </p>
+
+                      {trackingLink ? (
+                        <a
+                          href={trackingLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-800"
+                        >
+                          Отследить
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-slate-400">
+                          Отследить
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                    </div>
                   </section>
                 </div>
               </article>

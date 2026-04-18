@@ -23,15 +23,18 @@ export function OrderCompletePage({
   const firstOrderId = orderIds[0] ?? "-";
 
   return (
-    <div className="min-h-screen app-shell pb-16 pt-6 md:pt-8">
-      <div className="mx-auto w-full max-w-[860px] px-4 md:px-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 md:p-10">
+    <div className="min-h-screen app-shell pb-20 pt-8 md:pt-12">
+      <div className="mx-auto w-full px-4 md:px-6" style={{ maxWidth: "760px" }}>
+        <div
+          className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 md:p-10"
+          style={{ boxShadow: "0 20px 45px -30px rgba(15, 23, 42, 0.55)" }}
+        >
           <h1 className="text-center text-3xl text-gray-900 md:text-4xl">Спасибо за заказ!</h1>
           <p className="mt-3 text-center text-sm text-gray-600 md:text-base">
             Оплата подтверждена, заказ передан в обработку.
           </p>
 
-          <div className="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-5">
             <div className="space-y-3 text-sm md:text-base">
               <div className="flex items-start justify-between gap-4">
                 <span className="text-gray-600">Номер заказа</span>

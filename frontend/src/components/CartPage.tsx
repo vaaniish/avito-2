@@ -6,12 +6,14 @@ interface CartPageProps {
   items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
   onCheckout: (deliveryType: "delivery" | "pickup") => void;
+  onBackToHome: () => void;
 }
 
 export function CartPage({
   items,
   onUpdateQuantity,
   onCheckout,
+  onBackToHome,
 }: CartPageProps) {
   const shippingMethod: "delivery" = "delivery";
   const [couponCode, setCouponCode] = useState("");
@@ -149,6 +151,13 @@ export function CartPage({
             <p className="text-lg md:text-xl text-gray-500 mb-8">
               Ваша корзина пуста
             </p>
+            <button
+              type="button"
+              onClick={onBackToHome}
+              className="btn-primary px-6 py-3 text-sm md:text-base"
+            >
+              На главную
+            </button>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">

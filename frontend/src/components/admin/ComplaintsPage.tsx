@@ -242,7 +242,20 @@ function buildComplaintListingHref(listingId: string, fallbackUrl: string): stri
   if (normalizedId) {
     return `/products/${encodeURIComponent(normalizedId)}`;
   }
-  return fallbackUrl || "/";
+
+  const normalizedFallback = fallbackUrl.trim();
+  if (!normalizedFallback) return "/";
+
+  const queryIndex = normalizedFallback.indexOf("?");
+  if (queryIndex >= 0) {
+    const query = normalizedFallback.slice(queryIndex + 1);
+    const listingIdFromQuery = new URLSearchParams(query).get("listingId")?.trim();
+    if (listingIdFromQuery) {
+      return `/products/${encodeURIComponent(listingIdFromQuery)}`;
+    }
+  }
+
+  return normalizedFallback;
 }
 
 function makeIdempotencyKey(complaintId: string, status: StatusAction): string {
