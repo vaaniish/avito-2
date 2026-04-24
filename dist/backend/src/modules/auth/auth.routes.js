@@ -7,6 +7,7 @@ exports.authRouter = void 0;
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
+const session_token_1 = require("../../lib/session-token");
 const format_1 = require("../../utils/format");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const authRouter = (0, express_1.Router)();
@@ -81,6 +82,7 @@ authRouter.post("/login", async (req, res) => {
                 email: user.email,
                 name: user.name,
             },
+            sessionToken: (0, session_token_1.signSessionToken)(user.id),
             profile: {
                 wishlist: user.wishlist_items.map((item) => ({ id: item.listing.public_id })),
             },
@@ -142,6 +144,7 @@ authRouter.post("/signup", async (req, res) => {
                 email: user.email,
                 name: user.name,
             },
+            sessionToken: (0, session_token_1.signSessionToken)(user.id),
             profile: {
                 wishlist: [],
             },

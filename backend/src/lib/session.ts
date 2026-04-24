@@ -1,5 +1,6 @@
 import { type Request } from "express";
 import { prisma } from "./prisma";
+import { verifySessionToken } from "./session-token";
 
 type SessionUser = {
   id: number;
@@ -11,19 +12,21 @@ type SessionUser = {
   name: string;
 };
 
-function parseUserId(raw: string | undefined): number | null {
-  if (!raw) return null;
-  const parsed = Number(raw);
-  if (!Number.isInteger(parsed) || parsed <= 0) return null;
-  return parsed;
+function parseBearerToken(authorization: string | undefined): string | null {
+  if (!authorization) return null;
+  const normalized = authorization.trim();
+  if (!normalized) return null;
+  const parts = normalized.split(/\s+/);
+  if (parts.length !== 2) return null;
+  if (parts[0].toLowerCase() !== "bearer") return null;
+  const token = parts[1]?.trim();
+  return token || null;
 }
 
 export async function getSessionUser(req: Request): Promise<SessionUser | null> {
-  const fromHeader = parseUserId(req.header("x-user-id") ?? undefined);
-  const fromQuery = parseUserId(
-    typeof req.query.user_id === "string" ? req.query.user_id : undefined,
-  );
-  const resolvedId = fromHeader ?? fromQuery;
+  const bearerToken = parseBearerToken(req.header("authorization") ?? undefined);
+  const resolvedId = bearerToken ? verifySessionToken(bearerToken) : null;
+
   if (!resolvedId) {
     return null;
   }

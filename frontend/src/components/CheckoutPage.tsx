@@ -1,9 +1,30 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { CreditCard, MapPin, QrCode, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CartItem, Product } from "../types";
 import { apiGet, apiPost } from "../lib/api";
-import { YandexMapMarker, YandexMapPicker } from "./YandexMapPicker";
+import { type YandexMapMarker } from "./YandexMapPicker";
 import { notifyError, notifyInfo } from "./ui/notifications";
+import { CheckoutDeliverySection } from "./checkout.delivery-section";
+import {
+  DELIVERY_PICKUP_PROVIDER,
+  DEFAULT_DELIVERY_CITY,
+  DELIVERY_PROVIDER_TABS,
+  PAYMENT_RETURN_CHANNEL,
+  PAYMENT_RETURN_EVENT_KEY,
+  PAYMENT_TIMEOUT_MS,
+  RUSSIA_BOUNDS,
+  SBP_UI_ENABLED,
+  YANDEX_GEOSUGGEST_API_KEY,
+  getPaymentStatusMeta,
+  type ActivePayment,
+  type CreateOrdersResponse,
+  type DeliveryPoint,
+  type DeliveryPointsResponse,
+  type DeliveryProvider,
+  type PaymentMethod,
+  type PaymentStatusResponse,
+} from "./checkout.models";
+import { CheckoutOrderSummary } from "./checkout.order-summary";
+import { CheckoutPaymentMethodSection } from "./checkout.payment-method-section";
 
 interface CheckoutPageProps {
   items: CartItem[];
@@ -22,109 +43,38 @@ interface CheckoutPageProps {
   }) => void;
 }
 
-type PaymentMethod = "card" | "sbp";
-type PaymentStatusSummary = "pending" | "paid" | "failed";
-
-type CreateOrdersResponse = {
-  success: boolean;
-  orders: Array<{
-    order_id: string;
-    total_price: number;
-  }>;
-  total: number;
-  payment?: {
-    provider: "yoomoney";
-    paymentId: string | null;
-    status: string | null;
-    confirmationUrl: string | null;
-  } | null;
+type CheckoutPolicy = {
+  id: string;
+  version: string;
+  title: string;
+  contentUrl: string;
 };
 
-type PaymentStatusResponse = {
-  summary: PaymentStatusSummary;
-  orders: Array<{
-    orderId: string;
-    orderStatus: string;
-    paymentStatus: string | null;
-    paymentProvider: string | null;
-    paymentIntentId: string | null;
-  }>;
-};
-
-type ActivePayment = {
-  orderIds: string[];
-  total: number;
+function makeCheckoutIdempotencyFingerprint(params: {
+  items: Array<{ id: string; quantity: number }>;
+  customAddress: string;
+  pickupPointId: string | null;
+  pickupPointProvider: string | null;
   deliveryType: "delivery" | "pickup";
   paymentMethod: PaymentMethod;
-  confirmationUrl: string;
-  expiresAt: number;
-  summary: PaymentStatusSummary;
-};
+}): string {
+  return JSON.stringify({
+    deliveryType: params.deliveryType,
+    paymentMethod: params.paymentMethod,
+    customAddress: params.customAddress.trim(),
+    pickupPointId: params.pickupPointId ?? null,
+    pickupPointProvider: params.pickupPointProvider ?? null,
+    items: params.items
+      .map((item) => ({ id: item.id, quantity: item.quantity }))
+      .sort((left, right) => left.id.localeCompare(right.id)),
+  });
+}
 
-type DeliveryProvider = {
-  code: "yandex_pvz" | "russian_post" | "cdek";
-  label: string;
-};
-
-type DeliveryPoint = {
-  id: string;
-  provider: DeliveryProvider["code"];
-  providerLabel: string;
-  name: string;
-  address: string;
-  city: string;
-  lat: number;
-  lng: number;
-  workHours: string;
-  etaDays: number;
-  cost: number;
-};
-
-type DeliveryPointsResponse = {
-  city: string;
-  location?: {
-    label: string;
-    lat: number;
-    lng: number;
-  };
-  providers: DeliveryProvider[];
-  activeProvider?: DeliveryProvider["code"];
-  points: DeliveryPoint[];
-  pagination?: {
-    total: number;
-    cursor: number;
-    nextCursor: number | null;
-    hasMore: boolean;
-  } | null;
-};
-
-const DELIVERY_PICKUP_PROVIDER: DeliveryProvider["code"] = "yandex_pvz";
-const DEFAULT_DELIVERY_CITY = "Россия, Москва";
-const YANDEX_GEOSUGGEST_API_KEY =
-  import.meta.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.toString().trim() ?? "";
-const RUSSIA_BOUNDS: number[][] = [
-  [41.185, 19.6389],
-  [81.8587, 180],
-];
-const PAYMENT_TIMEOUT_MS = 30 * 60 * 1000;
-const SBP_UI_ENABLED = false;
-const PAYMENT_RETURN_EVENT_KEY = "ecomm_payment_returned";
-const PAYMENT_RETURN_CHANNEL = "ecomm-payment-channel";
-const DELIVERY_PROVIDER_TABS: Array<{
-  code: DeliveryProvider["code"];
-  label: string;
-  enabled: boolean;
-}> = [
-  { code: "yandex_pvz", label: "Яндекс ПВЗ", enabled: true },
-  { code: "russian_post", label: "Почта России", enabled: true },
-  { code: "cdek", label: "СДЭК", enabled: false },
-];
-
-function formatCountdown(totalSeconds: number): string {
-  const safe = Math.max(0, totalSeconds);
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `chk_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
 export function CheckoutPage({
@@ -148,10 +98,6 @@ export function CheckoutPage({
   const [deliveryPoints, setDeliveryPoints] = useState<DeliveryPoint[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [isPointsLoading, setIsPointsLoading] = useState(false);
-  const [isPointsLoadingMore, setIsPointsLoadingMore] = useState(false);
-  const [russianPostNextCursor, setRussianPostNextCursor] = useState<number | null>(null);
-  const [russianPostHasMore, setRussianPostHasMore] = useState(false);
-  const [mapZoom, setMapZoom] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [activePayment, setActivePayment] = useState<ActivePayment | null>(null);
@@ -163,10 +109,18 @@ export function CheckoutPage({
   } | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [paymentStatusError, setPaymentStatusError] = useState<string | null>(null);
+  const [checkoutPolicy, setCheckoutPolicy] = useState<CheckoutPolicy>({
+    id: "",
+    version: "",
+    title: "правила оформления и безопасной сделки",
+    contentUrl: "/terms",
+  });
+  const [policyAccepted, setPolicyAccepted] = useState(false);
 
   const isPlacingOrderRef = useRef(false);
   const hasCompletedRef = useRef(false);
   const paymentWindowRef = useRef<Window | null>(null);
+  const checkoutIdempotencyRef = useRef<{ key: string; fingerprint: string } | null>(null);
   const deliverySearchInputRef = useRef<HTMLInputElement | null>(null);
   const nativeAddressSuggestViewRef = useRef<any>(null);
   const activeDeliveryProviderRef = useRef<DeliveryProvider["code"]>(
@@ -234,6 +188,39 @@ export function CheckoutPage({
     activeDeliveryProviderRef.current = activeDeliveryProvider;
   }, [activeDeliveryProvider]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadCheckoutPolicy = async () => {
+      try {
+        const policy = await apiGet<{
+          id: string;
+          version: string;
+          title: string;
+          contentUrl: string;
+        }>("/public/policy/current?scope=checkout");
+        if (cancelled) return;
+        if (
+          typeof policy.id === "string" &&
+          typeof policy.title === "string" &&
+          typeof policy.contentUrl === "string"
+        ) {
+          setCheckoutPolicy({
+            id: policy.id,
+            version: typeof policy.version === "string" ? policy.version : "",
+            title: policy.title,
+            contentUrl: policy.contentUrl,
+          });
+        }
+      } catch {
+        // Keep fallback local terms link if policy endpoint is temporarily unavailable.
+      }
+    };
+    void loadCheckoutPolicy();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const loadDeliveryPoints = async (
     city: string,
     recenter = true,
@@ -247,9 +234,7 @@ export function CheckoutPage({
     const cursor = Number(options?.cursor ?? 0);
     const append = Boolean(options?.append);
     const silent = Boolean(options?.silent);
-    if (append || silent) {
-      setIsPointsLoadingMore(true);
-    } else {
+    if (!append && !silent) {
       setIsPointsLoading(true);
     }
     try {
@@ -266,8 +251,6 @@ export function CheckoutPage({
       const response = await apiGet<DeliveryPointsResponse>(
         `/profile/delivery-points?${params.toString()}`,
       );
-      const nextCursor = response.pagination?.nextCursor ?? null;
-      const hasMore = Boolean(response.pagination?.hasMore);
       if (append && provider === "russian_post") {
         setDeliveryPoints((prev) => {
           const byId = new Map(prev.map((point) => [point.id, point]));
@@ -282,20 +265,13 @@ export function CheckoutPage({
       setDeliveryProviders(response.providers);
       setActiveDeliveryProvider(
         provider === "all"
-          ? response.activeProvider ?? DELIVERY_PICKUP_PROVIDER
+          ? response.activeProvider
           : provider,
       );
       if (!append) {
         setSelectedPointId(null);
       }
       setDeliveryCity(query);
-      if (provider === "russian_post") {
-        setRussianPostNextCursor(nextCursor);
-        setRussianPostHasMore(hasMore);
-      } else {
-        setRussianPostNextCursor(null);
-        setRussianPostHasMore(false);
-      }
       if (recenter) {
         setMapCenterQuery(query);
       }
@@ -306,9 +282,7 @@ export function CheckoutPage({
           : "Не удалось загрузить точки выдачи",
       );
     } finally {
-      if (append || silent) {
-        setIsPointsLoadingMore(false);
-      } else {
+      if (!append && !silent) {
         setIsPointsLoading(false);
       }
     }
@@ -664,6 +638,11 @@ export function CheckoutPage({
       );
       return;
     }
+
+    if (!policyAccepted) {
+      notifyInfo("Перед оплатой нужно принять правила оформления и безопасной сделки.");
+      return;
+    }
     const effectivePickupPoint =
       deliveryType === "delivery"
         ? `${selectedPoint?.name || ""}, ${selectedPoint?.address || ""}`
@@ -708,7 +687,7 @@ export function CheckoutPage({
         return;
       }
 
-      const response = await apiPost<CreateOrdersResponse>("/profile/orders", {
+      const checkoutPayload = {
         items: items.map((item) => ({ listingId: item.id, quantity: item.quantity })),
         addressId: null,
         customAddress: effectivePickupPoint,
@@ -716,14 +695,47 @@ export function CheckoutPage({
         pickupPointProvider: selectedPoint?.provider ?? null,
         deliveryType,
         paymentMethod,
+      };
+      const checkoutFingerprint = makeCheckoutIdempotencyFingerprint({
+        items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+        customAddress: effectivePickupPoint,
+        pickupPointId: selectedPoint?.id ?? null,
+        pickupPointProvider: selectedPoint?.provider ?? null,
+        deliveryType,
+        paymentMethod,
       });
+      const existingIdempotency = checkoutIdempotencyRef.current;
+      const idempotencyKey =
+        existingIdempotency?.fingerprint === checkoutFingerprint
+          ? existingIdempotency.key
+          : generateIdempotencyKey();
+      checkoutIdempotencyRef.current = {
+        key: idempotencyKey,
+        fingerprint: checkoutFingerprint,
+      };
+
+      await apiPost<{ success: boolean }>(
+        "/profile/policy-acceptance",
+        {
+          scope: "checkout",
+          policyId: checkoutPolicy.id || undefined,
+        },
+      );
+
+      const response = await apiPost<CreateOrdersResponse>(
+        "/profile/orders",
+        checkoutPayload,
+        {
+          "Idempotency-Key": idempotencyKey,
+        },
+      );
 
       const orderIds = response.orders.map((order) => order.order_id);
       if (orderIds.length === 0) {
         throw new Error("Сервер не вернул созданные заказы");
       }
 
-      const confirmationUrl = response.payment?.confirmationUrl;
+      const confirmationUrl = response.payment.confirmationUrl;
       if (!confirmationUrl) {
         throw new Error("Не удалось получить ссылку на оплату");
       }
@@ -769,25 +781,7 @@ export function CheckoutPage({
 
   const paymentStatusMeta = useMemo(() => {
     if (!activePayment) return null;
-    if (activePayment.summary === "paid") {
-      return {
-        className: "border-emerald-200 bg-emerald-50 text-emerald-800",
-        title: "Оплата подтверждена",
-        description: "Спасибо за оплату. Перенаправляем на страницу заказа...",
-      };
-    }
-    if (activePayment.summary === "failed") {
-      return {
-        className: "border-rose-200 bg-rose-50 text-rose-800",
-        title: "Ожидаем оплату",
-        description: "Платёж не завершён. Можно повторно открыть страницу оплаты.",
-      };
-    }
-    return {
-      className: "border-amber-200 bg-amber-50 text-amber-800",
-      title: "Ожидаем оплату",
-      description: "Статус обновляется автоматически. Заказ ожидает оплату.",
-    };
+    return getPaymentStatusMeta(activePayment.summary);
   }, [activePayment]);
 
   return (
@@ -799,305 +793,86 @@ export function CheckoutPage({
 
         <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[1fr_400px]">
           <div className="space-y-6 md:space-y-8">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
-              {deliveryType === "delivery" ? (
-                <>
-                  <h2 className="mb-4 text-xl text-gray-900 md:text-2xl">Выберите ПВЗ</h2>
-                  <p className="mb-4 text-sm text-gray-600">
-                    На карте показаны доступные точки выдачи выбранного провайдера.
-                    Введите адрес или название ПВЗ, затем выберите нужную метку на карте.
-                  </p>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {DELIVERY_PROVIDER_TABS.map((tab) => (
-                      <button
-                        key={tab.code}
-                        type="button"
-                        disabled={
-                          !tab.enabled ||
-                          !deliveryProviders.some(
-                            (provider) => provider.code === tab.code,
-                          )
-                        }
-                        onClick={() => {
-                          if (
-                            !tab.enabled ||
-                            !deliveryProviders.some(
-                              (provider) => provider.code === tab.code,
-                            )
-                          ) {
-                            return;
-                          }
-                          setActiveDeliveryProvider(tab.code);
-                          setSelectedPointId(null);
-                          const query = deliveryCity.trim();
-                          if (query) {
-                            void loadDeliveryPoints(query, false, tab.code);
-                          } else {
-                            setDeliveryPoints([]);
-                            setMapCenterQuery(null);
-                          }
-                        }}
-                        className={`rounded-full border px-3 py-1.5 text-xs md:text-sm ${
-                          !tab.enabled ||
-                          !deliveryProviders.some(
-                            (provider) => provider.code === tab.code,
-                          )
-                            ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
-                            : activeDeliveryProvider === tab.code
-                              ? "border-blue-300 bg-blue-100 text-blue-700"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
+            <CheckoutDeliverySection
+              deliveryType={deliveryType}
+              deliveryProviders={deliveryProviders}
+              activeDeliveryProvider={activeDeliveryProvider}
+              deliveryCity={deliveryCity}
+              deliverySearchInputRef={deliverySearchInputRef}
+              mapMarkers={mapMarkers}
+              mapCenterQuery={mapCenterQuery}
+              selectedPointId={selectedPointId}
+              visibleDeliveryPoints={visibleDeliveryPoints}
+              selectedPoint={selectedPoint}
+              isPointsLoading={isPointsLoading}
+              onProviderSelect={(providerCode) => {
+                setActiveDeliveryProvider(providerCode);
+                setSelectedPointId(null);
+                const query = deliveryCity.trim();
+                if (query) {
+                  void loadDeliveryPoints(query, false, providerCode);
+                } else {
+                  setDeliveryPoints([]);
+                  setMapCenterQuery(null);
+                }
+              }}
+              onDeliveryCityChange={setDeliveryCity}
+              onSearch={() => {
+                void applyLocationSearch(deliveryCity);
+              }}
+              onClearSearch={() => {
+                setDeliveryCity("");
+                setMapCenterQuery(null);
+                setDeliveryPoints([]);
+                setSelectedPointId(null);
+              }}
+              onMarkerSelect={(markerId) => {
+                const point = visibleDeliveryPoints.find(
+                  (item) => item.id === markerId,
+                );
+                if (!point) return;
+                setSelectedPointId(point.id);
+              }}
+            />
 
-                  <div className="mb-4">
-                    <div className="flex items-center rounded-xl border border-slate-300 bg-white px-4 py-3 transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                      <Search className="mr-3 h-5 w-5 text-slate-400" />
-                      <input
-                        ref={deliverySearchInputRef}
-                        value={deliveryCity}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            void applyLocationSearch(deliveryCity);
-                          }
-                        }}
-                        onChange={(event) => {
-                          setDeliveryCity(event.target.value);
-                        }}
-                        placeholder="Введите адрес или название ПВЗ"
-                        className="h-8 w-full border-0 bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-400"
-                      />
-                      <button
-                        type="button"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                          void applyLocationSearch(deliveryCity);
-                        }}
-                        className="ml-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 md:text-sm"
-                      >
-                        Найти
-                      </button>
-                      {deliveryCity.trim().length > 0 && (
-                        <button
-                          onMouseDown={(event) => event.preventDefault()}
-                          onClick={() => {
-                            setDeliveryCity("");
-                            setMapCenterQuery(null);
-                            setDeliveryPoints([]);
-                            setSelectedPointId(null);
-                          }}
-                          className="ml-3 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-                          aria-label="Очистить поиск"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="h-[420px]">
-                    <YandexMapPicker
-                      markers={mapMarkers}
-                      centerQuery={mapCenterQuery}
-                      selectedMarkerId={selectedPointId}
-                      onMarkerSelect={(marker) => {
-                        const point = visibleDeliveryPoints.find(
-                          (item) => item.id === marker.id,
-                        );
-                        if (!point) return;
-                        setSelectedPointId(point.id);
-                      }}
-                      allowAddressSelect={false}
-                      onAddressSelect={() => {}}
-                    />
-                  </div>
-
-                  <div className="mt-4 text-sm text-gray-500">
-                    {isPointsLoading && <div>Загрузка ПВЗ...</div>}
-                    {!isPointsLoading &&
-                      visibleDeliveryPoints.length === 0 &&
-                      deliveryCity.trim().length === 0 && (
-                        <div>Введите адрес или название ПВЗ, чтобы загрузить метки на карте.</div>
-                      )}
-                    {!isPointsLoading &&
-                      visibleDeliveryPoints.length === 0 &&
-                      deliveryCity.trim().length > 0 && <div>По вашему запросу ПВЗ не найдены.</div>}
-                    {!isPointsLoading &&
-                      visibleDeliveryPoints.length > 0 &&
-                      !selectedPoint && (
-                      <div>Нажмите на метку на карте, чтобы выбрать конкретный ПВЗ.</div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-                    {selectedPoint
-                      ? `Выбранная точка (${selectedPoint.providerLabel}): ${selectedPoint.name} - ${selectedPoint.address}`
-                      : "ПВЗ еще не выбран. Выберите метку на карте."}
-                    {selectedPoint && (
-                      <div className="mt-1 text-xs text-gray-600">
-                        Город: {selectedPoint.city}. Режим работы:{" "}
-                        {selectedPoint.workHours || "По расписанию"}.
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h2 className="mb-4 text-xl text-gray-900 md:text-2xl">Самовывоз</h2>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <div className="mb-2 flex items-center gap-2 text-gray-900">
-                      <MapPin className="h-4 w-4" />
-                      <span className="font-medium">Вы выбрали самовывоз</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      После оформления заказа продавец свяжется с вами для согласования точки и
-                      времени получения.
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
-              <h2 className="mb-6 text-xl text-gray-900 md:text-2xl">Способ оплаты</h2>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("card")}
-                  disabled={hasActivePayment}
-                  className={`rounded-xl border p-4 text-left transition ${
-                    paymentMethod === "card"
-                      ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  } ${hasActivePayment ? "cursor-not-allowed opacity-60" : ""}`}
-                >
-                  <div className="mb-1 flex items-center gap-2 text-gray-900">
-                    <CreditCard className="h-4 w-4" />
-                    <span className="text-sm font-medium md:text-base">Банковская карта</span>
-                  </div>
-                  <div className="text-xs text-gray-600">Любая карта Мир</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("sbp")}
-                  disabled={hasActivePayment || !SBP_UI_ENABLED}
-                  className={`rounded-xl border p-4 text-left transition ${
-                    paymentMethod === "sbp"
-                      ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  } ${hasActivePayment || !SBP_UI_ENABLED ? "cursor-not-allowed opacity-60" : ""}`}
-                >
-                  <div className="mb-1 flex items-center gap-2 text-gray-900">
-                    <QrCode className="h-4 w-4" />
-                    <span className="text-sm font-medium md:text-base">Система быстрых платежей</span>
-                  </div>
-                  <div className="text-xs text-gray-600">Оплата по QR-коду через приложение банка</div>
-                </button>
-              </div>
-            </div>
+            <CheckoutPaymentMethodSection
+              paymentMethod={paymentMethod}
+              hasActivePayment={hasActivePayment}
+              onPaymentMethodChange={setPaymentMethod}
+            />
           </div>
 
-          <div className="h-fit lg:sticky lg:top-32">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
-              <h2 className="mb-6 text-xl text-gray-900 md:text-2xl">Ваш заказ</h2>
-
-              <div className="mb-6 space-y-4 border-b border-gray-200 pb-6">
-                {summaryItems.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                      <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="mb-1 truncate text-sm text-gray-900">{item.title}</p>
-                      <p className="text-xs text-gray-600">Количество: {item.quantity}</p>
-                    </div>
-                    <div className="text-sm text-gray-900">
-                      {(item.price * item.quantity).toLocaleString("ru-RU")} ₽
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-6 space-y-3 border-b border-gray-200 pb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Подытог</span>
-                  <span className="text-gray-900">{summarySubtotal.toLocaleString("ru-RU")} ₽</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    {deliveryType === "delivery" ? "Доставка до ПВЗ" : "Самовывоз"}
-                  </span>
-                  <span className={deliveryType === "delivery" ? "text-gray-900" : "text-green-600"}>
-                    {summaryShipping > 0 ? `${summaryShipping.toLocaleString("ru-RU")} ₽` : "Бесплатно"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-6 flex items-center justify-between">
-                <span className="text-lg text-gray-900">Итого</span>
-                <span className="text-2xl text-gray-900">{summaryTotal.toLocaleString("ru-RU")} ₽</span>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    if (hasActivePayment) {
-                      handleOpenPayment();
-                      return;
-                    }
-                    void handlePlaceOrder();
-                  }}
-                  disabled={isSubmitting || (!hasActivePayment && !canCheckoutWithSelectedPoint) || paymentIsPaid}
-                  className="btn-primary w-full py-4 text-sm disabled:bg-gray-400 md:text-base"
-                >
-                  {isSubmitting
-                    ? "Оформляем..."
-                    : paymentIsPaid
-                      ? "Оплата подтверждена"
-                      : hasActivePayment
-                        ? "Открыть страницу оплаты"
-                        : `Оплатить ${summaryTotal.toLocaleString("ru-RU")} ₽`}
-                </button>
-                {!hasActivePayment && (
-                  <button onClick={onBack} className="btn-secondary w-full py-4 text-sm md:text-base">
-                    Вернуться в корзину
-                  </button>
-                )}
-              </div>
-
-              {activePayment && paymentStatusMeta && (
-                <div className={`mt-4 rounded-xl border p-4 ${paymentStatusMeta.className}`}>
-                  <div className="text-sm font-semibold md:text-base">{paymentStatusMeta.title}</div>
-                  <div className="mt-1 text-xs md:text-sm">{paymentStatusMeta.description}</div>
-                  <div className="mt-3 space-y-1 text-xs md:text-sm">
-                    <div>
-                      Заказы: <span className="font-medium">{activePayment.orderIds.join(", ")}</span>
-                    </div>
-                    <div>
-                      Способ оплаты:{" "}
-                      <span className="font-medium">
-                        {activePayment.paymentMethod === "sbp" ? "СБП" : "Карта Мир"}
-                      </span>
-                    </div>
-                    <div>
-                      До отмены оплаты: <span className="font-medium">{formatCountdown(secondsLeft)}</span>
-                    </div>
-                  </div>
-
-                  {paymentStatusError && (
-                    <div className="mt-2 text-xs text-red-700">{paymentStatusError}</div>
-                  )}
-
-                </div>
-              )}
-            </div>
-          </div>
+          <CheckoutOrderSummary
+            summaryItems={summaryItems}
+            summarySubtotal={summarySubtotal}
+            summaryShipping={summaryShipping}
+            summaryTotal={summaryTotal}
+            deliveryType={deliveryType}
+            hasActivePayment={hasActivePayment}
+            isSubmitting={isSubmitting}
+            canCheckoutWithSelectedPoint={canCheckoutWithSelectedPoint}
+            policyAccepted={policyAccepted}
+            policyTitle={
+              checkoutPolicy.version
+                ? `${checkoutPolicy.title} (v${checkoutPolicy.version})`
+                : checkoutPolicy.title
+            }
+            policyUrl={checkoutPolicy.contentUrl || "/terms"}
+            paymentIsPaid={paymentIsPaid}
+            activePayment={activePayment}
+            paymentStatusMeta={paymentStatusMeta}
+            paymentStatusError={paymentStatusError}
+            secondsLeft={secondsLeft}
+            onPolicyAcceptedChange={setPolicyAccepted}
+            onPrimaryAction={() => {
+              if (hasActivePayment) {
+                handleOpenPayment();
+                return;
+              }
+              void handlePlaceOrder();
+            }}
+            onBack={onBack}
+          />
         </div>
       </div>
     </div>

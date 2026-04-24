@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HeroProps {
@@ -35,7 +35,7 @@ const heroSlides = [
   },
 ];
 
-export function Hero({ onBannerClick }: HeroProps) {
+export function Hero({ onBannerClick: _onBannerClick }: HeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -55,12 +55,6 @@ export function Hero({ onBannerClick }: HeroProps) {
       (prev) =>
         (prev - 1 + heroSlides.length) % heroSlides.length,
     );
-  };
-
-  const handleBannerButtonClick = (category: string) => {
-    if (onBannerClick) {
-      onBannerClick(category);
-    }
   };
 
   return (

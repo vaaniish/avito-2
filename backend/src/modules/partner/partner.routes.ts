@@ -5,6 +5,9 @@ import {
   ListingImage,
   MarketOrder,
   MarketOrderItem,
+  OrderStatus,
+  PlatformTransaction,
+  SellerType,
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
@@ -25,6 +28,12 @@ import {
   toPartnerListingStatus,
   toQuestionStatus,
 } from "../../utils/format";
+import { detectCircumventionSignals } from "../moderation/anti-circumvention";
+import { enforceCircumventionViolation } from "../moderation/circumvention-enforcement";
+import {
+  assertOrderStatusTransitionAllowed,
+  isOrderStatusTransitionAllowed,
+} from "../orders/order-status-fsm";
 
 const partnerRouter = Router();
 type ListingTypeValue = "PRODUCT" | "SERVICE";
@@ -39,7 +48,7 @@ type OrderStatusValue =
   | "DELIVERED"
   | "COMPLETED"
   | "CANCELLED";
-type SellerEditableOrderStatus = "CREATED" | "PREPARED";
+type SellerEditableOrderStatus = "PREPARED";
 const ROLE_SELLER = "SELLER";
 const ROLE_ADMIN = "ADMIN";
 const LISTING_ACTIVE: ListingStatusValue = "ACTIVE";
@@ -49,6 +58,64 @@ const ORDER_DELIVERY_SYNC_INTERVAL_MS = 2 * 60 * 1000;
 const DEFAULT_TRACKING_PROVIDER: DeliveryProviderCode = "yandex_pvz";
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
+
+type PartnerOrderRow = MarketOrder & {
+  items: MarketOrderItem[];
+  transactions: PlatformTransaction[];
+  buyer: {
+    public_id: string;
+    name: string;
+  };
+};
+
+function makeAuditPublicId(): string {
+  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+}
+
+function getRequestIp(req: Request): string | null {
+  const forwarded = req.header("x-forwarded-for");
+  if (forwarded && forwarded.trim()) {
+    return forwarded.split(",")[0]?.trim() ?? null;
+  }
+
+  return req.ip || null;
+}
+
+async function writeOrderStatusTransition(params: {
+  orderId: number;
+  orderPublicId: string;
+  fromStatus: OrderStatus | null;
+  toStatus: OrderStatus;
+  actorUserId: number | null;
+  reason: string;
+  ipAddress: string | null;
+}): Promise<void> {
+  await prisma.orderStatusHistory.create({
+    data: {
+      order_id: params.orderId,
+      from_status: params.fromStatus,
+      to_status: params.toStatus,
+      changed_by_id: params.actorUserId,
+      reason: params.reason,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      public_id: makeAuditPublicId(),
+      actor_user_id: params.actorUserId,
+      action: "order.status_changed",
+      entity_type: "order",
+      entity_public_id: params.orderPublicId,
+      details: {
+        fromStatus: params.fromStatus,
+        toStatus: params.toStatus,
+        reason: params.reason,
+      },
+      ip_address: params.ipAddress,
+    },
+  });
+}
 
 function parseListingType(value: unknown): ListingTypeValue {
   return value === "services" ? "SERVICE" : "PRODUCT";
@@ -94,7 +161,7 @@ function parseOrderStatus(value: unknown): OrderStatusValue | null {
 
 function parseSellerEditableOrderStatus(value: unknown): SellerEditableOrderStatus | null {
   const raw = parseOrderStatus(value);
-  if (raw === "CREATED" || raw === "PREPARED") return raw;
+  if (raw === "PREPARED") return raw;
   return null;
 }
 
@@ -114,6 +181,38 @@ function mapExternalDeliveryStatusToOrderStatus(
   return null;
 }
 
+type PayoutLegalTypeValue = "COMPANY" | "IP" | "BRAND" | "ADMIN_APPROVED";
+
+function parsePayoutLegalType(value: unknown): PayoutLegalTypeValue | null {
+  if (value === "COMPANY") return "COMPANY";
+  if (value === "IP") return "IP";
+  if (value === "BRAND") return "BRAND";
+  if (value === "ADMIN_APPROVED") return "ADMIN_APPROVED";
+  return null;
+}
+
+function normalizeDigits(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/\D+/g, "");
+}
+
+function normalizeRequiredText(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim();
+}
+
+function isValidTaxId(taxId: string): boolean {
+  return taxId.length === 10 || taxId.length === 12;
+}
+
+function isValidBic(bic: string): boolean {
+  return bic.length === 9;
+}
+
+function isValidBankAccount(account: string): boolean {
+  return account.length === 20;
+}
+
 function shouldSyncDeliveryStatus(
   order: Pick<
     MarketOrder,
@@ -127,10 +226,26 @@ function shouldSyncDeliveryStatus(
   return Date.now() - order.delivery_checked_at.getTime() >= ORDER_DELIVERY_SYNC_INTERVAL_MS;
 }
 
+async function hasBlockingOrderForListing(listingId: number): Promise<boolean> {
+  const linked = await prisma.marketOrderItem.findFirst({
+    where: {
+      listing_id: listingId,
+      order: {
+        status: {
+          not: "CANCELLED",
+        },
+      },
+    },
+    select: { id: true },
+  });
+  return Boolean(linked);
+}
+
 async function syncSingleOrderDeliveryStatus(
   order: Pick<
     MarketOrder,
     | "id"
+    | "public_id"
     | "status"
     | "delivery_type"
     | "tracking_provider"
@@ -165,8 +280,17 @@ async function syncSingleOrderDeliveryStatus(
     data.tracking_url = tracking.trackingUrl;
   }
 
+  let statusChanged = false;
   if (nextStatus && nextStatus !== order.status) {
-    data.status = nextStatus;
+    if (
+      isOrderStatusTransitionAllowed({
+        fromStatus: order.status,
+        toStatus: nextStatus,
+      })
+    ) {
+      data.status = nextStatus;
+      statusChanged = true;
+    }
   }
 
   if (nextStatus === "DELIVERED" && !order.delivered_at) {
@@ -186,6 +310,18 @@ async function syncSingleOrderDeliveryStatus(
     where: { id: order.id },
     data,
   });
+
+  if (statusChanged && nextStatus) {
+    await writeOrderStatusTransition({
+      orderId: order.id,
+      orderPublicId: order.public_id,
+      fromStatus: order.status,
+      toStatus: nextStatus,
+      actorUserId: null,
+      reason: "delivery.sync.external_status",
+      ipAddress: null,
+    });
+  }
 }
 
 function parseListingStatus(value: unknown): ListingStatusValue | null {
@@ -673,6 +809,191 @@ partnerRouter.get("/listings/title-suggestions", async (req: Request, res: Respo
     res.json(suggestions);
   } catch (error) {
     console.error("Error getting title suggestions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+partnerRouter.get("/payout-profile", async (req: Request, res: Response) => {
+  try {
+    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+    if (!session.ok) {
+      res.status(session.status).json({ error: session.message });
+      return;
+    }
+
+    const profile = await prisma.sellerPayoutProfile.findUnique({
+      where: {
+        seller_id: session.user.id,
+      },
+      select: {
+        public_id: true,
+        legal_type: true,
+        legal_name: true,
+        tax_id: true,
+        bank_account: true,
+        bank_bic: true,
+        correspondent_account: true,
+        bank_name: true,
+        recipient_name: true,
+        status: true,
+        verified_at: true,
+        rejection_reason: true,
+        updated_at: true,
+      },
+    });
+
+    if (!profile) {
+      res.json({ profile: null });
+      return;
+    }
+
+    res.json({
+      profile: {
+        id: profile.public_id,
+        legalType: profile.legal_type,
+        legalName: profile.legal_name,
+        taxId: profile.tax_id,
+        bankAccount: profile.bank_account,
+        bankBic: profile.bank_bic,
+        correspondentAccount: profile.correspondent_account,
+        bankName: profile.bank_name,
+        recipientName: profile.recipient_name,
+        status: profile.status.toLowerCase(),
+        verifiedAt: profile.verified_at,
+        rejectionReason: profile.rejection_reason,
+        updatedAt: profile.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching payout profile:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+partnerRouter.put("/payout-profile", async (req: Request, res: Response) => {
+  try {
+    const session = await requireAnyRole(req, [ROLE_SELLER, ROLE_ADMIN]);
+    if (!session.ok) {
+      res.status(session.status).json({ error: session.message });
+      return;
+    }
+
+    const body = (req.body ?? {}) as {
+      legalType?: unknown;
+      legalName?: unknown;
+      taxId?: unknown;
+      bankAccount?: unknown;
+      bankBic?: unknown;
+      correspondentAccount?: unknown;
+      bankName?: unknown;
+      recipientName?: unknown;
+    };
+
+    const legalType = parsePayoutLegalType(body.legalType);
+    const legalName = normalizeRequiredText(body.legalName);
+    const taxId = normalizeDigits(body.taxId);
+    const bankAccount = normalizeDigits(body.bankAccount);
+    const bankBic = normalizeDigits(body.bankBic);
+    const correspondentAccount = normalizeDigits(body.correspondentAccount);
+    const bankName = normalizeRequiredText(body.bankName);
+    const recipientName = normalizeRequiredText(body.recipientName);
+
+    if (!legalType) {
+      res.status(400).json({
+        error: "Invalid legal type. Use COMPANY, IP, BRAND or ADMIN_APPROVED.",
+      });
+      return;
+    }
+
+    if (
+      !legalName ||
+      !bankName ||
+      !recipientName ||
+      !isValidTaxId(taxId) ||
+      !isValidBankAccount(bankAccount) ||
+      !isValidBic(bankBic) ||
+      !isValidBankAccount(correspondentAccount)
+    ) {
+      res.status(400).json({
+        error:
+          "Invalid payout requisites. Check legal name, tax id, account, BIC and correspondent account.",
+      });
+      return;
+    }
+
+    const payload = {
+      legal_type: legalType as SellerType,
+      legal_name: legalName,
+      tax_id: taxId,
+      bank_account: bankAccount,
+      bank_bic: bankBic,
+      correspondent_account: correspondentAccount,
+      bank_name: bankName,
+      recipient_name: recipientName,
+      status: "PENDING" as const,
+      verified_by_id: null,
+      verified_at: null,
+      rejection_reason: null,
+    };
+
+    const saved = await prisma.sellerPayoutProfile.upsert({
+      where: {
+        seller_id: session.user.id,
+      },
+      create: {
+        public_id: makePublicId("PAYOUT"),
+        seller_id: session.user.id,
+        ...payload,
+      },
+      update: payload,
+      select: {
+        public_id: true,
+        legal_type: true,
+        legal_name: true,
+        tax_id: true,
+        bank_account: true,
+        bank_bic: true,
+        correspondent_account: true,
+        bank_name: true,
+        recipient_name: true,
+        status: true,
+        updated_at: true,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        public_id: makeAuditPublicId(),
+        actor_user_id: session.user.id,
+        action: "seller.payout_profile.updated",
+        entity_type: "user",
+        entity_public_id: null,
+        details: {
+          payoutProfileId: saved.public_id,
+          status: saved.status,
+        },
+        ip_address: getRequestIp(req),
+      },
+    });
+
+    res.json({
+      success: true,
+      profile: {
+        id: saved.public_id,
+        legalType: saved.legal_type,
+        legalName: saved.legal_name,
+        taxId: saved.tax_id,
+        bankAccount: saved.bank_account,
+        bankBic: saved.bank_bic,
+        correspondentAccount: saved.correspondent_account,
+        bankName: saved.bank_name,
+        recipientName: saved.recipient_name,
+        status: saved.status.toLowerCase(),
+        updatedAt: saved.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error upserting payout profile:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1277,6 +1598,18 @@ partnerRouter.post(
         return;
       }
 
+      if (
+        transition.nextStatus === LISTING_MODERATION &&
+        (await hasBlockingOrderForListing(existing.id))
+      ) {
+        res.status(409).json({
+          error:
+            "Нельзя повторно активировать объявление: по нему уже есть неотмененный заказ.",
+          status: toPartnerListingStatus(existing.status),
+        });
+        return;
+      }
+
       const updated = await prisma.marketplaceListing.update({
         where: { id: existing.id },
         data: {
@@ -1351,6 +1684,18 @@ partnerRouter.patch(
         return;
       }
 
+      if (
+        transition.nextStatus === LISTING_MODERATION &&
+        (await hasBlockingOrderForListing(existing.id))
+      ) {
+        res.status(409).json({
+          error:
+            "Нельзя повторно активировать объявление: по нему уже есть неотмененный заказ.",
+          status: toPartnerListingStatus(existing.status),
+        });
+        return;
+      }
+
       const updated = await prisma.marketplaceListing.update({
         where: { id: existing.id },
         data: {
@@ -1395,6 +1740,14 @@ partnerRouter.delete(
         return;
       }
 
+      if (await hasBlockingOrderForListing(existing.id)) {
+        res.status(409).json({
+          error:
+            "Нельзя удалить объявление, связанное с неотмененным заказом. Это нарушит финансовую прозрачность.",
+        });
+        return;
+      }
+
       await prisma.marketplaceListing.delete({
         where: { id: existing.id },
       });
@@ -1427,6 +1780,10 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
           },
         },
         items: true,
+        transactions: {
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+        },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
@@ -1446,13 +1803,23 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
             },
           },
           items: true,
+          transactions: {
+            orderBy: [{ created_at: "desc" }, { id: "desc" }],
+            take: 1,
+          },
         },
         orderBy: [{ created_at: "desc" }, { id: "desc" }],
       });
     }
 
     res.json(
-      orders.map((order) => ({
+      orders.map((order: PartnerOrderRow) => {
+        const latestTransaction = order.transactions[0] ?? null;
+        const grossAmount = latestTransaction?.amount ?? order.total_price;
+        const commissionAmount = latestTransaction?.commission ?? null;
+        const sellerPayout = commissionAmount === null ? null : grossAmount - commissionAmount;
+
+        return {
           id: order.public_id,
           buyer_name: order.buyer.name,
           buyer_id: order.buyer.public_id,
@@ -1465,14 +1832,23 @@ partnerRouter.get("/orders", async (req: Request, res: Response) => {
           tracking_url: order.tracking_url,
           delivery_ext_status: order.delivery_ext_status,
           delivery_address: order.delivery_address,
+          finance: {
+            gross_amount: grossAmount,
+            commission_rate: latestTransaction?.commission_rate ?? null,
+            commission_amount: commissionAmount,
+            seller_payout: sellerPayout,
+            transaction_status: latestTransaction?.status ?? null,
+            payment_provider: latestTransaction?.payment_provider?.toLowerCase() ?? null,
+            payment_intent_id: latestTransaction?.payment_intent_id ?? null,
+          },
           items: order.items.map((item: MarketOrderItem) => ({
             id: String(item.id),
             name: item.name,
             quantity: item.quantity,
             price: item.price,
           })),
-        }),
-      ),
+        };
+      }),
     );
   } catch (error) {
     console.error("Error fetching partner orders:", error);
@@ -1506,6 +1882,7 @@ partnerRouter.patch(
         },
         select: {
           id: true,
+          public_id: true,
           status: true,
           tracking_number: true,
         },
@@ -1516,39 +1893,52 @@ partnerRouter.patch(
         return;
       }
 
-      if (existing.status !== "CREATED" && existing.status !== "PREPARED" && existing.status !== "PAID") {
+      if (existing.status !== "PAID") {
         res.status(409).json({
-          error: "This status is updated automatically and cannot be changed manually",
+          error: "Only PAID orders can be moved to PREPARED manually",
         });
         return;
       }
 
-      if (
-        existing.status === "PAID" &&
-        nextStatus === "CREATED"
-      ) {
-        const updated = await prisma.marketOrder.update({
-          where: { id: existing.id },
-          data: { status: "CREATED" },
-        });
-        res.json({
-          success: true,
-          status: updated.status,
-        });
-        return;
-      }
+      assertOrderStatusTransitionAllowed({
+        fromStatus: existing.status,
+        toStatus: nextStatus,
+        context: "seller.mark_prepared",
+      });
 
-      const updated = await prisma.marketOrder.update({
-        where: { id: existing.id },
+      const updatedCount = await prisma.marketOrder.updateMany({
+        where: { id: existing.id, status: "PAID" },
         data: { status: nextStatus },
+      });
+
+      if (updatedCount.count === 0) {
+        res.status(409).json({
+          error: "Order status was updated automatically. Reload and retry.",
+        });
+        return;
+      }
+
+      await writeOrderStatusTransition({
+        orderId: existing.id,
+        orderPublicId: existing.public_id,
+        fromStatus: existing.status,
+        toStatus: nextStatus,
+        actorUserId: session.user.id,
+        reason: "seller.mark_prepared",
+        ipAddress: getRequestIp(req),
       });
 
       res.json({
         success: true,
-        status: updated.status,
+        status: nextStatus,
       });
     } catch (error) {
       console.error("Error updating order status:", error);
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("ORDER_STATUS_TRANSITION_NOT_ALLOWED")) {
+        res.status(409).json({ error: "Order transition is not allowed by workflow rules." });
+        return;
+      }
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -1583,6 +1973,7 @@ partnerRouter.patch(
         },
         select: {
           id: true,
+          public_id: true,
           status: true,
           delivery_type: true,
           tracking_provider: true,
@@ -1619,6 +2010,12 @@ partnerRouter.patch(
         return;
       }
 
+      assertOrderStatusTransitionAllowed({
+        fromStatus: existing.status,
+        toStatus: "SHIPPED",
+        context: "seller.tracking_assigned",
+      });
+
       await prisma.marketOrder.update({
         where: { id: existing.id },
         data: {
@@ -1633,10 +2030,23 @@ partnerRouter.patch(
         },
       });
 
+      if (existing.status !== "SHIPPED") {
+        await writeOrderStatusTransition({
+          orderId: existing.id,
+          orderPublicId: existing.public_id,
+          fromStatus: existing.status,
+          toStatus: "SHIPPED",
+          actorUserId: session.user.id,
+          reason: "seller.tracking_assigned",
+          ipAddress: getRequestIp(req),
+        });
+      }
+
       const refreshed = await prisma.marketOrder.findUnique({
         where: { id: existing.id },
         select: {
           id: true,
+          public_id: true,
           status: true,
           delivery_type: true,
           tracking_provider: true,
@@ -1663,6 +2073,23 @@ partnerRouter.patch(
         },
       });
 
+      if (finalState && finalState.status !== "SHIPPED") {
+        assertOrderStatusTransitionAllowed({
+          fromStatus: "SHIPPED",
+          toStatus: finalState.status,
+          context: "delivery.sync.after_tracking_update",
+        });
+        await writeOrderStatusTransition({
+          orderId: existing.id,
+          orderPublicId: existing.public_id,
+          fromStatus: "SHIPPED",
+          toStatus: finalState.status,
+          actorUserId: null,
+          reason: "delivery.sync.after_tracking_update",
+          ipAddress: getRequestIp(req),
+        });
+      }
+
       res.json({
         success: true,
         status: finalState?.status ?? "SHIPPED",
@@ -1674,6 +2101,11 @@ partnerRouter.patch(
       });
     } catch (error) {
       console.error("Error applying tracking number:", error);
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("ORDER_STATUS_TRANSITION_NOT_ALLOWED")) {
+        res.status(409).json({ error: "Tracking update conflicts with current order workflow state." });
+        return;
+      }
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -1757,11 +2189,60 @@ partnerRouter.post(
             seller_id: session.user.id,
           },
         },
-        select: { id: true },
+        select: {
+          id: true,
+          public_id: true,
+          buyer_id: true,
+          listing: {
+            select: {
+              id: true,
+              public_id: true,
+              seller_id: true,
+            },
+          },
+        },
       });
 
       if (!existing) {
         res.status(404).json({ error: "Question not found" });
+        return;
+      }
+
+      const circumventionSignals = detectCircumventionSignals(answer);
+      if (circumventionSignals.length > 0) {
+        const enforcement = await enforceCircumventionViolation({
+          req,
+          actorUserId: session.user.id,
+          actorRole: session.user.role,
+          channel: "seller_answer",
+          text: answer,
+          signals: circumventionSignals,
+          listingPublicId: existing.listing.public_id,
+          questionPublicId: existing.public_id,
+          autoComplaint: {
+            listingId: existing.listing.id,
+            listingPublicId: existing.listing.public_id,
+            sellerId: existing.listing.seller_id,
+            reporterId: existing.buyer_id,
+            questionPublicId: existing.public_id,
+          },
+        });
+
+        if (enforcement.blocked) {
+          const blockedUntil = enforcement.blockedUntil
+            ? ` до ${enforcement.blockedUntil.toISOString()}`
+            : "";
+          res.status(403).json({
+            error: `Аккаунт временно заблокирован${blockedUntil} за повторные попытки обхода платформы.`,
+          });
+          return;
+        }
+
+        res.status(400).json({
+          error:
+            "Ответ отклонен: запрещено передавать контакты и уводить сделку вне платформы. Нарушение зафиксировано.",
+          complaintId: enforcement.complaintPublicId,
+        });
         return;
       }
 
@@ -1789,4 +2270,3 @@ partnerRouter.post(
 );
 
 export { partnerRouter };
-

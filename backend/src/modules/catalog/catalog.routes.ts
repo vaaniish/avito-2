@@ -8,6 +8,8 @@ import {
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { getSessionUser, requireAnyRole } from "../../lib/session";
+import { detectCircumventionSignals } from "../moderation/anti-circumvention";
+import { enforceCircumventionViolation } from "../moderation/circumvention-enforcement";
 import { toClientCondition } from "../../utils/format";
 
 const catalogRouter = Router();
@@ -1112,6 +1114,35 @@ catalogRouter.post(
 
       if (!listing) {
         res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      const circumventionSignals = detectCircumventionSignals(questionText);
+      if (circumventionSignals.length > 0) {
+        const enforcement = await enforceCircumventionViolation({
+          req,
+          actorUserId: session.user.id,
+          actorRole: session.user.role,
+          channel: "buyer_question",
+          text: questionText,
+          signals: circumventionSignals,
+          listingPublicId: listing.public_id,
+        });
+
+        if (enforcement.blocked) {
+          const blockedUntil = enforcement.blockedUntil
+            ? ` до ${enforcement.blockedUntil.toISOString()}`
+            : "";
+          res.status(403).json({
+            error: `Аккаунт временно заблокирован${blockedUntil} за повторные попытки обхода платформы.`,
+          });
+          return;
+        }
+
+        res.status(400).json({
+          error:
+            "Запрещено передавать контакты и уводить общение вне платформы в вопросах к товару. Нарушение зафиксировано.",
+        });
         return;
       }
 

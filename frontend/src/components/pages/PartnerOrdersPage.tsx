@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CheckCircle,
   Clock,
@@ -13,16 +13,10 @@ import {
 import { apiGet, apiPatch } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
 import { ConfirmDialog, ToastViewport, type AppNotice } from "../ui/feedback";
+import type { OrderStatusValue } from "../checkout.models";
 
-type OrderStatus =
-  | "CREATED"
-  | "PAID"
-  | "PROCESSING"
-  | "PREPARED"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "COMPLETED"
-  | "CANCELLED";
+type OrderStatus = OrderStatusValue;
+type TrackingProvider = "yandex_pvz" | "russian_post";
 
 type PartnerOrder = {
   id: string;
@@ -32,7 +26,7 @@ type PartnerOrder = {
   status: OrderStatus;
   delivery_type: "pickup" | "delivery";
   created_at: string;
-  tracking_provider: string | null;
+  tracking_provider: TrackingProvider | null;
   tracking_number: string | null;
   tracking_url: string | null;
   delivery_ext_status: string | null;

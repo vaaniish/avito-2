@@ -39,10 +39,6 @@ export function notifyError(message: string) {
   bridge?.pushToast(message, "error");
 }
 
-export function notify(message: string, tone: AppNoticeTone = "info") {
-  bridge?.pushToast(message, tone);
-}
-
 export function confirmDialog(options: ConfirmOptions): Promise<boolean> {
   return new Promise((resolve) => {
     if (!bridge) {

@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
 import { getSessionUser } from "../../lib/session";
+import { signSessionToken } from "../../lib/session-token";
 import { toClientRole } from "../../utils/format";
 import bcrypt from "bcrypt";
 
@@ -86,6 +87,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
       },
+      sessionToken: signSessionToken(user.id),
       profile: {
         wishlist: user.wishlist_items.map((item: { listing: { public_id: string } }) => ({ id: item.listing.public_id })),
       },
@@ -159,6 +161,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
       },
+      sessionToken: signSessionToken(user.id),
       profile: {
         wishlist: [],
       },

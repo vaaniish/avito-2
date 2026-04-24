@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Minus, Plus, Heart, Trash2 } from "lucide-react";
 import type { CartItem } from "../types";
 
@@ -40,10 +40,7 @@ export function CartPage({
     }
   };
 
-  const applyQuantityChange = (
-    itemId: string,
-    currentQuantity: number,
-  ) => {
+  const applyQuantityChange = (itemId: string) => {
     const value = editingQuantities[itemId];
 
     if (value === undefined) {
@@ -77,11 +74,10 @@ export function CartPage({
   const handleQuantityKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
     itemId: string,
-    currentQuantity: number,
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      applyQuantityChange(itemId, currentQuantity);
+      applyQuantityChange(itemId);
       (e.target as HTMLInputElement).blur();
     }
   };
@@ -245,16 +241,12 @@ export function CartPage({
                               handleQuantityChange(e, item.id)
                             }
                             onBlur={() =>
-                              applyQuantityChange(
-                                item.id,
-                                item.quantity,
-                              )
+                              applyQuantityChange(item.id)
                             }
                             onKeyDown={(e) =>
                               handleQuantityKeyDown(
                                 e,
                                 item.id,
-                                item.quantity,
                               )
                             }
                             className="px-6 py-2 text-base min-w-[60px] text-center border-x border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all"
@@ -346,16 +338,12 @@ export function CartPage({
                                 handleQuantityChange(e, item.id)
                               }
                               onBlur={() =>
-                                applyQuantityChange(
-                                  item.id,
-                                  item.quantity,
-                                )
+                                applyQuantityChange(item.id)
                               }
                               onKeyDown={(e) =>
                                 handleQuantityKeyDown(
                                   e,
                                   item.id,
-                                  item.quantity,
                                 )
                               }
                               className="px-2 sm:px-4 py-1.5 text-sm sm:text-base min-w-[40px] sm:min-w-[50px] text-center border-x border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all"

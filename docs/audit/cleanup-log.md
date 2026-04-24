@@ -1,0 +1,496 @@
+# Cleanup Log (2026-04-19)
+
+## Safe Removals Completed
+
+- Frontend: removed unused default `React` imports in admin/pages/components where JSX runtime does not require `React` identifier.
+- `frontend/src/components/CartPage.tsx`
+  - Removed unused `currentQuantity` path in quantity-apply flow.
+- `frontend/src/components/Hero.tsx`
+  - Removed unused local click handler.
+- `frontend/src/components/YandexMapPicker.tsx`
+  - Removed unused `locationHint` state path that had no UI consumer.
+- `frontend/src/components/pages/AuthPage.tsx`
+  - Removed post-login `onBack()` override so route transition is controlled by app-level auth handler.
+- Backend decomposition:
+  - Moved profile account endpoints from monolith router into
+    `backend/src/modules/profile/profile.account.routes.ts`:
+    - `GET /wishlist`
+    - `POST /wishlist/:listingPublicId`
+    - `DELETE /wishlist/:listingPublicId`
+    - `GET /notifications`
+    - `PATCH /notifications/mark-as-read`
+  - API paths/payloads unchanged.
+- Backend decomposition (2nd slice):
+  - Moved engagement endpoints into
+    `backend/src/modules/profile/profile.engagement.routes.ts`:
+    - `POST /partnership-requests`
+    - `POST /listings/:listingPublicId/review`
+  - API paths/payloads unchanged.
+- Backend resilience:
+  - Added retryable timeout code `UND_ERR_CONNECT_TIMEOUT` for external payment network failures to prevent accidental generic 500s.
+- Backend decomposition (3rd slice):
+  - Moved orders/payments profile endpoints into
+    `backend/src/modules/profile/profile.orders.routes.ts`:
+    - `POST /payments/yookassa/webhook`
+    - `GET /orders/payment-status`
+    - `POST /orders`
+    - `GET /orders`
+  - Wired through dependency-injected factory to preserve existing helper behavior and keep contracts unchanged.
+- Backend decomposition (4th slice):
+  - Moved address/location profile endpoints into
+    `backend/src/modules/profile/profile.address.routes.ts`:
+    - `GET /addresses`
+    - `POST /addresses`
+    - `PATCH /addresses/:id`
+    - `DELETE /addresses/:id`
+    - `POST /addresses/:id/default`
+    - `GET /location/suggest`
+    - `GET /delivery-points`
+  - Wired through dependency-injected factory, contracts unchanged.
+- Backend decomposition (5th slice):
+  - Moved profile user endpoints into
+    `backend/src/modules/profile/profile.user.routes.ts`:
+    - `GET /me`
+    - `PATCH /me`
+  - Wired through dependency-injected factory, contracts unchanged.
+- Helper hygiene after refactor:
+  - Removed no-longer-used Prisma/import symbols from `profile.routes.ts`.
+  - Strengthened `mapUserAddressToDto` return type contract in `profile.user.routes.ts`
+    to keep spread operations type-safe.
+- Shared-helper extraction (6th cleanup slice):
+  - Introduced `backend/src/modules/profile/profile.shared.ts` and moved reusable helper blocks out of aggregator:
+    - `normalizeTextField`
+    - `parseLegacyBuilding`
+    - `buildAddressFullAddress`
+    - `mapUserAddressToDto`
+    - `extractPrimaryCityFromAddresses`
+  - Removed duplicate city-extraction helper from `profile.account.routes.ts`.
+  - Updated router dependency contracts to use shared `ProfileAddressDto`.
+- Delivery-engine extraction (7th cleanup slice):
+  - Introduced `backend/src/modules/profile/profile.delivery.ts`.
+  - Moved Yandex/RussianPost delivery logic and helper blocks out of
+    `profile.routes.ts` into dedicated module.
+  - Left `profile.routes.ts` as orchestration-only composition layer for profile subrouters.
+  - Preserved existing API contracts by reusing the same dependency-injection boundaries.
+- Delivery submodule split (8th cleanup slice):
+  - Split delivery monolith into:
+    - `profile.delivery.points.ts` (geocode/suggest/delivery-points providers)
+    - `profile.delivery.tracking.ts` (pickup tags + Yandex tracking lifecycle)
+    - `profile.delivery.shared.ts` (provider types/config/timeouts/common helpers)
+    - `profile.delivery.ts` as compatibility barrel re-export.
+  - Kept caller imports stable (`profile.routes.ts` unchanged on external behavior).
+- Payment-client extraction (9th cleanup slice):
+  - Added `backend/src/modules/profile/profile.payment.ts`.
+  - Moved YooKassa client helpers (`create/fetch/intent-base-id`) out of `profile.routes.ts`.
+  - Kept existing orders-router DI contract and endpoint behavior unchanged.
+- Frontend profile cleanup (10th slice):
+  - Added `frontend/src/components/pages/profile.address-helpers.ts` and moved pure address helper functions out of `ProfilePage.tsx`.
+  - Removed unused address-suggest function blocks from `ProfilePage.tsx` (no call sites).
+  - Removed stale address-suggest cache refs and normalized several state tuples to setter-only where values were never read.
+  - `ProfilePage.tsx` reduced from `3319` lines to `1565` lines.
+
+## Validation After Cleanup
+
+- `tsc -p frontend/tsconfig.json --noEmit`: PASS
+- `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+- `tsc -p backend/tsconfig.json --noEmit`: PASS
+- `tsc -p backend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+- `node scripts/e2e-smoke.mjs` with backend up: PASS (`12/12`)
+
+## Pending Cleanup (Second Pass)
+
+- `frontend/src/components/pages/ProfilePage.tsx`
+  - Multiple detected dead states/helpers (address suggestion pipeline) still present.
+  - Requires controlled extraction/removal due file size and intertwined address logic.
+  - Planned as dedicated refactor slice to avoid behavioral regressions.
+- Frontend checkout cleanup (11th slice):
+  - Extracted delivery/pickup UI section into `frontend/src/components/checkout.delivery-section.tsx`.
+  - Extracted payment method selector into `frontend/src/components/checkout.payment-method-section.tsx`.
+  - Extracted order summary + payment status card into `frontend/src/components/checkout.order-summary.tsx`.
+  - Simplified `frontend/src/components/CheckoutPage.tsx` to orchestration responsibilities only.
+  - `CheckoutPage.tsx` reduced from `985` lines to `759` lines.
+- Smoke check status (current local session):
+  - `node scripts/e2e-smoke.mjs`: FAIL (`12/12 fetch failed`) because local backend/frontend are not running.
+  - Probes: `http://127.0.0.1:3000/health` unreachable, `http://127.0.0.1:5173` unreachable.
+- Frontend app cleanup (12th slice):
+  - Added reusable `frontend/src/components/AppPageShell.tsx` for common `Header + Footer` composition.
+  - Replaced repeated shell branches in `frontend/src/App.tsx` with `renderWithAppShell(...)` helper.
+  - `App.tsx` reduced from `1289` lines to `1187` lines.
+- Validation after app cleanup:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (13th slice):
+  - Added `frontend/src/components/pages/profile.tab-panels.tsx`.
+  - Moved `orders`, `wishlist`, `partnership` tab render sections out of `ProfilePage.tsx` into dedicated panels.
+  - Added shared `PartnershipForm` type in `frontend/src/components/pages/profile.models.ts`.
+  - `ProfilePage.tsx` reduced from `1565` lines to `1478` lines.
+- Validation after profile tab-panel extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (14th slice):
+  - Added `frontend/src/components/pages/profile.addresses-tab.tsx`.
+  - Moved addresses tab (list + create modal + map picker UI) from `ProfilePage.tsx` into dedicated panel component.
+  - Added shared `AddressFormState` type in `frontend/src/components/pages/profile.models.ts`.
+  - `ProfilePage.tsx` reduced from `1478` lines to `1382` lines.
+- Validation after addresses-tab extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (15th slice):
+  - Added `frontend/src/components/pages/profile.sidebar.tsx`.
+  - Added `frontend/src/components/pages/profile.settings-tab.tsx`.
+  - Replaced inline sidebar and profile-settings markup in `ProfilePage.tsx` with extracted components.
+  - Added shared `ProfileFormState` type in `frontend/src/components/pages/profile.models.ts`.
+  - `ProfilePage.tsx` reduced from `1382` lines to `1254` lines.
+- Validation after sidebar/settings extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (16th slice):
+  - Added `frontend/src/components/pages/profile.partner-tab.tsx` and moved partner tab lazy orchestration there.
+  - Replaced `renderActiveTab` if-chain in `ProfilePage.tsx` with `baseTabRenderers` map + partner fallback component.
+  - `ProfilePage.tsx` reduced from `1254` lines to `1232` lines.
+- Validation after tab-router simplification:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (17th slice):
+  - Added `frontend/src/components/pages/profile.header.tsx` and moved profile top header markup there.
+  - Removed no-op `resolveCityRegion` helper and equivalent empty geocode fallbacks from `ProfilePage.tsx`.
+  - `ProfilePage.tsx` reduced from `1232` lines to `1220` lines.
+- Validation after header extraction + no-op cleanup:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (18th slice):
+  - Added `frontend/src/components/pages/profile.tab-router.tsx`.
+  - Moved active-tab dispatch (`baseTabRenderers` routing + partner fallback) out of `ProfilePage.tsx`.
+  - `ProfilePage.tsx` reduced from `1220` lines to `1211` lines.
+- Validation after tab-router extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (19th slice):
+  - Added `frontend/src/components/pages/profile.geocode.ts` and moved geocode parsing/merge logic there.
+  - Updated `ProfilePage.tsx` to consume imported geocode service in timeout and create-address flows.
+  - `ProfilePage.tsx` reduced from `1211` lines to `1021` lines.
+- Validation after geocode extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (20th slice):
+  - Added `frontend/src/components/pages/profile.address-suggest.ts` and moved native suggest init/cleanup + provider logic there.
+  - Replaced bulky suggest `useEffect` body in `ProfilePage.tsx` with `mountNativeAddressSuggest(...)` call.
+  - `ProfilePage.tsx` reduced from `1021` lines to `895` lines.
+- Validation after native-suggest extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+- Frontend profile cleanup (21st slice):
+  - Added `frontend/src/components/pages/profile.address-autofill.ts`.
+  - Replaced second bulky address `useEffect` body in `ProfilePage.tsx` with `scheduleAddressAutofill(...)` call.
+  - `ProfilePage.tsx` reduced from `895` lines to `811` lines.
+- Validation after address auto-fill extraction:
+  - `tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Frontend profile cleanup (22nd slice):
+  - Added `frontend/src/components/pages/profile.address-flow.ts` with:
+    - `createEmptyAddressForm(...)`
+    - `prepareCreateAddressPayload(...)`
+    - `mergeAddressFromMap(...)`
+    - `resolveMapCenterQuery(...)`
+    - shared `AddressMapSelection` type.
+  - Updated `frontend/src/components/pages/ProfilePage.tsx` to consume extracted address flow helpers.
+  - Updated `frontend/src/components/pages/profile.addresses-tab.tsx` to use shared `AddressMapSelection` type.
+  - `ProfilePage.tsx` reduced from `811` lines to `663` lines.
+- Validation after address-flow extraction:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Frontend profile cleanup (23rd slice):
+  - Added `frontend/src/components/pages/profile.address-input.handlers.ts`.
+  - Moved full-address input UI handlers (`focus/blur/enter/escape`) from inline JSX in `ProfilePage.tsx` into `createAddressInputHandlers(...)`.
+  - `ProfilePage.tsx` now wires extracted handler set through `addressFullInputHandlers`.
+  - `ProfilePage.tsx` reduced from `663` lines to `637` lines.
+- Validation after address input handlers extraction:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Frontend profile cleanup (24th slice):
+  - Added `frontend/src/components/pages/profile.address-modal.handlers.ts`.
+  - Moved modal handler logic (`open/close/reset`) and `onAddressFullAddressChange` logic out of inline `ProfilePage.tsx` into shared handler functions.
+  - Updated `frontend/src/components/pages/ProfilePage.tsx` to delegate through extracted handlers.
+  - `ProfilePage.tsx` line count changed from `637` to `643` (explicit callback wiring grew slightly, while modal logic complexity moved out of file).
+- Validation after address modal handlers extraction:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Stage 6 type/data audit (1st slice):
+  - Added `docs/audit/type-contract-audit.md` with findings table (`type/attribute/problem/fix/rationale/status`).
+  - Backend (`profile.engagement.routes.ts`):
+    - normalized optional partnership request fields to `null` when empty via `toNullableTrimmedString(...)`.
+    - fixed mojibake user-facing strings.
+  - Backend (`profile.address.routes.ts`):
+    - enforced first-address default invariant with `effectiveIsDefault` when creating user address.
+  - Backend (`profile.user.routes.ts`, `profile.orders.routes.ts`):
+    - replaced mojibake fallback/error strings with UTF-8 literals.
+  - Frontend (`profile.models.ts`):
+    - tightened `Address` type (`label`, required apartment/entrance/building, `lat/lon` as required nullable fields).
+    - added `ProfileUpdateResponse` type.
+  - Frontend (`ProfilePage.tsx`):
+    - switched `PATCH /profile/me` typing from `{ success: boolean }` to exact `ProfileUpdateResponse` contract.
+- Validation after Stage 6 slice 1:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Stage 6 type/data audit (2nd slice):
+  - Frontend (`checkout.models.ts`):
+    - tightened `PaymentStatusResponse` fields from broad `string` to explicit backend-aligned unions:
+      - `OrderStatusValue`
+      - `TransactionStatusValue`
+      - `PaymentProviderValue`
+  - Frontend (`PartnerListingsPage.tsx`):
+    - removed local drifting `ProfileAddressDto` and switched to shared model projection:
+      - `Pick<Address, "id" | "fullAddress" | "city" | "isDefault">`
+- Validation after Stage 6 slice 2:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs` (with local services up): PASS (`12/12`)
+
+- Stage 6 type/data audit (3rd slice):
+  - Frontend (`frontend/src/components/admin/ComplaintsPage.tsx`):
+    - tightened admin complaints DTO contracts:
+      - `listingStatus`: `active | inactive | moderation`
+      - `listingModerationStatus`: `approved | rejected | pending`
+      - `sellerStatus`: `active | blocked`
+      - sanction `level/status`: explicit finite unions
+    - expanded `ComplaintListResponse` from partial shape to full envelope (`sort`, `filters`, `options`).
+    - made `ComplaintStatusUpdateResponse.cascade` explicit and added `RelatedListingResponse` type.
+- Validation after Stage 6 slice 3:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs`: FAIL (`0/12`, local services were not reachable in this session)
+
+- Stage 6 type/data audit (4th slice):
+  - Frontend (`frontend/src/components/checkout.models.ts`):
+    - tightened checkout response envelopes:
+      - `CreateOrdersResponse.payment` is required
+      - introduced `YooKassaPaymentStatus` alias for payment status
+      - `DeliveryPointsResponse.location`, `activeProvider`, `pagination` are required (pagination nullable)
+  - Frontend (`frontend/src/components/CheckoutPage.tsx`):
+    - aligned consumption with strict contracts (`response.activeProvider`, `response.payment.confirmationUrl`).
+  - Frontend (`frontend/src/components/pages/PartnerOrdersPage.tsx`):
+    - removed duplicate local order status enum and reused shared `OrderStatusValue`.
+    - narrowed `tracking_provider` to known providers union.
+- Validation after Stage 6 slice 4:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node scripts/e2e-smoke.mjs`: FAIL (`ECONNREFUSED 127.0.0.1:5433`, Postgres not reachable in current shell session)
+
+- Stage 6 type/data audit (5th slice):
+  - Frontend (`frontend/src/components/admin/TransactionsPage.tsx`):
+    - tightened transaction contract fields to shared enum-derived unions:
+      - `orderStatus`: `Lowercase<OrderStatusValue>`
+      - `status`: `Lowercase<TransactionStatusValue>`
+      - `paymentProvider`: `Lowercase<PaymentProviderValue>`
+    - aligned status filter type to `\"all\" | AdminTransactionStatus`.
+- Validation after Stage 6 slice 5:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node scripts/e2e-smoke.mjs`: FAIL (`12/12 fetch failed`, local backend/frontend are not reachable in current shell session)
+
+- Stage 6 type/data audit (6th slice):
+  - Backend:
+    - added `backend/src/lib/session-token.ts` with JWT (`HS256`) issue/verify helpers.
+    - updated `backend/src/modules/auth/auth.routes.ts` to return `sessionToken` on `login/signup`.
+    - updated `backend/src/lib/session.ts`:
+      - `Authorization: Bearer` token verification as primary session identity.
+      - legacy `x-user-id`/`user_id` fallback guarded by `ALLOW_LEGACY_USER_ID` (default non-production only).
+  - Frontend:
+    - updated `frontend/src/lib/api.ts` to persist/read session token and send `Authorization: Bearer` automatically.
+    - fallback to `x-user-id` kept only when token is absent.
+    - updated auth entrypoints:
+      - `frontend/src/components/pages/AuthPage.tsx`
+      - `frontend/src/components/admin/AdminLogin.tsx`
+      to persist returned `sessionToken`.
+- Validation after Stage 6 slice 6:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`12/12`)
+
+- Stage 6 type/data audit (7th slice, auth phase 2 secure defaults):
+  - Backend (`backend/src/lib/session.ts`):
+    - removed query-based identity path (`user_id`).
+    - production mode now always disables legacy transport identity fallback.
+    - non-production legacy fallback remains available only via explicit opt-in (`ALLOW_LEGACY_USER_ID=true`).
+  - E2E regression (`scripts/e2e-smoke.mjs`):
+    - switched authenticated requests to `Authorization: Bearer <sessionToken>` across profile/partner/admin flows.
+    - renamed auth verification step to `auth: me via bearer token`.
+- Validation after Stage 6 slice 7:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`12/12`)
+
+- Stage 6 type/data audit (8th slice, auth hardening + negative regression):
+  - Backend:
+    - added production fail-fast validation for session-token secret in `backend/src/lib/session-token.ts`:
+      - `SESSION_TOKEN_SECRET` is mandatory in production.
+      - minimum production secret length is 32 characters.
+      - built-in development fallback secret is forbidden in production.
+    - added startup-time configuration assertion in `backend/src/server.ts` to fail fast before serving traffic.
+  - E2E regression:
+    - extended `scripts/e2e-smoke.mjs` auth coverage with negative bearer-token checks:
+      - malformed token is rejected (`401`).
+      - expired token is rejected (`401`).
+- Validation after Stage 6 slice 8:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`14/14`)
+
+- Stage 6 type/data audit (9th slice, CI preflight for auth config):
+  - Added `scripts/security-preflight.ts`:
+    - runs production-grade validation for session-token env config (`SESSION_TOKEN_*`).
+    - enforces fail-fast CI behavior for missing/invalid production auth settings.
+  - Added npm scripts in `package.json`:
+    - `security:preflight:session`
+    - `ci:preflight:prod-auth`
+- Validation after Stage 6 slice 9:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `NODE_ENV=production SESSION_TOKEN_SECRET='0123456789abcdef0123456789abcdef' npm run security:preflight:session`: PASS
+  - `NODE_ENV=production npm run security:preflight:session`: FAIL as expected (`SESSION_TOKEN_SECRET is required in production`)
+  - `node scripts/e2e-smoke.mjs`: PASS (`14/14`)
+
+- Stage 6 type/data audit (10th slice, strict token-only runtime):
+  - Backend (`backend/src/lib/session.ts`):
+    - removed remaining legacy transport identity fallback (`x-user-id`).
+    - `getSessionUser` now resolves identity only from verified bearer session token.
+  - Frontend transport (`frontend/src/lib/api.ts`):
+    - removed fallback header emission (`x-user-id`) when token is absent.
+    - API auth header now strictly `Authorization: Bearer <sessionToken>`.
+  - Frontend session bootstrap (`frontend/src/App.tsx`):
+    - app restores authenticated UI state only when both stored user and session token are present.
+    - stale user-only local storage state is cleared automatically.
+- Validation after Stage 6 slice 10:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`14/14`)
+
+- Stage 8 continuation (scenario coverage expansion):
+  - Expanded `scripts/e2e-smoke.mjs` to include additional P0/P1 scenarios:
+    - auth error paths: wrong password, anonymous protected access, buyer→admin forbidden.
+    - profile: `/me` patch+revert, default address deletion guard.
+    - catalog: questions flow + complaint creation.
+    - partner: full listing update, deterministic order status/tracking mutation path.
+    - partner: cross-seller listing update forbidden path.
+    - admin: complaint status requires `Idempotency-Key`, KYC review mutation.
+  - Updated `docs/audit/test-scenarios.csv` automation statuses for covered P0/P1 scenarios.
+- Validation after Stage 8 continuation:
+  - `node scripts/e2e-smoke.mjs`: PASS (`25/25`)
+  - matrix snapshot:
+    - automated: `42/50`
+    - pending: `8/50`
+    - P0/P1 pending: `0`
+
+- Stage 9 (performance + operational cost):
+  - Added benchmark script `scripts/perf-stage9.mjs` (synthetic load + `EXPLAIN ANALYZE` before/after).
+  - Added npm script: `perf:stage9`.
+  - Added composite complaint indexes and synced schema:
+    - `Complaint_status_created_at_id_idx`
+    - `Complaint_listing_status_created_at_id_idx`
+  - Added report: `docs/audit/performance-report.md`.
+- Validation after Stage 9:
+  - `npm run perf:stage9`: PASS
+  - benchmark delta:
+    - queue query execution `0.668 ms -> 0.049 ms` (`-92.7%`)
+  - `npm run db:push`: PASS
+
+- Stage 10 (second full pass + QA gate):
+  - Added explicit release gate artifact: `docs/audit/qa-gate.md`.
+  - Consolidated residual risks and exit criteria for READY status.
+- Validation after Stage 10:
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - `SESSION_TOKEN_SECRET='0123456789abcdef0123456789abcdef' npm run ci:preflight:prod-auth`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`25/25`)
+
+- Stage 8 (final continuation, race/compatibility closure):
+  - `scripts/e2e-smoke.mjs` extended with:
+    - webhook replay idempotency check (`SCN-042`)
+    - concurrent complaint status consistency (`SCN-043`)
+    - concurrent address default invariant (`SCN-044`)
+    - concurrent order status bounded mutation (`SCN-045`)
+    - legacy complaints endpoint compatibility + idempotent replay (`SCN-050`)
+  - `docs/audit/test-scenarios.csv` updated: corresponding scenarios moved to `automated`.
+- Validation after Stage 8 final continuation:
+  - `node scripts/e2e-smoke.mjs`: PASS (`30/30`)
+  - matrix snapshot: `49/50 automated`, `1/50 pending`
+
+- Stage 9 (catalog perf extension):
+  - `scripts/perf-stage9.mjs` expanded to include synthetic catalog dataset (`12000` listings) and catalog query benchmark.
+  - added listing index:
+    - `MarketplaceListing_type_status_moderation_created_id_idx`
+  - schema synchronized in `backend/prisma/schema.prisma`.
+  - `docs/audit/performance-report.md` refreshed with updated metrics.
+- Validation after Stage 9 extension:
+  - `npm run perf:stage9`: PASS
+  - key deltas:
+    - complaints queue query: `0.571 ms -> 0.042 ms` (`-92.6%`)
+    - catalog list query: `0.070 ms -> 0.046 ms` (`-34.3%`)
+  - `npm run db:push`: PASS
+
+- Stage 10 (gate refresh after new evidence):
+  - updated `docs/audit/qa-gate.md` with new coverage/perf evidence.
+  - updated residual risk scope to single pending scenario (`SCN-048`).
+- Validation after Stage 10 refresh:
+  - scenario coverage: `49 automated / 1 pending`
+  - gate remains `NOT READY` until frontend render-stress automation is added
+
+- Stage 10 (SCN-048 automation + endpoint p95 gate):
+  - Added `scripts/profile-render-stress.ts` and npm script `perf:profile-render-stress`:
+    - automated frontend stress benchmark for `ProfilePage` with commit/time thresholds.
+  - Added `scripts/http-latency-stage10.mjs` and npm script `perf:http-p95:stage10`:
+    - endpoint-level p95 verification for catalog/admin read paths.
+  - Updated env access safety for Node-side performance harness compatibility:
+    - `frontend/src/lib/api.ts`
+    - `frontend/src/components/pages/profile.address-utils.ts`
+    - `frontend/src/components/YandexMapPicker.tsx`
+  - Updated matrix + gate artifacts:
+    - `SCN-048` moved to automated
+    - `docs/audit/qa-gate.md` moved to `READY`
+- Validation after Stage 10 closure:
+  - `npm run perf:profile-render-stress`: PASS
+  - `npm run perf:http-p95:stage10`: PASS
+  - `node scripts/e2e-smoke.mjs`: PASS (`30/30`)
+  - `node node_modules/typescript/bin/tsc -p frontend/tsconfig.json --noEmit`: PASS
+  - `node node_modules/typescript/bin/tsc -p backend/tsconfig.json --noEmit`: PASS
+  - scenario coverage: `50 automated / 0 pending`

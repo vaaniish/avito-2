@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 
 declare global {
@@ -100,10 +100,19 @@ interface YandexMapPickerProps {
 type MapStatus = "loading" | "ready" | "unavailable";
 
 const YANDEX_MAPS_KEY =
-  import.meta.env.VITE_YANDEX_MAPS_API_KEY?.toString().trim() ?? "";
+  ((import.meta as ImportMeta & { env?: Record<string, unknown> }).env
+    ?.VITE_YANDEX_MAPS_API_KEY as string | undefined)
+    ?.toString()
+    .trim() ?? "";
 const YANDEX_SUGGEST_KEY =
-  import.meta.env.VITE_YANDEX_SUGGEST_API_KEY?.toString().trim() ??
-  import.meta.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.toString().trim() ??
+  ((import.meta as ImportMeta & { env?: Record<string, unknown> }).env
+    ?.VITE_YANDEX_SUGGEST_API_KEY as string | undefined)
+    ?.toString()
+    .trim() ??
+  ((import.meta as ImportMeta & { env?: Record<string, unknown> }).env
+    ?.VITE_YANDEX_GEOSUGGEST_API_KEY as string | undefined)
+    ?.toString()
+    .trim() ??
   "";
 const FEDERAL_DISTRICT_RE = /\u0444\u0435\u0434\u0435\u0440\u0430\u043b\u044c\u043d\p{L}*\s+\u043e\u043a\u0440\u0443\u0433/iu;
 const MUNICIPAL_FORMATION_RE =
@@ -186,7 +195,6 @@ export function YandexMapPicker({
   const viewportUpdateTimerRef = useRef<number | null>(null);
   const [viewportTick, setViewportTick] = useState(0);
   const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
-  const [locationHint, setLocationHint] = useState("");
 
   const selectedMarker = useMemo(
     () => markers.find((marker) => marker.id === selectedMarkerId) ?? null,
@@ -289,7 +297,13 @@ export function YandexMapPicker({
           map.controls?.remove?.("trafficControl");
           map.controls?.remove?.("fullscreenControl");
           map.controls?.remove?.("rulerControl");
-          map.behaviors?.enable?.("scrollZoom");
+          (
+            map.behaviors as
+              | {
+                  enable?: (name: string) => void;
+                }
+              | undefined
+          )?.enable?.("scrollZoom");
           const clusterer = new window.ymaps.Clusterer({
             groupByCoordinates: false,
             clusterDisableClickZoom: false,
@@ -525,14 +539,10 @@ export function YandexMapPicker({
     }
 
     if (options?.auto && (!parsed.city || !parsed.street)) {
-      setLocationHint(
-        "Геопозиция определена неточно. Выберите точку на карте вручную или введите адрес.",
-      );
       return;
     }
 
     if (!isRussianCountry(parsed.country)) {
-      setLocationHint("Доступны только точки в России.");
       return;
     }
 
@@ -549,25 +559,18 @@ export function YandexMapPicker({
       lon: Number.isFinite(coords[1]) ? coords[1] : null,
       country: parsed.country,
     });
-    setLocationHint("");
   };
 
   const requestCurrentLocation = async () => {
     if (!allowAddressSelect) return;
     if (!navigator.geolocation) {
-      setLocationHint("Браузер не поддерживает геолокацию.");
       return;
     }
-
-    setLocationHint("");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords = [position.coords.latitude, position.coords.longitude];
         if (position.coords.accuracy > 2000) {
-          setLocationHint(
-            "Геолокация определена слишком приблизительно. Уточните адрес вручную или выберите точку на карте.",
-          );
           return;
         }
 
@@ -576,11 +579,7 @@ export function YandexMapPicker({
           void getAddressByCoords(coords, { auto: true });
         }
       },
-      () => {
-        setLocationHint(
-          "Не удалось получить геолокацию. Разрешите доступ к местоположению в браузере.",
-        );
-      },
+      () => {},
       {
         enableHighAccuracy: true,
         timeout: 15_000,
@@ -693,4 +692,3 @@ export function YandexMapPicker({
     </div>
   );
 }
-

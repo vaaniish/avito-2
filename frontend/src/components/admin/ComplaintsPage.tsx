@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowDown,
@@ -18,6 +18,11 @@ type ComplaintStatusFilter = ComplaintStatus | "all";
 type ComplaintPriority = "low" | "medium" | "high";
 type ComplaintSortBy = "queueScore" | "riskScore" | "createdAt";
 type ComplaintSortOrder = "asc" | "desc";
+type ListingStatus = "active" | "inactive" | "moderation";
+type ListingModerationStatus = "approved" | "rejected" | "pending";
+type SellerStatus = "active" | "blocked";
+type ComplaintSanctionStatus = "active" | "completed";
+type ComplaintSanctionLevel = "warning" | "temp_3_days" | "temp_30_days" | "permanent";
 type DetailTab = "overview" | "sanctions";
 type StatusAction = "approved" | "rejected";
 
@@ -47,8 +52,8 @@ type ComplaintItem = {
   listingTitle: string;
   listingPrice: number;
   listingCreatedAt: string;
-  listingStatus: string;
-  listingModerationStatus: string;
+  listingStatus: ListingStatus;
+  listingModerationStatus: ListingModerationStatus;
   listingCity: string;
   listingRegion: string;
   listingComplaintsCount: number;
@@ -56,7 +61,7 @@ type ComplaintItem = {
   sellerName: string;
   sellerEmail: string;
   sellerPhone: string | null;
-  sellerStatus: "active" | "blocked";
+  sellerStatus: SellerStatus;
   sellerBlockedUntil: string | null;
   sellerBlockReason: string | null;
   sellerJoinedAt: string;
@@ -74,8 +79,8 @@ type ComplaintItem = {
   actionTaken: string | null;
   sanction: {
     id: string;
-    level: string;
-    status: "active" | "completed";
+    level: ComplaintSanctionLevel;
+    status: ComplaintSanctionStatus;
     startsAt: string | null;
     endsAt: string | null;
     reason: string | null;
@@ -83,8 +88,8 @@ type ComplaintItem = {
   } | null;
   activeSellerSanction: {
     id: string;
-    level: string;
-    status: "active" | "completed";
+    level: ComplaintSanctionLevel;
+    status: ComplaintSanctionStatus;
     startsAt: string | null;
     endsAt: string | null;
     reason: string | null;
@@ -112,6 +117,25 @@ type ComplaintListResponse = {
     pageSize: number;
     total: number;
     totalPages: number;
+  };
+  sort: {
+    by: ComplaintSortBy;
+    order: ComplaintSortOrder;
+  };
+  filters: {
+    status: ComplaintStatus[];
+    priority: ComplaintPriority[];
+    moderator: string | null;
+    from: string | null;
+    to: string | null;
+    q: string;
+  };
+  options: {
+    moderators: Array<{
+      id: string;
+      name: string;
+      email: string;
+    }>;
   };
 };
 
@@ -142,7 +166,7 @@ type SellerSummaryResponse = {
     id: string;
     name: string;
     email: string;
-    status: "active" | "blocked";
+    status: SellerStatus;
     blockedUntil: string | null;
     blockReason: string | null;
     verified: boolean;
@@ -178,18 +202,22 @@ type ComplaintStatusUpdateResponse = {
   enforcement: {
     applied: true;
     approvedViolationsCount: number;
-    level: string;
+    level: ComplaintSanctionLevel;
     sanctionId: string;
-    sellerStatus: "active" | "blocked";
+    sellerStatus: SellerStatus;
     blockedUntil: string | null;
     listingStatus: "inactive";
     listingModerationStatus: "rejected";
     message: string;
   } | null;
-  cascade?: {
+  cascade: {
     updatedCount: number;
     cascadedComplaintIds: string[];
   };
+};
+
+type RelatedListingResponse = {
+  items: RelatedListingComplaint[];
 };
 
 type FiltersState = {
@@ -269,6 +297,24 @@ const defaultPagination: ComplaintListResponse["pagination"] = {
   totalPages: 0,
 };
 
+const defaultListSort: ComplaintListResponse["sort"] = {
+  by: "queueScore",
+  order: "desc",
+};
+
+const defaultListFilters: ComplaintListResponse["filters"] = {
+  status: [],
+  priority: [],
+  moderator: null,
+  from: null,
+  to: null,
+  q: "",
+};
+
+const defaultListOptions: ComplaintListResponse["options"] = {
+  moderators: [],
+};
+
 export function ComplaintsPage() {
   const [filters, setFilters] = useState<FiltersState>({
     status: "new",
@@ -292,6 +338,9 @@ export function ComplaintsPage() {
   const [listData, setListData] = useState<ComplaintListResponse>({
     items: [],
     pagination: defaultPagination,
+    sort: defaultListSort,
+    filters: defaultListFilters,
+    options: defaultListOptions,
   });
 
   const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
@@ -348,7 +397,7 @@ export function ComplaintsPage() {
   const loadComplaintDetails = useCallback(async (complaintId: string) => {
     const [detail, related, seller] = await Promise.all([
       apiGet<ComplaintDetail>(`/admin/complaints/${complaintId}`),
-      apiGet<{ items: RelatedListingComplaint[] }>(`/admin/complaints/${complaintId}/related-listing`),
+      apiGet<RelatedListingResponse>(`/admin/complaints/${complaintId}/related-listing`),
       apiGet<SellerSummaryResponse>(`/admin/complaints/${complaintId}/seller-summary`),
     ]);
 
@@ -943,4 +992,3 @@ export function ComplaintsPage() {
     </div>
   );
 }
-

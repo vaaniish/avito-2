@@ -1,32 +1,28 @@
 import {
   Suspense,
+  type ReactNode,
   lazy,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import { SlidersHorizontal } from "lucide-react";
-import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
-import { ProductGrid } from "./components/ProductGrid";
 import { Footer, type FooterPage } from "./components/Footer";
-import { FilterPanel, type CatalogCategory } from "./components/FilterPanel";
-import type { ProfileTab } from "./components/pages/ProfilePage";
-import type { AdminPage } from "./components/admin/AdminPanel";
+import { AppCatalogView } from "./components/AppCatalogView";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "./components/ui/sheet";
+  AppPageShell,
+  type AppPageShellHeaderProps,
+} from "./components/AppPageShell";
+import type { CatalogCategory } from "./components/FilterPanel";
+import type { ProfileTab } from "./components/pages/profile.models";
+import type { AdminPage } from "./components/admin/AdminPanel";
 import type { CartItem, FilterState, Product } from "./types";
 import {
   apiGet,
   apiPost,
   apiDelete,
   clearSessionUser,
+  getSessionToken,
   getSessionUser,
   saveSessionUser,
   type SessionRole,
@@ -35,6 +31,11 @@ import {
 import { matchesSearch } from "./lib/search";
 import { notifyError } from "./components/ui/notifications";
 import { initYandexMetrika } from "./lib/metrika";
+import {
+  buildPathForView,
+  parseRoute,
+  type AppView,
+} from "./lib/app-routing";
 
 const CartPage = lazy(() =>
   import("./components/CartPage").then((module) => ({
@@ -112,209 +113,6 @@ const AdminPanel = lazy(() =>
   })),
 );
 
-type AppView =
-  | "home"
-  | "cart"
-  | "checkout"
-  | "orderComplete"
-  | "paymentReturn"
-  | "product"
-  | "sellerStore"
-  | "about"
-  | "partnership"
-  | "faq"
-  | "privacy"
-  | "terms"
-  | "auth"
-  | "profile"
-  | "adminLogin"
-  | "adminPanel";
-
-const ADMIN_ROUTE_PAGES: AdminPage[] = [
-  "transactions",
-  "complaints",
-  "sellers",
-  "listings",
-  "users",
-  "commissions",
-  "audit",
-];
-
-const PROFILE_ROUTE_TABS: ProfileTab[] = [
-  "profile",
-  "addresses",
-  "orders",
-  "wishlist",
-  "partnership",
-  "partner-listings",
-  "partner-questions",
-  "partner-orders",
-];
-
-type ParsedRoute = {
-  view: AppView;
-  listingId: string | null;
-  sellerId: string | null;
-  adminPage: AdminPage;
-  profileTab: ProfileTab;
-};
-
-function isAdminRoutePage(value: string): value is AdminPage {
-  return ADMIN_ROUTE_PAGES.includes(value as AdminPage);
-}
-
-function isProfileRouteTab(value: string): value is ProfileTab {
-  return PROFILE_ROUTE_TABS.includes(value as ProfileTab);
-}
-
-function normalizePathname(pathname: string): string {
-  if (!pathname || pathname === "/") return "/";
-  return pathname.replace(/\/+$/, "") || "/";
-}
-
-function decodeRouteSegment(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-function parseRoute(pathname: string, search: string): ParsedRoute {
-  const normalizedPath = normalizePathname(pathname);
-  const query = new URLSearchParams(search);
-  const listingIdFromQuery = query.get("listingId")?.trim() ?? "";
-  const defaultRoute: ParsedRoute = {
-    view: "home",
-    listingId: listingIdFromQuery || null,
-    sellerId: null,
-    adminPage: "transactions",
-    profileTab: "profile",
-  };
-
-  if (normalizedPath === "/") return defaultRoute;
-  if (normalizedPath === "/cart") return { ...defaultRoute, view: "cart" };
-  if (normalizedPath === "/checkout")
-    return { ...defaultRoute, view: "checkout" };
-  if (normalizedPath === "/order-complete")
-    return { ...defaultRoute, view: "orderComplete" };
-  if (normalizedPath === "/payment-return")
-    return { ...defaultRoute, view: "paymentReturn" };
-  if (normalizedPath === "/about") return { ...defaultRoute, view: "about" };
-  if (normalizedPath === "/partnership")
-    return { ...defaultRoute, view: "partnership" };
-  if (normalizedPath === "/faq") return { ...defaultRoute, view: "faq" };
-  if (normalizedPath === "/privacy")
-    return { ...defaultRoute, view: "privacy" };
-  if (normalizedPath === "/terms") return { ...defaultRoute, view: "terms" };
-  if (normalizedPath === "/auth") return { ...defaultRoute, view: "auth" };
-  if (normalizedPath === "/admin/login")
-    return { ...defaultRoute, view: "adminLogin" };
-
-  if (normalizedPath === "/admin") {
-    return { ...defaultRoute, view: "adminPanel", adminPage: "transactions" };
-  }
-
-  if (normalizedPath.startsWith("/admin/")) {
-    const segment = normalizedPath.slice("/admin/".length).trim();
-    return {
-      ...defaultRoute,
-      view: "adminPanel",
-      adminPage: isAdminRoutePage(segment) ? segment : "transactions",
-    };
-  }
-
-  if (normalizedPath === "/profile") {
-    return { ...defaultRoute, view: "profile", profileTab: "profile" };
-  }
-
-  if (normalizedPath.startsWith("/profile/")) {
-    const segment = normalizedPath.slice("/profile/".length).trim();
-    return {
-      ...defaultRoute,
-      view: "profile",
-      profileTab: isProfileRouteTab(segment) ? segment : "profile",
-    };
-  }
-
-  if (normalizedPath.startsWith("/products/")) {
-    const listingId = normalizedPath.slice("/products/".length).trim();
-    return {
-      ...defaultRoute,
-      view: "product",
-      listingId: listingId || defaultRoute.listingId,
-    };
-  }
-
-  if (normalizedPath.startsWith("/product/")) {
-    const listingId = normalizedPath.slice("/product/".length).trim();
-    return {
-      ...defaultRoute,
-      view: "product",
-      listingId: listingId || defaultRoute.listingId,
-    };
-  }
-
-  if (normalizedPath.startsWith("/sellers/")) {
-    const sellerId = decodeRouteSegment(
-      normalizedPath.slice("/sellers/".length).trim(),
-    );
-    return {
-      ...defaultRoute,
-      view: "sellerStore",
-      sellerId: sellerId || null,
-    };
-  }
-
-  return defaultRoute;
-}
-
-function buildPathForView(params: {
-  view: AppView;
-  listingId: string | null;
-  sellerId: string | null;
-  adminPage: AdminPage;
-  profileTab: ProfileTab;
-}): string {
-  const { view, listingId, sellerId, adminPage, profileTab } = params;
-  switch (view) {
-    case "home":
-      return "/";
-    case "cart":
-      return "/cart";
-    case "checkout":
-      return "/checkout";
-    case "orderComplete":
-      return "/order-complete";
-    case "paymentReturn":
-      return "/payment-return";
-    case "product":
-      return listingId ? `/products/${listingId}` : "/";
-    case "sellerStore":
-      return sellerId ? `/sellers/${encodeURIComponent(sellerId)}` : "/";
-    case "about":
-      return "/about";
-    case "partnership":
-      return "/partnership";
-    case "faq":
-      return "/faq";
-    case "privacy":
-      return "/privacy";
-    case "terms":
-      return "/terms";
-    case "auth":
-      return "/auth";
-    case "profile":
-      return profileTab === "profile" ? "/profile" : `/profile/${profileTab}`;
-    case "adminLogin":
-      return "/admin/login";
-    case "adminPanel":
-      return adminPage === "transactions" ? "/admin" : `/admin/${adminPage}`;
-    default:
-      return "/";
-  }
-}
-
 const DEFAULT_FILTERS: FilterState = {
   categories: [],
   priceRange: [0, 500000],
@@ -329,6 +127,7 @@ const DEFAULT_FILTERS: FilterState = {
 const CATALOG_PAGE_SIZE = 24;
 
 type CatalogMode = "products" | "services";
+type AuthProfileData = { wishlist: Array<{ id: string }> };
 
 export default function App() {
   const initialRoute = parseRoute(
@@ -420,7 +219,13 @@ export default function App() {
 
   useEffect(() => {
     const existingSession = getSessionUser();
-    if (!existingSession) return;
+    const existingToken = getSessionToken();
+    if (!existingSession || !existingToken) {
+      if (existingSession && !existingToken) {
+        clearSessionUser();
+      }
+      return;
+    }
 
     setCurrentUser(existingSession);
     setUserType(existingSession.role);
@@ -616,6 +421,10 @@ export default function App() {
     viewMode === "products" ? hasMoreProducts : hasMoreServices;
   const isLoadingMoreItems =
     viewMode === "products" ? isLoadingProducts : isLoadingServices;
+  const cartItemCount = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    [cartItems],
+  );
 
   useEffect(() => {
     if (!deepLinkListingId || currentView !== "product") return;
@@ -848,6 +657,64 @@ export default function App() {
     scrollToTop();
   };
 
+  const handleAuthLoginSuccess = (
+    role: SessionRole,
+    user: SessionUser,
+    profile: AuthProfileData,
+  ) => {
+    saveSessionUser(user);
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    setUserType(role || "regular");
+    setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
+
+    if (role === "admin") {
+      setCurrentAdminPage("transactions");
+      setCurrentView("adminPanel");
+      return;
+    }
+
+    setCurrentProfileTab("profile");
+    setCurrentView("profile");
+  };
+
+  const handleProfileLogout = () => {
+    clearSessionUser();
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setUserType("regular");
+    setCurrentProfileTab("profile");
+    setCurrentView("auth");
+  };
+
+  const handleAdminLoginSuccess = (user?: SessionUser) => {
+    if (user) {
+      saveSessionUser(user);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      setUserType(user.role);
+    }
+    setCurrentAdminPage("transactions");
+    setCurrentView("adminPanel");
+  };
+
+  const handleAdminLogout = () => {
+    clearSessionUser();
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setUserType("regular");
+    setCurrentAdminPage("transactions");
+    setCurrentView("home");
+    scrollToTop();
+  };
+
+  const handleProfileOpenListing = (listingPublicId: string) => {
+    setSelectedProduct(null);
+    setDeepLinkListingId(listingPublicId);
+    setCurrentView("product");
+    scrollToTop();
+  };
+
   const filteredItems = useMemo(() => {
     const effectiveCategories = new Set<string>();
     if (filters.categories.length > 0) {
@@ -945,155 +812,124 @@ export default function App() {
     </div>
   );
 
+  const appShellHeaderProps: AppPageShellHeaderProps = {
+    isAuthenticated,
+    cartItemCount,
+    onCartClick: handleCartClick,
+    onSearchSubmit: handleSearchSubmit,
+    onLogoClick: handleLogoClick,
+    onProfileClick: handleProfileClick,
+  };
+
+  const renderWithAppShell = (
+    content: ReactNode,
+    options?: { wrapperClassName?: string },
+  ) => (
+    <AppPageShell
+      {...appShellHeaderProps}
+      onFooterNavigate={handleFooterNavigation}
+      wrapperClassName={options?.wrapperClassName}
+    >
+      {content}
+    </AppPageShell>
+  );
+
   if (currentView === "product" && selectedProduct) {
     const cartItem = cartItems.find((item) => item.id === selectedProduct.id);
     const cartQuantity = cartItem ? cartItem.quantity : 0;
     const relatedPool = [...products, ...services];
 
-    return (
-      <div className="min-h-screen app-shell">
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <ProductDetail
+          product={selectedProduct}
+          onBack={() => {
+            setSelectedProduct(null);
+            if (productBackSellerId) {
+              setCurrentView("sellerStore");
+              setDeepLinkSellerId(productBackSellerId);
+              setProductBackSellerId(null);
+              return;
+            }
+            setCurrentView("home");
+          }}
+          onOpenSellerStore={handleOpenSellerStore}
+          onAddToCart={addToCart}
+          onBuyNow={handleBuyNow}
+          onUpdateQuantity={updateQuantity}
+          cartQuantity={cartQuantity}
+          relatedProducts={relatedPool
+            .filter(
+              (item) =>
+                item.id !== selectedProduct.id &&
+                item.category === selectedProduct.category,
+            )
+            .slice(0, 4)}
+          initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
+          onWishlistToggle={handleWishlistToggle}
         />
-        <Suspense fallback={lazyFallback}>
-          <ProductDetail
-            product={selectedProduct}
-            onBack={() => {
-              setSelectedProduct(null);
-              if (productBackSellerId) {
-                setCurrentView("sellerStore");
-                setDeepLinkSellerId(productBackSellerId);
-                setProductBackSellerId(null);
-                return;
-              }
-              setCurrentView("home");
-            }}
-            onOpenSellerStore={handleOpenSellerStore}
-            onAddToCart={addToCart}
-            onBuyNow={handleBuyNow}
-            onUpdateQuantity={updateQuantity}
-            cartQuantity={cartQuantity}
-            relatedProducts={relatedPool
-              .filter(
-                (item) =>
-                  item.id !== selectedProduct.id &&
-                  item.category === selectedProduct.category,
-              )
-              .slice(0, 4)}
-            initialIsWishlisted={wishlistProductIds.has(selectedProduct.id)}
-            onWishlistToggle={handleWishlistToggle}
-          />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </div>
+      </Suspense>,
+      { wrapperClassName: "min-h-screen app-shell" },
     );
   }
 
   if (currentView === "product" && !selectedProduct) {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <div className="page-container py-16 text-center text-gray-600">
-          {isDeepLinkListingLoading
-            ? "Загрузка объявления..."
-            : "Объявление не найдено"}
-        </div>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <div className="page-container py-16 text-center text-gray-600">
+        {isDeepLinkListingLoading
+          ? "Загрузка объявления..."
+          : "Объявление не найдено"}
+      </div>,
     );
   }
 
   if (currentView === "sellerStore" && deepLinkSellerId) {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <SellerStorePage
+          sellerId={deepLinkSellerId}
+          onBack={() => {
+            if (!sellerBackListingId) {
+              handleLogoClick();
+              return;
+            }
+
+            const listingId = sellerBackListingId;
+            const knownListing =
+              [...products, ...services].find((item) => item.id === listingId) ??
+              null;
+
+            setCurrentView("product");
+            setDeepLinkListingId(listingId);
+            setSelectedProduct((prev) => {
+              if (prev?.id === listingId) return prev;
+              return knownListing;
+            });
+            setSellerBackListingId(null);
+            scrollToTop();
+          }}
+          onOpenListing={(product) => {
+            setProductBackSellerId(deepLinkSellerId);
+            setSelectedProduct(product);
+            setDeepLinkListingId(product.id);
+            setCurrentView("product");
+            scrollToTop();
+          }}
+          onAddToCart={addToCart}
+          onUpdateQuantity={updateQuantity}
+          cartItems={cartItems}
+          wishlistProductIds={wishlistProductIds}
+          onWishlistToggle={handleWishlistToggle}
         />
-        <Suspense fallback={lazyFallback}>
-          <SellerStorePage
-            sellerId={deepLinkSellerId}
-            onBack={() => {
-              if (!sellerBackListingId) {
-                handleLogoClick();
-                return;
-              }
-
-              const listingId = sellerBackListingId;
-              const knownListing = [...products, ...services].find((item) => item.id === listingId) ?? null;
-
-              setCurrentView("product");
-              setDeepLinkListingId(listingId);
-              setSelectedProduct((prev) => {
-                if (prev?.id === listingId) return prev;
-                return knownListing;
-              });
-              setSellerBackListingId(null);
-              scrollToTop();
-            }}
-            onOpenListing={(product) => {
-              setProductBackSellerId(deepLinkSellerId);
-              setSelectedProduct(product);
-              setDeepLinkListingId(product.id);
-              setCurrentView("product");
-              scrollToTop();
-            }}
-            onAddToCart={addToCart}
-            onUpdateQuantity={updateQuantity}
-            cartItems={cartItems}
-            wishlistProductIds={wishlistProductIds}
-            onWishlistToggle={handleWishlistToggle}
-          />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+      </Suspense>,
     );
   }
 
   if (currentView === "sellerStore" && !deepLinkSellerId) {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <div className="page-container py-16 text-center text-gray-600">
-          Профиль продавца не найден
-        </div>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <div className="page-container py-16 text-center text-gray-600">
+        Профиль продавца не найден
+      </div>,
     );
   }
 
@@ -1114,77 +950,49 @@ export default function App() {
   }
 
   if (currentView === "checkout") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <CheckoutPage
+          items={cartItems}
+          deliveryType={selectedDeliveryType}
+          onBack={() => setCurrentView("cart")}
+          onRemoveUnavailableItems={(itemIds) => {
+            setCartItems((prev) =>
+              prev.filter((item) => !itemIds.includes(item.id)),
+            );
+          }}
+          onOrderCreated={(result) => {
+            setLastOrderTotal(result.total);
+            setLastOrderIds(result.orderIds);
+            setLastDeliveryType(result.deliveryType);
+          }}
+          onComplete={(result) => {
+            setLastOrderTotal(result.total);
+            setLastOrderIds(result.orderIds);
+            setLastDeliveryType(result.deliveryType);
+            setCartItems([]);
+            setCurrentView("orderComplete");
+          }}
         />
-        <Suspense fallback={lazyFallback}>
-          <CheckoutPage
-            items={cartItems}
-            deliveryType={selectedDeliveryType}
-            onBack={() => setCurrentView("cart")}
-            onRemoveUnavailableItems={(itemIds) => {
-              setCartItems((prev) =>
-                prev.filter((item) => !itemIds.includes(item.id)),
-              );
-            }}
-            onOrderCreated={(result) => {
-              setLastOrderTotal(result.total);
-              setLastOrderIds(result.orderIds);
-              setLastDeliveryType(result.deliveryType);
-            }}
-            onComplete={(result) => {
-              setLastOrderTotal(result.total);
-              setLastOrderIds(result.orderIds);
-              setLastDeliveryType(result.deliveryType);
-              setCartItems([]);
-              setCurrentView("orderComplete");
-            }}
-          />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+      </Suspense>,
     );
   }
 
   if (currentView === "orderComplete") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <OrderCompletePage
+          orderTotal={lastOrderTotal}
+          orderIds={lastOrderIds}
+          deliveryType={lastDeliveryType}
+          onViewHistory={() => {
+            setCurrentProfileTab("orders");
+            setCurrentView("profile");
+            scrollToTop();
+          }}
+          onBackToHome={handleLogoClick}
         />
-        <Suspense fallback={lazyFallback}>
-          <OrderCompletePage
-            orderTotal={lastOrderTotal}
-            orderIds={lastOrderIds}
-            deliveryType={lastDeliveryType}
-            onViewHistory={() => {
-              setCurrentProfileTab("orders");
-              setCurrentView("profile");
-              scrollToTop();
-            }}
-            onBackToHome={handleLogoClick}
-          />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+      </Suspense>,
     );
   }
 
@@ -1197,112 +1005,42 @@ export default function App() {
   }
 
   if (currentView === "about") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <Suspense fallback={lazyFallback}>
-          <AboutPage onBack={handleLogoClick} />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <AboutPage onBack={handleLogoClick} />
+      </Suspense>,
     );
   }
 
   if (currentView === "partnership") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <Suspense fallback={lazyFallback}>
-          <PartnershipPage onBack={handleLogoClick} />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <PartnershipPage onBack={handleLogoClick} />
+      </Suspense>,
     );
   }
 
   if (currentView === "faq") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <Suspense fallback={lazyFallback}>
-          <FAQPage onBack={handleLogoClick} />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <FAQPage onBack={handleLogoClick} />
+      </Suspense>,
     );
   }
 
   if (currentView === "privacy") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <Suspense fallback={lazyFallback}>
-          <PrivacyPage onBack={handleLogoClick} />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <PrivacyPage onBack={handleLogoClick} />
+      </Suspense>,
     );
   }
 
   if (currentView === "terms") {
-    return (
-      <>
-        <Header
-          isAuthenticated={isAuthenticated}
-          cartItemCount={cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          )}
-          onCartClick={handleCartClick}
-          onSearchSubmit={handleSearchSubmit}
-          onLogoClick={handleLogoClick}
-          onProfileClick={handleProfileClick}
-        />
-        <Suspense fallback={lazyFallback}>
-          <TermsPage onBack={handleLogoClick} />
-        </Suspense>
-        <Footer onNavigate={handleFooterNavigation} />
-      </>
+    return renderWithAppShell(
+      <Suspense fallback={lazyFallback}>
+        <TermsPage onBack={handleLogoClick} />
+      </Suspense>,
     );
   }
 
@@ -1312,25 +1050,7 @@ export default function App() {
         <AuthPage
           onBack={handleLogoClick}
           onPartnershipClick={() => setCurrentView("partnership")}
-          onLoginSuccess={(role, user, profile) => {
-            if (!user) return;
-            saveSessionUser(user);
-            setCurrentUser(user);
-            setIsAuthenticated(true);
-            setUserType(role || "regular");
-            setWishlistProductIds(
-              new Set(profile.wishlist.map((item) => item.id)),
-            );
-
-            if (role === "admin") {
-              setCurrentAdminPage("transactions");
-              setCurrentView("adminPanel");
-              return;
-            }
-
-            setCurrentProfileTab("profile");
-            setCurrentView("profile");
-          }}
+          onLoginSuccess={handleAuthLoginSuccess}
         />
       </Suspense>
     );
@@ -1341,24 +1061,12 @@ export default function App() {
       <Suspense fallback={lazyFallback}>
         <ProfilePage
           onBack={handleLogoClick}
-          onLogout={() => {
-            clearSessionUser();
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-            setUserType("regular");
-            setCurrentProfileTab("profile");
-            setCurrentView("auth");
-          }}
+          onLogout={handleProfileLogout}
           userType={userType === "partner" ? "partner" : "regular"}
           initialTab={currentProfileTab}
           onTabChange={setCurrentProfileTab}
           onWishlistUpdate={handleWishlistToggle}
-          onOpenListing={(listingPublicId) => {
-            setSelectedProduct(null);
-            setDeepLinkListingId(listingPublicId);
-            setCurrentView("product");
-            scrollToTop();
-          }}
+          onOpenListing={handleProfileOpenListing}
         />
       </Suspense>
     );
@@ -1369,16 +1077,7 @@ export default function App() {
       <Suspense fallback={lazyFallback}>
         <AdminLogin
           onBack={handleLogoClick}
-          onLoginSuccess={(user) => {
-            if (user) {
-              saveSessionUser(user);
-              setCurrentUser(user);
-              setIsAuthenticated(true);
-              setUserType(user.role);
-            }
-            setCurrentAdminPage("transactions");
-            setCurrentView("adminPanel");
-          }}
+          onLoginSuccess={handleAdminLoginSuccess}
         />
       </Suspense>
     );
@@ -1396,109 +1095,41 @@ export default function App() {
           }}
           userName={currentUser?.name}
           userEmail={currentUser?.email}
-          onLogout={() => {
-            clearSessionUser();
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-            setUserType("regular");
-            setCurrentAdminPage("transactions");
-            setCurrentView("home");
-            scrollToTop();
-          }}
+          onLogout={handleAdminLogout}
         />
       </Suspense>
     );
   }
 
-  return (
-    <div className="min-h-screen app-shell">
-      <Header
-        isAuthenticated={isAuthenticated}
-        cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-        onCartClick={handleCartClick}
-        onSearchSubmit={handleSearchSubmit}
-        onLogoClick={handleLogoClick}
-        onProfileClick={handleProfileClick}
-      />
+  const handleCatalogFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    if (newFilters.searchQuery === "") {
+      setIsSearchActive(false);
+    }
+  };
 
-      {!isSearchActive && <Hero onBannerClick={handleBannerClick} />}
-
-      <div className="page-container pb-14 sm:pb-16">
-        <div className="lg:hidden mb-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="btn-primary flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold sm:text-base">
-                <SlidersHorizontal className="w-5 h-5" />
-                <span>Фильтры</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-full sm:w-96 overflow-y-auto"
-            >
-              <SheetTitle className="sr-only">Фильтры товаров</SheetTitle>
-              <SheetDescription className="sr-only">
-                Фильтрация товаров по категориям, цене и рейтингу
-              </SheetDescription>
-              <FilterPanel
-                filters={filters}
-                onFilterChange={(newFilters) => {
-                  setFilters(newFilters);
-                  if (newFilters.searchQuery === "") {
-                    setIsSearchActive(false);
-                  }
-                }}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-                categories={currentCategories}
-                onApplyFilters={() => {
-                  const closeButton = document.querySelector(
-                    '[data-slot="sheet-close"]',
-                  ) as HTMLButtonElement | null;
-                  closeButton?.click();
-                }}
-              />
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <div className="mt-6 flex gap-6 lg:mt-8 lg:items-start lg:gap-12 xl:gap-14">
-          <aside className="hidden w-80 flex-shrink-0 self-start lg:block">
-            <FilterPanel
-              filters={filters}
-              onFilterChange={(newFilters) => {
-                setFilters(newFilters);
-                if (newFilters.searchQuery === "") {
-                  setIsSearchActive(false);
-                }
-              }}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              categories={currentCategories}
-            />
-          </aside>
-
-          <main className="min-w-0 flex-1">
-            <ProductGrid
-              products={sortedItems}
-              hasMore={hasMoreItems}
-              isLoadingMore={isLoadingMoreItems}
-              onLoadMore={handleLoadMoreCatalogItems}
-              onProductClick={handleProductClick}
-              onAddToCart={addToCart}
-              onUpdateQuantity={updateQuantity}
-              cartItems={cartItems}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              viewMode={viewMode}
-              wishlistProductIds={wishlistProductIds}
-              onWishlistToggle={handleWishlistToggle}
-            />
-          </main>
-        </div>
-      </div>
-
-      <Footer onNavigate={handleFooterNavigation} />
-    </div>
+  return renderWithAppShell(
+    <AppCatalogView
+      isSearchActive={isSearchActive}
+      filters={filters}
+      viewMode={viewMode}
+      categories={currentCategories}
+      sortedItems={sortedItems}
+      hasMoreItems={hasMoreItems}
+      isLoadingMoreItems={isLoadingMoreItems}
+      cartItems={cartItems}
+      sortBy={sortBy}
+      wishlistProductIds={wishlistProductIds}
+      onBannerClick={handleBannerClick}
+      onFilterChange={handleCatalogFilterChange}
+      onViewModeChange={setViewMode}
+      onLoadMoreCatalogItems={handleLoadMoreCatalogItems}
+      onProductClick={handleProductClick}
+      onAddToCart={addToCart}
+      onUpdateQuantity={updateQuantity}
+      onSortChange={setSortBy}
+      onWishlistToggle={handleWishlistToggle}
+    />,
+    { wrapperClassName: "min-h-screen app-shell" },
   );
 }

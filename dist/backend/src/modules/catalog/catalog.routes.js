@@ -4,6 +4,8 @@ exports.catalogRouter = void 0;
 const express_1 = require("express");
 const prisma_1 = require("../../lib/prisma");
 const session_1 = require("../../lib/session");
+const anti_circumvention_1 = require("../moderation/anti-circumvention");
+const circumvention_enforcement_1 = require("../moderation/circumvention-enforcement");
 const format_1 = require("../../utils/format");
 const catalogRouter = (0, express_1.Router)();
 exports.catalogRouter = catalogRouter;
@@ -955,6 +957,31 @@ catalogRouter.post("/listings/:publicId/questions", async (req, res) => {
         });
         if (!listing) {
             res.status(404).json({ error: "Listing not found" });
+            return;
+        }
+        const circumventionSignals = (0, anti_circumvention_1.detectCircumventionSignals)(questionText);
+        if (circumventionSignals.length > 0) {
+            const enforcement = await (0, circumvention_enforcement_1.enforceCircumventionViolation)({
+                req,
+                actorUserId: session.user.id,
+                actorRole: session.user.role,
+                channel: "buyer_question",
+                text: questionText,
+                signals: circumventionSignals,
+                listingPublicId: listing.public_id,
+            });
+            if (enforcement.blocked) {
+                const blockedUntil = enforcement.blockedUntil
+                    ? ` до ${enforcement.blockedUntil.toISOString()}`
+                    : "";
+                res.status(403).json({
+                    error: `Аккаунт временно заблокирован${blockedUntil} за повторные попытки обхода платформы.`,
+                });
+                return;
+            }
+            res.status(400).json({
+                error: "Запрещено передавать контакты и уводить общение вне платформы в вопросах к товару. Нарушение зафиксировано.",
+            });
             return;
         }
         const created = await prisma_1.prisma.listingQuestion.create({

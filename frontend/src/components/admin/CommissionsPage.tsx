@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit, Users } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
 import { notifyError, notifyInfo } from "../ui/notifications";

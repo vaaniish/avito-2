@@ -28,6 +28,7 @@ export function initYandexMetrika(): void {
     function (...args: any[]) {
       (window.ym!.a = window.ym!.a || []).push(args);
     };
+  if (!window.ym) return;
   window.ym.l = Date.now();
 
   const script = document.createElement("script");
@@ -58,4 +59,3 @@ export function trackListingViewInMetrika(params: {
     source: "product_detail",
   });
 }
-

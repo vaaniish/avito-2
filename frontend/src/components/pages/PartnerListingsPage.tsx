@@ -3,6 +3,7 @@ import { ArrowLeft, Edit2, Eye, EyeOff, Plus, Search, Trash2, Upload, X } from "
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
 import { ConfirmDialog, ToastViewport, type AppNotice } from "../ui/feedback";
+import type { Address } from "./profile.models";
 
 type ListingAttribute = { key: string; value: string };
 type ListingType = "products" | "services";
@@ -42,12 +43,7 @@ type CatalogCategoryDto = {
   subcategories: Array<{ id: string; name: string; items: string[] }>;
 };
 
-type ProfileAddressDto = {
-  id: string;
-  fullAddress: string;
-  city?: string | null;
-  isDefault?: boolean;
-};
+type ProfileAddressDto = Pick<Address, "id" | "fullAddress" | "city" | "isDefault">;
 type CategoryGuessDto = { category: string | null; confidence: number; source?: "listing" | "catalog" };
 
 type PartnerListingsPageProps = {

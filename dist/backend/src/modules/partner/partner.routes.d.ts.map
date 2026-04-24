@@ -1,1 +1,1 @@
-{"version":3,"file":"partner.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/partner/partner.routes.ts"],"names":[],"mappings":"AA4BA,QAAA,MAAM,aAAa,4CAAW,CAAC;AAkuD/B,OAAO,EAAE,aAAa,EAAE,CAAC"}
+{"version":3,"file":"partner.routes.d.ts","sourceRoot":"","sources":["../../../../../backend/src/modules/partner/partner.routes.ts"],"names":[],"mappings":"AAqCA,QAAA,MAAM,aAAa,4CAAW,CAAC;AA0rE/B,OAAO,EAAE,aAAa,EAAE,CAAC"}

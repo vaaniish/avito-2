@@ -25,6 +25,8 @@ async function main(): Promise<void> {
   await prisma.orderStatusHistory.deleteMany();
   await prisma.complaint.deleteMany();
   await prisma.kycRequest.deleteMany();
+  await prisma.policyAcceptance.deleteMany();
+  await prisma.platformPolicy.deleteMany();
   await prisma.platformTransaction.deleteMany();
   await prisma.marketOrderItem.deleteMany();
   await prisma.marketOrder.deleteMany();
@@ -39,6 +41,7 @@ async function main(): Promise<void> {
   await prisma.catalogCategory.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.partnershipRequest.deleteMany();
+  await prisma.sellerPayoutProfile.deleteMany();
   await prisma.sellerProfile.deleteMany();
   await prisma.commissionTier.deleteMany();
   await prisma.userAddress.deleteMany();
@@ -93,6 +96,53 @@ async function main(): Promise<void> {
       u.id,
     ]),
   );
+
+  await prisma.platformPolicy.createMany({
+    data: [
+      {
+        public_id: "POL-CHECKOUT-v1",
+        scope: "CHECKOUT",
+        version: "1.0",
+        title: "Правила оформления и безопасной сделки",
+        content_url: "/terms",
+        is_active: true,
+      },
+      {
+        public_id: "POL-PARTNERSHIP-v1",
+        scope: "PARTNERSHIP",
+        version: "1.0",
+        title: "Правила партнерства и безопасности",
+        content_url: "/terms",
+        is_active: true,
+      },
+    ],
+  });
+
+  const policyMap = new Map(
+    (
+      await prisma.platformPolicy.findMany({ select: { id: true, public_id: true } })
+    ).map((policy) => [policy.public_id, policy.id]),
+  );
+
+  await prisma.policyAcceptance.createMany({
+    data: [
+      ["POL-CHECKOUT-v1", "BUY-001"],
+      ["POL-CHECKOUT-v1", "BUY-002"],
+      ["POL-CHECKOUT-v1", "BUY-003"],
+      ["POL-CHECKOUT-v1", "BUY-004"],
+      ["POL-CHECKOUT-v1", "SLR-001"],
+      ["POL-CHECKOUT-v1", "SLR-002"],
+      ["POL-CHECKOUT-v1", "SLR-003"],
+      ["POL-CHECKOUT-v1", "SLR-004"],
+      ["POL-PARTNERSHIP-v1", "BUY-001"],
+      ["POL-PARTNERSHIP-v1", "BUY-002"],
+      ["POL-PARTNERSHIP-v1", "BUY-003"],
+      ["POL-PARTNERSHIP-v1", "BUY-004"],
+    ].map((row: any) => ({
+      policy_id: getRequired(policyMap, row[0], "Policy"),
+      user_id: getRequired(userMap, row[1], "User"),
+    })),
+  });
 
   await prisma.notification.createMany({
     data: [
@@ -181,6 +231,31 @@ async function main(): Promise<void> {
       is_verified: s[1],
       average_response_minutes: s[2],
       commission_tier_id: getRequired(tierMap, s[3], "Tier"),
+    })),
+  });
+
+  await prisma.sellerPayoutProfile.createMany({
+    data: [
+      ["PAY-001", "SLR-001", "COMPANY", "ООО Тех Поинт", "7701234567", "40702810900000000001", "044525225", "30101810400000000225", "ПАО Сбербанк", "ООО Тех Поинт", "VERIFIED"],
+      ["PAY-002", "SLR-002", "IP", "ИП Мобайл Эксперт", "165012345678", "40702810900000000002", "044525225", "30101810400000000225", "ПАО Сбербанк", "ИП Мобайл Эксперт", "VERIFIED"],
+      ["PAY-003", "SLR-003", "COMPANY", "ООО Домашний Комфорт", "6678123456", "40702810900000000003", "044525225", "30101810400000000225", "ПАО Сбербанк", "ООО Домашний Комфорт", "PENDING"],
+      ["PAY-004", "SLR-004", "COMPANY", "ООО Сервис Хаб", "2310123456", "40702810900000000004", "044525225", "30101810400000000225", "ПАО Сбербанк", "ООО Сервис Хаб", "PENDING"],
+      ["PAY-005", "SLR-005", "IP", "ИП КвикФикс Про", "770512345678", "40702810900000000005", "044525225", "30101810400000000225", "ПАО Сбербанк", "ИП КвикФикс Про", "REJECTED"],
+    ].map((p: any) => ({
+      public_id: p[0],
+      seller_id: getRequired(userMap, p[1], "User"),
+      legal_type: p[2],
+      legal_name: p[3],
+      tax_id: p[4],
+      bank_account: p[5],
+      bank_bic: p[6],
+      correspondent_account: p[7],
+      bank_name: p[8],
+      recipient_name: p[9],
+      status: p[10],
+      verified_at: p[10] === "VERIFIED" ? daysAgo(2) : null,
+      rejection_reason:
+        p[10] === "REJECTED" ? "Не прошла проверка реквизитов" : null,
     })),
   });
 

@@ -1,22 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import { apiGet } from "../../lib/api";
 import { matchesSearch } from "../../lib/search";
 import { notifyError } from "../ui/notifications";
+import type {
+  OrderStatusValue,
+  PaymentProviderValue,
+  TransactionStatusValue,
+} from "../checkout.models";
+
+type AdminOrderStatus = Lowercase<OrderStatusValue>;
+type AdminPaymentProvider = Lowercase<PaymentProviderValue>;
+type AdminTransactionStatus = Lowercase<TransactionStatusValue>;
 
 type TransactionStatus =
   | "all"
-  | "pending"
-  | "held"
-  | "success"
-  | "failed"
-  | "cancelled"
-  | "refunded";
+  | AdminTransactionStatus;
 
 type Transaction = {
   id: string;
   orderId: string;
-  orderStatus: string;
+  orderStatus: AdminOrderStatus;
   buyerId: string;
   buyerName: string;
   buyerEmail: string;
@@ -33,8 +37,8 @@ type Transaction = {
   commission: number;
   commissionRate: number;
   sellerPayout: number;
-  status: "pending" | "held" | "success" | "failed" | "cancelled" | "refunded";
-  paymentProvider: string;
+  status: AdminTransactionStatus;
+  paymentProvider: AdminPaymentProvider;
   paymentIntentId: string;
   createdAt: string;
 };

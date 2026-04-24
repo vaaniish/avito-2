@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { apiPost, type SessionUser } from "../../lib/api";
+import { apiPost, saveSessionToken, type SessionUser } from "../../lib/api";
 import { notifyError } from "../ui/notifications";
 
 interface AdminLoginProps {
@@ -10,26 +10,36 @@ interface AdminLoginProps {
 
 type AuthResponse = {
   user: SessionUser;
+  sessionToken?: string;
 };
 
 export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
+    setSubmitError(null);
 
     try {
       const response = await apiPost<AuthResponse>("/auth/login", formData);
+      if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
+        saveSessionToken(response.sessionToken);
+      }
       if (response.user.role !== "admin") {
-        notifyError("Доступ запрещен. Нужны права администратора");
+        const message = "Доступ запрещен. Нужны права администратора";
+        setSubmitError(message);
+        notifyError(message);
         return;
       }
       onLoginSuccess(response.user);
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : "Ошибка входа");
+      const message = error instanceof Error ? error.message : "Ошибка входа";
+      setSubmitError(message);
+      notifyError(message);
     } finally {
       setIsLoading(false);
     }
@@ -43,13 +53,18 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
         </button>
 
         <h1 className="text-2xl font-bold mb-2">Вход в админ-панель</h1>
-        <p className="text-sm text-gray-600 mb-6">Используйте admin@ecomm.ru / admin123</p>
+        <p className="text-sm text-gray-600 mb-6">
+          Используйте admin@ecomm.local / admin123
+        </p>
 
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
           <input
             type="email"
             value={formData.email}
-            onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+            onChange={(event) => {
+              setSubmitError(null);
+              setFormData({ ...formData, email: event.target.value });
+            }}
             placeholder="Email"
             className="field-control"
             required
@@ -59,7 +74,10 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
             <input
               type={showPassword ? "text" : "password"}
               value={formData.password}
-              onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+              onChange={(event) => {
+                setSubmitError(null);
+                setFormData({ ...formData, password: event.target.value });
+              }}
               placeholder="Пароль"
               className="field-control pr-12"
               required
@@ -80,6 +98,12 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
           >
             {isLoading ? "Входим..." : "Войти"}
           </button>
+
+          {submitError && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {submitError}
+            </p>
+          )}
         </form>
       </div>
     </div>

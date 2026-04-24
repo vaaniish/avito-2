@@ -4,18 +4,24 @@ exports.getSessionUser = getSessionUser;
 exports.requireRole = requireRole;
 exports.requireAnyRole = requireAnyRole;
 const prisma_1 = require("./prisma");
-function parseUserId(raw) {
-    if (!raw)
+const session_token_1 = require("./session-token");
+function parseBearerToken(authorization) {
+    if (!authorization)
         return null;
-    const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed <= 0)
+    const normalized = authorization.trim();
+    if (!normalized)
         return null;
-    return parsed;
+    const parts = normalized.split(/\s+/);
+    if (parts.length !== 2)
+        return null;
+    if (parts[0].toLowerCase() !== "bearer")
+        return null;
+    const token = parts[1]?.trim();
+    return token || null;
 }
 async function getSessionUser(req) {
-    const fromHeader = parseUserId(req.header("x-user-id") ?? undefined);
-    const fromQuery = parseUserId(typeof req.query.user_id === "string" ? req.query.user_id : undefined);
-    const resolvedId = fromHeader ?? fromQuery;
+    const bearerToken = parseBearerToken(req.header("authorization") ?? undefined);
+    const resolvedId = bearerToken ? (0, session_token_1.verifySessionToken)(bearerToken) : null;
     if (!resolvedId) {
         return null;
     }

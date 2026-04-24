@@ -9,6 +9,7 @@ export type SessionUser = {
 };
 
 const SESSION_STORAGE_KEY = "ecomm_session_user";
+const SESSION_TOKEN_STORAGE_KEY = "ecomm_session_token";
 const UTF8_DECODER = new TextDecoder("utf-8");
 
 const CP1251_SPECIAL_CHAR_TO_BYTE: Record<number, number> = {
@@ -154,9 +155,23 @@ function normalizePayload(value: unknown): unknown {
   return value;
 }
 
-export const API_BASE =
-  import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/+$/, "") ||
+type ImportMetaEnvLike = Record<string, unknown>;
+
+function getViteEnvValue(key: string): string | undefined {
+  const metaEnv = (import.meta as ImportMeta & { env?: ImportMetaEnvLike }).env;
+  const raw = metaEnv?.[key];
+  if (typeof raw !== "string") return undefined;
+  const normalized = raw.trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+const API_BASE =
+  getViteEnvValue("VITE_API_BASE_URL")?.replace(/\/+$/, "") ||
   "http://localhost:3001/api";
+const API_REQUEST_TIMEOUT_MS = Math.max(
+  1000,
+  Number(getViteEnvValue("VITE_API_TIMEOUT_MS") ?? "12000") || 12000,
+);
 
 export function getSessionUser(): SessionUser | null {
   const raw = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -171,12 +186,26 @@ export function getSessionUser(): SessionUser | null {
   }
 }
 
+export function getSessionToken(): string | null {
+  const raw = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY);
+  if (!raw) return null;
+  const token = raw.trim();
+  return token.length > 0 ? token : null;
+}
+
 export function saveSessionUser(user: SessionUser): void {
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
 }
 
+export function saveSessionToken(token: string): void {
+  const normalized = token.trim();
+  if (!normalized) return;
+  localStorage.setItem(SESSION_TOKEN_STORAGE_KEY, normalized);
+}
+
 export function clearSessionUser(): void {
   localStorage.removeItem(SESSION_STORAGE_KEY);
+  localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
 }
 
 type ApiOptions = {
@@ -187,22 +216,58 @@ type ApiOptions = {
 };
 
 async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
-  const session = getSessionUser();
+  const sessionToken = getSessionToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers ?? {}),
   };
 
-  if (session?.id) {
-    headers["x-user-id"] = String(session.id);
+  if (sessionToken) {
+    headers.Authorization = `Bearer ${sessionToken}`;
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: options.method ?? "GET",
-    headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    signal: options.signal,
-  });
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, API_REQUEST_TIMEOUT_MS);
+  const abortByCaller = () => {
+    controller.abort();
+  };
+
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort();
+    } else {
+      options.signal.addEventListener("abort", abortByCaller, { once: true });
+    }
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method: options.method ?? "GET",
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    window.clearTimeout(timeoutId);
+    options.signal?.removeEventListener("abort", abortByCaller);
+    if (timedOut) {
+      throw new Error(
+        `API не ответило за ${API_REQUEST_TIMEOUT_MS}мс (${API_BASE}). Проверьте backend и сеть.`,
+      );
+    }
+    const message =
+      error instanceof Error && error.message
+        ? `Не удалось подключиться к API (${API_BASE}). ${error.message}`
+        : `Не удалось подключиться к API (${API_BASE})`;
+    throw new Error(message);
+  }
+  window.clearTimeout(timeoutId);
+  options.signal?.removeEventListener("abort", abortByCaller);
 
   const text = await response.text();
   let payload: unknown = null;
@@ -216,17 +281,27 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
   payload = normalizePayload(payload);
 
   if (!response.ok) {
-    if (response.status === 401) {
+    const isAuthRoute =
+      path.startsWith("/auth/login") ||
+      path.startsWith("/auth/signup") ||
+      path.startsWith("/auth/me");
+    if (response.status === 401 && !isAuthRoute) {
       clearSessionUser();
-      throw new Error("Сессия истекла. Войдите снова.");
     }
 
-    const message =
+    let message =
       typeof payload === "object" && payload !== null && "error" in payload
         ? String((payload as { error?: unknown }).error ?? "Ошибка запроса")
         : typeof payload === "string" && payload.trim().length > 0
           ? payload
           : "Ошибка запроса";
+    if (
+      response.status === 401 &&
+      !isAuthRoute &&
+      (!message || message === "Ошибка запроса")
+    ) {
+      message = "Сессия истекла. Войдите снова.";
+    }
     throw new Error(message);
   }
 

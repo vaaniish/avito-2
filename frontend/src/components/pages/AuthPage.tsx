@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { apiPost, type SessionRole, type SessionUser } from "../../lib/api";
+import {
+  apiPost,
+  saveSessionToken,
+  type SessionRole,
+  type SessionUser,
+} from "../../lib/api";
 import { notifyError, notifySuccess } from "../ui/notifications";
 
 interface AuthPageProps {
@@ -15,6 +20,7 @@ interface AuthPageProps {
 
 type AuthResponse = {
   user: SessionUser;
+  sessionToken?: string;
   profile: {
     wishlist: Array<{ id: string }>;
   };
@@ -24,6 +30,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -36,6 +43,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
+    setSubmitError(null);
 
     try {
       if (isSignUp) {
@@ -45,18 +53,22 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           email: formData.email.trim(),
           password: formData.password,
         });
+        if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
+          saveSessionToken(response.sessionToken);
+        }
 
         notifySuccess("Регистрация успешна");
         onLoginSuccess?.(response.user.role, response.user, response.profile);
-        onBack();
       } else {
         const response = await apiPost<AuthResponse>("/auth/login", {
           email: formData.email.trim(),
           password: formData.password,
         });
+        if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
+          saveSessionToken(response.sessionToken);
+        }
 
         onLoginSuccess?.(response.user.role, response.user, response.profile);
-        onBack();
       }
 
       setFormData({
@@ -68,7 +80,10 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
         rememberMe: false,
       });
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : "Ошибка авторизации");
+      const message =
+        error instanceof Error ? error.message : "Ошибка авторизации";
+      setSubmitError(message);
+      notifyError(message);
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +126,10 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               type="text"
               required
               value={formData.name}
-              onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+              onChange={(event) => {
+                setSubmitError(null);
+                setFormData({ ...formData, name: event.target.value });
+              }}
               placeholder="Ваше имя"
               className="field-control"
             />
@@ -122,7 +140,10 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               type="text"
               required
               value={formData.username}
-              onChange={(event) => setFormData({ ...formData, username: event.target.value })}
+              onChange={(event) => {
+                setSubmitError(null);
+                setFormData({ ...formData, username: event.target.value });
+              }}
               placeholder="Имя пользователя"
               className="field-control"
             />
@@ -132,7 +153,10 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
             type="email"
             required
             value={formData.email}
-            onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+            onChange={(event) => {
+              setSubmitError(null);
+              setFormData({ ...formData, email: event.target.value });
+            }}
             placeholder="Email"
             className="field-control"
           />
@@ -142,7 +166,10 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               type={showPassword ? "text" : "password"}
               required
               value={formData.password}
-              onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+              onChange={(event) => {
+                setSubmitError(null);
+                setFormData({ ...formData, password: event.target.value });
+              }}
               placeholder="Пароль"
               className="field-control pr-12"
             />
@@ -162,6 +189,12 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           >
             {isLoading ? "Подождите..." : isSignUp ? "Зарегистрироваться" : "Войти"}
           </button>
+
+          {submitError && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {submitError}
+            </p>
+          )}
         </form>
 
         {!isSignUp && (
