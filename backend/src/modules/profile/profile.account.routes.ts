@@ -9,6 +9,7 @@ import { prisma } from "../../lib/prisma";
 import { requireAnyRole } from "../../lib/session";
 import { toClientCondition } from "../../utils/format";
 import { extractPrimaryCityFromAddresses } from "./profile.shared";
+import { toNotificationDto } from "../notifications/notification.service";
 import {
   acceptPolicyForUser,
   getRequestMetaFromExpressLike,
@@ -194,20 +195,77 @@ profileAccountRouter.get(
       });
 
       return res.json({
-        notifications: notifications.map((n) => ({
-          id: n.id,
-          type: n.type,
-          message: n.message,
-          url: n.target_url,
-          isRead: n.is_read,
-          date: n.created_at,
-        })),
+        notifications: notifications.map(toNotificationDto),
         unreadCount,
       });
     } catch (error) {
       console.error("Error fetching notifications:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
+  },
+);
+
+profileAccountRouter.get(
+  "/notifications/stream",
+  async (req: Request, res: Response) => {
+    const session = await requireAnyRole(req, [
+      ROLE_BUYER,
+      ROLE_SELLER,
+      ROLE_ADMIN,
+    ]);
+    if (!session.ok) {
+      res.status(session.status).json({ error: session.message });
+      return;
+    }
+
+    const initialLastId = Number(req.query.after ?? 0);
+    let lastId = Number.isFinite(initialLastId) && initialLastId > 0 ? initialLastId : 0;
+    let closed = false;
+
+    res.status(200);
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+
+    const sendEvent = (event: string, data: unknown) => {
+      if (closed) return;
+      res.write(`event: ${event}\n`);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    const poll = async () => {
+      try {
+        const notifications = await prisma.notification.findMany({
+          where: {
+            user_id: session.user.id,
+            id: { gt: lastId },
+          },
+          orderBy: { id: "asc" },
+          take: 20,
+        });
+
+        for (const notification of notifications) {
+          lastId = Math.max(lastId, notification.id);
+          sendEvent("notification", toNotificationDto(notification));
+        }
+      } catch (error) {
+        console.error("Error streaming notifications:", error);
+        sendEvent("error", { message: "Notification stream error" });
+      }
+    };
+
+    sendEvent("ready", { ok: true });
+    void poll();
+    const pollTimer = setInterval(() => void poll(), 2500);
+    const heartbeatTimer = setInterval(() => sendEvent("heartbeat", { ok: true }), 25000);
+
+    req.on("close", () => {
+      closed = true;
+      clearInterval(pollTimer);
+      clearInterval(heartbeatTimer);
+      res.end();
+    });
   },
 );
 
@@ -232,6 +290,31 @@ profileAccountRouter.patch(
       return res.json({ success: true });
     } catch (error) {
       console.error("Error marking notifications as read:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+profileAccountRouter.delete(
+  "/notifications",
+  async (req: Request, res: Response) => {
+    try {
+      const session = await requireAnyRole(req, [
+        ROLE_BUYER,
+        ROLE_SELLER,
+        ROLE_ADMIN,
+      ]);
+      if (!session.ok) {
+        return res.status(session.status).json({ error: session.message });
+      }
+
+      await prisma.notification.deleteMany({
+        where: { user_id: session.user.id },
+      });
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting notifications:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
   },

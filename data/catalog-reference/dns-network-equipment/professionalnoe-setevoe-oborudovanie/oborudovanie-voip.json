@@ -1,0 +1,2270 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Профессиональное сетевое оборудование",
+  "itemName": "Оборудование VoIP",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9ec3a16404e77/oborudovanie-voip/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:23.250Z",
+  "status": "done",
+  "totalPages": 6,
+  "totalProducts": 87,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/ab011eac08411b80/telefon-voip-yealink-sip-t30-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T30 черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей]",
+      "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "ab011eac08411b80",
+      "cardText": "Телефон VoIP Yealink SIP-T30 черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей]4.82 |295 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c79ff685a8a92ff1/telefon-voip-yealink-sip-t31-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T31 черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "c79ff685a8a92ff1",
+      "cardText": "Телефон VoIP Yealink SIP-T31 черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей]4.87 |116 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/732f6238a8aa2ff1/telefon-voip-yealink-sip-t31p-black-keyboard-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T31P (Black Keyboard) черный [проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "732f6238a8aa2ff1",
+      "cardText": "Телефон VoIP Yealink SIP-T31P (Black Keyboard) черный [проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]4.96 |48 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/14f8b1dfd0fe2ff4/telefon-voip-yealink-w73p-cernyj/",
+      "title": "Телефон VoIP Yealink W73P черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "14f8b1dfd0fe2ff4",
+      "cardText": "Телефон VoIP Yealink W73P черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]4.88 |98 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c945b002a8a72ff1/telefon-voip-yealink-sip-t30p-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T30P черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "c945b002a8a72ff1",
+      "cardText": "Телефон VoIP Yealink SIP-T30P черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]4.87 |93 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a520a257af448a5a/telefon-voip-grandstream-gxp1610-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP1610 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]",
+      "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "a520a257af448a5a",
+      "cardText": "Телефон VoIP Grandstream GXP1610 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]4.83 |131 отзыв 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b9498f6808481b80/telefon-voip-yealink-sip-t31g-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T31G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "b9498f6808481b80",
+      "cardText": "Телефон VoIP Yealink SIP-T31G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]4.93 |27 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df530adcc8a5a/telefon-voip-grandstream-gxp1620-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP1620 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]",
+      "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "f56df530adcc8a5a",
+      "cardText": "Телефон VoIP Grandstream GXP1620 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]4.8 |52 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cfb617c2a8aa2ff1/telefon-voip-yealink-sip-t31p-without-psu-black-keyboard-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T31P (without PSU-Black Keyboard) черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "cfb617c2a8aa2ff1",
+      "cardText": "Телефон VoIP Yealink SIP-T31P (without PSU-Black Keyboard) черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ]4.77 |30 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f18195f508481b80/telefon-voip-yealink-sip-t33g-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T33G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "f18195f508481b80",
+      "cardText": "Телефон VoIP Yealink SIP-T33G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]4.86 |22 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e2676f02374b3332/telefon-voip-fanvil-x1sp-cernyj/",
+      "title": "Телефон VoIP Fanvil X1SP черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "e2676f02374b3332",
+      "cardText": "Телефон VoIP Fanvil X1SP черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.83 |47 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0fb21e1563e8ed20/bazovaa-stancia-yealink-w70b-seryj/",
+      "title": "Базовая станция Yealink W70B серый [беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+      "specsText": "беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+      "bracketGroups": [
+        "беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "0fb21e1563e8ed20",
+      "cardText": "Базовая станция Yealink W70B серый [беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ]4.93 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1de7a568d022a3b1/telefon-voip-fanvil-x303-cernyj/",
+      "title": "Телефон VoIP Fanvil X303 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "1de7a568d022a3b1",
+      "cardText": "Телефон VoIP Fanvil X303 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей]4.86 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1b97da4238361b80/telefon-voip-yealink-sip-t43u-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T43U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "1b97da4238361b80",
+      "cardText": "Телефон VoIP Yealink SIP-T43U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]4.81 |26 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b14385be1877f7cb/telefon-voip-fanvil-x301g-cernyj/",
+      "title": "Телефон VoIP Fanvil X301G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "b14385be1877f7cb",
+      "cardText": "Телефон VoIP Fanvil X301G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.78 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1003aa4dcfb93332/telefon-voip-fanvil-x210-cernyj/",
+      "title": "Телефон VoIP Fanvil X210 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "1003aa4dcfb93332",
+      "cardText": "Телефон VoIP Fanvil X210 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]4.91 |11 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df51cadcc8a5a/telefon-voip-grandstream-gxp-1615-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP-1615 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "f56df51cadcc8a5a",
+      "cardText": "Телефон VoIP Grandstream GXP-1615 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ]4.75 |31 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d1ff2569e3033be5/ip-telefon-fanvil-x303w-cernyj/",
+      "title": "IP-телефон Fanvil X303W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "d1ff2569e3033be5",
+      "cardText": "IP-телефон Fanvil X303W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8f0f9050c00b7b67/telefon-voip-fanvil-x303p-cernyj/",
+      "title": "Телефон VoIP Fanvil X303P черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "8f0f9050c00b7b67",
+      "cardText": "Телефон VoIP Fanvil X303P черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.5 |6 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/be529cf5a8a82ff1/telefon-voip-yealink-sip-t30p-bez-bp-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T30P (без БП) черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "be529cf5a8a82ff1",
+      "cardText": "Телефон VoIP Yealink SIP-T30P (без БП) черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]4.69 |26 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1636ec6a78203330/telefon-voip-grandstream-gxp-1625-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP-1625 черный [проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "1636ec6a78203330",
+      "cardText": "Телефон VoIP Grandstream GXP-1625 черный [проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ]4.7 |30 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/14f8b1e1d0fe2ff4/telefon-voip-yealink-w76p-seryj-cernyj/",
+      "title": "Телефон VoIP Yealink W76P серый, черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "14f8b1e1d0fe2ff4",
+      "cardText": "Телефон VoIP Yealink W76P серый, черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]4.58 |19 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f4638b36374b3332/telefon-voip-fanvil-x3sp-verb-cernyj/",
+      "title": "Телефон VoIP Fanvil X3SP ver.B черный [проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "f4638b36374b3332",
+      "cardText": "Телефон VoIP Fanvil X3SP ver.B черный [проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ]4.93 |15 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e5dc7d625aa1d582/ip-telefon-yealink-w71p-cernyj/",
+      "title": "IP-телефон Yealink W71P черный [беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "e5dc7d625aa1d582",
+      "cardText": "IP-телефон Yealink W71P черный [беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d1136ca7374b3332/telefon-voip-fanvil-x1s-cernyj/",
+      "title": "Телефон VoIP Fanvil X1S черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "d1136ca7374b3332",
+      "cardText": "Телефон VoIP Fanvil X1S черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей]4.58 |60 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4865a863f8891b80/telefon-voip-fanvil-h2u-cernyj/",
+      "title": "Телефон VoIP Fanvil H2U черный [проводной, CDP, DHCP, FTP, HTTP, РоЕ]",
+      "specsText": "проводной, CDP, DHCP, FTP, HTTP, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, FTP, HTTP, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4865a863f8891b80",
+      "cardText": "Телефон VoIP Fanvil H2U черный [проводной, CDP, DHCP, FTP, HTTP, РоЕ]4.7 |10 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/84343ebe602b4711/telefon-voip-fanvil-x303g-cernyj/",
+      "title": "Телефон VoIP Fanvil X303G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "84343ebe602b4711",
+      "cardText": "Телефон VoIP Fanvil X303G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.5 |8 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/11a17cdcfa6cd763/telefon-voip-fanvil-x1sg-cernyj/",
+      "title": "Телефон VoIP Fanvil X1SG черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "11a17cdcfa6cd763",
+      "cardText": "Телефон VoIP Fanvil X1SG черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]4.77 |12 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/60ca6a5938361b80/telefon-voip-yealink-sip-t48u-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T48U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "60ca6a5938361b80",
+      "cardText": "Телефон VoIP Yealink SIP-T48U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]4.73 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/535330b8374c3332/telefon-voip-fanvil-x4u-cernyj/",
+      "title": "Телефон VoIP Fanvil X4U черный [проводной, SIP, дисплей, РоЕ]",
+      "specsText": "проводной, SIP, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, SIP, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "535330b8374c3332",
+      "cardText": "Телефон VoIP Fanvil X4U черный [проводной, SIP, дисплей, РоЕ]4.71 |7 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1606302fdafad763/telefon-voip-fanvil-h2u-belyj/",
+      "title": "Телефон VoIP Fanvil H2U белый [проводной, SIP, конференц-связь, РоЕ]",
+      "specsText": "проводной, SIP, конференц-связь, РоЕ",
+      "bracketGroups": [
+        "проводной, SIP, конференц-связь, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "1606302fdafad763",
+      "cardText": "Телефон VoIP Fanvil H2U белый [проводной, SIP, конференц-связь, РоЕ]4.7 |10 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3dcdc468d88d3330/telefon-voip-grandstream-gxp1630-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP1630 черный [проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "3dcdc468d88d3330",
+      "cardText": "Телефон VoIP Grandstream GXP1630 черный [проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/df9b4c756efe218b/telefon-voip-flyingvoice-p10p-seryj/",
+      "title": "Телефон VoIP Flyingvoice P10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "df9b4c756efe218b",
+      "cardText": "Телефон VoIP Flyingvoice P10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5 |3 отзываХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/645b9e8b374c3332/telefon-voip-fanvil-x6u-cernyj/",
+      "title": "Телефон VoIP Fanvil X6U черный [проводной, SIP, дисплей, РоЕ]",
+      "specsText": "проводной, SIP, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, SIP, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "645b9e8b374c3332",
+      "cardText": "Телефон VoIP Fanvil X6U черный [проводной, SIP, дисплей, РоЕ]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8a95a59962ee3330/telefon-voip-fanvil-x4-cernyj/",
+      "title": "Телефон VoIP Fanvil X4 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "8a95a59962ee3330",
+      "cardText": "Телефон VoIP Fanvil X4 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]4.69 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fe93635cd1ded20/telefon-voip-fanvil-x3s-lite-cernyj/",
+      "title": "Телефон VoIP Fanvil X3S Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "4fe93635cd1ded20",
+      "cardText": "Телефон VoIP Fanvil X3S Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]4.94 |16 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/23b43841b9a3aeb0/telefon-voip-flyingvoice-fip16-plus-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP16 Plus серый [беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "23b43841b9a3aeb0",
+      "cardText": "Телефон VoIP Flyingvoice FIP16 Plus серый [беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]4.4 |5 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4509fc340a37a02a/ip-telefon-fanvil-x301w-cernyj/",
+      "title": "IP-телефон Fanvil X301W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "4509fc340a37a02a",
+      "cardText": "IP-телефон Fanvil X301W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей]5 |3 отзыва 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/66e00822f8891b80/telefon-voip-fanvil-x5u-cernyj/",
+      "title": "Телефон VoIP Fanvil X5U черный [проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "66e00822f8891b80",
+      "cardText": "Телефон VoIP Fanvil X5U черный [проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ]5 |3 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cf64cfc880233332/telefon-voip-fanvil-x4g-cernyj/",
+      "title": "Телефон VoIP Fanvil X4G черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "cf64cfc880233332",
+      "cardText": "Телефон VoIP Fanvil X4G черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]4.76 |17 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/dffc82b139f5c8d9/telefon-voip-flyingvoice-fip11c-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP11C серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "dffc82b139f5c8d9",
+      "cardText": "Телефон VoIP Flyingvoice FIP11C серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e4cd20e0152d6d3a/telefon-voip-flyingvoice-fip10-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "e4cd20e0152d6d3a",
+      "cardText": "Телефон VoIP Flyingvoice FIP10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/db48b3dd37571702/telefon-voip-flyingvoice-p11-seryj/",
+      "title": "Телефон VoIP Flyingvoice P11 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "db48b3dd37571702",
+      "cardText": "Телефон VoIP Flyingvoice P11 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df526adcc8a5a/telefon-voip-grandstream-gxp-2160-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP-2160 черный [проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "f56df526adcc8a5a",
+      "cardText": "Телефон VoIP Grandstream GXP-2160 черный [проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]5 |2 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fe93644cd1ded20/telefon-voip-fanvil-x3sg-lite-cernyj/",
+      "title": "Телефон VoIP Fanvil X3SG Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "4fe93644cd1ded20",
+      "cardText": "Телефон VoIP Fanvil X3SG Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/91dc769d5f4b3332/telefon-voip-grandstream-grp2612w-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2612W черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "91dc769d5f4b3332",
+      "cardText": "Телефон VoIP Grandstream GRP2612W черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6ef34cc3812002ab/telefon-voip-flyingvoice-p10-seryj/",
+      "title": "Телефон VoIP Flyingvoice P10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "6ef34cc3812002ab",
+      "cardText": "Телефон VoIP Flyingvoice P10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]4 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4697352e0dba8f3a/telefon-voip-grandstream-grp2602g-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2602G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4697352e0dba8f3a",
+      "cardText": "Телефон VoIP Grandstream GRP2602G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fe9363bcd1ded20/telefon-voip-fanvil-x3s-pro-cernyj/",
+      "title": "Телефон VoIP Fanvil X3S Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "4fe9363bcd1ded20",
+      "cardText": "Телефон VoIP Fanvil X3S Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]5 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/783293a78577eb37/ip-telefon-fanvil-h3-belyj/",
+      "title": "IP-телефон Fanvil H3 белый [проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ]",
+      "specsText": "проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ",
+      "bracketGroups": [
+        "проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "783293a78577eb37",
+      "cardText": "IP-телефон Fanvil H3 белый [проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/55e47d5ecd1ded20/telefon-voip-fanvil-h3w-belyj/",
+      "title": "Телефон VoIP Fanvil H3W белый [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "55e47d5ecd1ded20",
+      "cardText": "Телефон VoIP Fanvil H3W белый [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2d91de9f333e52bd/telefon-voip-flyingvoice-p23g-seryj/",
+      "title": "Телефон VoIP Flyingvoice P23G серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "2d91de9f333e52bd",
+      "cardText": "Телефон VoIP Flyingvoice P23G серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fe277d2ccfb83332/telefon-voip-fanvil-x7c-cernyj/",
+      "title": "Телефон VoIP Fanvil X7C черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "fe277d2ccfb83332",
+      "cardText": "Телефон VoIP Fanvil X7C черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/14f8b1d9d0fe2ff4/telefon-voip-yealink-sip-t58w-with-camera-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T58W with camera черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]",
+      "specsText": "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "14f8b1d9d0fe2ff4",
+      "cardText": "Телефон VoIP Yealink SIP-T58W with camera черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/14f8b1dbd0fe2ff4/telefon-voip-yealink-sip-t58w-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T58W черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]",
+      "specsText": "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "14f8b1dbd0fe2ff4",
+      "cardText": "Телефон VoIP Yealink SIP-T58W черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4455a63a8b5d999a/ip-telefon-fanvil-h1-cernyj/",
+      "title": "IP-телефон Fanvil H1 черный [проводной, CDP, DHCP, IPv4, IPv6, РоЕ]",
+      "specsText": "проводной, CDP, DHCP, IPv4, IPv6, РоЕ",
+      "bracketGroups": [
+        "проводной, CDP, DHCP, IPv4, IPv6, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4455a63a8b5d999a",
+      "cardText": "IP-телефон Fanvil H1 черный [проводной, CDP, DHCP, IPv4, IPv6, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ddb28bbc942e6270/ip-telefon-fanvil-v63-cernyj/",
+      "title": "IP-телефон Fanvil V63 черный [проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "ddb28bbc942e6270",
+      "cardText": "IP-телефон Fanvil V63 черный [проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/02dfac78f3642ff4/telefon-voip-grandstream-grp2602p-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2602P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "02dfac78f3642ff4",
+      "cardText": "Телефон VoIP Grandstream GRP2602P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]4.56 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4514fcedb6e5b1b7/telefon-voip-flyingvoice-p11p-seryj/",
+      "title": "Телефон VoIP Flyingvoice P11P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4514fcedb6e5b1b7",
+      "cardText": "Телефон VoIP Flyingvoice P11P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c9829fb3de88fc97/telefon-voip-flyingvoice-p20p-seryj/",
+      "title": "Телефон VoIP Flyingvoice P20P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "c9829fb3de88fc97",
+      "cardText": "Телефон VoIP Flyingvoice P20P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fa3c19beeb3f790f/telefon-voip-fanvil-x3u-pro-cernyj/",
+      "title": "Телефон VoIP Fanvil X3U Pro черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "fa3c19beeb3f790f",
+      "cardText": "Телефон VoIP Fanvil X3U Pro черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9b8bf6e4e2f4927d/telefon-voip-flyingvoice-fip15g-plus-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP15G Plus серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "9b8bf6e4e2f4927d",
+      "cardText": "Телефон VoIP Flyingvoice FIP15G Plus серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8fc8562246373332/telefon-voip-fanvil-x210i-cernyj/",
+      "title": "Телефон VoIP Fanvil X210i черный [проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "8fc8562246373332",
+      "cardText": "Телефон VoIP Fanvil X210i черный [проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ]5 |1 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0e3c120351f4d9c5/telefon-voip-fanvil-v62-cernyj/",
+      "title": "Телефон VoIP Fanvil V62 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "0e3c120351f4d9c5",
+      "cardText": "Телефон VoIP Fanvil V62 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a45401c47343a6ee/telefon-voip-grandstream-grp2612g-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2612G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "a45401c47343a6ee",
+      "cardText": "Телефон VoIP Grandstream GRP2612G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e079446d7431269a/telefon-voip-flyingvoice-p20-seryj/",
+      "title": "Телефон VoIP Flyingvoice P20 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "e079446d7431269a",
+      "cardText": "Телефон VoIP Flyingvoice P20 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fe93647cd1ded20/telefon-voip-fanvil-x3sg-pro-cernyj/",
+      "title": "Телефон VoIP Fanvil X3SG Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4fe93647cd1ded20",
+      "cardText": "Телефон VoIP Fanvil X3SG Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]4 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c89fbe1cd3868a5a/telefon-voip-panasonic-kx-nt553ru-b-cernyj/",
+      "title": "Телефон VoIP Panasonic KX-NT553RU-B черный [проводной, DHCP, VoIP, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, VoIP, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, VoIP, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "c89fbe1cd3868a5a",
+      "cardText": "Телефон VoIP Panasonic KX-NT553RU-B черный [проводной, DHCP, VoIP, дисплей, РоЕ]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2153d1c11d744186/telefon-voip-flyingvoice-fip10p-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "2153d1c11d744186",
+      "cardText": "Телефон VoIP Flyingvoice FIP10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/07466fdfcfb93332/telefon-voip-fanvil-x7-cernyj/",
+      "title": "Телефон VoIP Fanvil X7 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "07466fdfcfb93332",
+      "cardText": "Телефон VoIP Fanvil X7 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]3 |2 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d2e4c072dd39738e/telefon-voip-fanvil-linkvil-w611w-cernyj/",
+      "title": "Телефон VoIP Fanvil LINKVIL W611W черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+      "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+      "bracketGroups": [
+        "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "d2e4c072dd39738e",
+      "cardText": "Телефон VoIP Fanvil LINKVIL W611W черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]3.82 |9 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b9d6a52e0702a6ed/telefon-voip-flyingvoice-fip14g-seryj/",
+      "title": "Телефон VoIP Flyingvoice FIP14G серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "b9d6a52e0702a6ed",
+      "cardText": "Телефон VoIP Flyingvoice FIP14G серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df51eadcc8a5a/telefon-voip-grandstream-gxp2130v2-cernyj/",
+      "title": "Телефон VoIP Grandstream GXP2130v2 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "f56df51eadcc8a5a",
+      "cardText": "Телефон VoIP Grandstream GXP2130v2 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]4.11 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1d0724b97ac9d7b6/ip-telefon-fanvil-h5-cernyj/",
+      "title": "IP-телефон Fanvil H5 черный [проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ]",
+      "specsText": "проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "1d0724b97ac9d7b6",
+      "cardText": "IP-телефон Fanvil H5 черный [проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4cb8fcdc831a719e/telefon-voip-flyingvoice-p23gw-seryj/",
+      "title": "Телефон VoIP Flyingvoice P23GW серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4cb8fcdc831a719e",
+      "cardText": "Телефон VoIP Flyingvoice P23GW серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bf94f22829888c0d/telefon-voip-flyingvoice-p22p-seryj/",
+      "title": "Телефон VoIP Flyingvoice P22P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "bf94f22829888c0d",
+      "cardText": "Телефон VoIP Flyingvoice P22P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/497ce8d9374c3332/telefon-voip-fanvil-x3u-cernyj/",
+      "title": "Телефон VoIP Fanvil X3U черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "497ce8d9374c3332",
+      "cardText": "Телефон VoIP Fanvil X3U черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]5 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fe9363fcd1ded20/telefon-voip-fanvil-x3sp-pro-cernyj/",
+      "title": "Телефон VoIP Fanvil X3SP Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "4fe9363fcd1ded20",
+      "cardText": "Телефон VoIP Fanvil X3SP Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/afc32232b1a43330/telefon-voip-grandstream-grp2612-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2612 черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "afc32232b1a43330",
+      "cardText": "Телефон VoIP Grandstream GRP2612 черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]1 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/55e47d58cd1ded20/telefon-voip-fanvil-h3-cernyj/",
+      "title": "Телефон VoIP Fanvil H3 черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+      "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "55e47d58cd1ded20",
+      "cardText": "Телефон VoIP Fanvil H3 черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a6f9b484f3b43332/telefon-voip-yealink-sip-t53-cernyj/",
+      "title": "Телефон VoIP Yealink SIP-T53 черный [проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "a6f9b484f3b43332",
+      "cardText": "Телефон VoIP Yealink SIP-T53 черный [проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/afc32234b1a43330/telefon-voip-grandstream-grp2612p-cernyj/",
+      "title": "Телефон VoIP Grandstream GRP2612P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "afc32234b1a43330",
+      "cardText": "Телефон VoIP Grandstream GRP2612P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/13a178ada9e4bd3d/telefon-voip-flyingvoice-p11w-seryj/",
+      "title": "Телефон VoIP Flyingvoice P11W серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей"
+      ],
+      "priceText": "",
+      "productId": "13a178ada9e4bd3d",
+      "cardText": "Телефон VoIP Flyingvoice P11W серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/50b4325195f40507/telefon-voip-flyingvoice-p21p-seryj/",
+      "title": "Телефон VoIP Flyingvoice P21P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+      "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "50b4325195f40507",
+      "cardText": "Телефон VoIP Flyingvoice P21P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cbc61519782a649d/ip-telefon-yealink-cp965-cernyj/",
+      "title": "IP-телефон Yealink CP965 черный [беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+      "specsText": "беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+      "bracketGroups": [
+        "беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ"
+      ],
+      "priceText": "",
+      "productId": "cbc61519782a649d",
+      "cardText": "IP-телефон Yealink CP965 черный [беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1e36729f63e7ed20/dopolnitelnaa-trubka-yealink-w73h/",
+      "title": "Дополнительная трубка Yealink W73H []",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "1e36729f63e7ed20",
+      "cardText": "Дополнительная трубка Yealink W73H []4.88 |34 отзыва 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f6dc09b27ae13330/dopolnitelnaa-trubka-yealink-w56h/",
+      "title": "Дополнительная трубка Yealink W56H [для IP телефонов]",
+      "specsText": "для IP телефонов",
+      "bracketGroups": [
+        "для IP телефонов"
+      ],
+      "priceText": "",
+      "productId": "f6dc09b27ae13330",
+      "cardText": "Дополнительная трубка Yealink W56H [для IP телефонов]4.7 |28 отзывов 2Хорошая надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Базовая",
+      "models": [
+        {
+          "brand": "Базовая",
+          "model": "станция Yealink W70B серый",
+          "name": "Базовая станция Yealink W70B серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0fb21e1563e8ed20/bazovaa-stancia-yealink-w70b-seryj/",
+              "title": "Базовая станция Yealink W70B серый [беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+              "specsText": "беспроводной, DECT, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Дополнительная",
+      "models": [
+        {
+          "brand": "Дополнительная",
+          "model": "трубка Yealink W56H",
+          "name": "Дополнительная трубка Yealink W56H",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f6dc09b27ae13330/dopolnitelnaa-trubka-yealink-w56h/",
+              "title": "Дополнительная трубка Yealink W56H [для IP телефонов]",
+              "specsText": "для IP телефонов",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Дополнительная",
+          "model": "трубка Yealink W73H []",
+          "name": "Дополнительная трубка Yealink W73H []",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1e36729f63e7ed20/dopolnitelnaa-trubka-yealink-w73h/",
+              "title": "Дополнительная трубка Yealink W73H []",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Телефон",
+      "models": [
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil H2U белый",
+          "name": "Телефон VoIP Fanvil H2U белый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1606302fdafad763/telefon-voip-fanvil-h2u-belyj/",
+              "title": "Телефон VoIP Fanvil H2U белый [проводной, SIP, конференц-связь, РоЕ]",
+              "specsText": "проводной, SIP, конференц-связь, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil H2U черный",
+          "name": "Телефон VoIP Fanvil H2U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4865a863f8891b80/telefon-voip-fanvil-h2u-cernyj/",
+              "title": "Телефон VoIP Fanvil H2U черный [проводной, CDP, DHCP, FTP, HTTP, РоЕ]",
+              "specsText": "проводной, CDP, DHCP, FTP, HTTP, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil H3 черный",
+          "name": "Телефон VoIP Fanvil H3 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/55e47d58cd1ded20/telefon-voip-fanvil-h3-cernyj/",
+              "title": "Телефон VoIP Fanvil H3 черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil H3W белый",
+          "name": "Телефон VoIP Fanvil H3W белый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/55e47d5ecd1ded20/telefon-voip-fanvil-h3w-belyj/",
+              "title": "Телефон VoIP Fanvil H3W белый [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil LINKVIL W611W черный",
+          "name": "Телефон VoIP Fanvil LINKVIL W611W черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d2e4c072dd39738e/telefon-voip-fanvil-linkvil-w611w-cernyj/",
+              "title": "Телефон VoIP Fanvil LINKVIL W611W черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil V62 черный",
+          "name": "Телефон VoIP Fanvil V62 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0e3c120351f4d9c5/telefon-voip-fanvil-v62-cernyj/",
+              "title": "Телефон VoIP Fanvil V62 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X1S черный",
+          "name": "Телефон VoIP Fanvil X1S черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d1136ca7374b3332/telefon-voip-fanvil-x1s-cernyj/",
+              "title": "Телефон VoIP Fanvil X1S черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X1SG черный",
+          "name": "Телефон VoIP Fanvil X1SG черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/11a17cdcfa6cd763/telefon-voip-fanvil-x1sg-cernyj/",
+              "title": "Телефон VoIP Fanvil X1SG черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X1SP черный",
+          "name": "Телефон VoIP Fanvil X1SP черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e2676f02374b3332/telefon-voip-fanvil-x1sp-cernyj/",
+              "title": "Телефон VoIP Fanvil X1SP черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X210 черный",
+          "name": "Телефон VoIP Fanvil X210 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1003aa4dcfb93332/telefon-voip-fanvil-x210-cernyj/",
+              "title": "Телефон VoIP Fanvil X210 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X210i черный",
+          "name": "Телефон VoIP Fanvil X210i черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8fc8562246373332/telefon-voip-fanvil-x210i-cernyj/",
+              "title": "Телефон VoIP Fanvil X210i черный [проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, IEEE 802.1x, IPv4, IPv6, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X301G черный",
+          "name": "Телефон VoIP Fanvil X301G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b14385be1877f7cb/telefon-voip-fanvil-x301g-cernyj/",
+              "title": "Телефон VoIP Fanvil X301G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X303 черный",
+          "name": "Телефон VoIP Fanvil X303 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1de7a568d022a3b1/telefon-voip-fanvil-x303-cernyj/",
+              "title": "Телефон VoIP Fanvil X303 черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X303G черный",
+          "name": "Телефон VoIP Fanvil X303G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/84343ebe602b4711/telefon-voip-fanvil-x303g-cernyj/",
+              "title": "Телефон VoIP Fanvil X303G черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X303P черный",
+          "name": "Телефон VoIP Fanvil X303P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8f0f9050c00b7b67/telefon-voip-fanvil-x303p-cernyj/",
+              "title": "Телефон VoIP Fanvil X303P черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3S Lite черный",
+          "name": "Телефон VoIP Fanvil X3S Lite черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fe93635cd1ded20/telefon-voip-fanvil-x3s-lite-cernyj/",
+              "title": "Телефон VoIP Fanvil X3S Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3S Pro черный",
+          "name": "Телефон VoIP Fanvil X3S Pro черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fe9363bcd1ded20/telefon-voip-fanvil-x3s-pro-cernyj/",
+              "title": "Телефон VoIP Fanvil X3S Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3SG Lite черный",
+          "name": "Телефон VoIP Fanvil X3SG Lite черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fe93644cd1ded20/telefon-voip-fanvil-x3sg-lite-cernyj/",
+              "title": "Телефон VoIP Fanvil X3SG Lite черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3SG Pro черный",
+          "name": "Телефон VoIP Fanvil X3SG Pro черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fe93647cd1ded20/telefon-voip-fanvil-x3sg-pro-cernyj/",
+              "title": "Телефон VoIP Fanvil X3SG Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3SP Pro черный",
+          "name": "Телефон VoIP Fanvil X3SP Pro черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fe9363fcd1ded20/telefon-voip-fanvil-x3sp-pro-cernyj/",
+              "title": "Телефон VoIP Fanvil X3SP Pro черный [проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3SP ver.B черный",
+          "name": "Телефон VoIP Fanvil X3SP ver.B черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f4638b36374b3332/telefon-voip-fanvil-x3sp-verb-cernyj/",
+              "title": "Телефон VoIP Fanvil X3SP ver.B черный [проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DNS SRV, FTP, HTTP, IPv6, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3U черный",
+          "name": "Телефон VoIP Fanvil X3U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/497ce8d9374c3332/telefon-voip-fanvil-x3u-cernyj/",
+              "title": "Телефон VoIP Fanvil X3U черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X3U Pro черный",
+          "name": "Телефон VoIP Fanvil X3U Pro черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fa3c19beeb3f790f/telefon-voip-fanvil-x3u-pro-cernyj/",
+              "title": "Телефон VoIP Fanvil X3U Pro черный [проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, EHS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X4 черный",
+          "name": "Телефон VoIP Fanvil X4 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8a95a59962ee3330/telefon-voip-fanvil-x4-cernyj/",
+              "title": "Телефон VoIP Fanvil X4 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X4G черный",
+          "name": "Телефон VoIP Fanvil X4G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cf64cfc880233332/telefon-voip-fanvil-x4g-cernyj/",
+              "title": "Телефон VoIP Fanvil X4G черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X4U черный",
+          "name": "Телефон VoIP Fanvil X4U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/535330b8374c3332/telefon-voip-fanvil-x4u-cernyj/",
+              "title": "Телефон VoIP Fanvil X4U черный [проводной, SIP, дисплей, РоЕ]",
+              "specsText": "проводной, SIP, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X5U черный",
+          "name": "Телефон VoIP Fanvil X5U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/66e00822f8891b80/telefon-voip-fanvil-x5u-cernyj/",
+              "title": "Телефон VoIP Fanvil X5U черный [проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CDP, CWMP, DHCP, FTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X6U черный",
+          "name": "Телефон VoIP Fanvil X6U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/645b9e8b374c3332/telefon-voip-fanvil-x6u-cernyj/",
+              "title": "Телефон VoIP Fanvil X6U черный [проводной, SIP, дисплей, РоЕ]",
+              "specsText": "проводной, SIP, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X7 черный",
+          "name": "Телефон VoIP Fanvil X7 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/07466fdfcfb93332/telefon-voip-fanvil-x7-cernyj/",
+              "title": "Телефон VoIP Fanvil X7 черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Fanvil X7C черный",
+          "name": "Телефон VoIP Fanvil X7C черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fe277d2ccfb83332/telefon-voip-fanvil-x7c-cernyj/",
+              "title": "Телефон VoIP Fanvil X7C черный [проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ]",
+              "specsText": "проводной, CWMP, DHCP, FTP, HTTP, конференц-связь, видеоконференции, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP10 серый",
+          "name": "Телефон VoIP Flyingvoice FIP10 серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e4cd20e0152d6d3a/telefon-voip-flyingvoice-fip10-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP10P серый",
+          "name": "Телефон VoIP Flyingvoice FIP10P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2153d1c11d744186/telefon-voip-flyingvoice-fip10p-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP11C серый",
+          "name": "Телефон VoIP Flyingvoice FIP11C серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/dffc82b139f5c8d9/telefon-voip-flyingvoice-fip11c-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP11C серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP14G серый",
+          "name": "Телефон VoIP Flyingvoice FIP14G серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b9d6a52e0702a6ed/telefon-voip-flyingvoice-fip14g-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP14G серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP15G Plus серый",
+          "name": "Телефон VoIP Flyingvoice FIP15G Plus серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9b8bf6e4e2f4927d/telefon-voip-flyingvoice-fip15g-plus-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP15G Plus серый [проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice FIP16 Plus серый",
+          "name": "Телефон VoIP Flyingvoice FIP16 Plus серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/23b43841b9a3aeb0/telefon-voip-flyingvoice-fip16-plus-seryj/",
+              "title": "Телефон VoIP Flyingvoice FIP16 Plus серый [беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей]",
+              "specsText": "беспроводной, DHCP, DNS, HTTP, HTTPS, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P10 серый",
+          "name": "Телефон VoIP Flyingvoice P10 серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6ef34cc3812002ab/telefon-voip-flyingvoice-p10-seryj/",
+              "title": "Телефон VoIP Flyingvoice P10 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P10P серый",
+          "name": "Телефон VoIP Flyingvoice P10P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/df9b4c756efe218b/telefon-voip-flyingvoice-p10p-seryj/",
+              "title": "Телефон VoIP Flyingvoice P10P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P11 серый",
+          "name": "Телефон VoIP Flyingvoice P11 серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/db48b3dd37571702/telefon-voip-flyingvoice-p11-seryj/",
+              "title": "Телефон VoIP Flyingvoice P11 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P11P серый",
+          "name": "Телефон VoIP Flyingvoice P11P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4514fcedb6e5b1b7/telefon-voip-flyingvoice-p11p-seryj/",
+              "title": "Телефон VoIP Flyingvoice P11P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P11W серый",
+          "name": "Телефон VoIP Flyingvoice P11W серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/13a178ada9e4bd3d/telefon-voip-flyingvoice-p11w-seryj/",
+              "title": "Телефон VoIP Flyingvoice P11W серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P20 серый",
+          "name": "Телефон VoIP Flyingvoice P20 серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e079446d7431269a/telefon-voip-flyingvoice-p20-seryj/",
+              "title": "Телефон VoIP Flyingvoice P20 серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P20P серый",
+          "name": "Телефон VoIP Flyingvoice P20P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c9829fb3de88fc97/telefon-voip-flyingvoice-p20p-seryj/",
+              "title": "Телефон VoIP Flyingvoice P20P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P21P серый",
+          "name": "Телефон VoIP Flyingvoice P21P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/50b4325195f40507/telefon-voip-flyingvoice-p21p-seryj/",
+              "title": "Телефон VoIP Flyingvoice P21P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P22P серый",
+          "name": "Телефон VoIP Flyingvoice P22P серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bf94f22829888c0d/telefon-voip-flyingvoice-p22p-seryj/",
+              "title": "Телефон VoIP Flyingvoice P22P серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P23G серый",
+          "name": "Телефон VoIP Flyingvoice P23G серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2d91de9f333e52bd/telefon-voip-flyingvoice-p23g-seryj/",
+              "title": "Телефон VoIP Flyingvoice P23G серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Flyingvoice P23GW серый",
+          "name": "Телефон VoIP Flyingvoice P23GW серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4cb8fcdc831a719e/telefon-voip-flyingvoice-p23gw-seryj/",
+              "title": "Телефон VoIP Flyingvoice P23GW серый [проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, HTTP, HTTPS, IPv4, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2602G черный",
+          "name": "Телефон VoIP Grandstream GRP2602G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4697352e0dba8f3a/telefon-voip-grandstream-grp2602g-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2602G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2602P черный",
+          "name": "Телефон VoIP Grandstream GRP2602P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/02dfac78f3642ff4/telefon-voip-grandstream-grp2602p-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2602P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2612 черный",
+          "name": "Телефон VoIP Grandstream GRP2612 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/afc32232b1a43330/telefon-voip-grandstream-grp2612-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2612 черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2612G черный",
+          "name": "Телефон VoIP Grandstream GRP2612G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a45401c47343a6ee/telefon-voip-grandstream-grp2612g-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2612G черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2612P черный",
+          "name": "Телефон VoIP Grandstream GRP2612P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/afc32234b1a43330/telefon-voip-grandstream-grp2612p-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2612P черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GRP2612W черный",
+          "name": "Телефон VoIP Grandstream GRP2612W черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/91dc769d5f4b3332/telefon-voip-grandstream-grp2612w-cernyj/",
+              "title": "Телефон VoIP Grandstream GRP2612W черный [проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной, ARP, DHCP, DNS, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP-1615 черный",
+          "name": "Телефон VoIP Grandstream GXP-1615 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df51cadcc8a5a/telefon-voip-grandstream-gxp-1615-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP-1615 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP-1625 черный",
+          "name": "Телефон VoIP Grandstream GXP-1625 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1636ec6a78203330/telefon-voip-grandstream-gxp-1625-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP-1625 черный [проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, CWMP, DHCP client, DNS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP-2160 черный",
+          "name": "Телефон VoIP Grandstream GXP-2160 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df526adcc8a5a/telefon-voip-grandstream-gxp-2160-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP-2160 черный [проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP1610 черный",
+          "name": "Телефон VoIP Grandstream GXP1610 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a520a257af448a5a/telefon-voip-grandstream-gxp1610-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP1610 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]",
+              "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP1620 черный",
+          "name": "Телефон VoIP Grandstream GXP1620 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df530adcc8a5a/telefon-voip-grandstream-gxp1620-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP1620 черный [проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей]",
+              "specsText": "проводной, ARP, DHCP, DNS SRV, ICMP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP1630 черный",
+          "name": "Телефон VoIP Grandstream GXP1630 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3dcdc468d88d3330/telefon-voip-grandstream-gxp1630-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP1630 черный [проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, ARP, CWMP, DHCP, DNS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Grandstream GXP2130v2 черный",
+          "name": "Телефон VoIP Grandstream GXP2130v2 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df51eadcc8a5a/telefon-voip-grandstream-gxp2130v2-cernyj/",
+              "title": "Телефон VoIP Grandstream GXP2130v2 черный [проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DNS SRV, FTP, HTTP, SIP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Panasonic KX-NT553RU-B черный",
+          "name": "Телефон VoIP Panasonic KX-NT553RU-B черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c89fbe1cd3868a5a/telefon-voip-panasonic-kx-nt553ru-b-cernyj/",
+              "title": "Телефон VoIP Panasonic KX-NT553RU-B черный [проводной, DHCP, VoIP, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, VoIP, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T30 черный",
+          "name": "Телефон VoIP Yealink SIP-T30 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ab011eac08411b80/telefon-voip-yealink-sip-t30-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T30 черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей]",
+              "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T30P (без БП) черный",
+          "name": "Телефон VoIP Yealink SIP-T30P (без БП) черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/be529cf5a8a82ff1/telefon-voip-yealink-sip-t30p-bez-bp-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T30P (без БП) черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T30P черный",
+          "name": "Телефон VoIP Yealink SIP-T30P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c945b002a8a72ff1/telefon-voip-yealink-sip-t30p-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T30P черный [проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CDP, DHCP, DNS SRV, FTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T31 черный",
+          "name": "Телефон VoIP Yealink SIP-T31 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c79ff685a8a92ff1/telefon-voip-yealink-sip-t31-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T31 черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей]",
+              "specsText": "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T31G черный",
+          "name": "Телефон VoIP Yealink SIP-T31G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b9498f6808481b80/telefon-voip-yealink-sip-t31g-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T31G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T31P (Black Keyboard) черный",
+          "name": "Телефон VoIP Yealink SIP-T31P (Black Keyboard) черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/732f6238a8aa2ff1/telefon-voip-yealink-sip-t31p-black-keyboard-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T31P (Black Keyboard) черный [проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, CDP, DHCP, DNS, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T31P (without PSU-Black Keyboard) черный",
+          "name": "Телефон VoIP Yealink SIP-T31P (without PSU-Black Keyboard) черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cfb617c2a8aa2ff1/telefon-voip-yealink-sip-t31p-without-psu-black-keyboard-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T31P (without PSU-Black Keyboard) черный [проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, IP, L2TP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T33G черный",
+          "name": "Телефон VoIP Yealink SIP-T33G черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f18195f508481b80/telefon-voip-yealink-sip-t33g-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T33G черный [проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, DHCP, DNS, IEEE 802.1x, IEEE 802.3af, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T43U черный",
+          "name": "Телефон VoIP Yealink SIP-T43U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1b97da4238361b80/telefon-voip-yealink-sip-t43u-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T43U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T48U черный",
+          "name": "Телефон VoIP Yealink SIP-T48U черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/60ca6a5938361b80/telefon-voip-yealink-sip-t48u-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T48U черный [проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, IP, LLDP, SIP, SIP 2.0, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T53 черный",
+          "name": "Телефон VoIP Yealink SIP-T53 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a6f9b484f3b43332/telefon-voip-yealink-sip-t53-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T53 черный [проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной, HTTP, HTTPS, IEEE 802.1x, SIP 2.0, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T58W черный",
+          "name": "Телефон VoIP Yealink SIP-T58W черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/14f8b1dbd0fe2ff4/telefon-voip-yealink-sip-t58w-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T58W черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]",
+              "specsText": "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink SIP-T58W with camera черный",
+          "name": "Телефон VoIP Yealink SIP-T58W with camera черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/14f8b1d9d0fe2ff4/telefon-voip-yealink-sip-t58w-with-camera-cernyj/",
+              "title": "Телефон VoIP Yealink SIP-T58W with camera черный [проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ]",
+              "specsText": "проводной, FTP, HTTP, HTTPS, IPv4, конференц-связь, видеоконференции, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink W73P черный",
+          "name": "Телефон VoIP Yealink W73P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/14f8b1dfd0fe2ff4/telefon-voip-yealink-w73p-cernyj/",
+              "title": "Телефон VoIP Yealink W73P черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Телефон",
+          "model": "VoIP Yealink W76P серый, черный",
+          "name": "Телефон VoIP Yealink W76P серый, черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/14f8b1e1d0fe2ff4/telefon-voip-yealink-w76p-seryj-cernyj/",
+              "title": "Телефон VoIP Yealink W76P серый, черный [беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ]",
+              "specsText": "беспроводной, DHCP, FTP, HTTP, HTTPS, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "IP-телефон",
+      "models": [
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil H1 черный",
+          "name": "IP-телефон Fanvil H1 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4455a63a8b5d999a/ip-telefon-fanvil-h1-cernyj/",
+              "title": "IP-телефон Fanvil H1 черный [проводной, CDP, DHCP, IPv4, IPv6, РоЕ]",
+              "specsText": "проводной, CDP, DHCP, IPv4, IPv6, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil H3 белый",
+          "name": "IP-телефон Fanvil H3 белый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/783293a78577eb37/ip-telefon-fanvil-h3-belyj/",
+              "title": "IP-телефон Fanvil H3 белый [проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ]",
+              "specsText": "проводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil H5 черный",
+          "name": "IP-телефон Fanvil H5 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1d0724b97ac9d7b6/ip-telefon-fanvil-h5-cernyj/",
+              "title": "IP-телефон Fanvil H5 черный [проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ]",
+              "specsText": "проводной, 802.1x, DHCP, FTP, HTTP, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil V63 черный",
+          "name": "IP-телефон Fanvil V63 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ddb28bbc942e6270/ip-telefon-fanvil-v63-cernyj/",
+              "title": "IP-телефон Fanvil V63 черный [проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной + беспроводной, 802.1x, CDP, DHCP, FTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil X301W черный",
+          "name": "IP-телефон Fanvil X301W черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4509fc340a37a02a/ip-telefon-fanvil-x301w-cernyj/",
+              "title": "IP-телефон Fanvil X301W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей]",
+              "specsText": "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Fanvil X303W черный",
+          "name": "IP-телефон Fanvil X303W черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d1ff2569e3033be5/ip-telefon-fanvil-x303w-cernyj/",
+              "title": "IP-телефон Fanvil X303W черный [проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "проводной + беспроводной, 802.1x, DHCP, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Yealink CP965 черный",
+          "name": "IP-телефон Yealink CP965 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cbc61519782a649d/ip-telefon-yealink-cp965-cernyj/",
+              "title": "IP-телефон Yealink CP965 черный [беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "беспроводной, DHCP, DNS, FTP, HTTP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "IP-телефон",
+          "model": "Yealink W71P черный",
+          "name": "IP-телефон Yealink W71P черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e5dc7d625aa1d582/ip-telefon-yealink-w71p-cernyj/",
+              "title": "IP-телефон Yealink W71P черный [беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ]",
+              "specsText": "беспроводной, FTP, HTTP, HTTPS, PnP, конференц-связь, дисплей, РоЕ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [
+    {
+      "text": "Телефоны VoIP",
+      "href": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/"
+    },
+    {
+      "text": "Аксессуары для VoIP оборудования",
+      "href": "https://www.dns-shop.ru/catalog/84d2f54d4aca4e77/aksessuary-dla-voip-oborudovania/"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9ec3a16404e77/oborudovanie-voip/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 0,
+      "title": "Оборудование VoIP купить в интернет-магазине DNS. Оборудование VoIP цены, большой каталог, новинки."
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Телефоны VoIP купить в интернет-магазине DNS. Телефоны VoIP цены, большой каталог, новинки. - страница 1 из 5"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "Телефоны VoIP купить в интернет-магазине DNS. Телефоны VoIP цены, большой каталог, новинки. - страница 2 из 5"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 18,
+      "title": "Телефоны VoIP купить в интернет-магазине DNS. Телефоны VoIP цены, большой каталог, новинки. - страница 3 из 5"
+    },
+    {
+      "page": 4,
+      "url": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/?stock=now-today-tomorrow-later&p=4",
+      "status": 200,
+      "count": 18,
+      "title": "Телефоны VoIP купить в интернет-магазине DNS. Телефоны VoIP цены, большой каталог, новинки. - страница 4 из 5"
+    },
+    {
+      "page": 5,
+      "url": "https://www.dns-shop.ru/catalog/17a9eca316404e77/telefony-voip/?stock=now-today-tomorrow-later&p=5",
+      "status": 200,
+      "count": 13,
+      "title": "Телефоны VoIP купить в интернет-магазине DNS. Телефоны VoIP цены, большой каталог, новинки. - страница 5 из 5"
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/84d2f54d4aca4e77/aksessuary-dla-voip-oborudovania/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 2,
+      "title": "Аксессуары для VoIP оборудования купить в интернет-магазине DNS. Аксессуары для VoIP оборудования цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

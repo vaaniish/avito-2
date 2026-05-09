@@ -1,0 +1,111 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Видеонаблюдение",
+  "itemName": "Аксессуары для систем видеонаблюдения",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17aa51c216404e77/aksessuary-dla-sistem-videonabludenia/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:03:49.116Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 3,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/52d587fcbde85ec8/blok-pitania-orient-sap-2405/",
+      "title": "Блок питания ORIENT SAP-2405 [для видеокамер, питание видеокамер, 1 шт]",
+      "specsText": "для видеокамер, питание видеокамер, 1 шт",
+      "bracketGroups": [
+        "для видеокамер, питание видеокамер, 1 шт"
+      ],
+      "priceText": "",
+      "productId": "52d587fcbde85ec8",
+      "cardText": "Блок питания ORIENT SAP-2405 [для видеокамер, питание видеокамер, 1 шт]4 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b781710badf48a5a/blok-pitania-orient-pa-06/",
+      "title": "Блок питания ORIENT PA-06 [для видеокамер, питание видеокамер, 1 шт]",
+      "specsText": "для видеокамер, питание видеокамер, 1 шт",
+      "bracketGroups": [
+        "для видеокамер, питание видеокамер, 1 шт"
+      ],
+      "priceText": "",
+      "productId": "b781710badf48a5a",
+      "cardText": "Блок питания ORIENT PA-06 [для видеокамер, питание видеокамер, 1 шт]4.13 |23 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/35ce10d997c5a96e/razem-rexant-05-3073/",
+      "title": "Разъем Rexant 05-3073 [для видеокамер, передача видео, 10 шт]",
+      "specsText": "для видеокамер, передача видео, 10 шт",
+      "bracketGroups": [
+        "для видеокамер, передача видео, 10 шт"
+      ],
+      "priceText": "",
+      "productId": "35ce10d997c5a96e",
+      "cardText": "Разъем Rexant 05-3073 [для видеокамер, передача видео, 10 шт]3 |2 отзыва"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Блок",
+      "models": [
+        {
+          "brand": "Блок",
+          "model": "питания ORIENT PA-06",
+          "name": "Блок питания ORIENT PA-06",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b781710badf48a5a/blok-pitania-orient-pa-06/",
+              "title": "Блок питания ORIENT PA-06 [для видеокамер, питание видеокамер, 1 шт]",
+              "specsText": "для видеокамер, питание видеокамер, 1 шт",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Блок",
+          "model": "питания ORIENT SAP-2405",
+          "name": "Блок питания ORIENT SAP-2405",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/52d587fcbde85ec8/blok-pitania-orient-sap-2405/",
+              "title": "Блок питания ORIENT SAP-2405 [для видеокамер, питание видеокамер, 1 шт]",
+              "specsText": "для видеокамер, питание видеокамер, 1 шт",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Разъем",
+      "models": [
+        {
+          "brand": "Разъем",
+          "model": "Rexant 05-3073",
+          "name": "Разъем Rexant 05-3073",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/35ce10d997c5a96e/razem-rexant-05-3073/",
+              "title": "Разъем Rexant 05-3073 [для видеокамер, передача видео, 10 шт]",
+              "specsText": "для видеокамер, передача видео, 10 шт",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17aa51c216404e77/aksessuary-dla-sistem-videonabludenia/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 3,
+      "title": "Аксессуары для систем видеонаблюдения купить в интернет-магазине DNS. Аксессуары для систем видеонаблюдения цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

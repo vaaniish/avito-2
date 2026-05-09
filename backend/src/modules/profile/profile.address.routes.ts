@@ -6,7 +6,7 @@ type SessionResult =
   | { ok: true; user: { id: number } }
   | { ok: false; status: number; message: string };
 
-type DeliveryProviderFilter = "all" | "russian_post" | "yandex_pvz";
+type DeliveryProviderFilter = "all" | "russian_post" | "yandex_pvz" | "cdek";
 
 type LocationPayload = {
   city: string;
@@ -433,6 +433,9 @@ export function createProfileAddressRouter(
         { cursor, limit },
       );
 
+      const activeProvider =
+        providerFilter === "all" ? points[0]?.provider ?? "yandex_pvz" : providerFilter;
+
       res.json({
         city: location.city,
         location: {
@@ -441,7 +444,7 @@ export function createProfileAddressRouter(
           lng: location.lng,
         },
         providers: deps.deliveryProviders,
-        activeProvider: providerFilter === "all" ? "yandex_pvz" : providerFilter,
+        activeProvider,
         points,
         pagination: pagination ?? null,
       });

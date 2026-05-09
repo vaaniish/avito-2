@@ -1,0 +1,2103 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Устройства расширения",
+  "itemName": "Платы расширения",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:10.527Z",
+  "status": "done",
+  "totalPages": 5,
+  "totalProducts": 82,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/5df1b16e8308d760/plata-rassirenia-dexp-ecusb20/",
+      "title": "Плата расширения DEXP ECUSB2.0 [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]",
+      "specsText": "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A",
+      "bracketGroups": [
+        "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A"
+      ],
+      "priceText": "",
+      "productId": "5df1b16e8308d760",
+      "cardText": "Плата расширения DEXP ECUSB2.0 [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]4.87 |463 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/030e35b0d1f1933d/plata-rassirenia-orient-xwt-pe2s/",
+      "title": "Плата расширения ORIENT XWT-PE2S [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "030e35b0d1f1933d",
+      "cardText": "Плата расширения ORIENT XWT-PE2S [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]4.74 |118 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5b9e59b325fa3330/plata-rassirenia-dexp-com/",
+      "title": "Плата расширения DEXP COM [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+      "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+      "bracketGroups": [
+        "подключение: IDC10 (COM), разъемы: DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "5b9e59b325fa3330",
+      "cardText": "Плата расширения DEXP COM [подключение: IDC10 (COM), разъемы: DB9 (COM)]4.86 |331 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d7ab4ae8f1ad1709/plata-rassirenia-espada-com-port/",
+      "title": "Плата расширения Espada COM-порт [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+      "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+      "bracketGroups": [
+        "подключение: IDC10 (COM), разъемы: DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "d7ab4ae8f1ad1709",
+      "cardText": "Плата расширения Espada COM-порт [подключение: IDC10 (COM), разъемы: DB9 (COM)]5 |11 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/21dc6daaff441b80/plata-rassirenia-orient-xwt-pe4sv2/",
+      "title": "Плата расширения ORIENT XWT-PE4SV2 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "21dc6daaff441b80",
+      "cardText": "Плата расширения ORIENT XWT-PE4SV2 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]4.85 |20 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3d58de118ed150b1/kontroller-orient-va-3u4pev2/",
+      "title": "Контроллер ORIENT VA-3U4PEV2 [подключение: PCI-E x1, разъемы: 4 x USB-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x USB-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x USB-A"
+      ],
+      "priceText": "",
+      "productId": "3d58de118ed150b1",
+      "cardText": "Контроллер ORIENT VA-3U4PEV2 [подключение: PCI-E x1, разъемы: 4 x USB-A]4.69 |16 отзывов 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/385b9b14f4543332/plata-rassirenia-dexp-usb30-x-2/",
+      "title": "Плата расширения DEXP USB3.0 x 2 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "385b9b14f4543332",
+      "cardText": "Плата расширения DEXP USB3.0 x 2 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]4.8 |512 отзывов 2Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2612ba949dc83330/plata-rassirenia-dexp-wt-pu3/",
+      "title": "Плата расширения DEXP WT-PU3 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "2612ba949dc83330",
+      "cardText": "-33%Плата расширения DEXP WT-PU3 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]4.3 |555 отзывов 8Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbde8c793333/plata-rassirenia-exegate-exe-352/",
+      "title": "Плата расширения ExeGate EXE-352 [подключение: PCI, разъемы: 4 x USB 2.0 Type-A]",
+      "specsText": "подключение: PCI, разъемы: 4 x USB 2.0 Type-A",
+      "bracketGroups": [
+        "подключение: PCI, разъемы: 4 x USB 2.0 Type-A"
+      ],
+      "priceText": "",
+      "productId": "d57edbde8c793333",
+      "cardText": "Плата расширения ExeGate EXE-352 [подключение: PCI, разъемы: 4 x USB 2.0 Type-A]4.75 |32 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/26cdde911bbc48b1/kontroller-orient-mj9215s8/",
+      "title": "Контроллер Orient MJ9215S8 [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "26cdde911bbc48b1",
+      "cardText": "Контроллер Orient MJ9215S8 [подключение: PCI-E x1]5 |10 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5b9e59b725fa3330/plata-rassirenia-dexp-2com/",
+      "title": "Плата расширения DEXP 2COM [подключение: PCI, разъемы: 2 x DB9 (COM)]",
+      "specsText": "подключение: PCI, разъемы: 2 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI, разъемы: 2 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "5b9e59b725fa3330",
+      "cardText": "Плата расширения DEXP 2COM [подключение: PCI, разъемы: 2 x DB9 (COM)]4.71 |89 отзывов 4Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbe48c793333/plata-rassirenia-exegate-exe-307/",
+      "title": "Плата расширения ExeGate EXE-307 [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "d57edbe48c793333",
+      "cardText": "Плата расширения ExeGate EXE-307 [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]5 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5b9e59b625fa3330/plata-rassirenia-dexp-2comlpt/",
+      "title": "Плата расширения DEXP 2COM+LPT [подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)"
+      ],
+      "priceText": "",
+      "productId": "5b9e59b625fa3330",
+      "cardText": "Плата расширения DEXP 2COM+LPT [подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)]4.53 |228 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbf48c793333/plata-rassirenia-exegate-exe-503/",
+      "title": "Плата расширения ExeGate EXE-503 [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "d57edbf48c793333",
+      "cardText": "Плата расширения ExeGate EXE-503 [подключение: PCI-E x1]4.6 |35 отзывов 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/905a01658f951054/kontroller-espada-pcieu2a-ver2/",
+      "title": "Контроллер Espada PCIEU2A ver.2 [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "905a01658f951054",
+      "cardText": "Контроллер Espada PCIEU2A ver.2 [подключение: PCI-E x4]4.74 |12 отзывов 4Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8dc6e7b677feb0d1/plata-rassirenia-orient-va-3u2a1c/",
+      "title": "Плата расширения ORIENT VA-3U2A1C [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "8dc6e7b677feb0d1",
+      "cardText": "Плата расширения ORIENT VA-3U2A1C [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]4.63 |25 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ead57090362a59a2/plata-rassirenia-cablexpert/",
+      "title": "Плата расширения Cablexpert [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]",
+      "specsText": "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A",
+      "bracketGroups": [
+        "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A"
+      ],
+      "priceText": "",
+      "productId": "ead57090362a59a2",
+      "cardText": "Плата расширения Cablexpert [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c959aafc0a74ed20/plata-rassirenia-gembird-fp525-usb3-2a/",
+      "title": "Плата расширения Gembird FP5.25-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "c959aafc0a74ed20",
+      "cardText": "Плата расширения Gembird FP5.25-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]4.72 |50 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/754d8bcb0a76ed20/plata-rassirenia-gembird-fp35-usb3-2a/",
+      "title": "Плата расширения Gembird FP3.5-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "754d8bcb0a76ed20",
+      "cardText": "Плата расширения Gembird FP3.5-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]4.73 |55 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/22b8aa1fdd0c8868/plata-rassirenia-orient-va-3u7pe/",
+      "title": "Плата расширения ORIENT VA-3U7PE [подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "22b8aa1fdd0c8868",
+      "cardText": "Плата расширения ORIENT VA-3U7PE [подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A]4.85 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a9fa83421a723330/plata-rassirenia-orient-va-3u2219pe/",
+      "title": "Плата расширения ORIENT VA-3U2219PE [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "a9fa83421a723330",
+      "cardText": "Плата расширения ORIENT VA-3U2219PE [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]4.44 |136 отзывов 5Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f410ff9dfcd978da/plata-rassirenia-cablexpert/",
+      "title": "Плата расширения Cablexpert [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "f410ff9dfcd978da",
+      "cardText": "Плата расширения Cablexpert [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2deed150c22a3332/plata-rassirenia-orient-c087/",
+      "title": "Плата расширения ORIENT C087 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "2deed150c22a3332",
+      "cardText": "Плата расширения ORIENT C087 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]4.76 |41 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/921bd91718c51b80/plata-rassirenia-espada-pcie-1394a-ver2/",
+      "title": "Плата расширения Espada PCIe 1394a ver.2 [подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)"
+      ],
+      "priceText": "",
+      "productId": "921bd91718c51b80",
+      "cardText": "Плата расширения Espada PCIe 1394a ver.2 [подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)]4.49 |167 отзывов 5Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/16b2d6b80a76ed20/plata-rassirenia-gembird-fp35-usb3-4a/",
+      "title": "Плата расширения Gembird FP3.5-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "16b2d6b80a76ed20",
+      "cardText": "Плата расширения Gembird FP3.5-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]4.67 |21 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbec8c793333/plata-rassirenia-exegate-exe-319/",
+      "title": "Плата расширения ExeGate EXE-319 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "d57edbec8c793333",
+      "cardText": "Плата расширения ExeGate EXE-319 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]4.57 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e8f2c6db0b29ed20/plata-rassirenia-orient-a1166s6/",
+      "title": "Плата расширения ORIENT A1166S6 [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "e8f2c6db0b29ed20",
+      "cardText": "Плата расширения ORIENT A1166S6 [подключение: PCI-E x4]4.71 |14 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/55a5a520b8d58a5a/plata-rassirenia-orient-xwt-pe2slp/",
+      "title": "Плата расширения ORIENT XWT-PE2SLP [подключение: PCI-E x1, разъемы: DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "55a5a520b8d58a5a",
+      "cardText": "Плата расширения ORIENT XWT-PE2SLP [подключение: PCI-E x1, разъемы: DB9 (COM)]4.7 |10 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbf08c793333/plata-rassirenia-exegate-exe-367/",
+      "title": "Плата расширения ExeGate EXE-367 [подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "d57edbf08c793333",
+      "cardText": "Плата расширения ExeGate EXE-367 [подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A]4.63 |19 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4c41293c0a76ed20/planka-perednej-paneli-gembird-fp525-usb3-4a/",
+      "title": "Планка передней панели Gembird FP5.25-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "4c41293c0a76ed20",
+      "cardText": "Планка передней панели Gembird FP5.25-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]4.67 |58 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ae51cbe55d011b80/plata-rassirenia-orient-c086/",
+      "title": "Плата расширения ORIENT C086 [подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A]",
+      "specsText": "подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A",
+      "bracketGroups": [
+        "подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A"
+      ],
+      "priceText": "",
+      "productId": "ae51cbe55d011b80",
+      "cardText": "Плата расширения ORIENT C086 [подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A]4.81 |97 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6786c447b07bd9cb/kontroller-deepcool/",
+      "title": "Контроллер Deepcool [подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)]",
+      "specsText": "подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)",
+      "bracketGroups": [
+        "подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)"
+      ],
+      "priceText": "",
+      "productId": "6786c447b07bd9cb",
+      "cardText": "Контроллер Deepcool [подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)]5 |8 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/44ffdbae3163b93b/plata-rassirenia-espada-pcie2sax/",
+      "title": "Плата расширения Espada PCIe2SAX [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "44ffdbae3163b93b",
+      "cardText": "Плата расширения Espada PCIe2SAX [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b7db7fb2d412ee4f/kontroller-orient-m9230rs4/",
+      "title": "Контроллер ORIENT M9230RS4 [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "b7db7fb2d412ee4f",
+      "cardText": "Контроллер ORIENT M9230RS4 [подключение: PCI-E x4]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b8f16e470a75ed20/plata-rassirenia-gembird-fp35-usb3-3a1c/",
+      "title": "Плата расширения Gembird FP3.5-USB3-3A1C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "b8f16e470a75ed20",
+      "cardText": "Плата расширения Gembird FP3.5-USB3-3A1C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]4.71 |14 отзывов 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7d89fa0e0a75ed20/plata-rassirenia-gembird-fp35-usb3-2a2c/",
+      "title": "Плата расширения Gembird FP3.5-USB3-2A2C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "7d89fa0e0a75ed20",
+      "cardText": "Плата расширения Gembird FP3.5-USB3-2A2C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C]4.75 |24 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/29077b37827f91ff/kontroller-espada-pcieu32gen2/",
+      "title": "Контроллер Espada PCIeU3.2Gen2 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A"
+      ],
+      "priceText": "",
+      "productId": "29077b37827f91ff",
+      "cardText": "Контроллер Espada PCIeU3.2Gen2 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbee8c793333/plata-rassirenia-exegate-exe-323/",
+      "title": "Плата расширения ExeGate EXE-323 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "d57edbee8c793333",
+      "cardText": "Плата расширения ExeGate EXE-323 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/376392e6560fd582/planka-perednej-paneli-espada-eu335/",
+      "title": "Планка передней панели Espada Eu335 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)"
+      ],
+      "priceText": "",
+      "productId": "376392e6560fd582",
+      "cardText": "Планка передней панели Espada Eu335 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)]4.82 |11 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e83d8f1390873330/plata-rassirenia-orient-nc-3u2pelp/",
+      "title": "Плата расширения ORIENT NC-3U2PELP [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "e83d8f1390873330",
+      "cardText": "Плата расширения ORIENT NC-3U2PELP [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]4.35 |45 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2374cd4a1a733330/plata-rassirenia-orient-xwt-pe1s1pv2/",
+      "title": "Плата расширения ORIENT XWT-PE1S1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "2374cd4a1a733330",
+      "cardText": "Плата расширения ORIENT XWT-PE1S1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)]4.69 |37 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9e5379eb69a83330/plata-rassirenia-espada-fg-emt04a-1-bu01/",
+      "title": "Плата расширения Espada FG-EMT04A-1-BU01 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "9e5379eb69a83330",
+      "cardText": "Плата расширения Espada FG-EMT04A-1-BU01 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]4.53 |24 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbf88c793333/plata-rassirenia-exegate-exe-504/",
+      "title": "Плата расширения ExeGate EXE-504 [подключение: PCI-E x2, разъемы: 2 x eSATA]",
+      "specsText": "подключение: PCI-E x2, разъемы: 2 x eSATA",
+      "bracketGroups": [
+        "подключение: PCI-E x2, разъемы: 2 x eSATA"
+      ],
+      "priceText": "",
+      "productId": "d57edbf88c793333",
+      "cardText": "Плата расширения ExeGate EXE-504 [подключение: PCI-E x2, разъемы: 2 x eSATA]4.75 |8 отзывов 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/52b12162389469e0/kontroller-espada-pcieuasm1142/",
+      "title": "Контроллер ESPADA PCIeUASM1142 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "52b12162389469e0",
+      "cardText": "Контроллер ESPADA PCIeUASM1142 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C]5 |1 отзыв 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e83803613cded582/kontroller-espada-pcieu32te/",
+      "title": "Контроллер Espada PCIeU32TE [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "e83803613cded582",
+      "cardText": "Контроллер Espada PCIeU32TE [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]4.75 |4 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9431e4a10b35ed20/plata-rassirenia-orient-m9215s/",
+      "title": "Плата расширения ORIENT M9215S [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "9431e4a10b35ed20",
+      "cardText": "Плата расширения ORIENT M9215S [подключение: PCI-E x1]4.5 |38 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b88e1452d8110b9d/kontroller-espada-eu30a2/",
+      "title": "Контроллер ESPADA EU30A2 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "b88e1452d8110b9d",
+      "cardText": "Контроллер ESPADA EU30A2 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]3.86 |7 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6edac5ae9462d9cb/kontroller-ocypus-delta-eu04/",
+      "title": "Контроллер Ocypus Delta EU04 [подключение: USB 2.0 (9 pin)]",
+      "specsText": "подключение: USB 2.0 (9 pin)",
+      "bracketGroups": [
+        "подключение: USB 2.0 (9 pin)"
+      ],
+      "priceText": "",
+      "productId": "6edac5ae9462d9cb",
+      "cardText": "Контроллер Ocypus Delta EU04 [подключение: USB 2.0 (9 pin)]5 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/faebe7c00b35ed20/plata-rassirenia-orient-nc-3u4419pex4/",
+      "title": "Плата расширения ORIENT NC-3U4419PEX4 [подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "faebe7c00b35ed20",
+      "cardText": "Плата расширения ORIENT NC-3U4419PEX4 [подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A]4.5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbf28c793333/plata-rassirenia-exegate-exe-501/",
+      "title": "Плата расширения ExeGate EXE-501 [подключение: PCI-E x1, разъемы: 2 x eSATA]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x eSATA",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x eSATA"
+      ],
+      "priceText": "",
+      "productId": "d57edbf28c793333",
+      "cardText": "Плата расширения ExeGate EXE-501 [подключение: PCI-E x1, разъемы: 2 x eSATA]4.33 |18 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a06f13704e184b58/plata-rassirenia-asus-thunderboltex-4/",
+      "title": "Плата расширения ASUS ThunderboltEX 4 [подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4"
+      ],
+      "priceText": "",
+      "productId": "a06f13704e184b58",
+      "cardText": "Плата расширения ASUS ThunderboltEX 4 [подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4]4.33 |5 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cf2528d8b4a23330/plata-rassirenia-espada-es3a1061/",
+      "title": "Плата расширения Espada ES3A1061 [подключение: PCI-E x1, разъемы: 2 x eSATA]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x eSATA",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x eSATA"
+      ],
+      "priceText": "",
+      "productId": "cf2528d8b4a23330",
+      "cardText": "Плата расширения Espada ES3A1061 [подключение: PCI-E x1, разъемы: 2 x eSATA]4.42 |59 отзывов 4Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/990e603a77d9ed20/plata-rassirenia-dexp-z-c7038/",
+      "title": "Плата расширения DEXP Z-C7038 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "990e603a77d9ed20",
+      "cardText": "Плата расширения DEXP Z-C7038 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]4.46 |32 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/28fbd8a534b1b7d6/kontroller-orient-am-u3142pe-6a2c/",
+      "title": "Контроллер Orient AM-U3142PE-6A2C [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A"
+      ],
+      "priceText": "",
+      "productId": "28fbd8a534b1b7d6",
+      "cardText": "Контроллер Orient AM-U3142PE-6A2C [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/166831a6819d1db0/plata-rassirenia-espada-pciem2wi/",
+      "title": "Плата расширения Espada PCIeM2Wi [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "166831a6819d1db0",
+      "cardText": "Плата расширения Espada PCIeM2Wi [подключение: PCI-E x1]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9c936689560fd582/planka-perednej-paneli-espada-eu5335c/",
+      "title": "Планка передней панели ESPADA Eu5335c [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "9c936689560fd582",
+      "cardText": "Планка передней панели ESPADA Eu5335c [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/22fb9acd0b35ed20/plata-rassirenia-orient-j585s5/",
+      "title": "Плата расширения ORIENT J585S5 [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "22fb9acd0b35ed20",
+      "cardText": "Плата расширения ORIENT J585S5 [подключение: PCI-E x4]4.8 |8 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ec6e2cf336979272/planka-perednej-paneli-orient-c194e/",
+      "title": "Планка передней панели Orient C194E [подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "ec6e2cf336979272",
+      "cardText": "Планка передней панели Orient C194E [подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]4.29 |7 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b7c45ae98302d760/plata-rassirenia-dexp-am2usb/",
+      "title": "Плата расширения DEXP AM2USB [подключение: M.2 (ключ M)]",
+      "specsText": "подключение: M.2 (ключ M)",
+      "bracketGroups": [
+        "подключение: M.2 (ключ M)"
+      ],
+      "priceText": "",
+      "productId": "b7c45ae98302d760",
+      "cardText": "Плата расширения DEXP AM2USB [подключение: M.2 (ключ M)]4.7 |34 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8b1bdf648ab13f92/kontroller-orient-va-3u52pe/",
+      "title": "Контроллер Orient VA-3U52PE [подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "8b1bdf648ab13f92",
+      "cardText": "Контроллер Orient VA-3U52PE [подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A]4 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d00f177330c73330/plata-rassirenia-open-dev-m2-pci-e-riser/",
+      "title": "Плата расширения OPEN-DEV M2-PCI-E-RISER [подключение: M.2 (ключ M)]",
+      "specsText": "подключение: M.2 (ключ M)",
+      "bracketGroups": [
+        "подключение: M.2 (ключ M)"
+      ],
+      "priceText": "",
+      "productId": "d00f177330c73330",
+      "cardText": "Плата расширения OPEN-DEV M2-PCI-E-RISER [подключение: M.2 (ключ M)]4.73 |166 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c46e90fac85da26e/kontroller-espada-pcie8satamar/",
+      "title": "Контроллер Espada PCIe8SATAMar [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "c46e90fac85da26e",
+      "cardText": "Контроллер Espada PCIe8SATAMar [подключение: PCI-E x1]5 |1 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ddb26eccfacc2636/plata-rassirenia-cablexpert/",
+      "title": "Плата расширения Cablexpert [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+      "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+      "bracketGroups": [
+        "подключение: IDC10 (COM), разъемы: DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "ddb26eccfacc2636",
+      "cardText": "Плата расширения Cablexpert [подключение: IDC10 (COM), разъемы: DB9 (COM)]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/deb59b970a6bed20/plata-rassirenia-gembird-spcr-04/",
+      "title": "Плата расширения Gembird SPCR-04 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "deb59b970a6bed20",
+      "cardText": "Плата расширения Gembird SPCR-04 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]3.71 |21 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a880db3d0b28ed20/plata-rassirenia-orient-am-u3242pe-c/",
+      "title": "Плата расширения ORIENT AM-U3242PE-C [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "a880db3d0b28ed20",
+      "cardText": "Плата расширения ORIENT AM-U3242PE-C [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]4.67 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d0abd43e1abb1b80/plata-rassirenia-espada-epcif-pcim4pad/",
+      "title": "Плата расширения Espada EPCIF-PCIM4pAd [подключение: PCI, PCI-E x1]",
+      "specsText": "подключение: PCI, PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI, PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "d0abd43e1abb1b80",
+      "cardText": "Плата расширения Espada EPCIF-PCIM4pAd [подключение: PCI, PCI-E x1]4.33 |11 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1c5400b80b29ed20/plata-rassirenia-orient-am-u3142pe-2a/",
+      "title": "Плата расширения ORIENT AM-U3142PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A"
+      ],
+      "priceText": "",
+      "productId": "1c5400b80b29ed20",
+      "cardText": "Плата расширения ORIENT AM-U3142PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A]4.4 |5 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/28733b290a75ed20/plata-rassirenia-gembird-fp35-usb3-2a-hda/",
+      "title": "Плата расширения Gembird FP3.5-USB3-2A-HDA [подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм]",
+      "specsText": "подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм",
+      "bracketGroups": [
+        "подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм"
+      ],
+      "priceText": "",
+      "productId": "28733b290a75ed20",
+      "cardText": "Плата расширения Gembird FP3.5-USB3-2A-HDA [подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм]4.67 |15 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e727b35ae32f1b80/plata-rassirenia-orient-am-31u2pe-2a/",
+      "title": "Плата расширения ORIENT AM-31U2PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "e727b35ae32f1b80",
+      "cardText": "Плата расширения ORIENT AM-31U2PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A]4.14 |23 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ac0154eec8afa834/kontroller-espada-pcieu3te/",
+      "title": "Контроллер Espada PCIeU3TE [подключение: PCI-E x1]",
+      "specsText": "подключение: PCI-E x1",
+      "bracketGroups": [
+        "подключение: PCI-E x1"
+      ],
+      "priceText": "",
+      "productId": "ac0154eec8afa834",
+      "cardText": "Контроллер Espada PCIeU3TE [подключение: PCI-E x1]3.73 |11 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a593e8cc9c0d3330/plata-rassirenia-orient-xwt-pe4sv1lp/",
+      "title": "Плата расширения ORIENT XWT-PE4SV1LP [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+      "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)"
+      ],
+      "priceText": "",
+      "productId": "a593e8cc9c0d3330",
+      "cardText": "Плата расширения ORIENT XWT-PE4SV1LP [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9e3369fb560ed582/planka-perednej-paneli-espada-eu410/",
+      "title": "Планка передней панели Espada Eu410 [подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "9e3369fb560ed582",
+      "cardText": "Планка передней панели Espada Eu410 [подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b1ef18e3628f3330/plata-rassirenia-orient-xwt-pe1pv2/",
+      "title": "Плата расширения ORIENT XWT-PE1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT)]",
+      "specsText": "подключение: PCI-E x1, разъемы: DB-25 (LPT)",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: DB-25 (LPT)"
+      ],
+      "priceText": "",
+      "productId": "b1ef18e3628f3330",
+      "cardText": "Плата расширения ORIENT XWT-PE1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT)]4.47 |20 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d57edbe88c793333/plata-rassirenia-exegate-exe-313/",
+      "title": "Плата расширения ExeGate EXE-313 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "d57edbe88c793333",
+      "cardText": "Плата расширения ExeGate EXE-313 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C]3.25 |4 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a2fbaf3a723db22/kontroller-espada-pcieuasm3242/",
+      "title": "Контроллер Espada PCIeUASM3242 [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "1a2fbaf3a723db22",
+      "cardText": "Контроллер Espada PCIeUASM3242 [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/da0d89df19795745/kontroller-orient-am-u3242pe-e/",
+      "title": "Контроллер ORIENT AM-U3242PE-E [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "da0d89df19795745",
+      "cardText": "Контроллер ORIENT AM-U3242PE-E [подключение: PCI-E x4]4.7|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c310c08d0b35ed20/plata-rassirenia-orient-am-u3142pe-ac/",
+      "title": "Плата расширения ORIENT AM-U3142PE-AC [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]",
+      "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C",
+      "bracketGroups": [
+        "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C"
+      ],
+      "priceText": "",
+      "productId": "c310c08d0b35ed20",
+      "cardText": "Плата расширения ORIENT AM-U3142PE-AC [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]3.4 |5 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/956bf0f50b29ed20/plata-rassirenia-orient-aj1166s10/",
+      "title": "Плата расширения ORIENT AJ1166S10 [подключение: PCI-E x4]",
+      "specsText": "подключение: PCI-E x4",
+      "bracketGroups": [
+        "подключение: PCI-E x4"
+      ],
+      "priceText": "",
+      "productId": "956bf0f50b29ed20",
+      "cardText": "Плата расширения ORIENT AJ1166S10 [подключение: PCI-E x4]2.86 |7 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/020e48935610d582/planka-perednej-paneli-espada-eu2tyc/",
+      "title": "Планка передней панели ESPADA Eu2tyC [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C]",
+      "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C",
+      "bracketGroups": [
+        "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C"
+      ],
+      "priceText": "",
+      "productId": "020e48935610d582",
+      "cardText": "Планка передней панели ESPADA Eu2tyC [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7bbb2c901a733330/plata-rassirenia-orient-xwt-pe4sv2lp/",
+      "title": "Плата расширения ORIENT XWT-PE4SV2LP [подключение: PCI-E x1, разъемы: DB9 (COM) x4]",
+      "specsText": "подключение: PCI-E x1, разъемы: DB9 (COM) x4",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: DB9 (COM) x4"
+      ],
+      "priceText": "",
+      "productId": "7bbb2c901a733330",
+      "cardText": "Плата расширения ORIENT XWT-PE4SV2LP [подключение: PCI-E x1, разъемы: DB9 (COM) x4]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8feb0eb3f8af4d8f/plata-rassirenia-gigabyte-tp-v220-rb2-j6/",
+      "title": "Плата расширения GIGABYTE TP-V220-RB2-J6 [подключение: PCI-E x16]",
+      "specsText": "подключение: PCI-E x16",
+      "bracketGroups": [
+        "подключение: PCI-E x16"
+      ],
+      "priceText": "",
+      "productId": "8feb0eb3f8af4d8f",
+      "cardText": "Плата расширения GIGABYTE TP-V220-RB2-J6 [подключение: PCI-E x16] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a4665cde3287d9cb/plata-rassirenia-espada-eu30a/",
+      "title": "Плата расширения Espada EU30A [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+      "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+      "bracketGroups": [
+        "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A"
+      ],
+      "priceText": "",
+      "productId": "a4665cde3287d9cb",
+      "cardText": "Плата расширения Espada EU30A [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]4 |1 отзывОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Контроллер",
+      "models": [
+        {
+          "brand": "Контроллер",
+          "model": "Deepcool",
+          "name": "Контроллер Deepcool",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6786c447b07bd9cb/kontroller-deepcool/",
+              "title": "Контроллер Deepcool [подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)]",
+              "specsText": "подключение: SATA, USB 2.0 (9 pin), USB Type-C, разъемы: 4 x USB 2.0 (9 pin)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "ESPADA EU30A2",
+          "name": "Контроллер ESPADA EU30A2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b88e1452d8110b9d/kontroller-espada-eu30a2/",
+              "title": "Контроллер ESPADA EU30A2 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIe8SATAMar",
+          "name": "Контроллер Espada PCIe8SATAMar",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c46e90fac85da26e/kontroller-espada-pcie8satamar/",
+              "title": "Контроллер Espada PCIe8SATAMar [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIEU2A ver.2",
+          "name": "Контроллер Espada PCIEU2A ver.2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/905a01658f951054/kontroller-espada-pcieu2a-ver2/",
+              "title": "Контроллер Espada PCIEU2A ver.2 [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIeU3.2Gen2",
+          "name": "Контроллер Espada PCIeU3.2Gen2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/29077b37827f91ff/kontroller-espada-pcieu32gen2/",
+              "title": "Контроллер Espada PCIeU3.2Gen2 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 3 x USB 3.2 Gen 2 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIeU32TE",
+          "name": "Контроллер Espada PCIeU32TE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e83803613cded582/kontroller-espada-pcieu32te/",
+              "title": "Контроллер Espada PCIeU32TE [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIeU3TE",
+          "name": "Контроллер Espada PCIeU3TE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ac0154eec8afa834/kontroller-espada-pcieu3te/",
+              "title": "Контроллер Espada PCIeU3TE [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "ESPADA PCIeUASM1142",
+          "name": "Контроллер ESPADA PCIeUASM1142",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/52b12162389469e0/kontroller-espada-pcieuasm1142/",
+              "title": "Контроллер ESPADA PCIeUASM1142 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Espada PCIeUASM3242",
+          "name": "Контроллер Espada PCIeUASM3242",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a2fbaf3a723db22/kontroller-espada-pcieuasm3242/",
+              "title": "Контроллер Espada PCIeUASM3242 [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Ocypus Delta EU04",
+          "name": "Контроллер Ocypus Delta EU04",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6edac5ae9462d9cb/kontroller-ocypus-delta-eu04/",
+              "title": "Контроллер Ocypus Delta EU04 [подключение: USB 2.0 (9 pin)]",
+              "specsText": "подключение: USB 2.0 (9 pin)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Orient AM-U3142PE-6A2C",
+          "name": "Контроллер Orient AM-U3142PE-6A2C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/28fbd8a534b1b7d6/kontroller-orient-am-u3142pe-6a2c/",
+              "title": "Контроллер Orient AM-U3142PE-6A2C [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-C, 6 x USB 3.2 Gen 2 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "ORIENT AM-U3242PE-E",
+          "name": "Контроллер ORIENT AM-U3242PE-E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/da0d89df19795745/kontroller-orient-am-u3242pe-e/",
+              "title": "Контроллер ORIENT AM-U3242PE-E [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "ORIENT M9230RS4",
+          "name": "Контроллер ORIENT M9230RS4",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b7db7fb2d412ee4f/kontroller-orient-m9230rs4/",
+              "title": "Контроллер ORIENT M9230RS4 [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Orient MJ9215S8",
+          "name": "Контроллер Orient MJ9215S8",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/26cdde911bbc48b1/kontroller-orient-mj9215s8/",
+              "title": "Контроллер Orient MJ9215S8 [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "ORIENT VA-3U4PEV2",
+          "name": "Контроллер ORIENT VA-3U4PEV2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3d58de118ed150b1/kontroller-orient-va-3u4pev2/",
+              "title": "Контроллер ORIENT VA-3U4PEV2 [подключение: PCI-E x1, разъемы: 4 x USB-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x USB-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Контроллер",
+          "model": "Orient VA-3U52PE",
+          "name": "Контроллер Orient VA-3U52PE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8b1bdf648ab13f92/kontroller-orient-va-3u52pe/",
+              "title": "Контроллер Orient VA-3U52PE [подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 5 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Планка",
+      "models": [
+        {
+          "brand": "Планка",
+          "model": "передней панели ESPADA Eu2tyC",
+          "name": "Планка передней панели ESPADA Eu2tyC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/020e48935610d582/planka-perednej-paneli-espada-eu2tyc/",
+              "title": "Планка передней панели ESPADA Eu2tyC [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Планка",
+          "model": "передней панели Espada Eu335",
+          "name": "Планка передней панели Espada Eu335",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/376392e6560fd582/planka-perednej-paneli-espada-eu335/",
+              "title": "Планка передней панели Espada Eu335 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Планка",
+          "model": "передней панели Espada Eu410",
+          "name": "Планка передней панели Espada Eu410",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9e3369fb560ed582/planka-perednej-paneli-espada-eu410/",
+              "title": "Планка передней панели Espada Eu410 [подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen2, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Планка",
+          "model": "передней панели ESPADA Eu5335c",
+          "name": "Планка передней панели ESPADA Eu5335c",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9c936689560fd582/planka-perednej-paneli-espada-eu5335c/",
+              "title": "Планка передней панели ESPADA Eu5335c [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 3.5 мм jack (аудио), 3.5 мм jack (микрофон), USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Планка",
+          "model": "передней панели Gembird FP5.25-USB3-4A",
+          "name": "Планка передней панели Gembird FP5.25-USB3-4A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4c41293c0a76ed20/planka-perednej-paneli-gembird-fp525-usb3-4a/",
+              "title": "Планка передней панели Gembird FP5.25-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Планка",
+          "model": "передней панели Orient C194E",
+          "name": "Планка передней панели Orient C194E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ec6e2cf336979272/planka-perednej-paneli-orient-c194e/",
+              "title": "Планка передней панели Orient C194E [подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen2 Type E, разъемы: 2 x USB 3.2 Gen 2 Type-A, 2 x USB 3.2 Gen 2 Type-C",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Плата",
+      "models": [
+        {
+          "brand": "Плата",
+          "model": "расширения ASUS ThunderboltEX 4",
+          "name": "Плата расширения ASUS ThunderboltEX 4",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a06f13704e184b58/plata-rassirenia-asus-thunderboltex-4/",
+              "title": "Плата расширения ASUS ThunderboltEX 4 [подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x mini DisplayPort (input), 2 x Thunderbolt 4/USB 4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Cablexpert",
+          "name": "Плата расширения Cablexpert",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ead57090362a59a2/plata-rassirenia-cablexpert/",
+              "title": "Плата расширения Cablexpert [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]",
+              "specsText": "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/f410ff9dfcd978da/plata-rassirenia-cablexpert/",
+              "title": "Плата расширения Cablexpert [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/ddb26eccfacc2636/plata-rassirenia-cablexpert/",
+              "title": "Плата расширения Cablexpert [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+              "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP 2COM",
+          "name": "Плата расширения DEXP 2COM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5b9e59b725fa3330/plata-rassirenia-dexp-2com/",
+              "title": "Плата расширения DEXP 2COM [подключение: PCI, разъемы: 2 x DB9 (COM)]",
+              "specsText": "подключение: PCI, разъемы: 2 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP 2COM+LPT",
+          "name": "Плата расширения DEXP 2COM+LPT",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5b9e59b625fa3330/plata-rassirenia-dexp-2comlpt/",
+              "title": "Плата расширения DEXP 2COM+LPT [подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM), DB-25 (LPT)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP AM2USB",
+          "name": "Плата расширения DEXP AM2USB",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b7c45ae98302d760/plata-rassirenia-dexp-am2usb/",
+              "title": "Плата расширения DEXP AM2USB [подключение: M.2 (ключ M)]",
+              "specsText": "подключение: M.2 (ключ M)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP COM",
+          "name": "Плата расширения DEXP COM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5b9e59b325fa3330/plata-rassirenia-dexp-com/",
+              "title": "Плата расширения DEXP COM [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+              "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP ECUSB2.0",
+          "name": "Плата расширения DEXP ECUSB2.0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5df1b16e8308d760/plata-rassirenia-dexp-ecusb20/",
+              "title": "Плата расширения DEXP ECUSB2.0 [подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A]",
+              "specsText": "подключение: USB 2.0 (9 pin), разъемы: 2 x USB 2.0 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP USB3.0 x 2",
+          "name": "Плата расширения DEXP USB3.0 x 2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/385b9b14f4543332/plata-rassirenia-dexp-usb30-x-2/",
+              "title": "Плата расширения DEXP USB3.0 x 2 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP WT-PU3",
+          "name": "Плата расширения DEXP WT-PU3",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2612ba949dc83330/plata-rassirenia-dexp-wt-pu3/",
+              "title": "Плата расширения DEXP WT-PU3 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения DEXP Z-C7038",
+          "name": "Плата расширения DEXP Z-C7038",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/990e603a77d9ed20/plata-rassirenia-dexp-z-c7038/",
+              "title": "Плата расширения DEXP Z-C7038 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada COM-порт",
+          "name": "Плата расширения Espada COM-порт",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d7ab4ae8f1ad1709/plata-rassirenia-espada-com-port/",
+              "title": "Плата расширения Espada COM-порт [подключение: IDC10 (COM), разъемы: DB9 (COM)]",
+              "specsText": "подключение: IDC10 (COM), разъемы: DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada EPCIF-PCIM4pAd",
+          "name": "Плата расширения Espada EPCIF-PCIM4pAd",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d0abd43e1abb1b80/plata-rassirenia-espada-epcif-pcim4pad/",
+              "title": "Плата расширения Espada EPCIF-PCIM4pAd [подключение: PCI, PCI-E x1]",
+              "specsText": "подключение: PCI, PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada ES3A1061",
+          "name": "Плата расширения Espada ES3A1061",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cf2528d8b4a23330/plata-rassirenia-espada-es3a1061/",
+              "title": "Плата расширения Espada ES3A1061 [подключение: PCI-E x1, разъемы: 2 x eSATA]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x eSATA",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada EU30A",
+          "name": "Плата расширения Espada EU30A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a4665cde3287d9cb/plata-rassirenia-espada-eu30a/",
+              "title": "Плата расширения Espada EU30A [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada FG-EMT04A-1-BU01",
+          "name": "Плата расширения Espada FG-EMT04A-1-BU01",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9e5379eb69a83330/plata-rassirenia-espada-fg-emt04a-1-bu01/",
+              "title": "Плата расширения Espada FG-EMT04A-1-BU01 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada PCIe 1394a ver.2",
+          "name": "Плата расширения Espada PCIe 1394a ver.2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/921bd91718c51b80/plata-rassirenia-espada-pcie-1394a-ver2/",
+              "title": "Плата расширения Espada PCIe 1394a ver.2 [подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x FireWire (IEEE1394 6p), FireWire (IEEE1394 4p)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada PCIe2SAX",
+          "name": "Плата расширения Espada PCIe2SAX",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/44ffdbae3163b93b/plata-rassirenia-espada-pcie2sax/",
+              "title": "Плата расширения Espada PCIe2SAX [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Espada PCIeM2Wi",
+          "name": "Плата расширения Espada PCIeM2Wi",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/166831a6819d1db0/plata-rassirenia-espada-pciem2wi/",
+              "title": "Плата расширения Espada PCIeM2Wi [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-307",
+          "name": "Плата расширения ExeGate EXE-307",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbe48c793333/plata-rassirenia-exegate-exe-307/",
+              "title": "Плата расширения ExeGate EXE-307 [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-313",
+          "name": "Плата расширения ExeGate EXE-313",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbe88c793333/plata-rassirenia-exegate-exe-313/",
+              "title": "Плата расширения ExeGate EXE-313 [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-319",
+          "name": "Плата расширения ExeGate EXE-319",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbec8c793333/plata-rassirenia-exegate-exe-319/",
+              "title": "Плата расширения ExeGate EXE-319 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-323",
+          "name": "Плата расширения ExeGate EXE-323",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbee8c793333/plata-rassirenia-exegate-exe-323/",
+              "title": "Плата расширения ExeGate EXE-323 [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-352",
+          "name": "Плата расширения ExeGate EXE-352",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbde8c793333/plata-rassirenia-exegate-exe-352/",
+              "title": "Плата расширения ExeGate EXE-352 [подключение: PCI, разъемы: 4 x USB 2.0 Type-A]",
+              "specsText": "подключение: PCI, разъемы: 4 x USB 2.0 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-367",
+          "name": "Плата расширения ExeGate EXE-367",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbf08c793333/plata-rassirenia-exegate-exe-367/",
+              "title": "Плата расширения ExeGate EXE-367 [подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 3 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-501",
+          "name": "Плата расширения ExeGate EXE-501",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbf28c793333/plata-rassirenia-exegate-exe-501/",
+              "title": "Плата расширения ExeGate EXE-501 [подключение: PCI-E x1, разъемы: 2 x eSATA]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x eSATA",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-503",
+          "name": "Плата расширения ExeGate EXE-503",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbf48c793333/plata-rassirenia-exegate-exe-503/",
+              "title": "Плата расширения ExeGate EXE-503 [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ExeGate EXE-504",
+          "name": "Плата расширения ExeGate EXE-504",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d57edbf88c793333/plata-rassirenia-exegate-exe-504/",
+              "title": "Плата расширения ExeGate EXE-504 [подключение: PCI-E x2, разъемы: 2 x eSATA]",
+              "specsText": "подключение: PCI-E x2, разъемы: 2 x eSATA",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP3.5-USB3-2A",
+          "name": "Плата расширения Gembird FP3.5-USB3-2A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/754d8bcb0a76ed20/plata-rassirenia-gembird-fp35-usb3-2a/",
+              "title": "Плата расширения Gembird FP3.5-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP3.5-USB3-2A-HDA",
+          "name": "Плата расширения Gembird FP3.5-USB3-2A-HDA",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/28733b290a75ed20/plata-rassirenia-gembird-fp35-usb3-2a-hda/",
+              "title": "Плата расширения Gembird FP3.5-USB3-2A-HDA [подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм]",
+              "specsText": "подключение: AAFP, USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, Jack 3.5 мм",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP3.5-USB3-2A2C",
+          "name": "Плата расширения Gembird FP3.5-USB3-2A2C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7d89fa0e0a75ed20/plata-rassirenia-gembird-fp35-usb3-2a2c/",
+              "title": "Плата расширения Gembird FP3.5-USB3-2A2C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A, 2 x USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP3.5-USB3-3A1C",
+          "name": "Плата расширения Gembird FP3.5-USB3-3A1C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b8f16e470a75ed20/plata-rassirenia-gembird-fp35-usb3-3a1c/",
+              "title": "Плата расширения Gembird FP3.5-USB3-3A1C [подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 3 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP3.5-USB3-4A",
+          "name": "Плата расширения Gembird FP3.5-USB3-4A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/16b2d6b80a76ed20/plata-rassirenia-gembird-fp35-usb3-4a/",
+              "title": "Плата расширения Gembird FP3.5-USB3-4A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 4 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird FP5.25-USB3-2A",
+          "name": "Плата расширения Gembird FP5.25-USB3-2A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c959aafc0a74ed20/plata-rassirenia-gembird-fp525-usb3-2a/",
+              "title": "Плата расширения Gembird FP5.25-USB3-2A [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения Gembird SPCR-04",
+          "name": "Плата расширения Gembird SPCR-04",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/deb59b970a6bed20/plata-rassirenia-gembird-spcr-04/",
+              "title": "Плата расширения Gembird SPCR-04 [подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения GIGABYTE TP-V220-RB2-J6",
+          "name": "Плата расширения GIGABYTE TP-V220-RB2-J6",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8feb0eb3f8af4d8f/plata-rassirenia-gigabyte-tp-v220-rb2-j6/",
+              "title": "Плата расширения GIGABYTE TP-V220-RB2-J6 [подключение: PCI-E x16]",
+              "specsText": "подключение: PCI-E x16",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения OPEN-DEV M2-PCI-E-RISER",
+          "name": "Плата расширения OPEN-DEV M2-PCI-E-RISER",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d00f177330c73330/plata-rassirenia-open-dev-m2-pci-e-riser/",
+              "title": "Плата расширения OPEN-DEV M2-PCI-E-RISER [подключение: M.2 (ключ M)]",
+              "specsText": "подключение: M.2 (ключ M)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT A1166S6",
+          "name": "Плата расширения ORIENT A1166S6",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e8f2c6db0b29ed20/plata-rassirenia-orient-a1166s6/",
+              "title": "Плата расширения ORIENT A1166S6 [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT AJ1166S10",
+          "name": "Плата расширения ORIENT AJ1166S10",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/956bf0f50b29ed20/plata-rassirenia-orient-aj1166s10/",
+              "title": "Плата расширения ORIENT AJ1166S10 [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT AM-31U2PE-2A",
+          "name": "Плата расширения ORIENT AM-31U2PE-2A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e727b35ae32f1b80/plata-rassirenia-orient-am-31u2pe-2a/",
+              "title": "Плата расширения ORIENT AM-31U2PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT AM-U3142PE-2A",
+          "name": "Плата расширения ORIENT AM-U3142PE-2A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1c5400b80b29ed20/plata-rassirenia-orient-am-u3142pe-2a/",
+              "title": "Плата расширения ORIENT AM-U3142PE-2A [подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A]",
+              "specsText": "подключение: PCI-E x4, разъемы: 2 x USB 3.2 Gen 2 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT AM-U3142PE-AC",
+          "name": "Плата расширения ORIENT AM-U3142PE-AC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c310c08d0b35ed20/plata-rassirenia-orient-am-u3142pe-ac/",
+              "title": "Плата расширения ORIENT AM-U3142PE-AC [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2 Type-A, USB 3.2 Gen 2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT AM-U3242PE-C",
+          "name": "Плата расширения ORIENT AM-U3242PE-C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a880db3d0b28ed20/plata-rassirenia-orient-am-u3242pe-c/",
+              "title": "Плата расширения ORIENT AM-U3242PE-C [подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C]",
+              "specsText": "подключение: PCI-E x4, разъемы: USB 3.2 Gen 2x2 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT C086",
+          "name": "Плата расширения ORIENT C086",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ae51cbe55d011b80/plata-rassirenia-orient-c086/",
+              "title": "Плата расширения ORIENT C086 [подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A]",
+              "specsText": "подключение: 2 x USB 2.0 (5 pin), разъемы: 2 x USB 2.0 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT C087",
+          "name": "Плата расширения ORIENT C087",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2deed150c22a3332/plata-rassirenia-orient-c087/",
+              "title": "Плата расширения ORIENT C087 [подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: USB 3.2 Gen1 (19 pin), разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT J585S5",
+          "name": "Плата расширения ORIENT J585S5",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/22fb9acd0b35ed20/plata-rassirenia-orient-j585s5/",
+              "title": "Плата расширения ORIENT J585S5 [подключение: PCI-E x4]",
+              "specsText": "подключение: PCI-E x4",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT M9215S",
+          "name": "Плата расширения ORIENT M9215S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9431e4a10b35ed20/plata-rassirenia-orient-m9215s/",
+              "title": "Плата расширения ORIENT M9215S [подключение: PCI-E x1]",
+              "specsText": "подключение: PCI-E x1",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT NC-3U2PELP",
+          "name": "Плата расширения ORIENT NC-3U2PELP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e83d8f1390873330/plata-rassirenia-orient-nc-3u2pelp/",
+              "title": "Плата расширения ORIENT NC-3U2PELP [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT NC-3U4419PEX4",
+          "name": "Плата расширения ORIENT NC-3U4419PEX4",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/faebe7c00b35ed20/plata-rassirenia-orient-nc-3u4419pex4/",
+              "title": "Плата расширения ORIENT NC-3U4419PEX4 [подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x4, разъемы: 4 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT VA-3U2219PE",
+          "name": "Плата расширения ORIENT VA-3U2219PE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a9fa83421a723330/plata-rassirenia-orient-va-3u2219pe/",
+              "title": "Плата расширения ORIENT VA-3U2219PE [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT VA-3U2A1C",
+          "name": "Плата расширения ORIENT VA-3U2A1C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8dc6e7b677feb0d1/plata-rassirenia-orient-va-3u2a1c/",
+              "title": "Плата расширения ORIENT VA-3U2A1C [подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x USB 3.2 Gen 1 Type-A, USB 3.2 Gen 1 Type-C",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT VA-3U7PE",
+          "name": "Плата расширения ORIENT VA-3U7PE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/22b8aa1fdd0c8868/plata-rassirenia-orient-va-3u7pe/",
+              "title": "Плата расширения ORIENT VA-3U7PE [подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A]",
+              "specsText": "подключение: PCI-E x1, разъемы: 7 x USB 3.2 Gen 1 Type-A",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE1PV2",
+          "name": "Плата расширения ORIENT XWT-PE1PV2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b1ef18e3628f3330/plata-rassirenia-orient-xwt-pe1pv2/",
+              "title": "Плата расширения ORIENT XWT-PE1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT)]",
+              "specsText": "подключение: PCI-E x1, разъемы: DB-25 (LPT)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE1S1PV2",
+          "name": "Плата расширения ORIENT XWT-PE1S1PV2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2374cd4a1a733330/plata-rassirenia-orient-xwt-pe1s1pv2/",
+              "title": "Плата расширения ORIENT XWT-PE1S1PV2 [подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: DB-25 (LPT), DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE2S",
+          "name": "Плата расширения ORIENT XWT-PE2S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/030e35b0d1f1933d/plata-rassirenia-orient-xwt-pe2s/",
+              "title": "Плата расширения ORIENT XWT-PE2S [подключение: PCI-E x1, разъемы: 2 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 2 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE2SLP",
+          "name": "Плата расширения ORIENT XWT-PE2SLP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/55a5a520b8d58a5a/plata-rassirenia-orient-xwt-pe2slp/",
+              "title": "Плата расширения ORIENT XWT-PE2SLP [подключение: PCI-E x1, разъемы: DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE4SV1LP",
+          "name": "Плата расширения ORIENT XWT-PE4SV1LP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a593e8cc9c0d3330/plata-rassirenia-orient-xwt-pe4sv1lp/",
+              "title": "Плата расширения ORIENT XWT-PE4SV1LP [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE4SV2",
+          "name": "Плата расширения ORIENT XWT-PE4SV2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/21dc6daaff441b80/plata-rassirenia-orient-xwt-pe4sv2/",
+              "title": "Плата расширения ORIENT XWT-PE4SV2 [подключение: PCI-E x1, разъемы: 4 x DB9 (COM)]",
+              "specsText": "подключение: PCI-E x1, разъемы: 4 x DB9 (COM)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Плата",
+          "model": "расширения ORIENT XWT-PE4SV2LP",
+          "name": "Плата расширения ORIENT XWT-PE4SV2LP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7bbb2c901a733330/plata-rassirenia-orient-xwt-pe4sv2lp/",
+              "title": "Плата расширения ORIENT XWT-PE4SV2LP [подключение: PCI-E x1, разъемы: DB9 (COM) x4]",
+              "specsText": "подключение: PCI-E x1, разъемы: DB9 (COM) x4",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Платы расширения купить в интернет-магазине DNS. Платы расширения цены, большой каталог, новинки. - страница 1 из 5"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "Платы расширения купить в интернет-магазине DNS. Платы расширения цены, большой каталог, новинки. - страница 2 из 5"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 18,
+      "title": "Платы расширения купить в интернет-магазине DNS. Платы расширения цены, большой каталог, новинки. - страница 3 из 5"
+    },
+    {
+      "page": 4,
+      "url": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later&p=4",
+      "status": 200,
+      "count": 18,
+      "title": "Платы расширения купить в интернет-магазине DNS. Платы расширения цены, большой каталог, новинки. - страница 4 из 5"
+    },
+    {
+      "page": 5,
+      "url": "https://www.dns-shop.ru/catalog/17a89bb916404e77/platy-rassirenia/?stock=now-today-tomorrow-later&p=5",
+      "status": 200,
+      "count": 10,
+      "title": "Платы расширения купить в интернет-магазине DNS. Платы расширения цены, большой каталог, новинки. - страница 5 из 5"
+    }
+  ],
+  "errors": []
+}

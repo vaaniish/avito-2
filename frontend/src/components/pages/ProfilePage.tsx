@@ -66,16 +66,35 @@ type PartnershipPolicy = {
   contentUrl: string;
 };
 
+const PARTNERSHIP_INN_REGEX = /^\d{10}(\d{2})?$/;
+
+function isValidPartnershipEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isValidPartnershipUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export function ProfilePage({
   onBack,
   onLogout,
   userType,
   initialTab,
   onTabChange,
+  onPartnershipClick,
   onWishlistUpdate,
   onOpenListing,
+  onOpenCreateListing,
 }: ProfilePageProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTab>(initialTab ?? "profile");
+  const [activeTab, setActiveTab] = useState<ProfileTab>(
+    initialTab === "partnership" ? "profile" : initialTab ?? "profile",
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -157,12 +176,27 @@ export function ProfilePage({
 
   useEffect(() => {
     if (!initialTab) return;
+    if (initialTab === "partnership") {
+      onPartnershipClick?.();
+      return;
+    }
     setActiveTab((prev) => (prev === initialTab ? prev : initialTab));
-  }, [initialTab]);
+  }, [initialTab, onPartnershipClick]);
 
   useEffect(() => {
     onTabChange?.(activeTab);
   }, [activeTab, onTabChange]);
+
+  const handleTabChange = useCallback(
+    (tab: ProfileTab) => {
+      if (tab === "partnership") {
+        onPartnershipClick?.();
+        return;
+      }
+      setActiveTab(tab);
+    },
+    [onPartnershipClick],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -253,7 +287,7 @@ export function ProfilePage({
       setReviewModalOpen(false);
       setItemToReview(null);
       setReviewForm({ rating: 0, comment: "" });
-      // Optionally, refetch orders or update state to show "review submitted"
+      await loadProfile();
     } catch (error) {
       notifyError(error instanceof Error ? error.message : "Не удалось отправить отзыв.");
     }
@@ -474,8 +508,63 @@ export function ProfilePage({
   };
 
   const submitPartnershipRequest = async () => {
-    if (!partnershipForm.name || !partnershipForm.email || !partnershipForm.contact || !partnershipForm.link || !partnershipForm.category || !partnershipForm.whyUs) {
+    const normalizedForm: PartnershipForm = {
+      sellerType: partnershipForm.sellerType,
+      name: partnershipForm.name.trim(),
+      email: partnershipForm.email.trim(),
+      contact: partnershipForm.contact.trim(),
+      link: partnershipForm.link.trim(),
+      category: partnershipForm.category.trim(),
+      inn: partnershipForm.inn.trim(),
+      geography: partnershipForm.geography.trim(),
+      socialProfile: partnershipForm.socialProfile.trim(),
+      credibility: partnershipForm.credibility.trim(),
+      whyUs: partnershipForm.whyUs.trim(),
+    };
+
+    if (
+      !normalizedForm.name ||
+      !normalizedForm.email ||
+      !normalizedForm.contact ||
+      !normalizedForm.link ||
+      !normalizedForm.category ||
+      !normalizedForm.inn ||
+      !normalizedForm.geography ||
+      !normalizedForm.socialProfile ||
+      !normalizedForm.credibility ||
+      !normalizedForm.whyUs
+    ) {
       notifyInfo("Заполните обязательные поля заявки");
+      return;
+    }
+
+    if (!isValidPartnershipEmail(normalizedForm.email)) {
+      notifyInfo("Укажите корректный email компании");
+      return;
+    }
+
+    if (!isValidPartnershipUrl(normalizedForm.link)) {
+      notifyInfo("Укажите корректную ссылку на сайт или витрину (http/https)");
+      return;
+    }
+
+    if (!isValidPartnershipUrl(normalizedForm.socialProfile)) {
+      notifyInfo("Укажите корректную ссылку на публичный профиль компании (http/https)");
+      return;
+    }
+
+    if (!PARTNERSHIP_INN_REGEX.test(normalizedForm.inn)) {
+      notifyInfo("ИНН должен содержать 10 или 12 цифр");
+      return;
+    }
+
+    if (normalizedForm.credibility.length < 20) {
+      notifyInfo("Опишите надежность бизнеса подробнее (минимум 20 символов)");
+      return;
+    }
+
+    if (normalizedForm.whyUs.length < 30) {
+      notifyInfo("Расскажите подробнее, как вы будете работать на платформе (минимум 30 символов)");
       return;
     }
 
@@ -489,7 +578,10 @@ export function ProfilePage({
         scope: "partnership",
         policyId: partnershipPolicy.id || undefined,
       });
-      const response = await apiPost<{ success: boolean; request_id: string }>("/profile/partnership-requests", partnershipForm);
+      const response = await apiPost<{ success: boolean; request_id: string }>(
+        "/profile/partnership-requests",
+        normalizedForm,
+      );
       notifySuccess(`Заявка отправлена: ${response.request_id}`);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : "Не удалось отправить заявку");
@@ -693,7 +785,7 @@ export function ProfilePage({
             userType={userType}
             activeTab={activeTab}
             profile={profile}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             onLogout={onLogout}
           />
 
@@ -702,6 +794,8 @@ export function ProfilePage({
               activeTab={activeTab}
               baseTabRenderers={baseTabRenderers}
               onRequestAddressChange={handleAddressChangeFromListings}
+              onOpenListing={onOpenListing ?? (() => {})}
+              onOpenCreateListing={onOpenCreateListing}
             />
           </main>
         </div>

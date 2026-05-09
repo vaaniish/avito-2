@@ -1,0 +1,613 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Профессиональное сетевое оборудование",
+  "itemName": "Инструменты для витой пары",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9dcd816404e77/instrumenty-dla-vitoj-pary/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:25.768Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 23,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/d56f270b736369bb/instrument-dla-zacistki-aceline-acstpt-stut/",
+      "title": "Инструмент для зачистки Aceline AcSTPT-STUT [заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции]",
+      "specsText": "заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции",
+      "bracketGroups": [
+        "заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции"
+      ],
+      "priceText": "",
+      "productId": "d56f270b736369bb",
+      "cardText": "Инструмент для зачистки Aceline AcSTPT-STUT [заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции]4.86 |73 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e3b6584986543361/instrument-dla-zacistki-5bites-ly-t352/",
+      "title": "Инструмент для зачистки 5Bites LY-T352 [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "e3b6584986543361",
+      "cardText": "Инструмент для зачистки 5Bites LY-T352 [зачистка кабеля]4.92 |64 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7dd4082508652787/instrument-dla-zacistki-aceline-acsta-stut/",
+      "title": "Инструмент для зачистки Aceline AcSTA-STUT [зачистка кабеля, обрезка кабеля, снятие изоляции]",
+      "specsText": "зачистка кабеля, обрезка кабеля, снятие изоляции",
+      "bracketGroups": [
+        "зачистка кабеля, обрезка кабеля, снятие изоляции"
+      ],
+      "priceText": "",
+      "productId": "7dd4082508652787",
+      "cardText": "Инструмент для зачистки Aceline AcSTA-STUT [зачистка кабеля, обрезка кабеля, снятие изоляции]4.76 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ff5f21f00f7b1b80/instrument-dla-zadelki-rexant-12-4201/",
+      "title": "Инструмент для заделки Rexant 12-4201 [заделка кабеля, зачистка кабеля]",
+      "specsText": "заделка кабеля, зачистка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "ff5f21f00f7b1b80",
+      "cardText": "Инструмент для заделки Rexant 12-4201 [заделка кабеля, зачистка кабеля]4.41 |190 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/591b1399ae0b8a5a/instrument-dla-zadelki-5bites-ly-t3141/",
+      "title": "Инструмент для заделки 5bites LY-T3141 [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "591b1399ae0b8a5a",
+      "cardText": "Инструмент для заделки 5bites LY-T3141 [зачистка кабеля]4.79 |14 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d487d2b23330/instrument-dla-zadelki-rexant-12-4222/",
+      "title": "Инструмент для заделки Rexant 12-4222 [заделка кабеля, зачистка кабеля]",
+      "specsText": "заделка кабеля, зачистка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "2cb8d487d2b23330",
+      "cardText": "Инструмент для заделки Rexant 12-4222 [заделка кабеля, зачистка кабеля]4.39 |46 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3a2f344e8301c77c/instrument-dla-zadelki-lanmaster-twt-pnd-lsa-a/",
+      "title": "Инструмент для заделки Lanmaster TWT-PND-LSA-A [заделка кабеля, обрезка кабеля]",
+      "specsText": "заделка кабеля, обрезка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, обрезка кабеля"
+      ],
+      "priceText": "",
+      "productId": "3a2f344e8301c77c",
+      "cardText": "Инструмент для заделки Lanmaster TWT-PND-LSA-A [заделка кабеля, обрезка кабеля]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/36314d23990cd721/instrument-dla-zadelki-rexant-mini-ht-318m/",
+      "title": "Инструмент для заделки Rexant Mini HT-318M [заделка кабеля, зачистка кабеля]",
+      "specsText": "заделка кабеля, зачистка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "36314d23990cd721",
+      "cardText": "Инструмент для заделки Rexant Mini HT-318M [заделка кабеля, зачистка кабеля]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d485d2b23330/instrument-dla-zadelki-rexant-ht-314b/",
+      "title": "Инструмент для заделки Rexant HT-314B [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "2cb8d485d2b23330",
+      "cardText": "Инструмент для заделки Rexant HT-314B [зачистка кабеля]4.48 |79 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/591b138fae0b8a5a/instrument-dla-zadelki-5bites-ly-3140n/",
+      "title": "Инструмент для заделки 5bites LY-3140N [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "591b138fae0b8a5a",
+      "cardText": "Инструмент для заделки 5bites LY-3140N [зачистка кабеля]4.89 |9 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d47dd2b23330/instrument-dla-zacistki-rexant-ht-s-501b/",
+      "title": "Инструмент для зачистки Rexant HT-S-501B [зачистка кабеля, обрезка кабеля]",
+      "specsText": "зачистка кабеля, обрезка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля, обрезка кабеля"
+      ],
+      "priceText": "",
+      "productId": "2cb8d47dd2b23330",
+      "cardText": "Инструмент для зачистки Rexant HT-S-501B [зачистка кабеля, обрезка кабеля]4.67 |12 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/591b138bae0b8a5a/instrument-dla-zadelki-5bites-ly-t2020b/",
+      "title": "Инструмент для заделки 5bites LY-T2020B [заделка кабеля, зачистка кабеля]",
+      "specsText": "заделка кабеля, зачистка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "591b138bae0b8a5a",
+      "cardText": "Инструмент для заделки 5bites LY-T2020B [заделка кабеля, зачистка кабеля]4.5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/81320c52432cf9db/instrument-dla-zadelki-lanmaster-lan-pnd-110/",
+      "title": "Инструмент для заделки Lanmaster LAN-PND-110 [заделка кабеля]",
+      "specsText": "заделка кабеля",
+      "bracketGroups": [
+        "заделка кабеля"
+      ],
+      "priceText": "",
+      "productId": "81320c52432cf9db",
+      "cardText": "Инструмент для заделки Lanmaster LAN-PND-110 [заделка кабеля]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9bbd4f641df9a4ea/instrument-dla-zacistki-lanmaster-twt-str-utp/",
+      "title": "Инструмент для зачистки Lanmaster TWT-STR-UTP [обрезка кабеля, снятие изоляции]",
+      "specsText": "обрезка кабеля, снятие изоляции",
+      "bracketGroups": [
+        "обрезка кабеля, снятие изоляции"
+      ],
+      "priceText": "",
+      "productId": "9bbd4f641df9a4ea",
+      "cardText": "Инструмент для зачистки Lanmaster TWT-STR-UTP [обрезка кабеля, снятие изоляции]4 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/074b6ccfa5a12ff4/instrument-dla-zadelki-vention-kech0/",
+      "title": "Инструмент для заделки Vention KECH0 [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "074b6ccfa5a12ff4",
+      "cardText": "Инструмент для заделки Vention KECH0 [зачистка кабеля]4.5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d21d919491a98298/instrument-dla-zacistki-lanmaster-lan-ft-strofc/",
+      "title": "Инструмент для зачистки Lanmaster LAN-FT-STR/OFC [снятие изоляции]",
+      "specsText": "снятие изоляции",
+      "bracketGroups": [
+        "снятие изоляции"
+      ],
+      "priceText": "",
+      "productId": "d21d919491a98298",
+      "cardText": "Инструмент для зачистки Lanmaster LAN-FT-STR/OFC [снятие изоляции]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5c5ce768745ff107/instrument-dla-zadelki-lanmaster-twt-pnd-lsa-b/",
+      "title": "Инструмент для заделки Lanmaster TWT-PND-LSA-B [заделка кабеля, обрезка кабеля]",
+      "specsText": "заделка кабеля, обрезка кабеля",
+      "bracketGroups": [
+        "заделка кабеля, обрезка кабеля"
+      ],
+      "priceText": "",
+      "productId": "5c5ce768745ff107",
+      "cardText": "Инструмент для заделки Lanmaster TWT-PND-LSA-B [заделка кабеля, обрезка кабеля]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e089111eff09e653/instrument-dla-zacistki-lanmaster-lan-ft-strdis/",
+      "title": "Инструмент для зачистки Lanmaster LAN-FT-STR/DIS [снятие изоляции]",
+      "specsText": "снятие изоляции",
+      "bracketGroups": [
+        "снятие изоляции"
+      ],
+      "priceText": "",
+      "productId": "e089111eff09e653",
+      "cardText": "Инструмент для зачистки Lanmaster LAN-FT-STR/DIS [снятие изоляции]5 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ecc13e7520c44f00/instrument-dla-zacistki-lanmaster-lan-ft-cutlobl/",
+      "title": "Инструмент для зачистки Lanmaster (LAN-FT-CUTL/OBL) [зачистка кабеля, обрезка кабеля]",
+      "specsText": "зачистка кабеля, обрезка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля, обрезка кабеля"
+      ],
+      "priceText": "",
+      "productId": "ecc13e7520c44f00",
+      "cardText": "Инструмент для зачистки Lanmaster (LAN-FT-CUTL/OBL) [зачистка кабеля, обрезка кабеля]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d6704a34b2132e53/instrument-dla-zadelki-lanmaster-lan-pnd/",
+      "title": "Инструмент для заделки Lanmaster LAN-PND [заделка кабеля]",
+      "specsText": "заделка кабеля",
+      "bracketGroups": [
+        "заделка кабеля"
+      ],
+      "priceText": "",
+      "productId": "d6704a34b2132e53",
+      "cardText": "Инструмент для заделки Lanmaster LAN-PND [заделка кабеля]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3da4e5b701523332/instrument-dla-zadelki-hyperline-ht-3240/",
+      "title": "Инструмент для заделки Hyperline HT-3240 [запрессовка кабеля]",
+      "specsText": "запрессовка кабеля",
+      "bracketGroups": [
+        "запрессовка кабеля"
+      ],
+      "priceText": "",
+      "productId": "3da4e5b701523332",
+      "cardText": "Инструмент для заделки Hyperline HT-3240 [запрессовка кабеля] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d086abc978033330/instrument-dla-zacistki-talon-tool-ht-325/",
+      "title": "Инструмент для зачистки TALON TOOL HT-325 [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "d086abc978033330",
+      "cardText": "Инструмент для зачистки TALON TOOL HT-325 [зачистка кабеля]3.53 |10 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cefc6f5ea7829e06/instrument-dla-zacistki-lanmaster-lan-ft-strftth/",
+      "title": "Инструмент для зачистки Lanmaster (LAN-FT-STR/FTTH) [зачистка кабеля]",
+      "specsText": "зачистка кабеля",
+      "bracketGroups": [
+        "зачистка кабеля"
+      ],
+      "priceText": "",
+      "productId": "cefc6f5ea7829e06",
+      "cardText": "Инструмент для зачистки Lanmaster (LAN-FT-STR/FTTH) [зачистка кабеля]5|рейтинг бренда"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Инструмент",
+      "models": [
+        {
+          "brand": "Инструмент",
+          "model": "для заделки 5bites LY-3140N",
+          "name": "Инструмент для заделки 5bites LY-3140N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/591b138fae0b8a5a/instrument-dla-zadelki-5bites-ly-3140n/",
+              "title": "Инструмент для заделки 5bites LY-3140N [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки 5bites LY-T2020B",
+          "name": "Инструмент для заделки 5bites LY-T2020B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/591b138bae0b8a5a/instrument-dla-zadelki-5bites-ly-t2020b/",
+              "title": "Инструмент для заделки 5bites LY-T2020B [заделка кабеля, зачистка кабеля]",
+              "specsText": "заделка кабеля, зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки 5bites LY-T3141",
+          "name": "Инструмент для заделки 5bites LY-T3141",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/591b1399ae0b8a5a/instrument-dla-zadelki-5bites-ly-t3141/",
+              "title": "Инструмент для заделки 5bites LY-T3141 [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Hyperline HT-3240",
+          "name": "Инструмент для заделки Hyperline HT-3240",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3da4e5b701523332/instrument-dla-zadelki-hyperline-ht-3240/",
+              "title": "Инструмент для заделки Hyperline HT-3240 [запрессовка кабеля]",
+              "specsText": "запрессовка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Lanmaster LAN-PND",
+          "name": "Инструмент для заделки Lanmaster LAN-PND",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d6704a34b2132e53/instrument-dla-zadelki-lanmaster-lan-pnd/",
+              "title": "Инструмент для заделки Lanmaster LAN-PND [заделка кабеля]",
+              "specsText": "заделка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Lanmaster LAN-PND-110",
+          "name": "Инструмент для заделки Lanmaster LAN-PND-110",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/81320c52432cf9db/instrument-dla-zadelki-lanmaster-lan-pnd-110/",
+              "title": "Инструмент для заделки Lanmaster LAN-PND-110 [заделка кабеля]",
+              "specsText": "заделка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Lanmaster TWT-PND-LSA-A",
+          "name": "Инструмент для заделки Lanmaster TWT-PND-LSA-A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3a2f344e8301c77c/instrument-dla-zadelki-lanmaster-twt-pnd-lsa-a/",
+              "title": "Инструмент для заделки Lanmaster TWT-PND-LSA-A [заделка кабеля, обрезка кабеля]",
+              "specsText": "заделка кабеля, обрезка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Lanmaster TWT-PND-LSA-B",
+          "name": "Инструмент для заделки Lanmaster TWT-PND-LSA-B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5c5ce768745ff107/instrument-dla-zadelki-lanmaster-twt-pnd-lsa-b/",
+              "title": "Инструмент для заделки Lanmaster TWT-PND-LSA-B [заделка кабеля, обрезка кабеля]",
+              "specsText": "заделка кабеля, обрезка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Rexant 12-4201",
+          "name": "Инструмент для заделки Rexant 12-4201",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ff5f21f00f7b1b80/instrument-dla-zadelki-rexant-12-4201/",
+              "title": "Инструмент для заделки Rexant 12-4201 [заделка кабеля, зачистка кабеля]",
+              "specsText": "заделка кабеля, зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Rexant 12-4222",
+          "name": "Инструмент для заделки Rexant 12-4222",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d487d2b23330/instrument-dla-zadelki-rexant-12-4222/",
+              "title": "Инструмент для заделки Rexant 12-4222 [заделка кабеля, зачистка кабеля]",
+              "specsText": "заделка кабеля, зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Rexant HT-314B",
+          "name": "Инструмент для заделки Rexant HT-314B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d485d2b23330/instrument-dla-zadelki-rexant-ht-314b/",
+              "title": "Инструмент для заделки Rexant HT-314B [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Rexant Mini HT-318M",
+          "name": "Инструмент для заделки Rexant Mini HT-318M",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/36314d23990cd721/instrument-dla-zadelki-rexant-mini-ht-318m/",
+              "title": "Инструмент для заделки Rexant Mini HT-318M [заделка кабеля, зачистка кабеля]",
+              "specsText": "заделка кабеля, зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для заделки Vention KECH0",
+          "name": "Инструмент для заделки Vention KECH0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/074b6ccfa5a12ff4/instrument-dla-zadelki-vention-kech0/",
+              "title": "Инструмент для заделки Vention KECH0 [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки 5Bites LY-T352",
+          "name": "Инструмент для зачистки 5Bites LY-T352",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e3b6584986543361/instrument-dla-zacistki-5bites-ly-t352/",
+              "title": "Инструмент для зачистки 5Bites LY-T352 [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Aceline AcSTA-STUT",
+          "name": "Инструмент для зачистки Aceline AcSTA-STUT",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7dd4082508652787/instrument-dla-zacistki-aceline-acsta-stut/",
+              "title": "Инструмент для зачистки Aceline AcSTA-STUT [зачистка кабеля, обрезка кабеля, снятие изоляции]",
+              "specsText": "зачистка кабеля, обрезка кабеля, снятие изоляции",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Aceline AcSTPT-STUT",
+          "name": "Инструмент для зачистки Aceline AcSTPT-STUT",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d56f270b736369bb/instrument-dla-zacistki-aceline-acstpt-stut/",
+              "title": "Инструмент для зачистки Aceline AcSTPT-STUT [заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции]",
+              "specsText": "заделка кабеля, зачистка кабеля, обрезка кабеля, снятие изоляции",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Lanmaster (LAN-FT-CUTL/OBL)",
+          "name": "Инструмент для зачистки Lanmaster (LAN-FT-CUTL/OBL)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ecc13e7520c44f00/instrument-dla-zacistki-lanmaster-lan-ft-cutlobl/",
+              "title": "Инструмент для зачистки Lanmaster (LAN-FT-CUTL/OBL) [зачистка кабеля, обрезка кабеля]",
+              "specsText": "зачистка кабеля, обрезка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Lanmaster (LAN-FT-STR/FTTH)",
+          "name": "Инструмент для зачистки Lanmaster (LAN-FT-STR/FTTH)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cefc6f5ea7829e06/instrument-dla-zacistki-lanmaster-lan-ft-strftth/",
+              "title": "Инструмент для зачистки Lanmaster (LAN-FT-STR/FTTH) [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Lanmaster LAN-FT-STR/DIS",
+          "name": "Инструмент для зачистки Lanmaster LAN-FT-STR/DIS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e089111eff09e653/instrument-dla-zacistki-lanmaster-lan-ft-strdis/",
+              "title": "Инструмент для зачистки Lanmaster LAN-FT-STR/DIS [снятие изоляции]",
+              "specsText": "снятие изоляции",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Lanmaster LAN-FT-STR/OFC",
+          "name": "Инструмент для зачистки Lanmaster LAN-FT-STR/OFC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d21d919491a98298/instrument-dla-zacistki-lanmaster-lan-ft-strofc/",
+              "title": "Инструмент для зачистки Lanmaster LAN-FT-STR/OFC [снятие изоляции]",
+              "specsText": "снятие изоляции",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Lanmaster TWT-STR-UTP",
+          "name": "Инструмент для зачистки Lanmaster TWT-STR-UTP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9bbd4f641df9a4ea/instrument-dla-zacistki-lanmaster-twt-str-utp/",
+              "title": "Инструмент для зачистки Lanmaster TWT-STR-UTP [обрезка кабеля, снятие изоляции]",
+              "specsText": "обрезка кабеля, снятие изоляции",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки Rexant HT-S-501B",
+          "name": "Инструмент для зачистки Rexant HT-S-501B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d47dd2b23330/instrument-dla-zacistki-rexant-ht-s-501b/",
+              "title": "Инструмент для зачистки Rexant HT-S-501B [зачистка кабеля, обрезка кабеля]",
+              "specsText": "зачистка кабеля, обрезка кабеля",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для зачистки TALON TOOL HT-325",
+          "name": "Инструмент для зачистки TALON TOOL HT-325",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d086abc978033330/instrument-dla-zacistki-talon-tool-ht-325/",
+              "title": "Инструмент для зачистки TALON TOOL HT-325 [зачистка кабеля]",
+              "specsText": "зачистка кабеля",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9dcd816404e77/instrumenty-dla-vitoj-pary/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Инструменты для витой пары купить в интернет-магазине DNS. Инструменты для витой пары цены, большой каталог, новинки. - страница 1 из 2"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17a9dcd816404e77/instrumenty-dla-vitoj-pary/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 5,
+      "title": "Инструменты для витой пары купить в интернет-магазине DNS. Инструменты для витой пары цены, большой каталог, новинки. - страница 2 из 2"
+    }
+  ],
+  "errors": []
+}

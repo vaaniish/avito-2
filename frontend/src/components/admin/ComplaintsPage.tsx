@@ -8,9 +8,10 @@ import {
   CircleX,
   ExternalLink,
   Search,
-  X,
 } from "lucide-react";
 import { apiGet, apiPatch } from "../../lib/api";
+import { AppModal } from "../ui/app-modal";
+import { ScoreExplanation, type ScoreExplanationRow } from "./ScoreExplanation";
 import { confirmDialog, notifyError } from "../ui/notifications";
 
 type ComplaintStatus = "new" | "pending" | "approved" | "rejected";
@@ -70,6 +71,7 @@ type ComplaintItem = {
   reporterId: string;
   reporterName: string;
   reporterEmail: string;
+  sellerComplaintsCount: number;
   sellerViolationsCount: number;
   sellerListingsCount: number;
   sellerOrdersCount: number;
@@ -263,6 +265,109 @@ function getComplaintTypeLabel(type: string): string {
   if (normalized === "other") return "Другая причина";
   if (normalized === "payment_off_platform") return "Оплата вне платформы";
   return type;
+}
+
+function isOffPlatformComplaintType(type: string): boolean {
+  const normalized = type.trim().toLowerCase();
+  return (
+    normalized.includes("вне") ||
+    normalized.includes("platform") ||
+    normalized.includes("payment")
+  );
+}
+
+function buildComplaintRiskRows(complaint: ComplaintItem): ScoreExplanationRow[] {
+  const rows: ScoreExplanationRow[] = [];
+
+  if (complaint.sellerComplaintsCount >= 5) {
+    rows.push({
+      label: "Много жалоб на продавца",
+      points: 30,
+      reason: "История продавца считается сильным объективным сигналом повторного риска.",
+    });
+  } else if (complaint.sellerComplaintsCount >= 2) {
+    rows.push({
+      label: "Повторные жалобы на продавца",
+      points: 15,
+      reason: "Сигнал слабее, чем массовые жалобы, но уже показывает повторяемость.",
+    });
+  }
+
+  if (complaint.listingComplaintsCount >= 3) {
+    rows.push({
+      label: "3+ жалобы на объявление",
+      points: 20,
+      reason: "Несколько независимых репортов повышают доверие к жалобе.",
+    });
+  } else if (complaint.listingComplaintsCount >= 2) {
+    rows.push({
+      label: "2 жалобы на объявление",
+      points: 10,
+      reason: "Умеренный повторный сигнал: одного репорта уже недостаточно, но массовости нет.",
+    });
+  }
+
+  if (isOffPlatformComplaintType(complaint.complaintType)) {
+    rows.push({
+      label: "Тип жалобы про оплату вне платформы",
+      points: 20,
+      reason: "Высокий риск обхода сделки и мошенничества.",
+    });
+  }
+
+  return rows;
+}
+
+function complaintRiskNotes(complaint: ComplaintItem): string[] {
+  const rawScore = buildComplaintRiskRows(complaint).reduce((sum, row) => sum + row.points, 0);
+  return [
+    `Сырой балл: ${rawScore}. Риск = round(${rawScore} / 70 * 100) = ${complaint.riskScore}.`,
+    "70 — текущий максимум базовой шкалы объективных сигналов.",
+    "60+ рекомендует подтвердить, 20 и ниже — отклонить, середина остается на ручную проверку.",
+    complaint.evaluation.reasons.includes("insufficient_objective_signals")
+      ? "Объективных сигналов мало, поэтому система не поднимает риск без проверки модератором."
+      : "Сработали объективные признаки: история жалоб, повторяемость или тип высокого риска.",
+  ];
+}
+
+function buildComplaintQueueRows(complaint: ComplaintItem): ScoreExplanationRow[] {
+  const ageBoost = Math.min(30, Math.floor(complaint.ageHours / 12) * 2);
+  const repeatBoost = Math.min(36, complaint.sellerViolationsCount * 9);
+  const listingBoost = Math.min(20, Math.max(0, complaint.listingComplaintsCount - 1) * 7);
+
+  return [
+    {
+      label: "Риск жалобы",
+      points: complaint.riskScore,
+      reason: "Базовая серьезность кейса: чем выше риск, тем раньше он нужен модератору.",
+    },
+    {
+      label: "Возраст жалобы",
+      points: ageBoost,
+      reason: "Добавляет до +30, чтобы старые жалобы не зависали внизу очереди.",
+    },
+    {
+      label: "Подтвержденные нарушения продавца",
+      points: repeatBoost,
+      reason: "Добавляет до +36: подтвержденные кейсы важнее неподтвержденных жалоб.",
+    },
+    {
+      label: "Повторные жалобы на это объявление",
+      points: listingBoost,
+      reason: "Добавляет до +20, чтобы массово репортимые объявления поднимались выше.",
+    },
+  ];
+}
+
+function complaintQueueNotes(complaint: ComplaintItem): string[] {
+  const ageBoost = Math.min(30, Math.floor(complaint.ageHours / 12) * 2);
+  const repeatBoost = Math.min(36, complaint.sellerViolationsCount * 9);
+  const listingBoost = Math.min(20, Math.max(0, complaint.listingComplaintsCount - 1) * 7);
+  return [
+    `Формула: ${complaint.riskScore} + ${ageBoost} + ${repeatBoost} + ${listingBoost} = ${complaint.queueScore}.`,
+    "85+ — высокий приоритет, 50+ — средний, ниже — низкий.",
+    `Возраст жалобы: ${complaint.ageHours} ч. Подтвержденных нарушений продавца: ${complaint.sellerViolationsCount}. Жалоб на объявление: ${complaint.listingComplaintsCount}.`,
+  ];
 }
 
 function buildComplaintListingHref(listingId: string, fallbackUrl: string): string {
@@ -668,10 +773,17 @@ export function ComplaintsPage() {
 
       <div className="space-y-3">
         {listData.items.map((complaint) => (
-          <button
+          <div
             key={complaint.id}
-            type="button"
+            role="button"
+            tabIndex={0}
             onClick={() => handleOpenDetail(complaint.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleOpenDetail(complaint.id);
+              }
+            }}
             className={`dashboard-card w-full text-left ${selectedComplaintId === complaint.id ? "border-[rgb(38,83,141)]" : ""}`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -680,19 +792,31 @@ export function ComplaintsPage() {
                 <div className="text-xs text-gray-500">{formatDateTime(complaint.createdAt)}</div>
                 <div className="mt-1 text-sm">{complaint.listingTitle}</div>
                 <div className="mt-1 flex flex-wrap gap-1 text-xs">
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
-                    Балл очереди {complaint.queueScore}
-                  </span>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
-                    Риск {complaint.riskScore}
-                  </span>
+                  <ScoreExplanation
+                    label="Балл очереди"
+                    value={complaint.queueScore}
+                    title="Как рассчитан балл очереди"
+                    formula="queueScore = riskScore + ageBoost + repeatBoost + listingBoost"
+                    rows={buildComplaintQueueRows(complaint)}
+                    notes={complaintQueueNotes(complaint)}
+                    tone={complaint.queueScore >= 50 ? "warning" : "neutral"}
+                  />
+                  <ScoreExplanation
+                    label="Риск"
+                    value={complaint.riskScore}
+                    title="Как рассчитан риск жалобы"
+                    formula="riskScore = round(rawScore / 70 * 100)"
+                    rows={buildComplaintRiskRows(complaint)}
+                    notes={complaintRiskNotes(complaint)}
+                    tone={complaint.riskScore >= 60 ? "warning" : "neutral"}
+                  />
                 </div>
               </div>
               <span className={`rounded-full border px-2 py-1 text-xs ${getStatusClass(complaint.status)}`}>
                 {getStatusLabel(complaint.status)}
               </span>
             </div>
-          </button>
+          </div>
         ))}
 
         {listData.items.length === 0 ? (
@@ -741,28 +865,72 @@ export function ComplaintsPage() {
 
       {isDetailOpen && typeof document !== "undefined"
         ? createPortal(
-        <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center"
-          style={{
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            padding: "24px",
-          }}
-          onClick={handleCloseDetail}
+        <AppModal
+          open={isDetailOpen}
+          onClose={handleCloseDetail}
+          size="lg"
+          bodyClassName="app-modal__body--wide complaint-review-modal"
+          footerClassName="complaint-review-modal__footer"
+          footer={
+            selectedComplaint ? (
+              <div className="w-full">
+                <div className="text-xs font-medium text-slate-500">Комментарий модератора</div>
+                <textarea
+                  className="field-control mt-2 min-h-[88px] rounded-xl border-slate-200 bg-slate-50/40 focus:bg-white"
+                  rows={3}
+                  placeholder={
+                    isComplaintDecisionLocked
+                      ? "Жалоба закрыта, редактирование недоступно"
+                      : "Добавьте комментарий к решению"
+                  }
+                  value={moderatorComment}
+                  onChange={(event) => setModeratorComment(event.target.value)}
+                  disabled={isComplaintDecisionLocked}
+                />
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      void handleUpdateStatus("rejected");
+                    }}
+                    className={
+                      isComplaintDecisionLocked
+                        ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
+                        : "btn-success-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
+                    }
+                    disabled={isActionLoading !== null || isComplaintDecisionLocked}
+                  >
+                    <CircleX className="h-4 w-4" /> Отклонить
+                  </button>
+                  <button
+                    onClick={() => {
+                      void handleUpdateStatus("approved");
+                    }}
+                    className={
+                      isComplaintDecisionLocked
+                        ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
+                        : "btn-danger-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
+                    }
+                    disabled={isActionLoading !== null || isComplaintDecisionLocked}
+                  >
+                    <CheckCircle className="h-4 w-4" /> Подтвердить
+                  </button>
+                </div>
+                {isComplaintDecisionLocked ? (
+                  <div className="mt-2 text-xs text-amber-700">
+                    Жалоба зафиксирована со статусом «{getStatusLabel(selectedComplaint.status)}».
+                    Изменение решения недоступно.
+                  </div>
+                ) : null}
+              </div>
+            ) : undefined
+          }
         >
-          <div
-            className="w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_28px_80px_-30px_rgba(15,23,42,0.45)] ring-1 ring-slate-300/60"
-            style={{
-              maxWidth: "760px",
-              maxHeight: "80vh",
-            }}
-            onClick={(event) => event.stopPropagation()}
-          >
             {!selectedComplaint ? (
               <div className="p-8 text-center text-sm text-slate-500">Загрузка деталей жалобы...</div>
             ) : (
-              <div className="flex flex-col" style={{ maxHeight: "80vh" }}>
-                <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white px-5 py-4 md:px-6">
-                  <div className="flex items-start justify-between gap-4">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-start gap-4">
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-slate-900">{selectedComplaint.id}</div>
                       <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
@@ -781,16 +949,6 @@ export function ComplaintsPage() {
                         </a>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50"
-                        onClick={handleCloseDetail}
-                        aria-label="Закрыть"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
@@ -799,12 +957,24 @@ export function ComplaintsPage() {
                     >
                       {getStatusLabel(selectedComplaint.status)}
                     </span>
-                    <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-                      Риск {selectedComplaint.riskScore}
-                    </span>
-                    <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-                      Балл очереди {selectedComplaint.queueScore}
-                    </span>
+                    <ScoreExplanation
+                      label="Риск"
+                      value={selectedComplaint.riskScore}
+                      title="Как рассчитан риск жалобы"
+                      formula="riskScore = round(rawScore / 70 * 100)"
+                      rows={buildComplaintRiskRows(selectedComplaint)}
+                      notes={complaintRiskNotes(selectedComplaint)}
+                      tone={selectedComplaint.riskScore >= 60 ? "warning" : "neutral"}
+                    />
+                    <ScoreExplanation
+                      label="Балл очереди"
+                      value={selectedComplaint.queueScore}
+                      title="Как рассчитан балл очереди"
+                      formula="queueScore = riskScore + ageBoost + repeatBoost + listingBoost"
+                      rows={buildComplaintQueueRows(selectedComplaint)}
+                      notes={complaintQueueNotes(selectedComplaint)}
+                      tone={selectedComplaint.queueScore >= 50 ? "warning" : "neutral"}
+                    />
                   </div>
 
                   <div className="dashboard-chip-row mt-4">
@@ -820,7 +990,7 @@ export function ComplaintsPage() {
                   </div>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 md:px-6 md:py-5">
+                <div>
                   {activeTab === "overview" ? (
                     <div className="space-y-4 text-sm">
                       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -933,59 +1103,9 @@ export function ComplaintsPage() {
                   ) : null}
                 </div>
 
-                <div className="border-t border-slate-200 bg-white/95 px-5 py-4 backdrop-blur md:px-6">
-                  <div className="text-xs font-medium text-slate-500">Комментарий модератора</div>
-                  <textarea
-                    className="field-control mt-2 min-h-[88px] rounded-xl border-slate-200 bg-slate-50/40 focus:bg-white"
-                    rows={3}
-                    placeholder={
-                      isComplaintDecisionLocked
-                        ? "Жалоба закрыта, редактирование недоступно"
-                        : "Добавьте комментарий к решению"
-                    }
-                    value={moderatorComment}
-                    onChange={(event) => setModeratorComment(event.target.value)}
-                    disabled={isComplaintDecisionLocked}
-                  />
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => {
-                        void handleUpdateStatus("rejected");
-                      }}
-                      className={
-                        isComplaintDecisionLocked
-                          ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
-                          : "btn-success-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
-                      }
-                      disabled={isActionLoading !== null || isComplaintDecisionLocked}
-                    >
-                      <CircleX className="h-4 w-4" /> Отклонить
-                    </button>
-                    <button
-                      onClick={() => {
-                        void handleUpdateStatus("approved");
-                      }}
-                      className={
-                        isComplaintDecisionLocked
-                          ? "flex w-full cursor-not-allowed items-center justify-center gap-1 rounded-xl border border-slate-300 bg-slate-100 py-2 text-sm text-slate-400"
-                          : "btn-danger-soft flex w-full items-center justify-center gap-1 py-2 text-sm"
-                      }
-                      disabled={isActionLoading !== null || isComplaintDecisionLocked}
-                    >
-                      <CheckCircle className="h-4 w-4" /> Подтвердить
-                    </button>
-                  </div>
-                  {isComplaintDecisionLocked ? (
-                    <div className="mt-2 text-xs text-amber-700">
-                      Жалоба зафиксирована со статусом «{getStatusLabel(selectedComplaint.status)}».
-                      Изменение решения недоступно.
-                    </div>
-                  ) : null}
-                </div>
               </div>
             )}
-          </div>
-        </div>,
+        </AppModal>,
         document.body,
       )
         : null}

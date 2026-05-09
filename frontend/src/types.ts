@@ -9,6 +9,9 @@ export interface Product {
   seller: string;
   sellerId?: string;
   category: string;
+  catalogCategoryId?: string;
+  catalogSubcategoryId?: string;
+  catalogItemId?: string;
   sku?: string; // Article/SKU number
   isNew?: boolean;
   isSale?: boolean;
@@ -30,6 +33,10 @@ export interface Product {
   breadcrumbs?: string[]; // Category breadcrumbs
   condition?: "new" | "used"; // Condition: new or used
   city?: string; // City name where item is located
+  listingStatus?: "active" | "inactive" | "moderation";
+  moderationStatus?: "approved" | "pending" | "rejected";
+  isAvailable?: boolean;
+  unavailableReason?: string;
 }
 
 export interface Review {
@@ -37,6 +44,7 @@ export interface Review {
   author: string;
   rating: number;
   date: string;
+  sortTs?: number;
   comment: string;
   avatar?: string;
   listingId?: string;
@@ -57,4 +65,3 @@ export interface FilterState {
   includeWords?: string; // Words that MUST be present (разрешенные слова)
   excludeWords?: string; // Words that MUST NOT be present (запрещенные слова)
 }
-

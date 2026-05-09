@@ -1,0 +1,81 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Бытовая техника",
+  "subcategoryName": "Встраиваемая техника",
+  "itemName": "Встраиваемые подогреватели для посуды",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/54d638e7f4d84e77/vstraivaemye-podogrevateli-dla-posudy/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T15:48:08.274Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 2,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/1ed670046047d21a/vstraivaemyj-podogrevatel-posudy-asko-odw8127b/",
+      "title": "Встраиваемый подогреватель посуды Asko ODW8127B [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см]",
+      "specsText": "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см",
+      "bracketGroups": [
+        "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см"
+      ],
+      "priceText": "",
+      "productId": "1ed670046047d21a",
+      "cardText": "Встраиваемый подогреватель посуды Asko ODW8127B [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/24d4e9956047d21a/vstraivaemyj-podogrevatel-posudy-asko-odw8127s/",
+      "title": "Встраиваемый подогреватель посуды Asko ODW8127S [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см]",
+      "specsText": "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см",
+      "bracketGroups": [
+        "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см"
+      ],
+      "priceText": "",
+      "productId": "24d4e9956047d21a",
+      "cardText": "Встраиваемый подогреватель посуды Asko ODW8127S [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см] нет отзывовОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Встраиваемый",
+      "models": [
+        {
+          "brand": "Встраиваемый",
+          "model": "подогреватель посуды Asko ODW8127B",
+          "name": "Встраиваемый подогреватель посуды Asko ODW8127B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1ed670046047d21a/vstraivaemyj-podogrevatel-posudy-asko-odw8127b/",
+              "title": "Встраиваемый подогреватель посуды Asko ODW8127B [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см]",
+              "specsText": "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Встраиваемый",
+          "model": "подогреватель посуды Asko ODW8127S",
+          "name": "Встраиваемый подогреватель посуды Asko ODW8127S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/24d4e9956047d21a/vstraivaemyj-podogrevatel-posudy-asko-odw8127s/",
+              "title": "Встраиваемый подогреватель посуды Asko ODW8127S [0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см]",
+              "specsText": "0.81 кВт, управление - поворотный механизм, корпус - нержавеющая сталь, 54.5 см х 14 см",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/54d638e7f4d84e77/vstraivaemye-podogrevateli-dla-posudy/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 2,
+      "title": "Встраиваемые подогреватели для посуды купить в интернет-магазине DNS. Встраиваемые подогреватели для посуды цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

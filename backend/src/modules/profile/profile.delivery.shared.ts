@@ -1,9 +1,12 @@
-export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+import { isCdekConfigured } from "../delivery/cdek-api";
+
+export type DeliveryProviderCode = "russian_post" | "yandex_pvz" | "cdek";
 export type DeliveryProviderFilter = DeliveryProviderCode | "all";
 
 export const DELIVERY_PROVIDER_LABELS: Record<DeliveryProviderCode, string> = {
   russian_post: "Почта России",
   yandex_pvz: "Яндекс ПВЗ",
+  cdek: "СДЭК",
 };
 
 export const DELIVERY_PROVIDERS: Array<{
@@ -18,6 +21,14 @@ export const DELIVERY_PROVIDERS: Array<{
     code: "russian_post",
     label: DELIVERY_PROVIDER_LABELS.russian_post,
   },
+  ...(isCdekConfigured()
+    ? [
+        {
+          code: "cdek" as const,
+          label: DELIVERY_PROVIDER_LABELS.cdek,
+        },
+      ]
+    : []),
 ];
 
 export function parseDeliveryProviderFilter(
@@ -28,7 +39,8 @@ export function parseDeliveryProviderFilter(
   if (
     normalized === "all" ||
     normalized === "yandex_pvz" ||
-    normalized === "russian_post"
+    normalized === "russian_post" ||
+    normalized === "cdek"
   ) {
     return normalized;
   }
@@ -37,6 +49,7 @@ export function parseDeliveryProviderFilter(
 
 export function normalizePickupProvider(value: unknown): DeliveryProviderCode {
   if (value === "russian_post") return "russian_post";
+  if (value === "cdek") return "cdek";
   return "yandex_pvz";
 }
 

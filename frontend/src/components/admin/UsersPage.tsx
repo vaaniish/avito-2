@@ -59,6 +59,7 @@ export function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("all");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [blockReasonDraft, setBlockReasonDraft] = useState("");
 
   const loadUsers = async () => {
     try {
@@ -95,11 +96,16 @@ export function UsersPage() {
 
   const selectedUserData = users.find((user) => user.id === selectedUser) ?? null;
 
+  useEffect(() => {
+    setBlockReasonDraft(selectedUserData?.blockReason ?? "");
+  }, [selectedUserData?.id, selectedUserData?.blockReason]);
+
   const toggleUserStatus = async (user: AdminUser, shouldBlock: boolean) => {
+    const blockReason = blockReasonDraft.trim();
     try {
       await apiPatch<{ success: boolean }>(`/admin/users/${user.id}/status`, {
         status: shouldBlock ? "blocked" : "active",
-        blockReason: shouldBlock ? "Нарушение правил платформы" : null,
+        blockReason: shouldBlock ? blockReason : null,
       });
       await loadUsers();
     } catch (error) {
@@ -293,13 +299,27 @@ export function UsersPage() {
               )}
 
               {selectedUserData.status === "active" ? (
-                <button
-                  onClick={() => void toggleUserStatus(selectedUserData, true)}
-                  className="btn-danger-soft flex w-full items-center justify-center gap-2 py-2"
-                  disabled={selectedUserData.role === "admin"}
-                >
-                  <Ban className="h-4 w-4" /> Заблокировать
-                </button>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700" htmlFor="admin-block-reason">
+                    Причина блокировки
+                  </label>
+                  <textarea
+                    id="admin-block-reason"
+                    value={blockReasonDraft}
+                    onChange={(event) => setBlockReasonDraft(event.target.value.slice(0, 500))}
+                    className="field-control min-h-[92px] resize-y"
+                    placeholder="Например: нарушение правил площадки, подозрение на обход безопасной сделки"
+                    disabled={selectedUserData.role === "admin"}
+                  />
+                  <div className="text-xs text-gray-500">{blockReasonDraft.trim().length}/500 символов</div>
+                  <button
+                    onClick={() => void toggleUserStatus(selectedUserData, true)}
+                    className="btn-danger-soft flex w-full items-center justify-center gap-2 py-2"
+                    disabled={selectedUserData.role === "admin"}
+                  >
+                    <Ban className="h-4 w-4" /> Заблокировать
+                  </button>
+                </div>
               ) : (
                 <button
                   onClick={() => void toggleUserStatus(selectedUserData, false)}

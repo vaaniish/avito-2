@@ -161,7 +161,7 @@ function markerPreset(provider?: string, selected = false): string {
   if (selected && provider === "yandex_pvz") return "islands#darkBlueShoppingCircleIcon";
   if (selected) return "islands#darkBlueIcon";
   if (provider === "yandex_pvz") return "islands#blueShoppingCircleIcon";
-  if (provider === "cdek") return "islands#darkBlueIcon";
+  if (provider === "cdek") return "islands#greenIcon";
   if (provider === "russian_post") return "islands#orangeIcon";
   if (provider === "ozon") return "islands#violetIcon";
   return "islands#blueIcon";

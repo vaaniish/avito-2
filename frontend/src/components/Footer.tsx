@@ -32,7 +32,7 @@ export function Footer({ onNavigate }: FooterProps) {
               </h3>
               <div className="hidden sm:block w-px h-8 sm:h-10 bg-white/20"></div>
               <p className="text-[rgb(255,255,255)] text-sm sm:text-base lg:text-lg">
-                Универсальная B2C платформа для товаров и услуг
+                Универсальная B2C платформа для товаров
               </p>
             </div>
 
@@ -132,7 +132,7 @@ export function Footer({ onNavigate }: FooterProps) {
 
           {/* Description */}
           <p className="text-gray-400 text-sm sm:text-base max-w-xs px-4">
-            Универсальная B2C платформа для товаров и услуг
+            Универсальная B2C платформа для товаров
           </p>
 
           {/* Navigation Links */}

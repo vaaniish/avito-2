@@ -1,4 +1,10 @@
-export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+import {
+  createCdekOrder,
+  fetchCdekOrderStatus,
+  isCdekConfigured,
+} from "../delivery/cdek-api";
+
+export type DeliveryProviderCode = "russian_post" | "yandex_pvz" | "cdek";
 
 export type DeliveryValidationResult = {
   valid: boolean;
@@ -67,12 +73,16 @@ function buildTrackingUrl(provider: DeliveryProviderCode, trackingNumber: string
   if (provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
   }
+  if (provider === "cdek") {
+    return `https://www.cdek.ru/ru/tracking?order_id=${encodeURIComponent(trackingNumber)}`;
+  }
   return "";
 }
 
 function normalizeProvider(value: unknown): DeliveryProviderCode {
   if (value === "russian_post") return "russian_post";
   if (value === "yandex_pvz") return "yandex_pvz";
+  if (value === "cdek") return "cdek";
   return DEFAULT_PROVIDER;
 }
 
@@ -620,6 +630,59 @@ async function requestRussianPostTracking(
   return requestRussianPostTrackingSoap(trackingNumber);
 }
 
+const PICKUP_POINT_TAG_RE = /\[PICKUP_ID:([^\]]+)\]/iu;
+
+export function extractPickupPointIdFromDeliveryAddress(address: string | null): string {
+  const raw = String(address ?? "").trim();
+  if (!raw) return "";
+  const match = raw.match(PICKUP_POINT_TAG_RE);
+  return String(match?.[1] ?? "").trim();
+}
+
+export async function createCdekDeliveryForPreparedOrder(params: {
+  orderPublicId: string;
+  deliveryAddress: string | null;
+  totalPrice: number;
+  buyerName: string;
+  buyerPhone?: string | null;
+  buyerEmail?: string | null;
+  items: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+}): Promise<DeliveryValidationResult | null> {
+  if (!isCdekConfigured()) return null;
+
+  const shipmentPoint = process.env.CDEK_SHIPMENT_POINT_CODE?.trim() ?? "";
+  if (!shipmentPoint) {
+    throw new Error("CDEK_SHIPMENT_POINT_CODE is not configured");
+  }
+
+  const deliveryPoint = extractPickupPointIdFromDeliveryAddress(params.deliveryAddress);
+  if (!deliveryPoint) {
+    throw new Error("CDEK delivery point is not selected");
+  }
+
+  const created = await createCdekOrder({
+    orderPublicId: params.orderPublicId,
+    shipmentPoint,
+    deliveryPoint,
+    recipientName: params.buyerName,
+    recipientPhone: params.buyerPhone,
+    recipientEmail: params.buyerEmail,
+    totalPrice: params.totalPrice,
+    items: params.items,
+  });
+
+  return {
+    valid: true,
+    normalizedTrackingNumber: created.trackingNumber,
+    trackingUrl: created.trackingUrl,
+    source: "api",
+  };
+}
+
 export async function validateTrackingNumber(params: {
   provider?: unknown;
   trackingNumber: string;
@@ -660,6 +723,24 @@ export async function validateTrackingNumber(params: {
         source: "api",
       };
     }
+  }
+
+  if (provider === "cdek") {
+    const cdekInfo = await fetchCdekOrderStatus(normalizedTrackingNumber);
+    if (cdekInfo) {
+      return {
+        valid: true,
+        normalizedTrackingNumber,
+        trackingUrl: cdekInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
+        source: "api",
+      };
+    }
+    return {
+      valid: Boolean(normalizedTrackingNumber),
+      normalizedTrackingNumber,
+      trackingUrl: buildTrackingUrl(provider, normalizedTrackingNumber),
+      source: "fallback",
+    };
   }
 
   const payload = await requestTrackingApi("/validate", {
@@ -729,6 +810,13 @@ export async function fetchTrackingStatus(params: {
         trackingUrl: yandexInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
         rawStatus: yandexInfo.rawStatus,
       };
+    }
+  }
+
+  if (provider === "cdek") {
+    const cdekInfo = await fetchCdekOrderStatus(normalizedTrackingNumber);
+    if (cdekInfo) {
+      return cdekInfo;
     }
   }
 

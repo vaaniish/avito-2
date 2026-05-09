@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Footer, type FooterPage } from "./components/Footer";
@@ -13,7 +14,7 @@ import {
   AppPageShell,
   type AppPageShellHeaderProps,
 } from "./components/AppPageShell";
-import type { CatalogCategory } from "./components/FilterPanel";
+import type { CatalogCategory, CatalogItem } from "./components/FilterPanel";
 import type { ProfileTab } from "./components/pages/profile.models";
 import type { AdminPage } from "./components/admin/AdminPanel";
 import type { CartItem, FilterState, Product } from "./types";
@@ -102,6 +103,11 @@ const ProfilePage = lazy(() =>
     default: module.ProfilePage,
   })),
 );
+const PartnerListingsPage = lazy(() =>
+  import("./components/pages/PartnerListingsPage").then((module) => ({
+    default: module.PartnerListingsPage,
+  })),
+);
 const AdminLogin = lazy(() =>
   import("./components/admin/AdminLogin").then((module) => ({
     default: module.AdminLogin,
@@ -125,9 +131,64 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 const CATALOG_PAGE_SIZE = 24;
+const CATALOG_ORDER_UPDATED_EVENT = "catalog-order-updated";
 
-type CatalogMode = "products" | "services";
+type CatalogMode = "products";
 type AuthProfileData = { wishlist: Array<{ id: string }> };
+
+function resolveCatalogItemIds(
+  categories: CatalogCategory[],
+  selectedValues: string[],
+): string[] {
+  if (!selectedValues.length) return [];
+  const bySelection = new Map<string, Set<string>>();
+  for (const category of categories) {
+    const categoryItemIds = new Set<string>();
+    for (const subcategory of category.subcategories) {
+      const catalogItems = subcategory.catalogItems?.length
+        ? subcategory.catalogItems
+        : subcategory.items.map((item) => ({ id: item, name: item }));
+      const subcategoryItemIds = new Set(catalogItems.map((item) => item.id));
+      bySelection.set(subcategory.id, subcategoryItemIds);
+      bySelection.set(subcategory.name, subcategoryItemIds);
+      for (const item of catalogItems) {
+        categoryItemIds.add(item.id);
+        bySelection.set(item.id, new Set([item.id]));
+        bySelection.set(item.name, new Set([item.id]));
+      }
+    }
+    bySelection.set(category.id, categoryItemIds);
+    bySelection.set(category.name, categoryItemIds);
+  }
+
+  const resolved = new Set<string>();
+  for (const value of selectedValues) {
+    const itemIds = bySelection.get(value);
+    if (!itemIds) {
+      resolved.add(value);
+      continue;
+    }
+    for (const itemId of itemIds) {
+      resolved.add(itemId);
+    }
+  }
+  return Array.from(resolved);
+}
+
+function catalogItemIdSet(categories: CatalogCategory[]): Set<string> {
+  const ids = new Set<string>();
+  for (const category of categories) {
+    for (const subcategory of category.subcategories) {
+      const catalogItems = subcategory.catalogItems?.length
+        ? subcategory.catalogItems
+        : subcategory.items.map((item) => ({ id: item }));
+      for (const item of catalogItems) {
+        ids.add(item.id);
+      }
+    }
+  }
+  return ids;
+}
 
 export default function App() {
   const initialRoute = parseRoute(
@@ -136,6 +197,9 @@ export default function App() {
   );
   const [deepLinkListingId, setDeepLinkListingId] = useState<string | null>(
     initialRoute.listingId,
+  );
+  const [selectedCatalogItemId, setSelectedCatalogItemId] = useState<string | null>(
+    initialRoute.catalogItemId,
   );
   const [deepLinkSellerId, setDeepLinkSellerId] = useState<string | null>(
     initialRoute.sellerId,
@@ -146,6 +210,12 @@ export default function App() {
   const [productBackSellerId, setProductBackSellerId] = useState<string | null>(
     null,
   );
+  const [productBackProfileTab, setProductBackProfileTab] =
+    useState<ProfileTab | null>(null);
+  const [productBackAdminPage, setProductBackAdminPage] =
+    useState<AdminPage | null>(
+      initialRoute.productReturnTo === "admin-listings" ? "listings" : null,
+    );
   const [currentView, setCurrentView] = useState<AppView>(initialRoute.view);
   const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>(
     initialRoute.adminPage,
@@ -154,6 +224,7 @@ export default function App() {
     initialRoute.profileTab,
   );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSessionHydrated, setIsSessionHydrated] = useState(false);
   const [userType, setUserType] = useState<SessionRole>("regular");
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
 
@@ -168,7 +239,7 @@ export default function App() {
   >("delivery");
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [viewMode, setViewMode] = useState<"products" | "services">("products");
+  const [viewMode] = useState<CatalogMode>("products");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<string>("popular");
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -177,19 +248,25 @@ export default function App() {
   );
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [services, setServices] = useState<Product[]>([]);
   const [isDeepLinkListingLoading, setIsDeepLinkListingLoading] =
     useState(false);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
-  const [hasMoreServices, setHasMoreServices] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [productCategories, setProductCategories] = useState<CatalogCategory[]>(
     [],
   );
-  const [serviceCategories, setServiceCategories] = useState<CatalogCategory[]>(
-    [],
-  );
+  const [catalogCategoriesLoadAttempt, setCatalogCategoriesLoadAttempt] =
+    useState(0);
+  const productsRef = useRef<Product[]>([]);
+  const isLoadingProductsRef = useRef(false);
+
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
+
+  useEffect(() => {
+    isLoadingProductsRef.current = isLoadingProducts;
+  }, [isLoadingProducts]);
 
   const handleWishlistToggle = async (
     productId: string,
@@ -224,12 +301,14 @@ export default function App() {
       if (existingSession && !existingToken) {
         clearSessionUser();
       }
+      setIsSessionHydrated(true);
       return;
     }
 
     setCurrentUser(existingSession);
     setUserType(existingSession.role);
     setIsAuthenticated(true);
+    setIsSessionHydrated(true);
     const shouldAutoOpenAdminPanel =
       existingSession.role === "admin" &&
       (initialRoute.view === "home" || initialRoute.view === "adminLogin");
@@ -252,7 +331,11 @@ export default function App() {
       setCurrentAdminPage(parsedRoute.adminPage);
       setCurrentProfileTab(parsedRoute.profileTab);
       setDeepLinkListingId(parsedRoute.listingId);
+      setSelectedCatalogItemId(parsedRoute.catalogItemId);
       setDeepLinkSellerId(parsedRoute.sellerId);
+      setProductBackAdminPage(
+        parsedRoute.productReturnTo === "admin-listings" ? "listings" : null,
+      );
       if (parsedRoute.view !== "product") {
         setSelectedProduct(null);
       }
@@ -268,9 +351,11 @@ export default function App() {
     const targetPath = buildPathForView({
       view: currentView,
       listingId: selectedProduct?.id ?? deepLinkListingId,
+      catalogItemId: selectedCatalogItemId,
       sellerId: deepLinkSellerId,
       adminPage: currentAdminPage,
       profileTab: currentProfileTab,
+      productReturnTo: productBackAdminPage === "listings" ? "admin-listings" : null,
     });
     const currentPath = `${window.location.pathname}${window.location.search}`;
     if (targetPath !== currentPath) {
@@ -282,10 +367,16 @@ export default function App() {
     currentView,
     deepLinkListingId,
     deepLinkSellerId,
+    productBackAdminPage,
+    selectedCatalogItemId,
     selectedProduct?.id,
   ]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (currentView === "adminPanel") {
       if (!isAuthenticated || userType !== "admin") {
         setCurrentView("adminLogin");
@@ -295,23 +386,20 @@ export default function App() {
 
     if (
       (currentView === "profile" ||
+        currentView === "partnerListingCreate" ||
+        (currentView === "partnership" && currentProfileTab === "partnership") ||
         currentView === "cart" ||
         currentView === "checkout") &&
       !isAuthenticated
     ) {
       setCurrentView("auth");
     }
-  }, [currentView, isAuthenticated, userType]);
+  }, [currentProfileTab, currentView, isAuthenticated, isSessionHydrated, userType]);
 
   const loadStaticCatalogData = useCallback(async () => {
     try {
-      const [productCategoriesData, serviceCategoriesData] =
-        await Promise.all([
-          apiGet<CatalogCategory[]>("/catalog/categories?type=products"),
-          apiGet<CatalogCategory[]>("/catalog/categories?type=services"),
-        ]);
-      setProductCategories(productCategoriesData);
-      setServiceCategories(serviceCategoriesData);
+      const productResult = await apiGet<CatalogCategory[]>("/catalog/categories?type=products");
+      setProductCategories(productResult);
     } catch (error) {
       console.error(error);
       notifyError("Не удалось загрузить каталог");
@@ -321,106 +409,119 @@ export default function App() {
   const loadCatalogChunk = useCallback(
     async (mode: CatalogMode, options?: { reset?: boolean }) => {
       const reset = Boolean(options?.reset);
-      const sourceItems = mode === "products" ? products : services;
+      const sourceItems = productsRef.current;
       const offset = reset ? 0 : sourceItems.length;
 
-      if (mode === "products") {
-        if (isLoadingProducts) return;
-        setIsLoadingProducts(true);
-      } else {
-        if (isLoadingServices) return;
-        setIsLoadingServices(true);
-      }
+      if (isLoadingProductsRef.current) return;
+      isLoadingProductsRef.current = true;
+      setIsLoadingProducts(true);
 
       try {
+        const params = new URLSearchParams({
+          type: mode,
+          limit: String(CATALOG_PAGE_SIZE),
+          offset: String(offset),
+        });
+        if (selectedCatalogItemId) {
+          params.set("itemId", selectedCatalogItemId);
+        } else {
+          const selectedItemIds = resolveCatalogItemIds(
+            productCategories,
+            filters.categories,
+          );
+          if (selectedItemIds.length > 0) {
+            params.set("itemIds", selectedItemIds.join(","));
+          }
+        }
         const page = await apiGet<Product[]>(
-          `/catalog/listings?type=${mode}&limit=${CATALOG_PAGE_SIZE}&offset=${offset}`,
+          `/catalog/listings?${params.toString()}`,
         );
 
-        if (mode === "products") {
-          setProducts((prev) => {
-            if (reset) return page;
-            const known = new Set(prev.map((item) => item.id));
-            const merged = [...prev];
-            for (const nextItem of page) {
-              if (known.has(nextItem.id)) continue;
-              known.add(nextItem.id);
-              merged.push(nextItem);
-            }
-            return merged;
-          });
-          setHasMoreProducts(page.length === CATALOG_PAGE_SIZE);
-        } else {
-          setServices((prev) => {
-            if (reset) return page;
-            const known = new Set(prev.map((item) => item.id));
-            const merged = [...prev];
-            for (const nextItem of page) {
-              if (known.has(nextItem.id)) continue;
-              known.add(nextItem.id);
-              merged.push(nextItem);
-            }
-            return merged;
-          });
-          setHasMoreServices(page.length === CATALOG_PAGE_SIZE);
-        }
+        setProducts((prev) => {
+          if (reset) {
+            productsRef.current = page;
+            return page;
+          }
+          const known = new Set(prev.map((item) => item.id));
+          const merged = [...prev];
+          for (const nextItem of page) {
+            if (known.has(nextItem.id)) continue;
+            known.add(nextItem.id);
+            merged.push(nextItem);
+          }
+          productsRef.current = merged;
+          return merged;
+        });
+        setHasMoreProducts(page.length === CATALOG_PAGE_SIZE);
       } catch (error) {
         console.error(error);
         notifyError("Не удалось загрузить каталог");
       } finally {
-        if (mode === "products") {
-          setIsLoadingProducts(false);
-        } else {
-          setIsLoadingServices(false);
-        }
+        isLoadingProductsRef.current = false;
+        setIsLoadingProducts(false);
       }
     },
-    [isLoadingProducts, isLoadingServices, products, services],
+    [filters.categories, productCategories, selectedCatalogItemId],
   );
 
   useEffect(() => {
     void loadStaticCatalogData();
+  }, [catalogCategoriesLoadAttempt, loadStaticCatalogData]);
+
+  useEffect(() => {
+    const reloadCatalogOrder = () => {
+      void loadStaticCatalogData();
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === CATALOG_ORDER_UPDATED_EVENT) {
+        reloadCatalogOrder();
+      }
+    };
+
+    window.addEventListener(CATALOG_ORDER_UPDATED_EVENT, reloadCatalogOrder);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener(CATALOG_ORDER_UPDATED_EVENT, reloadCatalogOrder);
+      window.removeEventListener("storage", handleStorage);
+    };
   }, [loadStaticCatalogData]);
 
   useEffect(() => {
+    if (productCategories.length > 0 || catalogCategoriesLoadAttempt >= 2) {
+      return;
+    }
+
+    const retryTimer = window.setTimeout(() => {
+      setCatalogCategoriesLoadAttempt((attempt) => attempt + 1);
+    }, 1000);
+
+    return () => window.clearTimeout(retryTimer);
+  }, [catalogCategoriesLoadAttempt, productCategories.length]);
+
+  useEffect(() => {
     const handler = window.setTimeout(() => {
-      if (viewMode === "products") {
-        void loadCatalogChunk("products", { reset: true });
-        return;
-      }
-      void loadCatalogChunk("services", { reset: true });
+      void loadCatalogChunk("products", { reset: true });
     }, 350);
 
     return () => {
       window.clearTimeout(handler);
     };
-  }, [filters, loadCatalogChunk, viewMode]);
+  }, [filters, loadCatalogChunk, selectedCatalogItemId, viewMode]);
 
   const handleLoadMoreCatalogItems = useCallback(() => {
-    if (viewMode === "products") {
-      if (!hasMoreProducts || isLoadingProducts) return;
-      void loadCatalogChunk("products");
-      return;
-    }
-
-    if (!hasMoreServices || isLoadingServices) return;
-    void loadCatalogChunk("services");
+    if (!hasMoreProducts || isLoadingProducts) return;
+    void loadCatalogChunk("products");
   }, [
     hasMoreProducts,
-    hasMoreServices,
     isLoadingProducts,
-    isLoadingServices,
     loadCatalogChunk,
-    viewMode,
   ]);
 
-  const currentItems = viewMode === "products" ? products : services;
-  const currentCategories =
-    viewMode === "products" ? productCategories : serviceCategories;
-  const hasMoreItems =
-    viewMode === "products" ? hasMoreProducts : hasMoreServices;
-  const isLoadingMoreItems =
-    viewMode === "products" ? isLoadingProducts : isLoadingServices;
+  const currentItems = products;
+  const currentCategories = productCategories;
+  const hasMoreItems = hasMoreProducts;
+  const isLoadingMoreItems = isLoadingProducts;
   const cartItemCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems],
@@ -429,7 +530,7 @@ export default function App() {
   useEffect(() => {
     if (!deepLinkListingId || currentView !== "product") return;
 
-    const allItems = [...products, ...services];
+    const allItems = products;
     const target = allItems.find((item) => item.id === deepLinkListingId);
     if (target) {
       setSelectedProduct(target);
@@ -464,26 +565,62 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [currentView, deepLinkListingId, products, services]);
+  }, [currentView, deepLinkListingId, products]);
 
   const categoryMap = useMemo(() => {
     const newMap = new Map<string, Set<string>>();
     for (const category of currentCategories) {
       const allSubCategoryItems = new Set<string>();
       for (const subcategory of category.subcategories) {
-        const subCategoryItems = new Set(subcategory.items);
+        const catalogItems = subcategory.catalogItems?.length
+          ? subcategory.catalogItems
+          : subcategory.items.map((item) => ({ id: item, name: item }));
+        const subCategoryItems = new Set(catalogItems.map((item) => item.id));
+        newMap.set(subcategory.id, subCategoryItems);
         newMap.set(subcategory.name, subCategoryItems);
         for (const item of subCategoryItems) {
           allSubCategoryItems.add(item);
         }
       }
+      newMap.set(category.id, allSubCategoryItems);
       newMap.set(category.name, allSubCategoryItems);
     }
     return newMap;
   }, [currentCategories]);
 
+  useEffect(() => {
+    if (currentCategories.length === 0) return;
+
+    const validCatalogItemIds = catalogItemIdSet(currentCategories);
+    if (validCatalogItemIds.size === 0) return;
+
+    if (
+      selectedCatalogItemId &&
+      !validCatalogItemIds.has(selectedCatalogItemId)
+    ) {
+      setSelectedCatalogItemId(null);
+      setCurrentView("home");
+    }
+
+    if (filters.categories.length === 0) return;
+
+    const nextFilterCategories = filters.categories.filter((category) =>
+      validCatalogItemIds.has(category),
+    );
+    if (nextFilterCategories.length === filters.categories.length) return;
+
+    setFilters((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((category) =>
+        validCatalogItemIds.has(category),
+      ),
+    }));
+  }, [currentCategories, filters.categories, selectedCatalogItemId]);
+
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const scroll = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    scroll();
+    window.requestAnimationFrame(scroll);
   };
 
   const requestLoginForCartAccess = () => {
@@ -540,9 +677,20 @@ export default function App() {
   };
 
   const handleSearchSubmit = (query: string) => {
+    setSelectedCatalogItemId(null);
     setFilters((prev) => ({ ...prev, searchQuery: query }));
     setIsSearchActive(query.length > 0);
     setCurrentView("home");
+  };
+
+  const handleCatalogItemSelect = (item: CatalogItem) => {
+    setSelectedCatalogItemId(item.id);
+    setSelectedProduct(null);
+    setDeepLinkListingId(null);
+    setFilters(DEFAULT_FILTERS);
+    setIsSearchActive(false);
+    setCurrentView("catalogItem");
+    scrollToTop();
   };
 
   const handleLogoClick = () => {
@@ -550,9 +698,11 @@ export default function App() {
     setCurrentProfileTab("profile");
     setCurrentAdminPage("transactions");
     setDeepLinkListingId(null);
+    setSelectedCatalogItemId(null);
     setDeepLinkSellerId(null);
     setSellerBackListingId(null);
     setProductBackSellerId(null);
+    setProductBackProfileTab(null);
     setSelectedProduct(null);
     setIsSearchActive(false);
     setFilters(DEFAULT_FILTERS);
@@ -561,6 +711,7 @@ export default function App() {
 
   const handleBannerClick = (category: string) => {
     setCurrentView("home");
+    setSelectedCatalogItemId(null);
     setSelectedProduct(null);
     setIsSearchActive(false);
 
@@ -585,6 +736,8 @@ export default function App() {
 
   const handleProductClick = (product: Product) => {
     setProductBackSellerId(currentView === "sellerStore" ? deepLinkSellerId : null);
+    setProductBackProfileTab(null);
+    setProductBackAdminPage(null);
     setSelectedProduct(product);
     setDeepLinkListingId(product.id);
     setCurrentView("product");
@@ -621,6 +774,7 @@ export default function App() {
 
   const handleFooterNavigation = (page: FooterPage) => {
     if (page === "partnership" && !isAuthenticated) {
+      setCurrentProfileTab("partnership");
       setCurrentView("auth");
       scrollToTop();
       return;
@@ -628,7 +782,7 @@ export default function App() {
 
     if (page === "partnership" && isAuthenticated) {
       setCurrentProfileTab("partnership");
-      setCurrentView("profile");
+      setCurrentView("partnership");
       scrollToTop();
       return;
     }
@@ -638,6 +792,29 @@ export default function App() {
     }
     setCurrentView(page);
     scrollToTop();
+  };
+
+  const handleOpenPartnershipPage = () => {
+    setCurrentProfileTab("profile");
+    setCurrentView("partnership");
+    scrollToTop();
+  };
+
+  const handleOpenProfilePartnershipPage = () => {
+    setCurrentProfileTab("partnership");
+    setCurrentView("partnership");
+    scrollToTop();
+  };
+
+  const handlePartnershipBack = () => {
+    if (currentProfileTab === "partnership") {
+      setCurrentProfileTab("profile");
+      setCurrentView("profile");
+      scrollToTop();
+      return;
+    }
+
+    handleLogoClick();
   };
 
   const handleProfileClick = () => {
@@ -674,7 +851,11 @@ export default function App() {
       return;
     }
 
-    setCurrentProfileTab("profile");
+    if (currentProfileTab === "partnership") {
+      setCurrentView("partnership");
+      return;
+    }
+
     setCurrentView("profile");
   };
 
@@ -711,7 +892,21 @@ export default function App() {
   const handleProfileOpenListing = (listingPublicId: string) => {
     setSelectedProduct(null);
     setDeepLinkListingId(listingPublicId);
+    setProductBackProfileTab(currentProfileTab);
+    setProductBackAdminPage(null);
     setCurrentView("product");
+    scrollToTop();
+  };
+
+  const handleOpenCreateListing = () => {
+    setCurrentProfileTab("partner-listings");
+    setCurrentView("partnerListingCreate");
+    scrollToTop();
+  };
+
+  const handleCloseCreateListing = () => {
+    setCurrentProfileTab("partner-listings");
+    setCurrentView("profile");
     scrollToTop();
   };
 
@@ -733,7 +928,7 @@ export default function App() {
     return currentItems.filter((item) => {
       if (
         effectiveCategories.size > 0 &&
-        !effectiveCategories.has(item.category)
+        !effectiveCategories.has(item.catalogItemId ?? item.category)
       )
         return false;
       if (
@@ -819,6 +1014,8 @@ export default function App() {
     onSearchSubmit: handleSearchSubmit,
     onLogoClick: handleLogoClick,
     onProfileClick: handleProfileClick,
+    catalogCategories: productCategories,
+    onCatalogItemSelect: handleCatalogItemSelect,
   };
 
   const renderWithAppShell = (
@@ -837,7 +1034,7 @@ export default function App() {
   if (currentView === "product" && selectedProduct) {
     const cartItem = cartItems.find((item) => item.id === selectedProduct.id);
     const cartQuantity = cartItem ? cartItem.quantity : 0;
-    const relatedPool = [...products, ...services];
+    const relatedPool = products;
 
     return renderWithAppShell(
       <Suspense fallback={lazyFallback}>
@@ -851,8 +1048,25 @@ export default function App() {
               setProductBackSellerId(null);
               return;
             }
+            if (productBackProfileTab) {
+              setCurrentProfileTab(productBackProfileTab);
+              setProductBackProfileTab(null);
+              setCurrentView("profile");
+              return;
+            }
+            if (productBackAdminPage) {
+              setCurrentAdminPage(productBackAdminPage);
+              setProductBackAdminPage(null);
+              setCurrentView("adminPanel");
+              return;
+            }
             setCurrentView("home");
           }}
+          backLabel={
+            productBackAdminPage === "listings"
+              ? "Назад к модерации объявлений"
+              : undefined
+          }
           onOpenSellerStore={handleOpenSellerStore}
           onAddToCart={addToCart}
           onBuyNow={handleBuyNow}
@@ -896,7 +1110,7 @@ export default function App() {
 
             const listingId = sellerBackListingId;
             const knownListing =
-              [...products, ...services].find((item) => item.id === listingId) ??
+              products.find((item) => item.id === listingId) ??
               null;
 
             setCurrentView("product");
@@ -910,6 +1124,7 @@ export default function App() {
           }}
           onOpenListing={(product) => {
             setProductBackSellerId(deepLinkSellerId);
+            setProductBackAdminPage(null);
             setSelectedProduct(product);
             setDeepLinkListingId(product.id);
             setCurrentView("product");
@@ -1015,7 +1230,7 @@ export default function App() {
   if (currentView === "partnership") {
     return renderWithAppShell(
       <Suspense fallback={lazyFallback}>
-        <PartnershipPage onBack={handleLogoClick} />
+        <PartnershipPage onBack={handlePartnershipBack} />
       </Suspense>,
     );
   }
@@ -1049,7 +1264,7 @@ export default function App() {
       <Suspense fallback={lazyFallback}>
         <AuthPage
           onBack={handleLogoClick}
-          onPartnershipClick={() => setCurrentView("partnership")}
+          onPartnershipClick={handleOpenPartnershipPage}
           onLoginSuccess={handleAuthLoginSuccess}
         />
       </Suspense>
@@ -1065,8 +1280,27 @@ export default function App() {
           userType={userType === "partner" ? "partner" : "regular"}
           initialTab={currentProfileTab}
           onTabChange={setCurrentProfileTab}
+          onPartnershipClick={handleOpenProfilePartnershipPage}
           onWishlistUpdate={handleWishlistToggle}
           onOpenListing={handleProfileOpenListing}
+          onOpenCreateListing={handleOpenCreateListing}
+        />
+      </Suspense>
+    );
+  }
+
+  if (currentView === "partnerListingCreate") {
+    return (
+      <Suspense fallback={lazyFallback}>
+        <PartnerListingsPage
+          createMode
+          onRequestAddressChange={() => {
+            setCurrentProfileTab("addresses");
+            setCurrentView("profile");
+            scrollToTop();
+          }}
+          onOpenListing={handleProfileOpenListing}
+          onExitCreate={handleCloseCreateListing}
         />
       </Suspense>
     );
@@ -1111,6 +1345,7 @@ export default function App() {
   return renderWithAppShell(
     <AppCatalogView
       isSearchActive={isSearchActive}
+      hideHero={isSearchActive || currentView === "catalogItem"}
       filters={filters}
       viewMode={viewMode}
       categories={currentCategories}
@@ -1122,7 +1357,10 @@ export default function App() {
       wishlistProductIds={wishlistProductIds}
       onBannerClick={handleBannerClick}
       onFilterChange={handleCatalogFilterChange}
-      onViewModeChange={setViewMode}
+      onViewModeChange={() => {
+        setSelectedCatalogItemId(null);
+        setCurrentView("home");
+      }}
       onLoadMoreCatalogItems={handleLoadMoreCatalogItems}
       onProductClick={handleProductClick}
       onAddToCart={addToCart}

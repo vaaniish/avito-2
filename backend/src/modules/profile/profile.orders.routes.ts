@@ -9,13 +9,18 @@ import {
 import { createHash } from "crypto";
 import { Router, type Request, type Response } from "express";
 import { assertOrderStatusTransitionAllowed } from "../orders/order-status-fsm";
+import { fetchTrackingStatus, type DeliveryExternalStatus } from "../partner/order-delivery";
 import { getPolicyAcceptanceStatus } from "../policy/policy.shared";
+import {
+  buildTargetUrl,
+  createNotifications,
+} from "../notifications/notification.service";
 
 type SessionResult =
   | { ok: true; user: { id: number } }
   | { ok: false; status: number; message: string };
 
-type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+type DeliveryProviderCode = "russian_post" | "yandex_pvz" | "cdek";
 
 type YooKassaPayment = {
   id: string;
@@ -287,6 +292,61 @@ function uniqueNumbers(values: number[]): number[] {
 
 function makeAuditPublicId(): string {
   return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+}
+
+function mapDeliveryStatusToOrderStatus(
+  status: DeliveryExternalStatus,
+): OrderStatus | null {
+  if (status === "IN_TRANSIT") return "SHIPPED";
+  if (status === "DELIVERED") return "DELIVERED";
+  if (status === "ISSUED") return "COMPLETED";
+  if (status === "CANCELLED") return "CANCELLED";
+  return null;
+}
+
+function shouldSyncBuyerDeliveryStatus(
+  order: Pick<
+    MarketOrder,
+    "status" | "delivery_type" | "tracking_provider" | "tracking_number" | "delivery_checked_at"
+  >,
+): boolean {
+  if (order.delivery_type !== "DELIVERY") return false;
+  if (!order.tracking_provider || !order.tracking_number) return false;
+  if (order.status === "CANCELLED" || order.status === "COMPLETED") return false;
+  if (!order.delivery_checked_at) return true;
+  return Date.now() - order.delivery_checked_at.getTime() >= 30_000;
+}
+
+async function syncBuyerDeliveryStatuses(params: {
+  prisma: PrismaClient;
+  orders: MarketOrder[];
+}): Promise<void> {
+  const candidates = params.orders.filter(shouldSyncBuyerDeliveryStatus);
+  if (candidates.length === 0) return;
+
+  await Promise.all(
+    candidates.map(async (order) => {
+      const tracking = await fetchTrackingStatus({
+        provider: order.tracking_provider,
+        trackingNumber: order.tracking_number ?? "",
+      });
+      if (!tracking) return;
+
+      const nextStatus = mapDeliveryStatusToOrderStatus(tracking.status);
+      const data: Partial<MarketOrder> = {
+        tracking_url: tracking.trackingUrl ?? order.tracking_url,
+        delivery_ext_status: tracking.rawStatus ?? tracking.status,
+        delivery_checked_at: new Date(),
+      };
+      if (nextStatus && nextStatus !== order.status) {
+        data.status = nextStatus;
+      }
+      await params.prisma.marketOrder.update({
+        where: { id: order.id },
+        data,
+      });
+    }),
+  );
 }
 
 async function writeOrderStatusTransitionRecords(params: {
@@ -1248,6 +1308,7 @@ export function createProfileOrdersRouter(
           db_id: number;
           order_id: string;
           total_price: number;
+          seller_id: number;
         }> = [];
 
         let sequence = 0;
@@ -1352,11 +1413,22 @@ export function createProfileOrdersRouter(
             db_id: order.id,
             order_id: order.public_id,
             total_price: preparedOrder.totalPrice,
+            seller_id: preparedOrder.sellerId,
           });
         }
 
         return result;
       });
+
+      await createNotifications(
+        createdOrders.map((order) => ({
+          userId: order.seller_id,
+          type: "ORDER_STATUS",
+          message: `Новый заказ ${order.order_id} на сумму ${order.total_price.toLocaleString("ru-RU")} ₽.`,
+          targetUrl: buildTargetUrl("partner"),
+        })),
+        deps.prisma,
+      );
 
       const successPayload = {
         success: true,
@@ -1410,7 +1482,7 @@ export function createProfileOrdersRouter(
         return;
       }
 
-      const orders = await deps.prisma.marketOrder.findMany({
+      let orders = await deps.prisma.marketOrder.findMany({
         where: { buyer_id: session.user.id },
         include: {
           seller: {
@@ -1424,17 +1496,74 @@ export function createProfileOrdersRouter(
               },
             },
           },
-          items: true,
+          items: {
+            include: {
+              listing: {
+                select: {
+                  public_id: true,
+                },
+              },
+            },
+          },
         },
         orderBy: [{ created_at: "desc" }],
       });
+      await syncBuyerDeliveryStatuses({ prisma: deps.prisma, orders });
+      if (orders.some(shouldSyncBuyerDeliveryStatus)) {
+        orders = await deps.prisma.marketOrder.findMany({
+          where: { buyer_id: session.user.id },
+          include: {
+            seller: {
+              include: {
+                addresses: {
+                  select: {
+                    city: true,
+                  },
+                  orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                  take: 1,
+                },
+              },
+            },
+            items: {
+              include: {
+                listing: {
+                  select: {
+                    public_id: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: [{ created_at: "desc" }],
+        });
+      }
+      const listingIds = orders.flatMap((order) =>
+        order.items
+          .map((item) => item.listing_id)
+          .filter((listingId): listingId is number => typeof listingId === "number"),
+      );
+      const reviewedListingIds = new Set(
+        (
+          await deps.prisma.listingReview.findMany({
+            where: {
+              author_id: session.user.id,
+              listing_id: {
+                in: [...new Set(listingIds)],
+              },
+            },
+            select: {
+              listing_id: true,
+            },
+          })
+        ).map((review) => review.listing_id),
+      );
 
       res.json(
         orders.map(
           (
             order: MarketOrder & {
               seller: AppUser & { addresses: Array<{ city: string }> };
-              items: MarketOrderItem[];
+              items: Array<MarketOrderItem & { listing: { public_id: string } | null }>;
             },
           ) => ({
             id: String(order.id),
@@ -1448,6 +1577,10 @@ export function createProfileOrdersRouter(
               "Адрес не указан",
             deliveryCost: order.delivery_cost,
             discount: order.discount,
+            trackingProvider: order.tracking_provider,
+            trackingNumber: order.tracking_number,
+            trackingUrl: order.tracking_url,
+            deliveryExternalStatus: order.delivery_ext_status,
             seller: {
               name: order.seller.name,
               avatar: order.seller.avatar,
@@ -1455,13 +1588,19 @@ export function createProfileOrdersRouter(
               address: `${deps.extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
               workingHours: "пн — вс: 9:00-21:00",
             },
-            items: order.items.map((item: MarketOrderItem) => ({
-              id: String(item.id),
-              name: item.name,
-              image: item.image ?? "",
-              price: item.price,
-              quantity: item.quantity,
-            })),
+            items: order.items.map((item) => {
+              const reviewed = item.listing_id !== null && reviewedListingIds.has(item.listing_id);
+              return {
+                id: String(item.id),
+                listingPublicId: item.listing?.public_id ?? "",
+                name: item.name,
+                image: item.image ?? "",
+                price: item.price,
+                quantity: item.quantity,
+                reviewed,
+                canReview: order.status === "COMPLETED" && item.listing_id !== null && !reviewed,
+              };
+            }),
           }),
         ),
       );

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, MapPin, Star, User, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, MapPin, MessageCircle, Star, User } from "lucide-react";
 import { apiGet } from "../lib/api";
 import type { CartItem, Product, Review } from "../types";
 import { ProductCard } from "./ProductCard";
+import { AppModal } from "./ui/app-modal";
 import { notifyError } from "./ui/notifications";
 
 type SellerProfile = {
@@ -21,6 +22,7 @@ type SellerProfile = {
 
 type SellerStorefrontResponse = {
   seller: SellerProfile;
+  reviews?: Review[];
   items: Product[];
   pagination: {
     limit: number;
@@ -42,7 +44,7 @@ type SellerStorePageProps = {
 };
 
 const PAGE_SIZE = 24;
-type ReviewSort = "newest" | "highest" | "lowest";
+type ReviewSort = "newest" | "oldest" | "highest" | "lowest";
 
 function formatReviewsWord(count: number): string {
   const mod10 = count % 10;
@@ -56,6 +58,93 @@ function toDateLabel(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("ru-RU");
+}
+
+const REVIEW_MONTH_INDEX: Record<string, number> = {
+  января: 0,
+  февраль: 1,
+  февраля: 1,
+  март: 2,
+  марта: 2,
+  апрель: 3,
+  апреля: 3,
+  май: 4,
+  мая: 4,
+  июнь: 5,
+  июня: 5,
+  июль: 6,
+  июля: 6,
+  август: 7,
+  августа: 7,
+  сентябрь: 8,
+  сентября: 8,
+  октябрь: 9,
+  октября: 9,
+  ноябрь: 10,
+  ноября: 10,
+  декабрь: 11,
+  декабря: 11,
+};
+
+function parseReviewDateLabel(value: string): number {
+  const nativeTime = new Date(value).getTime();
+  if (!Number.isNaN(nativeTime)) return nativeTime;
+
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d{1,2})\s+([а-яё]+)(?:\s+|\s*,\s*| в )(\d{1,2}):(\d{2})/u);
+  if (!match) return 0;
+
+  const [, dayRaw, monthRaw, hourRaw, minuteRaw] = match;
+  const month = REVIEW_MONTH_INDEX[monthRaw];
+  if (month === undefined) return 0;
+
+  const now = new Date();
+  const parsed = new Date(
+    now.getFullYear(),
+    month,
+    Number(dayRaw),
+    Number(hourRaw),
+    Number(minuteRaw),
+  );
+  return parsed.getTime();
+}
+
+function toSortTime(review: Review): number {
+  if (typeof review.sortTs === "number") return review.sortTs;
+  return parseReviewDateLabel(review.date);
+}
+
+function ModalRatingStars({
+  value,
+  size = 16,
+  gap = 1,
+}: {
+  value: number;
+  size?: number;
+  gap?: number;
+}) {
+  return (
+    <span className="inline-flex items-center" style={{ gap }} aria-label={`Рейтинг ${value.toFixed(1)}`}>
+      {[0, 1, 2, 3, 4].map((index) => {
+        const fillPercent = Math.max(0, Math.min(1, value - index)) * 100;
+        return (
+          <span
+            key={index}
+            className="relative inline-block flex-shrink-0 overflow-hidden"
+            style={{ width: size, height: size, fontSize: size, lineHeight: `${size}px` }}
+            aria-hidden="true"
+          >
+            <span className="absolute inset-0 text-gray-300">★</span>
+            <span className="absolute inset-0 overflow-hidden text-yellow-400" style={{ width: `${fillPercent}%` }}>
+              ★
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
 function extractJoinedYear(raw: string | null | undefined): string | null {
@@ -102,6 +191,8 @@ export function SellerStorePage({
         );
 
         setSeller(response.seller);
+        setSellerReviews(response.reviews ?? []);
+        setIsReviewsLoading(false);
         setItems((prev) => {
           if (!append) return response.items;
 
@@ -131,6 +222,7 @@ export function SellerStorePage({
   useEffect(() => {
     setSeller(null);
     setItems([]);
+    setSellerReviews([]);
     setNextOffset(0);
     setHasMore(false);
     setIsLoading(true);
@@ -138,41 +230,21 @@ export function SellerStorePage({
     void loadPage(0, false);
   }, [loadPage]);
 
-  const firstListingId = items[0]?.id ?? null;
-
   useEffect(() => {
-    let ignore = false;
-
-    const loadSellerReviews = async () => {
-      if (!firstListingId) {
-        setSellerReviews([]);
-        setIsReviewsLoading(false);
-        return;
-      }
-
-      setIsReviewsLoading(true);
-      try {
-        const listing = await apiGet<Product>(`/catalog/listings/${firstListingId}`);
-        if (!ignore) {
-          setSellerReviews(listing.reviews ?? []);
-        }
-      } catch {
-        if (!ignore) {
-          setSellerReviews([]);
-        }
-      } finally {
-        if (!ignore) {
-          setIsReviewsLoading(false);
-        }
+    if (!isReviewsModalOpen || typeof document === "undefined") return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsReviewsModalOpen(false);
       }
     };
-
-    void loadSellerReviews();
-
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      ignore = true;
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [firstListingId]);
+  }, [isReviewsModalOpen]);
 
   const joinedYear = useMemo(() => extractJoinedYear(seller?.joinedAt), [seller?.joinedAt]);
 
@@ -191,7 +263,7 @@ export function SellerStorePage({
     if (reviewSort === "highest") {
       source.sort((a, b) => {
         if (b.rating !== a.rating) return b.rating - a.rating;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return toSortTime(b) - toSortTime(a);
       });
       return source;
     }
@@ -199,12 +271,17 @@ export function SellerStorePage({
     if (reviewSort === "lowest") {
       source.sort((a, b) => {
         if (a.rating !== b.rating) return a.rating - b.rating;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return toSortTime(b) - toSortTime(a);
       });
       return source;
     }
 
-    source.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (reviewSort === "oldest") {
+      source.sort((a, b) => toSortTime(a) - toSortTime(b));
+      return source;
+    }
+
+    source.sort((a, b) => toSortTime(b) - toSortTime(a));
     return source;
   }, [reviewSort, sellerReviews]);
 
@@ -217,6 +294,17 @@ export function SellerStorePage({
     }
     return counts;
   }, [sellerReviews]);
+
+  const modalReviewsTotal = sellerReviews.length || sellerReviewsCount;
+  const modalRatingTotal = Math.max(1, modalReviewsTotal);
+  const modalAverageRating = sellerReviews.length > 0
+    ? sellerReviews.reduce((sum, review) => sum + review.rating, 0) / sellerReviews.length
+    : sellerReviewsCount > 0
+      ? sellerRatingNumber
+      : 0;
+  const modalAverageRatingLabel = sellerReviewsCount > 0 || sellerReviews.length > 0
+    ? modalAverageRating.toFixed(1).replace(".", ",")
+    : "-";
 
   return (
     <div className="app-shell">
@@ -249,9 +337,9 @@ export function SellerStorePage({
                 </div>
                 <div>
                   <div className="max-w-[420px] truncate text-3xl font-semibold leading-none text-gray-900 md:text-4xl">{seller.name}</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-gray-900">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-900">
                     <span className="tabular-nums text-2xl font-semibold leading-none">{sellerRatingDisplay}</span>
-                    <div className="flex items-center gap-0.5">
+                    <div className="flex items-center gap-0.5" aria-label={`Рейтинг продавца ${sellerRatingDisplay}`}>
                       {[...Array(5)].map((_, index) => (
                         <Star
                           key={index}
@@ -261,13 +349,20 @@ export function SellerStorePage({
                         />
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      className="tabular-nums text-xl text-gray-700 transition hover:text-red-500"
-                      onClick={() => setIsReviewsModalOpen(true)}
-                    >
-                      {seller.reviewsCount} {formatReviewsWord(seller.reviewsCount)}
-                    </button>
+                    {seller.reviewsCount > 0 ? (
+                      <button
+                        type="button"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-[rgb(38,83,141)] transition hover:border-[rgb(38,83,141)] hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-[rgb(38,83,141)] focus:ring-offset-1"
+                        onClick={() => setIsReviewsModalOpen(true)}
+                        aria-label={`Открыть отзывы продавца: ${seller.reviewsCount} ${formatReviewsWord(seller.reviewsCount)}`}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Смотреть {seller.reviewsCount} {formatReviewsWord(seller.reviewsCount)}
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-500">Пока нет отзывов</span>
+                    )}
                   </div>
                   <p className="mt-1 text-lg text-gray-900 md:text-xl">
                     Партнёр{joinedYear ? ` · На Ecomm с ${joinedYear}` : ""}
@@ -348,126 +443,97 @@ export function SellerStorePage({
 
       {isReviewsModalOpen && typeof document !== "undefined"
         ? createPortal(
-        <div
-          className="fixed inset-0 z-[1600] flex items-center justify-center bg-black/50 p-3 md:p-4"
-          onClick={() => setIsReviewsModalOpen(false)}
-        >
-          <div
-            className="flex max-h-[90vh] w-[min(760px,96vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-              <h3 className="text-2xl text-gray-900">Отзывы о пользователе</h3>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
-                onClick={() => setIsReviewsModalOpen(false)}
-                aria-label="Закрыть"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-              <div className="grid grid-cols-1 gap-6 border-b border-gray-200 pb-6 md:grid-cols-[180px_1fr]">
-                <div>
-                  <div className="text-6xl font-semibold leading-none text-gray-900">{sellerRatingValue}</div>
-                  <div className="mt-2 flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.round(sellerRatingNumber) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                        }`}
-                      />
-                    ))}
+            <AppModal
+              open={isReviewsModalOpen}
+              onClose={() => setIsReviewsModalOpen(false)}
+              title="Отзывы о пользователе"
+              size="lg"
+              bodyClassName="app-modal__body--wide"
+            >
+              <div className="flex flex-col gap-8 sm:flex-row sm:gap-12">
+                <div className="flex flex-col items-center">
+                  <div className="mb-1 text-5xl font-black leading-none text-black">
+                    {modalAverageRatingLabel}
                   </div>
-                  <p className="mt-2 text-xl text-gray-900">{sellerReviewsCount} {formatReviewsWord(sellerReviewsCount)}</p>
+                  <div className="mb-2 flex gap-1">
+                    <ModalRatingStars value={modalAverageRating} size={24} gap={1} />
+                  </div>
+                  <div className="text-base text-black">
+                    {modalReviewsTotal} {formatReviewsWord(modalReviewsTotal)}
+                  </div>
                 </div>
 
-                <div className="grid gap-2">
+                <div className="flex-1 space-y-2">
                   {[5, 4, 3, 2, 1].map((score) => {
                     const count = ratingDistribution[score - 1] ?? 0;
-                    const width = sellerReviewsCount > 0 ? (count / sellerReviewsCount) * 100 : 0;
+                    const width = (count / modalRatingTotal) * 100;
                     return (
-                      <div key={score} className="grid grid-cols-[72px_1fr_38px] items-center gap-2">
-                        <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <span>{score}</span>
-                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                      <div key={score} className="flex items-center gap-3">
+                        <div className="flex w-[112px] gap-1" aria-label={`${score} звезд`}>
+                          <ModalRatingStars value={score} size={19} gap={0} />
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-                          <div className="h-full rounded-full bg-gray-500" style={{ width: `${width}%` }} />
+                        <div
+                          className="h-2.5 flex-1 overflow-hidden rounded-full"
+                          style={{ backgroundColor: "#d4d8de" }}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${width}%`,
+                              minWidth: count > 0 ? 5 : 0,
+                              backgroundColor: "#777777",
+                            }}
+                          />
                         </div>
-                        <span className="text-right text-sm text-gray-700">{count}</span>
+                        <div className="w-8 text-right text-black">{count}</div>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "newest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("newest")}
+              <div>
+                <select
+                  className="rounded-full bg-gray-100 px-5 py-3 text-base font-medium text-black outline-none transition hover:bg-gray-200"
+                  value={reviewSort}
+                  onChange={(event) => setReviewSort(event.target.value as ReviewSort)}
+                  aria-label="Сортировка отзывов"
                 >
-                  Сначала новые
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "highest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("highest")}
-                >
-                  Высокая оценка
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "lowest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("lowest")}
-                >
-                  Низкая оценка
-                </button>
+                  <option value="newest">Сначала новые</option>
+                  <option value="oldest">Сначала старые</option>
+                  <option value="highest">Высокая оценка</option>
+                  <option value="lowest">Низкая оценка</option>
+                </select>
               </div>
 
-              <div className="mt-5 space-y-5">
+              <div className="space-y-4">
                 {isReviewsLoading ? <p className="text-sm text-gray-500">Загрузка отзывов...</p> : null}
 
                 {sortedSellerReviews.map((review) => (
-                  <article key={review.id} className="rounded-2xl border border-gray-200 p-4">
+                  <article key={review.id} className="border-b border-gray-200 pb-4 last:border-0">
                     <div className="flex items-start gap-3">
-                      <div className="h-12 w-12 overflow-hidden rounded-full bg-gray-200">
+                      <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-[rgb(38,83,141)]">
                         {review.avatar ? (
                           <img src={review.avatar} alt={review.author} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-500">
-                            <User className="h-5 w-5" />
+                          <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-white">
+                            {review.author.trim().charAt(0).toUpperCase() || <User className="h-5 w-5" />}
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="text-lg font-semibold text-gray-900">{review.author}</span>
-                          <span className="text-sm text-gray-500">{toDateLabel(review.date)}</span>
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="font-medium text-black">{review.author}</span>
+                          <span className="text-xs text-gray-500">{toDateLabel(review.date)}</span>
                         </div>
-                        <div className="mt-1 flex items-center gap-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                              }`}
-                            />
-                          ))}
+                        <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <ModalRatingStars value={review.rating} size={16} gap={0} />
+                          {review.listingTitle ? (
+                            <span className="ml-2 text-xs text-gray-600">Сделка состоялась · {review.listingTitle}</span>
+                          ) : null}
                         </div>
-                        {review.listingTitle ? <p className="mt-2 text-sm text-gray-500">Сделка: {review.listingTitle}</p> : null}
-                        <p className="mt-2 whitespace-pre-line text-base leading-6 text-gray-800">{review.comment}</p>
+                        <p className="text-sm text-gray-700">{review.comment}</p>
                       </div>
                     </div>
                   </article>
@@ -481,11 +547,9 @@ export function SellerStorePage({
                   </p>
                 ) : null}
               </div>
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )
+            </AppModal>,
+            document.body,
+          )
         : null}
     </div>
   );

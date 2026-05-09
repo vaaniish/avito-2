@@ -1,0 +1,116 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Комплектующие для сервера",
+  "itemName": "Аксессуары для серверных корпусов",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/e6d959c943e32156/aksessuary-dla-servernyh-korpusov/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:57.045Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 3,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/9100613c9a843330/zagluska-supermicro-mcp-240-00096-0n/",
+      "title": "Заглушка Supermicro MCP-240-00096-0N [совместимость: Supermicro CSE-747B]",
+      "specsText": "совместимость: Supermicro CSE-747B",
+      "bracketGroups": [
+        "совместимость: Supermicro CSE-747B"
+      ],
+      "priceText": "",
+      "productId": "9100613c9a843330",
+      "cardText": "Заглушка Supermicro MCP-240-00096-0N [совместимость: Supermicro CSE-747B]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/71989a2e936a8551/rucka-dla-servera-chenbro-384-mix000138ba0/",
+      "title": "Ручка для сервера Chenbro 384-MIX000138BA0 [совместимость: Chenbro RM23812]",
+      "specsText": "совместимость: Chenbro RM23812",
+      "bracketGroups": [
+        "совместимость: Chenbro RM23812"
+      ],
+      "priceText": "",
+      "productId": "71989a2e936a8551",
+      "cardText": "Ручка для сервера Chenbro 384-MIX000138BA0 [совместимость: Chenbro RM23812] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9100614c9a843330/kreplenie-supermicro-mcp-320-81302-0b/",
+      "title": "Крепление Supermicro MCP-320-81302-0B [совместимость: Supermicro SC813LT, Supermicro SC813T]",
+      "specsText": "совместимость: Supermicro SC813LT, Supermicro SC813T",
+      "bracketGroups": [
+        "совместимость: Supermicro SC813LT, Supermicro SC813T"
+      ],
+      "priceText": "",
+      "productId": "9100614c9a843330",
+      "cardText": "Крепление Supermicro MCP-320-81302-0B [совместимость: Supermicro SC813LT, Supermicro SC813T]5|рейтинг бренда"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Заглушка",
+      "models": [
+        {
+          "brand": "Заглушка",
+          "model": "Supermicro MCP-240-00096-0N",
+          "name": "Заглушка Supermicro MCP-240-00096-0N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9100613c9a843330/zagluska-supermicro-mcp-240-00096-0n/",
+              "title": "Заглушка Supermicro MCP-240-00096-0N [совместимость: Supermicro CSE-747B]",
+              "specsText": "совместимость: Supermicro CSE-747B",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Крепление",
+      "models": [
+        {
+          "brand": "Крепление",
+          "model": "Supermicro MCP-320-81302-0B",
+          "name": "Крепление Supermicro MCP-320-81302-0B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9100614c9a843330/kreplenie-supermicro-mcp-320-81302-0b/",
+              "title": "Крепление Supermicro MCP-320-81302-0B [совместимость: Supermicro SC813LT, Supermicro SC813T]",
+              "specsText": "совместимость: Supermicro SC813LT, Supermicro SC813T",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Ручка",
+      "models": [
+        {
+          "brand": "Ручка",
+          "model": "для сервера Chenbro 384-MIX000138BA0",
+          "name": "Ручка для сервера Chenbro 384-MIX000138BA0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/71989a2e936a8551/rucka-dla-servera-chenbro-384-mix000138ba0/",
+              "title": "Ручка для сервера Chenbro 384-MIX000138BA0 [совместимость: Chenbro RM23812]",
+              "specsText": "совместимость: Chenbro RM23812",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/e6d959c943e32156/aksessuary-dla-servernyh-korpusov/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 3,
+      "title": "Аксессуары для серверных корпусов купить в интернет-магазине DNS. Аксессуары для серверных корпусов цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

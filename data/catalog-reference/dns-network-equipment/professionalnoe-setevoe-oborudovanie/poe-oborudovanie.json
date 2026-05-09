@@ -1,0 +1,2096 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Профессиональное сетевое оборудование",
+  "itemName": "PoE оборудование",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:24.803Z",
+  "status": "done",
+  "totalPages": 5,
+  "totalProducts": 81,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/691364ab84f1ed20/inzektor-poe-keenetic-kn-4510/",
+      "title": "Инжектор PoE Keenetic KN-4510 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "691364ab84f1ed20",
+      "cardText": "Инжектор PoE Keenetic KN-4510 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.96 |113 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b6c37b6692bb3330/inzektor-poe-orient-sap-48poe-1a/",
+      "title": "Инжектор PoE ORIENT SAP-48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "b6c37b6692bb3330",
+      "cardText": "Инжектор PoE ORIENT SAP-48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.84 |151 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f3fd51b3e0773330/inzektor-poe-ubiquiti-poe-24-12w-g/",
+      "title": "Инжектор PoE Ubiquiti POE-24-12W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "f3fd51b3e0773330",
+      "cardText": "Инжектор PoE Ubiquiti POE-24-12W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.82 |83 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df4f9adcc8a5a/inzektor-splitter-poe-orient-nt-633poe/",
+      "title": "Инжектор + сплиттер PoE ORIENT NT-633POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "f56df4f9adcc8a5a",
+      "cardText": "Инжектор + сплиттер PoE ORIENT NT-633POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.65 |243 отзыва 4Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ce30aa367f493330/inzektor-poe-tenda-poe30g-at/",
+      "title": "Инжектор PoE Tenda PoE30G-AT [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "ce30aa367f493330",
+      "cardText": "Инжектор PoE Tenda PoE30G-AT [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.97 |31 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/550456f2a7cd3330/inzektor-poe-ubiquiti-poe-48-24w/",
+      "title": "Инжектор PoE Ubiquiti POE-48-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "550456f2a7cd3330",
+      "cardText": "Инжектор PoE Ubiquiti POE-48-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.95 |38 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a59a4ddad72e615e/inzektor-poe-mikrotik-rbgpoe/",
+      "title": "Инжектор PoE MikroTik RBGPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "a59a4ddad72e615e",
+      "cardText": "Инжектор PoE MikroTik RBGPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.88 |103 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f56df4f7adcc8a5a/inzektor-poe-orient-sap-48poe/",
+      "title": "Инжектор PoE ORIENT SAP-48POE [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "f56df4f7adcc8a5a",
+      "cardText": "Инжектор PoE ORIENT SAP-48POE [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.69 |243 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/968d9c6225fd3332/inzektor-poe-orient-sap-c48poe-1a/",
+      "title": "Инжектор PoE ORIENT SAP-C48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "968d9c6225fd3332",
+      "cardText": "Инжектор PoE ORIENT SAP-C48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.72 |97 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0b63f065a9c83332/inzektor-splitter-poe-orient-nt-636poe/",
+      "title": "Инжектор + сплиттер PoE ORIENT NT-636POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "0b63f065a9c83332",
+      "cardText": "Инжектор + сплиттер PoE ORIENT NT-636POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.62 |184 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/434981318d47658a/udlinitel-poe-orient-swp-103n-100/",
+      "title": "Удлинитель PoE ORIENT SWP-103N-100 [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "434981318d47658a",
+      "cardText": "Удлинитель PoE ORIENT SWP-103N-100 [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.76 |42 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2e68ff9ee6af3330/splitter-poe-orient-poe-655r-48v/",
+      "title": "Сплиттер PoE ORIENT POE-655R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "2e68ff9ee6af3330",
+      "cardText": "Сплиттер PoE ORIENT POE-655R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.77 |65 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8f8f63faf9ae3330/inzektor-poe-orient-sap-c48poe-05a/",
+      "title": "Инжектор PoE ORIENT SAP-C48POE 0.5A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "8f8f63faf9ae3330",
+      "cardText": "Инжектор PoE ORIENT SAP-C48POE 0.5A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.72 |86 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecebc06df3332/inzektor-poe-osnovo-midspan-1300ga/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/300GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecebc06df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/300GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.7 |40 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/236c4a79a7cd3330/inzektor-poe-ubiquiti-poe-24-24w-g/",
+      "title": "Инжектор PoE Ubiquiti POE-24-24W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "236c4a79a7cd3330",
+      "cardText": "Инжектор PoE Ubiquiti POE-24-24W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]4.89 |38 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f6c3620da7cd3330/inzektor-poe-ubiquiti-poe-24-24w/",
+      "title": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "f6c3620da7cd3330",
+      "cardText": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.88 |35 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/221eacea4ac41b80/inzektor-poe-wi-tek-wi-poe51-48v/",
+      "title": "Инжектор PoE Wi-Tek WI-POE51-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "221eacea4ac41b80",
+      "cardText": "Инжектор PoE Wi-Tek WI-POE51-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |16 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/be55199c3a31c55a/udlinitel-poe-orient-swp-102-100/",
+      "title": "Удлинитель PoE ORIENT SWP-102-100 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "be55199c3a31c55a",
+      "cardText": "Удлинитель PoE ORIENT SWP-102-100 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.94 |17 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/00f0a36292bc3330/inzektor-poe-orient-sap-24poe-1a/",
+      "title": "Инжектор PoE ORIENT SAP-24POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "00f0a36292bc3330",
+      "cardText": "Инжектор PoE ORIENT SAP-24POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.6 |108 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ac506df3332/inzektor-poe-osnovo-midspan-1151a/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/151A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ac506df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/151A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.92 |50 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ec97a567d4923333/splitter-poe-wi-tek-wi-poe11s-48v/",
+      "title": "Сплиттер PoE Wi-Tek WI-POE11S-48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "ec97a567d4923333",
+      "cardText": "Сплиттер PoE Wi-Tek WI-POE11S-48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.8 |82 отзыва 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fccbff6d4ac31b80/inzektor-poe-wi-tek-wi-poe31-48v/",
+      "title": "Инжектор PoE Wi-Tek WI-POE31-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "fccbff6d4ac31b80",
+      "cardText": "Инжектор PoE Wi-Tek WI-POE31-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.84 |77 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f5808316f3523333/splitter-poe-orient-poe-657r-48v12/",
+      "title": "Сплиттер PoE ORIENT POE-657R 48V/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "f5808316f3523333",
+      "cardText": "Сплиттер PoE ORIENT POE-657R 48V/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]4.8 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ac606df3332/inzektor-poe-osnovo-midspan-1151ga/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/151GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ac606df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/151GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.8 |35 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/534c0ea4a7cc3330/inzektor-poe-mikrotik-rbpoe/",
+      "title": "Инжектор PoE Mikrotik RBPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "534c0ea4a7cc3330",
+      "cardText": "Инжектор PoE Mikrotik RBPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]4.74 |125 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/973652ebafef3330/inzektor-splitter-poe-orient-nt-635poe/",
+      "title": "Инжектор + сплиттер PoE ORIENT NT-635POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "973652ebafef3330",
+      "cardText": "Инжектор + сплиттер PoE ORIENT NT-635POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.78 |89 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/839ab58a4b333330/inzektor-poe-tp-link-tl-poe2412g/",
+      "title": "Инжектор PoE TP-Link TL-POE2412G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "839ab58a4b333330",
+      "cardText": "Инжектор PoE TP-Link TL-POE2412G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.74 |34 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/edc0a0512f37f07b/udlinitel-poe-orient-swp-103-100r/",
+      "title": "Удлинитель PoE ORIENT SWP-103-100R [разъемы - 4x RJ-45 (female)]",
+      "specsText": "разъемы - 4x RJ-45 (female)",
+      "bracketGroups": [
+        "разъемы - 4x RJ-45 (female)"
+      ],
+      "priceText": "",
+      "productId": "edc0a0512f37f07b",
+      "cardText": "Удлинитель PoE ORIENT SWP-103-100R [разъемы - 4x RJ-45 (female)]4.86 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9dd4fba50a29db4f/inzektor-poe-orient-sap-48poev2/",
+      "title": "Инжектор PoE Orient SAP-48POEV2 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "9dd4fba50a29db4f",
+      "cardText": "Инжектор PoE Orient SAP-48POEV2 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec606df3332/splitter-poe-osnovo-poe-splitter2/",
+      "title": "Сплиттер PoE OSNOVO PoE Splitter/2 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec606df3332",
+      "cardText": "Сплиттер PoE OSNOVO PoE Splitter/2 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.91 |11 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0e343c789756cbce/udlinitel-poe-orient-swp-104-1000/",
+      "title": "Удлинитель PoE ORIENT SWP-104-1000 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "0e343c789756cbce",
+      "cardText": "Удлинитель PoE ORIENT SWP-104-1000 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cd10017724f93332/splitter-poe-orient-poe-653r-48v/",
+      "title": "Сплиттер PoE ORIENT POE-653R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "cd10017724f93332",
+      "cardText": "Сплиттер PoE ORIENT POE-653R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.78 |28 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c93849b4ed918ae1/udlinitel-poe-orient-swp-104-100/",
+      "title": "Удлинитель PoE ORIENT SWP-104-100 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "c93849b4ed918ae1",
+      "cardText": "Удлинитель PoE ORIENT SWP-104-100 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.43 |14 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4047985d4d9b4e78/udlinitel-poe-orient-swp-103-1000r/",
+      "title": "Удлинитель PoE ORIENT SWP-103-1000R [разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "4047985d4d9b4e78",
+      "cardText": "Удлинитель PoE ORIENT SWP-103-1000R [разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec206df3332/inzektor-poe-osnovo-midspan-1652g/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/652G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec206df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/652G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fb61006bd1a22ff4/inzektor-poe-wi-tek-wi-poe31-24v/",
+      "title": "Инжектор PoE Wi-Tek WI-POE31-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "fb61006bd1a22ff4",
+      "cardText": "Инжектор PoE Wi-Tek WI-POE31-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.88 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b232ee26af633332/splitter-poe-orient-poe-656r/",
+      "title": "Сплиттер PoE ORIENT POE-656R [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "b232ee26af633332",
+      "cardText": "Сплиттер PoE ORIENT POE-656R [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]5 |18 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ec97a569d4923333/inzektor-poe-wi-tek-wi-poe55-48v-60w/",
+      "title": "Инжектор PoE Wi-Tek WI-POE55-48V-60W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "ec97a569d4923333",
+      "cardText": "Инжектор PoE Wi-Tek WI-POE55-48V-60W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.58 |10 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b0dcb0341c36ad23/udlinitel-poe-orient-swp-103n-1000/",
+      "title": "Удлинитель PoE ORIENT SWP-103N-1000 [разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "b0dcb0341c36ad23",
+      "cardText": "Удлинитель PoE ORIENT SWP-103N-1000 [разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cdc00117810fcefc/inzektor-poe-cudy-poe400/",
+      "title": "Инжектор PoE Cudy POE400 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "cdc00117810fcefc",
+      "cardText": "Инжектор PoE Cudy POE400 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/91434e31cd0f2ff4/inzektor-splitter-poe-orient-nt-637poe/",
+      "title": "Инжектор + сплиттер PoE ORIENT NT-637POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "91434e31cd0f2ff4",
+      "cardText": "Инжектор + сплиттер PoE ORIENT NT-637POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.45 |22 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ab906df3332/udlinitel-poe-osnovo-e-poe1a/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ab906df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.5 |10 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051abb06df3332/udlinitel-poe-osnovo-e-poe1w/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/1W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051abb06df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/1W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.64 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051aba06df3332/udlinitel-poe-osnovo-e-poe1/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/1 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051aba06df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/1 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4e70b10ed183c8c4/inzektor-poe-cudy-poe200/",
+      "title": "Инжектор PoE Cudy POE200 [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "4e70b10ed183c8c4",
+      "cardText": "Инжектор PoE Cudy POE200 [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051abf06df3332/konverter-poe-osnovo-cn-poe24g/",
+      "title": "Конвертер PoE OSNOVO CN-PoE24/G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051abf06df3332",
+      "cardText": "Конвертер PoE OSNOVO CN-PoE24/G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b4bd6a5cd68528e6/udlinitel-poe-cudy-poe15/",
+      "title": "Удлинитель PoE Cudy POE15 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "b4bd6a5cd68528e6",
+      "cardText": "Удлинитель PoE Cudy POE15 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec706df3332/splitter-poe-osnovo-poe-splitter2w/",
+      "title": "Сплиттер PoE OSNOVO PoE Splitter/2W [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec706df3332",
+      "cardText": "Сплиттер PoE OSNOVO PoE Splitter/2W [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.86 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5cb90fe3d4923333/povtoritel-poe-wi-tek-wi-pe31e/",
+      "title": "Повторитель PoE Wi-Tek WI-PE31E [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5cb90fe3d4923333",
+      "cardText": "Повторитель PoE Wi-Tek WI-PE31E [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.71 |14 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051abc06df3332/udlinitel-poe-osnovo-e-poe2w/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/2W [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051abc06df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/2W [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fb973af104733332/udlinitel-poe-osnovo-e-poe-1g/",
+      "title": "Удлинитель PoE OSNOVO E-PoE-1G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "fb973af104733332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE-1G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec506df3332/inzektor-poe-osnovo-midspan-2602g/",
+      "title": "Инжектор PoE OSNOVO Midspan-2/602G [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec506df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-2/602G [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8910ed56046e206c/udlinitel-poe-cudy-poe25/",
+      "title": "Удлинитель PoE Cudy POE25 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "8910ed56046e206c",
+      "cardText": "Удлинитель PoE Cudy POE25 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3809f1136b2cd9cb/udlinitel-poe-ubiquiti-long-range-ethernet-repeater/",
+      "title": "Удлинитель PoE Ubiquiti Long-Range Ethernet Repeater [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "3809f1136b2cd9cb",
+      "cardText": "Удлинитель PoE Ubiquiti Long-Range Ethernet Repeater [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4fc06df06efbcef4/inzektor-splitter-poe-lanmaster-lan-poe-kit-21/",
+      "title": "Инжектор + сплиттер PoE Lanmaster LAN-POE-KIT-2.1 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "4fc06df06efbcef4",
+      "cardText": "Инжектор + сплиттер PoE Lanmaster LAN-POE-KIT-2.1 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]5 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051abd06df3332/udlinitel-poe-osnovo-e-poe1gw/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/1GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051abd06df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/1GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051abe06df3332/udlinitel-poe-osnovo-e-poe2gw/",
+      "title": "Удлинитель PoE OSNOVO E-PoE/2GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051abe06df3332",
+      "cardText": "Удлинитель PoE OSNOVO E-PoE/2GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ac406df3332/inzektor-poe-osnovo-midspan-12p/",
+      "title": "Инжектор PoE OSNOVO Midspan-12/P [разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ac406df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-12/P [разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c2a97cffced4ed20/inzektor-poe-ubiquiti-poe-24-24w/",
+      "title": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "c2a97cffced4ed20",
+      "cardText": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c48b5bbf08f1a419/inzektor-poe-cudy-poe300/",
+      "title": "Инжектор PoE Cudy POE300 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "c48b5bbf08f1a419",
+      "cardText": "Инжектор PoE Cudy POE300 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ac206df3332/inzektor-poe-osnovo-ppk-11/",
+      "title": "Инжектор PoE OSNOVO PPK-11 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ac206df3332",
+      "cardText": "Инжектор PoE OSNOVO PPK-11 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]4.33 |26 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c993f218950db0d1/udlinitel-poe-cudy-poe10/",
+      "title": "Удлинитель PoE Cudy POE10 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "c993f218950db0d1",
+      "cardText": "Удлинитель PoE Cudy POE10 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0b63f067a9c83332/splitter-poe-orient-poe-655r-2412/",
+      "title": "Сплиттер PoE ORIENT POE-655R 24/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "0b63f067a9c83332",
+      "cardText": "Сплиттер PoE ORIENT POE-655R 24/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]4.19 |21 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5a051ac306df3332/inzektor-poe-osnovo-midspan-8p/",
+      "title": "Инжектор PoE OSNOVO Midspan-8/P [разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5a051ac306df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-8/P [разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.23 |37 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec906df3332/splitter-poe-osnovo-poe-splitterg2/",
+      "title": "Сплиттер PoE OSNOVO PoE Splitter/G2 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec906df3332",
+      "cardText": "Сплиттер PoE OSNOVO PoE Splitter/G2 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.2 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b9cb01dab4aff94d/inzektor-poe-cudy-poe350/",
+      "title": "Инжектор PoE Cudy POE350 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "b9cb01dab4aff94d",
+      "cardText": "Инжектор PoE Cudy POE350 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/57a8e28027896f9e/povtoritel-poe-wi-tek-wi-poe21e-o/",
+      "title": "Повторитель PoE Wi-Tek WI-POE21E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "57a8e28027896f9e",
+      "cardText": "Повторитель PoE Wi-Tek WI-POE21E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d2ca712e16f5ed20/inzektor-poe-wi-tek-wi-poe51-24v/",
+      "title": "Инжектор PoE WI-Tek WI-POE51-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "d2ca712e16f5ed20",
+      "cardText": "Инжектор PoE WI-Tek WI-POE51-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]1 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fbc4b151ef4f3330/inzektor-poe-orient-poe-655t/",
+      "title": "Инжектор PoE ORIENT POE-655T [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "fbc4b151ef4f3330",
+      "cardText": "Инжектор PoE ORIENT POE-655T [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]3.95 |10 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/75ef71d80b010b50/udlinitel-poe-cudy-poe40/",
+      "title": "Удлинитель PoE Cudy POE40 [разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с]",
+      "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "75ef71d80b010b50",
+      "cardText": "Удлинитель PoE Cudy POE40 [разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с]3.67 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5cb90fe5d4923333/povtoritel-poe-wi-tek-wi-pe51e/",
+      "title": "Повторитель PoE Wi-Tek WI-PE51E [разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "5cb90fe5d4923333",
+      "cardText": "Повторитель PoE Wi-Tek WI-PE51E [разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.67 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecebb06df3332/inzektor-poe-osnovo-midspan-1151g/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/151G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecebb06df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/151G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]4.67 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8f4f5e7b5cdced20/splitter-poe-dahua-dh-tas100/",
+      "title": "Сплиттер PoE Dahua DH-TAS100 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "8f4f5e7b5cdced20",
+      "cardText": "Сплиттер PoE Dahua DH-TAS100 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec306df3332/inzektor-poe-osnovo-midspan-1902g/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/902G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec306df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/902G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/09bad544980238fa/splitter-poe-orient-swp-102-1000r/",
+      "title": "Сплиттер PoE ORIENT SWP-102-1000R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "09bad544980238fa",
+      "cardText": "Сплиттер PoE ORIENT SWP-102-1000R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1861537cbc6ed231/udlinitel-poe-orient-nt-607poe/",
+      "title": "Удлинитель PoE ORIENT NT-607POE [разъемы - 2x RJ-45 (male), 4x RJ-45 (female)]",
+      "specsText": "разъемы - 2x RJ-45 (male), 4x RJ-45 (female)",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (male), 4x RJ-45 (female)"
+      ],
+      "priceText": "",
+      "productId": "1861537cbc6ed231",
+      "cardText": "Удлинитель PoE ORIENT NT-607POE [разъемы - 2x RJ-45 (male), 4x RJ-45 (female)]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/434d0c55c5934789/splitter-poe-orient-swp-102-100r/",
+      "title": "Сплиттер PoE ORIENT SWP-102-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "434d0c55c5934789",
+      "cardText": "Сплиттер PoE ORIENT SWP-102-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/601ecec006df3332/inzektor-poe-osnovo-midspan-1pw/",
+      "title": "Инжектор PoE OSNOVO Midspan-1/PW [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "601ecec006df3332",
+      "cardText": "Инжектор PoE OSNOVO Midspan-1/PW [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a7e91147e608e913/udlinitel-poe-orient-swp-101-100r/",
+      "title": "Удлинитель PoE ORIENT SWP-101-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "a7e91147e608e913",
+      "cardText": "Удлинитель PoE ORIENT SWP-101-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e0dabcb790aa4dcb/povtoritel-poe-wi-tek-wi-poe22e-o/",
+      "title": "Повторитель PoE Wi-Tek WI-POE22E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]",
+      "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "e0dabcb790aa4dcb",
+      "cardText": "Повторитель PoE Wi-Tek WI-POE22E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ee377c9fd80975db/inzektor-poe-orient-sap-48poev3/",
+      "title": "Инжектор PoE ORIENT SAP-48POEV3 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+      "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+      "bracketGroups": [
+        "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "ee377c9fd80975db",
+      "cardText": "Инжектор PoE ORIENT SAP-48POEV3 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]4.8|рейтинг бренда"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Инжектор",
+      "models": [
+        {
+          "brand": "Инжектор",
+          "model": "+ сплиттер PoE Lanmaster LAN-POE-KIT-2.1",
+          "name": "Инжектор + сплиттер PoE Lanmaster LAN-POE-KIT-2.1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4fc06df06efbcef4/inzektor-splitter-poe-lanmaster-lan-poe-kit-21/",
+              "title": "Инжектор + сплиттер PoE Lanmaster LAN-POE-KIT-2.1 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "+ сплиттер PoE ORIENT NT-633POE",
+          "name": "Инжектор + сплиттер PoE ORIENT NT-633POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df4f9adcc8a5a/inzektor-splitter-poe-orient-nt-633poe/",
+              "title": "Инжектор + сплиттер PoE ORIENT NT-633POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "+ сплиттер PoE ORIENT NT-635POE",
+          "name": "Инжектор + сплиттер PoE ORIENT NT-635POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/973652ebafef3330/inzektor-splitter-poe-orient-nt-635poe/",
+              "title": "Инжектор + сплиттер PoE ORIENT NT-635POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "+ сплиттер PoE ORIENT NT-636POE",
+          "name": "Инжектор + сплиттер PoE ORIENT NT-636POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0b63f065a9c83332/inzektor-splitter-poe-orient-nt-636poe/",
+              "title": "Инжектор + сплиттер PoE ORIENT NT-636POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "+ сплиттер PoE ORIENT NT-637POE",
+          "name": "Инжектор + сплиттер PoE ORIENT NT-637POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/91434e31cd0f2ff4/inzektor-splitter-poe-orient-nt-637poe/",
+              "title": "Инжектор + сплиттер PoE ORIENT NT-637POE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Cudy POE200",
+          "name": "Инжектор PoE Cudy POE200",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4e70b10ed183c8c4/inzektor-poe-cudy-poe200/",
+              "title": "Инжектор PoE Cudy POE200 [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Cudy POE300",
+          "name": "Инжектор PoE Cudy POE300",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c48b5bbf08f1a419/inzektor-poe-cudy-poe300/",
+              "title": "Инжектор PoE Cudy POE300 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Cudy POE350",
+          "name": "Инжектор PoE Cudy POE350",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b9cb01dab4aff94d/inzektor-poe-cudy-poe350/",
+              "title": "Инжектор PoE Cudy POE350 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Cudy POE400",
+          "name": "Инжектор PoE Cudy POE400",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cdc00117810fcefc/inzektor-poe-cudy-poe400/",
+              "title": "Инжектор PoE Cudy POE400 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Keenetic KN-4510",
+          "name": "Инжектор PoE Keenetic KN-4510",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/691364ab84f1ed20/inzektor-poe-keenetic-kn-4510/",
+              "title": "Инжектор PoE Keenetic KN-4510 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE MikroTik RBGPOE",
+          "name": "Инжектор PoE MikroTik RBGPOE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a59a4ddad72e615e/inzektor-poe-mikrotik-rbgpoe/",
+              "title": "Инжектор PoE MikroTik RBGPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Mikrotik RBPOE",
+          "name": "Инжектор PoE Mikrotik RBPOE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/534c0ea4a7cc3330/inzektor-poe-mikrotik-rbpoe/",
+              "title": "Инжектор PoE Mikrotik RBPOE [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT POE-655T",
+          "name": "Инжектор PoE ORIENT POE-655T",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fbc4b151ef4f3330/inzektor-poe-orient-poe-655t/",
+              "title": "Инжектор PoE ORIENT POE-655T [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-24POE 1A",
+          "name": "Инжектор PoE ORIENT SAP-24POE 1A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/00f0a36292bc3330/inzektor-poe-orient-sap-24poe-1a/",
+              "title": "Инжектор PoE ORIENT SAP-24POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-48POE",
+          "name": "Инжектор PoE ORIENT SAP-48POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f56df4f7adcc8a5a/inzektor-poe-orient-sap-48poe/",
+              "title": "Инжектор PoE ORIENT SAP-48POE [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-48POE 1A",
+          "name": "Инжектор PoE ORIENT SAP-48POE 1A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b6c37b6692bb3330/inzektor-poe-orient-sap-48poe-1a/",
+              "title": "Инжектор PoE ORIENT SAP-48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Orient SAP-48POEV2",
+          "name": "Инжектор PoE Orient SAP-48POEV2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9dd4fba50a29db4f/inzektor-poe-orient-sap-48poev2/",
+              "title": "Инжектор PoE Orient SAP-48POEV2 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-48POEV3",
+          "name": "Инжектор PoE ORIENT SAP-48POEV3",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ee377c9fd80975db/inzektor-poe-orient-sap-48poev3/",
+              "title": "Инжектор PoE ORIENT SAP-48POEV3 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-C48POE 0.5A",
+          "name": "Инжектор PoE ORIENT SAP-C48POE 0.5A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8f8f63faf9ae3330/inzektor-poe-orient-sap-c48poe-05a/",
+              "title": "Инжектор PoE ORIENT SAP-C48POE 0.5A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE ORIENT SAP-C48POE 1A",
+          "name": "Инжектор PoE ORIENT SAP-C48POE 1A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/968d9c6225fd3332/inzektor-poe-orient-sap-c48poe-1a/",
+              "title": "Инжектор PoE ORIENT SAP-C48POE 1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/151A",
+          "name": "Инжектор PoE OSNOVO Midspan-1/151A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ac506df3332/inzektor-poe-osnovo-midspan-1151a/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/151A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/151G",
+          "name": "Инжектор PoE OSNOVO Midspan-1/151G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecebb06df3332/inzektor-poe-osnovo-midspan-1151g/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/151G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/151GA",
+          "name": "Инжектор PoE OSNOVO Midspan-1/151GA",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ac606df3332/inzektor-poe-osnovo-midspan-1151ga/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/151GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/300GA",
+          "name": "Инжектор PoE OSNOVO Midspan-1/300GA",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecebc06df3332/inzektor-poe-osnovo-midspan-1300ga/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/300GA [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/652G",
+          "name": "Инжектор PoE OSNOVO Midspan-1/652G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec206df3332/inzektor-poe-osnovo-midspan-1652g/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/652G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/902G",
+          "name": "Инжектор PoE OSNOVO Midspan-1/902G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec306df3332/inzektor-poe-osnovo-midspan-1902g/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/902G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-1/PW",
+          "name": "Инжектор PoE OSNOVO Midspan-1/PW",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec006df3332/inzektor-poe-osnovo-midspan-1pw/",
+              "title": "Инжектор PoE OSNOVO Midspan-1/PW [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-12/P",
+          "name": "Инжектор PoE OSNOVO Midspan-12/P",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ac406df3332/inzektor-poe-osnovo-midspan-12p/",
+              "title": "Инжектор PoE OSNOVO Midspan-12/P [разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 24x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-2/602G",
+          "name": "Инжектор PoE OSNOVO Midspan-2/602G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec506df3332/inzektor-poe-osnovo-midspan-2602g/",
+              "title": "Инжектор PoE OSNOVO Midspan-2/602G [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO Midspan-8/P",
+          "name": "Инжектор PoE OSNOVO Midspan-8/P",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ac306df3332/inzektor-poe-osnovo-midspan-8p/",
+              "title": "Инжектор PoE OSNOVO Midspan-8/P [разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 16x RJ-45 (female), 1x DC, скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE OSNOVO PPK-11",
+          "name": "Инжектор PoE OSNOVO PPK-11",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ac206df3332/inzektor-poe-osnovo-ppk-11/",
+              "title": "Инжектор PoE OSNOVO PPK-11 [разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Tenda PoE30G-AT",
+          "name": "Инжектор PoE Tenda PoE30G-AT",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ce30aa367f493330/inzektor-poe-tenda-poe30g-at/",
+              "title": "Инжектор PoE Tenda PoE30G-AT [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE TP-Link TL-POE2412G",
+          "name": "Инжектор PoE TP-Link TL-POE2412G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/839ab58a4b333330/inzektor-poe-tp-link-tl-poe2412g/",
+              "title": "Инжектор PoE TP-Link TL-POE2412G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Ubiquiti POE-24-12W-G",
+          "name": "Инжектор PoE Ubiquiti POE-24-12W-G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f3fd51b3e0773330/inzektor-poe-ubiquiti-poe-24-12w-g/",
+              "title": "Инжектор PoE Ubiquiti POE-24-12W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Ubiquiti POE-24-24W",
+          "name": "Инжектор PoE Ubiquiti POE-24-24W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f6c3620da7cd3330/inzektor-poe-ubiquiti-poe-24-24w/",
+              "title": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/c2a97cffced4ed20/inzektor-poe-ubiquiti-poe-24-24w/",
+              "title": "Инжектор PoE Ubiquiti POE-24-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Ubiquiti POE-24-24W-G",
+          "name": "Инжектор PoE Ubiquiti POE-24-24W-G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/236c4a79a7cd3330/inzektor-poe-ubiquiti-poe-24-24w-g/",
+              "title": "Инжектор PoE Ubiquiti POE-24-24W-G [разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Ubiquiti POE-48-24W",
+          "name": "Инжектор PoE Ubiquiti POE-48-24W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/550456f2a7cd3330/inzektor-poe-ubiquiti-poe-48-24w/",
+              "title": "Инжектор PoE Ubiquiti POE-48-24W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Wi-Tek WI-POE31-24V",
+          "name": "Инжектор PoE Wi-Tek WI-POE31-24V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fb61006bd1a22ff4/inzektor-poe-wi-tek-wi-poe31-24v/",
+              "title": "Инжектор PoE Wi-Tek WI-POE31-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Wi-Tek WI-POE31-48V",
+          "name": "Инжектор PoE Wi-Tek WI-POE31-48V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fccbff6d4ac31b80/inzektor-poe-wi-tek-wi-poe31-48v/",
+              "title": "Инжектор PoE Wi-Tek WI-POE31-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE WI-Tek WI-POE51-24V",
+          "name": "Инжектор PoE WI-Tek WI-POE51-24V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d2ca712e16f5ed20/inzektor-poe-wi-tek-wi-poe51-24v/",
+              "title": "Инжектор PoE WI-Tek WI-POE51-24V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Wi-Tek WI-POE51-48V",
+          "name": "Инжектор PoE Wi-Tek WI-POE51-48V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/221eacea4ac41b80/inzektor-poe-wi-tek-wi-poe51-48v/",
+              "title": "Инжектор PoE Wi-Tek WI-POE51-48V [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инжектор",
+          "model": "PoE Wi-Tek WI-POE55-48V-60W",
+          "name": "Инжектор PoE Wi-Tek WI-POE55-48V-60W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ec97a569d4923333/inzektor-poe-wi-tek-wi-poe55-48v-60w/",
+              "title": "Инжектор PoE Wi-Tek WI-POE55-48V-60W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Конвертер",
+      "models": [
+        {
+          "brand": "Конвертер",
+          "model": "PoE OSNOVO CN-PoE24/G",
+          "name": "Конвертер PoE OSNOVO CN-PoE24/G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051abf06df3332/konverter-poe-osnovo-cn-poe24g/",
+              "title": "Конвертер PoE OSNOVO CN-PoE24/G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Повторитель",
+      "models": [
+        {
+          "brand": "Повторитель",
+          "model": "PoE Wi-Tek WI-PE31E",
+          "name": "Повторитель PoE Wi-Tek WI-PE31E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5cb90fe3d4923333/povtoritel-poe-wi-tek-wi-pe31e/",
+              "title": "Повторитель PoE Wi-Tek WI-PE31E [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Повторитель",
+          "model": "PoE Wi-Tek WI-PE51E",
+          "name": "Повторитель PoE Wi-Tek WI-PE51E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5cb90fe5d4923333/povtoritel-poe-wi-tek-wi-pe51e/",
+              "title": "Повторитель PoE Wi-Tek WI-PE51E [разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 6x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Повторитель",
+          "model": "PoE Wi-Tek WI-POE21E-O",
+          "name": "Повторитель PoE Wi-Tek WI-POE21E-O",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/57a8e28027896f9e/povtoritel-poe-wi-tek-wi-poe21e-o/",
+              "title": "Повторитель PoE Wi-Tek WI-POE21E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Повторитель",
+          "model": "PoE Wi-Tek WI-POE22E-O",
+          "name": "Повторитель PoE Wi-Tek WI-POE22E-O",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e0dabcb790aa4dcb/povtoritel-poe-wi-tek-wi-poe22e-o/",
+              "title": "Повторитель PoE Wi-Tek WI-POE22E-O [разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Сплиттер",
+      "models": [
+        {
+          "brand": "Сплиттер",
+          "model": "PoE Dahua DH-TAS100",
+          "name": "Сплиттер PoE Dahua DH-TAS100",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8f4f5e7b5cdced20/splitter-poe-dahua-dh-tas100/",
+              "title": "Сплиттер PoE Dahua DH-TAS100 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT POE-653R 48V",
+          "name": "Сплиттер PoE ORIENT POE-653R 48V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cd10017724f93332/splitter-poe-orient-poe-653r-48v/",
+              "title": "Сплиттер PoE ORIENT POE-653R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT POE-655R 24/12",
+          "name": "Сплиттер PoE ORIENT POE-655R 24/12",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0b63f067a9c83332/splitter-poe-orient-poe-655r-2412/",
+              "title": "Сплиттер PoE ORIENT POE-655R 24/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT POE-655R 48V",
+          "name": "Сплиттер PoE ORIENT POE-655R 48V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2e68ff9ee6af3330/splitter-poe-orient-poe-655r-48v/",
+              "title": "Сплиттер PoE ORIENT POE-655R 48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT POE-656R",
+          "name": "Сплиттер PoE ORIENT POE-656R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b232ee26af633332/splitter-poe-orient-poe-656r/",
+              "title": "Сплиттер PoE ORIENT POE-656R [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT POE-657R 48V/12",
+          "name": "Сплиттер PoE ORIENT POE-657R 48V/12",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f5808316f3523333/splitter-poe-orient-poe-657r-48v12/",
+              "title": "Сплиттер PoE ORIENT POE-657R 48V/12 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT SWP-102-1000R",
+          "name": "Сплиттер PoE ORIENT SWP-102-1000R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/09bad544980238fa/splitter-poe-orient-swp-102-1000r/",
+              "title": "Сплиттер PoE ORIENT SWP-102-1000R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE ORIENT SWP-102-100R",
+          "name": "Сплиттер PoE ORIENT SWP-102-100R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/434d0c55c5934789/splitter-poe-orient-swp-102-100r/",
+              "title": "Сплиттер PoE ORIENT SWP-102-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE OSNOVO PoE Splitter/2",
+          "name": "Сплиттер PoE OSNOVO PoE Splitter/2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec606df3332/splitter-poe-osnovo-poe-splitter2/",
+              "title": "Сплиттер PoE OSNOVO PoE Splitter/2 [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE OSNOVO PoE Splitter/2W",
+          "name": "Сплиттер PoE OSNOVO PoE Splitter/2W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec706df3332/splitter-poe-osnovo-poe-splitter2w/",
+              "title": "Сплиттер PoE OSNOVO PoE Splitter/2W [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE OSNOVO PoE Splitter/G2",
+          "name": "Сплиттер PoE OSNOVO PoE Splitter/G2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/601ecec906df3332/splitter-poe-osnovo-poe-splitterg2/",
+              "title": "Сплиттер PoE OSNOVO PoE Splitter/G2 [разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Сплиттер",
+          "model": "PoE Wi-Tek WI-POE11S-48V",
+          "name": "Сплиттер PoE Wi-Tek WI-POE11S-48V",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ec97a567d4923333/splitter-poe-wi-tek-wi-poe11s-48v/",
+              "title": "Сплиттер PoE Wi-Tek WI-POE11S-48V [разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x DC, 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Удлинитель",
+      "models": [
+        {
+          "brand": "Удлинитель",
+          "model": "PoE Cudy POE10",
+          "name": "Удлинитель PoE Cudy POE10",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c993f218950db0d1/udlinitel-poe-cudy-poe10/",
+              "title": "Удлинитель PoE Cudy POE10 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE Cudy POE15",
+          "name": "Удлинитель PoE Cudy POE15",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b4bd6a5cd68528e6/udlinitel-poe-cudy-poe15/",
+              "title": "Удлинитель PoE Cudy POE15 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE Cudy POE25",
+          "name": "Удлинитель PoE Cudy POE25",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8910ed56046e206c/udlinitel-poe-cudy-poe25/",
+              "title": "Удлинитель PoE Cudy POE25 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE Cudy POE40",
+          "name": "Удлинитель PoE Cudy POE40",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/75ef71d80b010b50/udlinitel-poe-cudy-poe40/",
+              "title": "Удлинитель PoE Cudy POE40 [разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с]",
+              "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с, 1000 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT NT-607POE",
+          "name": "Удлинитель PoE ORIENT NT-607POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1861537cbc6ed231/udlinitel-poe-orient-nt-607poe/",
+              "title": "Удлинитель PoE ORIENT NT-607POE [разъемы - 2x RJ-45 (male), 4x RJ-45 (female)]",
+              "specsText": "разъемы - 2x RJ-45 (male), 4x RJ-45 (female)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-101-100R",
+          "name": "Удлинитель PoE ORIENT SWP-101-100R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a7e91147e608e913/udlinitel-poe-orient-swp-101-100r/",
+              "title": "Удлинитель PoE ORIENT SWP-101-100R [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-102-100",
+          "name": "Удлинитель PoE ORIENT SWP-102-100",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/be55199c3a31c55a/udlinitel-poe-orient-swp-102-100/",
+              "title": "Удлинитель PoE ORIENT SWP-102-100 [разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 3x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-103-1000R",
+          "name": "Удлинитель PoE ORIENT SWP-103-1000R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4047985d4d9b4e78/udlinitel-poe-orient-swp-103-1000r/",
+              "title": "Удлинитель PoE ORIENT SWP-103-1000R [разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 1000 Мбит/с, 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-103-100R",
+          "name": "Удлинитель PoE ORIENT SWP-103-100R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/edc0a0512f37f07b/udlinitel-poe-orient-swp-103-100r/",
+              "title": "Удлинитель PoE ORIENT SWP-103-100R [разъемы - 4x RJ-45 (female)]",
+              "specsText": "разъемы - 4x RJ-45 (female)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-103N-100",
+          "name": "Удлинитель PoE ORIENT SWP-103N-100",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/434981318d47658a/udlinitel-poe-orient-swp-103n-100/",
+              "title": "Удлинитель PoE ORIENT SWP-103N-100 [разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-103N-1000",
+          "name": "Удлинитель PoE ORIENT SWP-103N-1000",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b0dcb0341c36ad23/udlinitel-poe-orient-swp-103n-1000/",
+              "title": "Удлинитель PoE ORIENT SWP-103N-1000 [разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 4x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-104-100",
+          "name": "Удлинитель PoE ORIENT SWP-104-100",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c93849b4ed918ae1/udlinitel-poe-orient-swp-104-100/",
+              "title": "Удлинитель PoE ORIENT SWP-104-100 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE ORIENT SWP-104-1000",
+          "name": "Удлинитель PoE ORIENT SWP-104-1000",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0e343c789756cbce/udlinitel-poe-orient-swp-104-1000/",
+              "title": "Удлинитель PoE ORIENT SWP-104-1000 [разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 5x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE-1G",
+          "name": "Удлинитель PoE OSNOVO E-PoE-1G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fb973af104733332/udlinitel-poe-osnovo-e-poe-1g/",
+              "title": "Удлинитель PoE OSNOVO E-PoE-1G [разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 1x RJ-45 (female), 1x RJ-45 (male), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/1",
+          "name": "Удлинитель PoE OSNOVO E-PoE/1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051aba06df3332/udlinitel-poe-osnovo-e-poe1/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/1 [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/1A",
+          "name": "Удлинитель PoE OSNOVO E-PoE/1A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051ab906df3332/udlinitel-poe-osnovo-e-poe1a/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/1A [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/1GW",
+          "name": "Удлинитель PoE OSNOVO E-PoE/1GW",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051abd06df3332/udlinitel-poe-osnovo-e-poe1gw/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/1GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 1000 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/1W",
+          "name": "Удлинитель PoE OSNOVO E-PoE/1W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051abb06df3332/udlinitel-poe-osnovo-e-poe1w/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/1W [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/2GW",
+          "name": "Удлинитель PoE OSNOVO E-PoE/2GW",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051abe06df3332/udlinitel-poe-osnovo-e-poe2gw/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/2GW [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE OSNOVO E-PoE/2W",
+          "name": "Удлинитель PoE OSNOVO E-PoE/2W",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5a051abc06df3332/udlinitel-poe-osnovo-e-poe2w/",
+              "title": "Удлинитель PoE OSNOVO E-PoE/2W [разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 10 Мбит/с, 100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Удлинитель",
+          "model": "PoE Ubiquiti Long-Range Ethernet Repeater",
+          "name": "Удлинитель PoE Ubiquiti Long-Range Ethernet Repeater",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3809f1136b2cd9cb/udlinitel-poe-ubiquiti-long-range-ethernet-repeater/",
+              "title": "Удлинитель PoE Ubiquiti Long-Range Ethernet Repeater [разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с]",
+              "specsText": "разъемы - 2x RJ-45 (female), скорость Ethernet - 100 Мбит/с, 10 Мбит/с, 1000 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "PoE оборудование купить в интернет-магазине DNS. PoE оборудование цены, большой каталог, новинки. - страница 1 из 5"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "PoE оборудование купить в интернет-магазине DNS. PoE оборудование цены, большой каталог, новинки. - страница 2 из 5"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 18,
+      "title": "PoE оборудование купить в интернет-магазине DNS. PoE оборудование цены, большой каталог, новинки. - страница 3 из 5"
+    },
+    {
+      "page": 4,
+      "url": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later&p=4",
+      "status": 200,
+      "count": 18,
+      "title": "PoE оборудование купить в интернет-магазине DNS. PoE оборудование цены, большой каталог, новинки. - страница 4 из 5"
+    },
+    {
+      "page": 5,
+      "url": "https://www.dns-shop.ru/catalog/9564eba7fef37fd7/poe-oborudovanie/?stock=now-today-tomorrow-later&p=5",
+      "status": 200,
+      "count": 9,
+      "title": "PoE оборудование купить в интернет-магазине DNS. PoE оборудование цены, большой каталог, новинки. - страница 5 из 5"
+    }
+  ],
+  "errors": []
+}

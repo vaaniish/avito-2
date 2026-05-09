@@ -1,0 +1,239 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Смартфоны и фототехника",
+  "subcategoryName": "Смартфоны и гаджеты",
+  "itemName": "Аксессуары для радиостанций",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/5a9aceaa6c984e0a/aksessuary-dla-radiostancij/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:38:00.617Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 7,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/487769441cab0737/zaradnaa-stancia-grifon-g-3/",
+      "title": "Зарядная станция Грифон G-3 [Грифон G-3, от электросети]",
+      "specsText": "Грифон G-3, от электросети",
+      "bracketGroups": [
+        "Грифон G-3, от электросети"
+      ],
+      "priceText": "",
+      "productId": "487769441cab0737",
+      "cardText": "Зарядная станция Грифон G-3 [Грифон G-3, от электросети] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8ee6e34ec25e44d6/adapter-pitania-grifon-g-34/",
+      "title": "Адаптер питания Грифон G-34 [Грифон G-34, от электросети]",
+      "specsText": "Грифон G-34, от электросети",
+      "bracketGroups": [
+        "Грифон G-34, от электросети"
+      ],
+      "priceText": "",
+      "productId": "8ee6e34ec25e44d6",
+      "cardText": "Адаптер питания Грифон G-34 [Грифон G-34, от электросети] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2a96049d4463ee25/zaradnaa-stancia-argut-a-43/",
+      "title": "Зарядная станция Аргут A-43 [Аргут А-43 UHF, от электросети]",
+      "specsText": "Аргут А-43 UHF, от электросети",
+      "bracketGroups": [
+        "Аргут А-43 UHF, от электросети"
+      ],
+      "priceText": "",
+      "productId": "2a96049d4463ee25",
+      "cardText": "Зарядная станция Аргут A-43 [Аргут А-43 UHF, от электросети] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/40924f99e644d431/zaradnaa-stancia-argut-a-73/",
+      "title": "Зарядная станция Аргут A-73 [Аргут А-73 UHF, Аргут А-73 VHF, от электросети]",
+      "specsText": "Аргут А-73 UHF, Аргут А-73 VHF, от электросети",
+      "bracketGroups": [
+        "Аргут А-73 UHF, Аргут А-73 VHF, от электросети"
+      ],
+      "priceText": "",
+      "productId": "40924f99e644d431",
+      "cardText": "Зарядная станция Аргут A-73 [Аргут А-73 UHF, Аргут А-73 VHF, от электросети] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4a5ae37fa8b8909a/zaradnaa-stancia-argut-a-25/",
+      "title": "Зарядная станция Аргут A-25 [Аргут А-25, от электросети]",
+      "specsText": "Аргут А-25, от электросети",
+      "bracketGroups": [
+        "Аргут А-25, от электросети"
+      ],
+      "priceText": "",
+      "productId": "4a5ae37fa8b8909a",
+      "cardText": "Зарядная станция Аргут A-25 [Аргут А-25, от электросети] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b067fdb2683cd04f/zaradnaa-stancia-argut-a-74/",
+      "title": "Зарядная станция Аргут A-74 [Аргут А-74 DMR UHF, от электросети]",
+      "specsText": "Аргут А-74 DMR UHF, от электросети",
+      "bracketGroups": [
+        "Аргут А-74 DMR UHF, от электросети"
+      ],
+      "priceText": "",
+      "productId": "b067fdb2683cd04f",
+      "cardText": "Зарядная станция Аргут A-74 [Аргут А-74 DMR UHF, от электросети] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f8c811267e3881b4/antenna-dla-racii-argut-pnu-06/",
+      "title": "Антенна для рации Аргут PNU-06 [совместимость - Аргут А-43 UHF, 400-520 МГц]",
+      "specsText": "совместимость - Аргут А-43 UHF, 400-520 МГц",
+      "bracketGroups": [
+        "совместимость - Аргут А-43 UHF, 400-520 МГц"
+      ],
+      "priceText": "",
+      "productId": "f8c811267e3881b4",
+      "cardText": "Антенна для рации Аргут PNU-06 [совместимость - Аргут А-43 UHF, 400-520 МГц]5 |1 отзыв"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Адаптер",
+      "models": [
+        {
+          "brand": "Адаптер",
+          "model": "питания Грифон G-34",
+          "name": "Адаптер питания Грифон G-34",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8ee6e34ec25e44d6/adapter-pitania-grifon-g-34/",
+              "title": "Адаптер питания Грифон G-34 [Грифон G-34, от электросети]",
+              "specsText": "Грифон G-34, от электросети",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Антенна",
+      "models": [
+        {
+          "brand": "Антенна",
+          "model": "для рации Аргут PNU-06",
+          "name": "Антенна для рации Аргут PNU-06",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f8c811267e3881b4/antenna-dla-racii-argut-pnu-06/",
+              "title": "Антенна для рации Аргут PNU-06 [совместимость - Аргут А-43 UHF, 400-520 МГц]",
+              "specsText": "совместимость - Аргут А-43 UHF, 400-520 МГц",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Зарядная",
+      "models": [
+        {
+          "brand": "Зарядная",
+          "model": "станция Аргут A-25",
+          "name": "Зарядная станция Аргут A-25",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4a5ae37fa8b8909a/zaradnaa-stancia-argut-a-25/",
+              "title": "Зарядная станция Аргут A-25 [Аргут А-25, от электросети]",
+              "specsText": "Аргут А-25, от электросети",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Зарядная",
+          "model": "станция Аргут A-43",
+          "name": "Зарядная станция Аргут A-43",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2a96049d4463ee25/zaradnaa-stancia-argut-a-43/",
+              "title": "Зарядная станция Аргут A-43 [Аргут А-43 UHF, от электросети]",
+              "specsText": "Аргут А-43 UHF, от электросети",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Зарядная",
+          "model": "станция Аргут A-73",
+          "name": "Зарядная станция Аргут A-73",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/40924f99e644d431/zaradnaa-stancia-argut-a-73/",
+              "title": "Зарядная станция Аргут A-73 [Аргут А-73 UHF, Аргут А-73 VHF, от электросети]",
+              "specsText": "Аргут А-73 UHF, Аргут А-73 VHF, от электросети",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Зарядная",
+          "model": "станция Аргут A-74",
+          "name": "Зарядная станция Аргут A-74",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b067fdb2683cd04f/zaradnaa-stancia-argut-a-74/",
+              "title": "Зарядная станция Аргут A-74 [Аргут А-74 DMR UHF, от электросети]",
+              "specsText": "Аргут А-74 DMR UHF, от электросети",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Зарядная",
+          "model": "станция Грифон G-3",
+          "name": "Зарядная станция Грифон G-3",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/487769441cab0737/zaradnaa-stancia-grifon-g-3/",
+              "title": "Зарядная станция Грифон G-3 [Грифон G-3, от электросети]",
+              "specsText": "Грифон G-3, от электросети",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [
+    {
+      "text": "Зарядные станции и адаптеры питания для радиостанций",
+      "href": "https://www.dns-shop.ru/catalog/recipe/f688d66204430a71/zaradnye-stancii-i-adaptery-pitania-dla-radiostancij/"
+    },
+    {
+      "text": "Антенны для радиостанций",
+      "href": "https://www.dns-shop.ru/catalog/recipe/6e3823d171c6e22c/antenny-dla-radiostancij/"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/5a9aceaa6c984e0a/aksessuary-dla-radiostancij/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 0,
+      "title": "Аксессуары для радиостанций купить в интернет-магазине DNS. Аксессуары для радиостанций цены, большой каталог, новинки."
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/recipe/f688d66204430a71/zaradnye-stancii-i-adaptery-pitania-dla-radiostancij/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 6,
+      "title": "Зарядные станции и адаптеры питания для радиостанций купить в интернет-магазине DNS. Зарядные станции и адаптеры питания для радиостанций цены, большой каталог, новинки. - страница 1 из 1"
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/recipe/6e3823d171c6e22c/antenny-dla-radiostancij/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "Антенны для радиостанций купить в интернет-магазине DNS. Антенны для радиостанций цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

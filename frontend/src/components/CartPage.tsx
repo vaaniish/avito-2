@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Minus, Plus, Heart, Trash2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Heart, Trash2 } from "lucide-react";
 import type { CartItem } from "../types";
 
 interface CartPageProps {
@@ -98,6 +98,15 @@ export function CartPage({
   return (
     <div className="min-h-screen app-shell pb-24 pt-6 md:pt-12">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+        <button
+          type="button"
+          onClick={onBackToHome}
+          className="back-link mb-6 inline-flex items-center gap-2 text-sm md:text-base"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          На главную
+        </button>
+
         {/* Page Title */}
         <h1 className="text-center mb-8 md:mb-12">Корзина</h1>
 

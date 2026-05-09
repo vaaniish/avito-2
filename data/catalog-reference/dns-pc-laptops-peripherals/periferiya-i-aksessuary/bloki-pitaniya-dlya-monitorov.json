@@ -1,0 +1,81 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "ПК, ноутбуки, периферия",
+  "subcategoryName": "Периферия и аксессуары",
+  "itemName": "Блоки питания для мониторов",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/ccd4897bcb74e81f/bloki-pitania-dla-monitorov/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:59:21.646Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 2,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/9122bfd8395bed20/adapter-pitania-dla-monitora-topon-top-tf05/",
+      "title": "Адаптер питания для монитора TopON TOP-TF05 [сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В]",
+      "specsText": "сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В",
+      "bracketGroups": [
+        "сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В"
+      ],
+      "priceText": "",
+      "productId": "9122bfd8395bed20",
+      "cardText": "Адаптер питания для монитора TopON TOP-TF05 [сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В]4.28 |68 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9d70dd6f395aed20/adapter-pitania-dla-monitora-topon-top-tf03/",
+      "title": "Адаптер питания для монитора TopON TOP-TF03 [сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В]",
+      "specsText": "сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В",
+      "bracketGroups": [
+        "сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В"
+      ],
+      "priceText": "",
+      "productId": "9d70dd6f395aed20",
+      "cardText": "Адаптер питания для монитора TopON TOP-TF03 [сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В]4.44 |49 отзывов 5Отличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Адаптер",
+      "models": [
+        {
+          "brand": "Адаптер",
+          "model": "питания для монитора TopON TOP-TF03",
+          "name": "Адаптер питания для монитора TopON TOP-TF03",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9d70dd6f395aed20/adapter-pitania-dla-monitora-topon-top-tf03/",
+              "title": "Адаптер питания для монитора TopON TOP-TF03 [сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В]",
+              "specsText": "сетевой, совместимость - монитор, 36 Вт, 12 В - 12 В",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Адаптер",
+          "model": "питания для монитора TopON TOP-TF05",
+          "name": "Адаптер питания для монитора TopON TOP-TF05",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9122bfd8395bed20/adapter-pitania-dla-monitora-topon-top-tf05/",
+              "title": "Адаптер питания для монитора TopON TOP-TF05 [сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В]",
+              "specsText": "сетевой, совместимость - монитор, 60 Вт, 12 В - 12 В",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/ccd4897bcb74e81f/bloki-pitania-dla-monitorov/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 2,
+      "title": "Блоки питания для мониторов купить в интернет-магазине DNS. Блоки питания для мониторов цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

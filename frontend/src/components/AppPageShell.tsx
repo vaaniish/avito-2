@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer, type FooterPage } from "./Footer";
+import type { CatalogCategory, CatalogItem } from "./FilterPanel";
 
 export type AppPageShellHeaderProps = {
   isAuthenticated: boolean;
@@ -9,6 +10,8 @@ export type AppPageShellHeaderProps = {
   onSearchSubmit: (query: string) => void;
   onLogoClick: () => void;
   onProfileClick: () => void;
+  catalogCategories: CatalogCategory[];
+  onCatalogItemSelect: (item: CatalogItem) => void;
 };
 
 type AppPageShellProps = {
@@ -27,6 +30,8 @@ export function AppPageShell({
   onSearchSubmit,
   onLogoClick,
   onProfileClick,
+  catalogCategories,
+  onCatalogItemSelect,
 }: AppPageShellProps) {
   const content = (
     <>
@@ -37,6 +42,8 @@ export function AppPageShell({
         onSearchSubmit={onSearchSubmit}
         onLogoClick={onLogoClick}
         onProfileClick={onProfileClick}
+        catalogCategories={catalogCategories}
+        onCatalogItemSelect={onCatalogItemSelect}
       />
       {children}
       <Footer onNavigate={onFooterNavigate} />

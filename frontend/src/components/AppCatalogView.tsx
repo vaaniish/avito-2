@@ -13,8 +13,9 @@ import type { CartItem, FilterState, Product } from "../types";
 
 type AppCatalogViewProps = {
   isSearchActive: boolean;
+  hideHero?: boolean;
   filters: FilterState;
-  viewMode: "products" | "services";
+  viewMode: "products";
   categories: CatalogCategory[];
   sortedItems: Product[];
   hasMoreItems: boolean;
@@ -24,7 +25,7 @@ type AppCatalogViewProps = {
   wishlistProductIds: Set<string>;
   onBannerClick: (category: string) => void;
   onFilterChange: (newFilters: FilterState) => void;
-  onViewModeChange: (nextMode: "products" | "services") => void;
+  onViewModeChange: (nextMode: "products") => void;
   onLoadMoreCatalogItems: () => void;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
@@ -35,6 +36,7 @@ type AppCatalogViewProps = {
 
 export function AppCatalogView({
   isSearchActive,
+  hideHero,
   filters,
   viewMode,
   categories,
@@ -56,7 +58,7 @@ export function AppCatalogView({
 }: AppCatalogViewProps) {
   return (
     <>
-      {!isSearchActive && <Hero onBannerClick={onBannerClick} />}
+      {!hideHero && !isSearchActive && <Hero onBannerClick={onBannerClick} />}
 
       <div className="page-container pb-14 sm:pb-16">
         <div className="lg:hidden mb-6">

@@ -1,0 +1,59 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Комплектующие для сервера",
+  "itemName": "Серверная память",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/4665d1c30d258853/servernaa-pamat/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:50.372Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 1,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/57a4cd79b28ded20/servernaa-operativnaa-pamat-samsung-m321r2ga3bb6-cqk-16-gb/",
+      "title": "Серверная оперативная память Samsung [M321R2GA3BB6-CQK] 16 ГБ [DDR5, 16 ГБx1 шт, 4800 МГц]",
+      "specsText": "DDR5, 16 ГБx1 шт, 4800 МГц",
+      "bracketGroups": [
+        "M321R2GA3BB6-CQK",
+        "DDR5, 16 ГБx1 шт, 4800 МГц"
+      ],
+      "priceText": "",
+      "productId": "57a4cd79b28ded20",
+      "cardText": "Серверная оперативная память Samsung [M321R2GA3BB6-CQK] 16 ГБ [DDR5, 16 ГБx1 шт, 4800 МГц]5 |1 отзывОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Серверная",
+      "models": [
+        {
+          "brand": "Серверная",
+          "model": "оперативная память Samsung 16 ГБ",
+          "name": "Серверная оперативная память Samsung 16 ГБ",
+          "manufacturerCodes": [
+            "M321R2GA3BB6-CQK"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/57a4cd79b28ded20/servernaa-operativnaa-pamat-samsung-m321r2ga3bb6-cqk-16-gb/",
+              "title": "Серверная оперативная память Samsung [M321R2GA3BB6-CQK] 16 ГБ [DDR5, 16 ГБx1 шт, 4800 МГц]",
+              "specsText": "DDR5, 16 ГБx1 шт, 4800 МГц",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/recipe/4665d1c30d258853/servernaa-pamat/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "Серверная память (DIMM) купить в интернет-магазине DNS. Серверная память (DIMM) цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

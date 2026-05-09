@@ -1,4 +1,5 @@
 import {
+  CatalogAttributeDefinition,
   CatalogCategory,
   CatalogItem,
   CatalogSubcategory,
@@ -11,15 +12,32 @@ import { getSessionUser, requireAnyRole } from "../../lib/session";
 import { detectCircumventionSignals } from "../moderation/anti-circumvention";
 import { enforceCircumventionViolation } from "../moderation/circumvention-enforcement";
 import { toClientCondition } from "../../utils/format";
+import {
+  buildTargetUrl,
+  createNotification,
+  notifyAdmins,
+} from "../notifications/notification.service";
 
 const catalogRouter = Router();
-type ListingTypeValue = "PRODUCT" | "SERVICE";
+type ListingTypeValue = "PRODUCT";
 
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
 const COMPLAINT_RATE_LIMIT_PER_HOUR = 20;
 const COMPLAINT_DEDUP_WINDOW_MINUTES = 45;
 const MAX_COMPLAINT_DESCRIPTION_LENGTH = 3000;
+const INTERNAL_LISTING_ATTRIBUTE_KEYS = new Set([
+  "__meeting_address",
+  "__catalog_category",
+  "__catalog_subcategory",
+  "__catalog_item",
+  "__catalog_item_custom",
+  "__catalog_request_attributes",
+  "__catalog_request_comment",
+  "__custom_manufacturer",
+  "__has_defects",
+  "__listing_state",
+]);
 
 const CP1251_SPECIAL_CHAR_TO_BYTE: Record<number, number> = {
   0x0402: 0x80,
@@ -144,8 +162,7 @@ function normalizeDisplayText(value: string | null | undefined, fallback = ""): 
   return decoded;
 }
 
-function resolveListingType(rawType: unknown): ListingTypeValue {
-  if (rawType === "services") return "SERVICE";
+function resolveListingType(_rawType: unknown): ListingTypeValue {
   return "PRODUCT";
 }
 
@@ -186,6 +203,22 @@ function listingCategoryName(
   return normalizeDisplayText(listing.item?.name, "Без категории");
 }
 
+function listingCatalogRefs(
+  listing: MarketplaceListing & {
+    item: (CatalogItem & {
+      subcategory: CatalogSubcategory & {
+        category: CatalogCategory;
+      };
+    }) | null;
+  },
+) {
+  return {
+    catalogCategoryId: listing.item?.subcategory.category.public_id ?? null,
+    catalogSubcategoryId: listing.item?.subcategory.public_id ?? null,
+    catalogItemId: listing.item?.public_id ?? null,
+  };
+}
+
 function listingBreadcrumbs(
   listing: MarketplaceListing & {
     item: (CatalogItem & {
@@ -205,26 +238,136 @@ function listingBreadcrumbs(
 }
 
 function listingSpecifications(
-  attributes: ListingAttribute[],
+  params: {
+    attributes: ListingAttribute[];
+    techGrade: string | null;
+    techBatteryHealth: number | null;
+    techDefects: string | null;
+    techIncluded: string | null;
+  },
 ): Record<string, string> | undefined {
-  if (!attributes.length) return undefined;
-  const object = Object.fromEntries(
-    attributes.map((attribute: ListingAttribute) => [
-      attribute.key,
-      attribute.value,
-    ]),
-  );
-  return Object.keys(object).length ? object : undefined;
+  const object: Record<string, string> = {};
+  for (const attribute of params.attributes) {
+    if (INTERNAL_LISTING_ATTRIBUTE_KEYS.has(attribute.key)) continue;
+    if (attribute.key.startsWith("__custom_")) continue;
+    object[attribute.key] = attribute.value;
+  }
+
+  if (!Object.keys(object).length) return undefined;
+  return object;
 }
 
 function extractSellerCity(seller: { addresses: Array<{ city: string }> }): string {
   return seller.addresses[0]?.city?.trim() ?? "";
 }
 
+function listingStatusToClient(status: string): "active" | "inactive" | "moderation" {
+  if (status === "ACTIVE") return "active";
+  if (status === "MODERATION") return "moderation";
+  return "inactive";
+}
+
+function moderationStatusToClient(status: string): "approved" | "pending" | "rejected" {
+  if (status === "APPROVED") return "approved";
+  if (status === "REJECTED") return "rejected";
+  return "pending";
+}
+
+function getListingUnavailableReason(listing: {
+  status: string;
+  moderation_status: string;
+}): string | null {
+  if (listing.status === "MODERATION" || listing.moderation_status === "PENDING") {
+    return "Объявление на модерации";
+  }
+  if (listing.moderation_status === "REJECTED") {
+    return "Объявление отклонено модерацией";
+  }
+  if (listing.status !== "ACTIVE") {
+    return "Снято с публикации";
+  }
+  return null;
+}
+
 type SellerReviewMetrics = {
   rating: number;
   reviewsCount: number;
 };
+
+type CatalogAttributeDefinitionDto = {
+  key: string;
+  label: string;
+  inputType: string;
+  required: boolean;
+  options: string[];
+  unit: string | null;
+  min: number | null;
+  max: number | null;
+  defaultValue: string | null;
+  orderIndex: number;
+};
+
+function jsonStringOptions(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => (typeof item === "string" ? normalizeDisplayText(item) : ""))
+    .filter(Boolean);
+}
+
+function toAttributeDefinitionDto(
+  definition: CatalogAttributeDefinition,
+): CatalogAttributeDefinitionDto {
+  return {
+    key: definition.key,
+    label: normalizeDisplayText(definition.label, definition.key),
+    inputType: definition.input_type,
+    required: definition.required,
+    options: jsonStringOptions(definition.options),
+    unit: definition.unit,
+    min: definition.min_value,
+    max: definition.max_value,
+    defaultValue: definition.default_value,
+    orderIndex: definition.order_index,
+  };
+}
+
+function isSystemBackedProductAttributeDefinition(
+  definition: Pick<CatalogAttributeDefinition, "key" | "label">,
+): boolean {
+  const key = definition.key.trim().toLocaleLowerCase("ru-RU");
+  const label = definition.label.trim().toLocaleLowerCase("ru-RU");
+  return key === "condition_grade" || (key === "condition" && label === "состояние");
+}
+
+function toClientAttributeDefinitionDtos(
+  definitions: CatalogAttributeDefinition[],
+  type: "PRODUCT",
+): CatalogAttributeDefinitionDto[] {
+  return definitions
+    .filter(
+      (definition) =>
+        type !== "PRODUCT" || !isSystemBackedProductAttributeDefinition(definition),
+    )
+    .map(toAttributeDefinitionDto);
+}
+
+function mergeAttributeDefinitionDtos(
+  base: CatalogAttributeDefinitionDto[],
+  overrides: CatalogAttributeDefinitionDto[],
+): CatalogAttributeDefinitionDto[] {
+  const byKey = new Map<string, CatalogAttributeDefinitionDto>();
+  for (const definition of base) {
+    byKey.set(definition.key, definition);
+  }
+  for (const definition of overrides) {
+    byKey.set(definition.key, {
+      ...byKey.get(definition.key),
+      ...definition,
+      orderIndex: byKey.get(definition.key)?.orderIndex ?? definition.orderIndex,
+    });
+  }
+  return Array.from(byKey.values()).sort((a, b) => a.orderIndex - b.orderIndex);
+}
 
 async function loadSellerReviewMetrics(
   sellerIds: number[],
@@ -283,6 +426,7 @@ async function loadSellerReviews(sellerId: number, limit = 50): Promise<
     rating: number;
     comment: string;
     date: string;
+    sortTs: number;
     listingId: string;
     listingTitle: string;
   }>
@@ -327,6 +471,7 @@ async function loadSellerReviews(sellerId: number, limit = 50): Promise<
       hour: "2-digit",
       minute: "2-digit",
     }),
+    sortTs: review.created_at.getTime(),
     listingId: review.listing.public_id,
     listingTitle: normalizeDisplayText(review.listing.title, "Объявление"),
   }));
@@ -335,34 +480,110 @@ async function loadSellerReviews(sellerId: number, limit = 50): Promise<
 catalogRouter.get("/categories", async (req: Request, res: Response) => {
   try {
     const type = resolveListingType(req.query.type);
-    const categories = await prisma.catalogCategory.findMany({
-      where: { type },
-      include: {
-        subcategories: {
-          orderBy: { order_index: "asc" },
-          include: {
-            items: {
-              orderBy: [{ order_index: "asc" }, { id: "asc" }],
+    const [categories, visibleListingCounts] = await Promise.all([
+      prisma.catalogCategory.findMany({
+        where: { type },
+        include: {
+          attribute_definitions: {
+            orderBy: [{ order_index: "asc" }, { id: "asc" }],
+          },
+          subcategories: {
+            orderBy: [{ order_index: "asc" }, { id: "asc" }],
+            include: {
+              attribute_definitions: {
+                orderBy: [{ order_index: "asc" }, { id: "asc" }],
+              },
+              items: {
+                orderBy: [{ order_index: "asc" }, { id: "asc" }],
+                include: {
+                  attribute_definitions: {
+                    orderBy: [{ order_index: "asc" }, { id: "asc" }],
+                  },
+                },
+              },
             },
           },
         },
-      },
-      orderBy: { order_index: "asc" },
-    });
+        orderBy: [{ order_index: "asc" }, { id: "asc" }],
+      }),
+      prisma.marketplaceListing.groupBy({
+        by: ["item_id"],
+        where: {
+          type,
+          status: "ACTIVE",
+          moderation_status: "APPROVED",
+          item_id: {
+            not: null,
+          },
+        },
+        _count: {
+          _all: true,
+        },
+      }),
+    ]);
+    const countByItemId = new Map(
+      visibleListingCounts
+        .filter((row) => row.item_id !== null)
+        .map((row) => [row.item_id as number, row._count._all]),
+    );
+    const categoryCounts = new Map<number, number>();
+    const subcategoryCounts = new Map<number, number>();
+    for (const category of categories) {
+      for (const subcategory of category.subcategories) {
+        for (const item of subcategory.items) {
+          const count = countByItemId.get(item.id) ?? 0;
+          if (count === 0) continue;
+          categoryCounts.set(category.id, (categoryCounts.get(category.id) ?? 0) + count);
+          subcategoryCounts.set(
+            subcategory.id,
+            (subcategoryCounts.get(subcategory.id) ?? 0) + count,
+          );
+        }
+      }
+    }
 
     res.json(
       categories.map((category) => ({
-          id: category.public_id,
-          name: normalizeDisplayText(category.name, "Без названия"),
-          icon_key: category.icon_key,
-          subcategories: category.subcategories.map((subcategory) => ({
-              id: subcategory.public_id,
-              name: normalizeDisplayText(subcategory.name, "Без названия"),
-              items: subcategory.items.map((item) => normalizeDisplayText(item.name, "Без названия")),
-            }),
-          ),
+        id: category.public_id,
+        name: normalizeDisplayText(category.name, "Без названия"),
+        icon_key: category.icon_key,
+        count: categoryCounts.get(category.id) ?? 0,
+        attributeSchema: toClientAttributeDefinitionDtos(
+          category.attribute_definitions,
+          type,
+        ),
+        subcategories: category.subcategories.map((subcategory) => {
+          const inheritedSchema = mergeAttributeDefinitionDtos(
+            toClientAttributeDefinitionDtos(category.attribute_definitions, type),
+            toClientAttributeDefinitionDtos(subcategory.attribute_definitions, type),
+          );
+          return {
+            id: subcategory.public_id,
+            name: normalizeDisplayText(subcategory.name, "Без названия"),
+            count: subcategoryCounts.get(subcategory.id) ?? 0,
+            items: subcategory.items.map((item) =>
+              normalizeDisplayText(item.name, "Без названия"),
+            ),
+            catalogItems: subcategory.items.map((item) => ({
+              id: item.public_id,
+              name: normalizeDisplayText(item.name, "Без названия"),
+              count: countByItemId.get(item.id) ?? 0,
+              categoryId: category.public_id,
+              subcategoryId: subcategory.public_id,
+            })),
+            attributeSchema: inheritedSchema,
+            itemAttributeSchemas: Object.fromEntries(
+              subcategory.items.map((item) => [
+                normalizeDisplayText(item.name, "Без названия"),
+                mergeAttributeDefinitionDtos(
+                  [],
+                  toClientAttributeDefinitionDtos(item.attribute_definitions, type),
+                ),
+              ]),
+            ),
+          };
         }),
-      ),
+      })),
     );
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -375,12 +596,53 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
     const type = resolveListingType(req.query.type);
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
     const offset = req.query.offset ? Number(req.query.offset) : 0;
+    const itemPublicId = String(req.query.itemId ?? "").trim();
+    const itemPublicIds = String(req.query.itemIds ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
 
     if (req.query.limit && (!Number.isInteger(limit) || (limit ?? 0) <= 0)) {
       return res.status(400).json({ error: "Invalid limit" });
     }
     if (req.query.offset && (!Number.isInteger(offset) || offset < 0)) {
       return res.status(400).json({ error: "Invalid offset" });
+    }
+
+    let itemId: number | undefined;
+    let itemIds: number[] | undefined;
+    if (itemPublicId) {
+      const item = await prisma.catalogItem.findFirst({
+        where: {
+          public_id: itemPublicId,
+          subcategory: {
+            category: {
+              type,
+            },
+          },
+        },
+        select: { id: true },
+      });
+      if (!item) {
+        return res.status(404).json({ error: "Catalog item not found" });
+      }
+      itemId = item.id;
+    } else if (itemPublicIds.length > 0) {
+      const uniquePublicIds = Array.from(new Set(itemPublicIds)).slice(0, 200);
+      const items = await prisma.catalogItem.findMany({
+        where: {
+          public_id: {
+            in: uniquePublicIds,
+          },
+          subcategory: {
+            category: {
+              type,
+            },
+          },
+        },
+        select: { id: true },
+      });
+      itemIds = items.map((item) => item.id);
     }
 
     const take = typeof limit === "number" ? Math.min(limit, 100) : undefined;
@@ -391,6 +653,11 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
         type,
         status: "ACTIVE",
         moderation_status: "APPROVED",
+        ...(typeof itemId === "number"
+          ? { item_id: itemId }
+          : itemIds
+            ? { item_id: { in: itemIds.length > 0 ? itemIds : [-1] } }
+            : {}),
       },
       include: {
         seller: {
@@ -450,6 +717,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             listing.sale_price !== null && listing.sale_price < listing.price
               ? listing.sale_price
               : null;
+          const catalogRefs = listingCatalogRefs(listing);
 
           return {
             id: listing.public_id,
@@ -469,6 +737,9 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             sellerAvatar: listing.seller.avatar,
             sellerJoinedAt: listing.seller.joined_at,
             category: listingCategoryName(listing),
+            catalogCategoryId: catalogRefs.catalogCategoryId,
+            catalogSubcategoryId: catalogRefs.catalogSubcategoryId,
+            catalogItemId: catalogRefs.catalogItemId,
             sku: listing.sku,
             isNew: listing.condition === "NEW",
             isSale: salePrice !== null,
@@ -483,7 +754,7 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
             ),
             sellerListings: listing.seller._count.listings,
             breadcrumbs: listingBreadcrumbs(listing),
-            specifications: listingSpecifications(listing.attributes),
+            specifications: listingSpecifications({ attributes: listing.attributes, techGrade: listing.tech_grade, techBatteryHealth: listing.tech_battery_health, techDefects: listing.tech_defects, techIncluded: listing.tech_included }),
             isPriceLower: salePrice !== null,
             condition: toClientCondition(listing.condition),
           };
@@ -558,7 +829,10 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       return res.status(404).json({ error: "Listing not found" });
     }
 
-    if (listing.status !== "ACTIVE") {
+    const isPubliclyAvailable =
+      listing.status === "ACTIVE" && listing.moderation_status === "APPROVED";
+
+    if (!isPubliclyAvailable) {
       if (!sessionUser) {
         return res.status(404).json({ error: "Listing not found" });
       }
@@ -567,26 +841,17 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
         sessionUser.role === "ADMIN" || listing.seller_id === sessionUser.id;
 
       if (!hasRelatedAccess) {
-        const [relatedOrderItem, relatedWishlistItem] = await Promise.all([
-          prisma.marketOrderItem.findFirst({
-            where: {
-              listing_id: listing.id,
-              order: {
-                buyer_id: sessionUser.id,
-              },
+        const relatedOrderItem = await prisma.marketOrderItem.findFirst({
+          where: {
+            listing_id: listing.id,
+            order: {
+              buyer_id: sessionUser.id,
             },
-            select: { id: true },
-          }),
-          prisma.wishlistItem.findFirst({
-            where: {
-              user_id: sessionUser.id,
-              listing_id: listing.id,
-            },
-            select: { id: true },
-          }),
-        ]);
+          },
+          select: { id: true },
+        });
 
-        hasRelatedAccess = Boolean(relatedOrderItem || relatedWishlistItem);
+        hasRelatedAccess = Boolean(relatedOrderItem);
       }
 
       if (!hasRelatedAccess) {
@@ -607,6 +872,7 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       rating: 0,
       reviewsCount: 0,
     };
+    const catalogRefs = listingCatalogRefs(listing);
 
     return res.json({
       id: listing.public_id,
@@ -623,6 +889,9 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       sellerAvatar: listing.seller.avatar,
       sellerJoinedAt: listing.seller.joined_at,
       category: listingCategoryName(listing),
+      catalogCategoryId: catalogRefs.catalogCategoryId,
+      catalogSubcategoryId: catalogRefs.catalogSubcategoryId,
+      catalogItemId: catalogRefs.catalogItemId,
       sku: listing.sku,
       isNew: listing.condition === "NEW",
       isSale: salePrice !== null,
@@ -639,7 +908,11 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       ),
       breadcrumbs: listingBreadcrumbs(listing),
       condition: toClientCondition(listing.condition),
-      specifications: listingSpecifications(listing.attributes),
+      specifications: listingSpecifications({ attributes: listing.attributes, techGrade: listing.tech_grade, techBatteryHealth: listing.tech_battery_health, techDefects: listing.tech_defects, techIncluded: listing.tech_included }),
+      listingStatus: listingStatusToClient(listing.status),
+      moderationStatus: moderationStatusToClient(listing.moderation_status),
+      isAvailable: isPubliclyAvailable,
+      unavailableReason: getListingUnavailableReason(listing),
       reviews: sellerReviews,
     });
   } catch (error) {
@@ -752,7 +1025,7 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
       moderation_status: "APPROVED" as const,
     };
 
-    const [total, listings] = await Promise.all([
+    const [total, listings, sellerReviewMetricsBySellerId, sellerReviews] = await Promise.all([
       prisma.marketplaceListing.count({
         where: listingWhere,
       }),
@@ -779,6 +1052,8 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
         take,
         skip,
       }),
+      loadSellerReviewMetrics([seller.id]),
+      loadSellerReviews(seller.id, 50),
     ]);
 
     const sellerName = normalizeDisplayText(seller.name, "Продавец");
@@ -788,7 +1063,7 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
     );
     const sellerListings = seller._count.listings;
     const sellerVerified = Boolean(seller.seller_profile?.is_verified);
-    const sellerReviewMetrics = (await loadSellerReviewMetrics([seller.id])).get(seller.id) ?? {
+    const sellerReviewMetrics = sellerReviewMetricsBySellerId.get(seller.id) ?? {
       rating: 0,
       reviewsCount: 0,
     };
@@ -806,12 +1081,14 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
         listingsCount: sellerListings,
         joinedAt: seller.joined_at,
       },
+      reviews: sellerReviews,
       items: listings.map((listing) => {
         const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
         const salePrice =
           listing.sale_price !== null && listing.sale_price < listing.price
             ? listing.sale_price
             : null;
+        const catalogRefs = listingCatalogRefs(listing);
 
         return {
           id: listing.public_id,
@@ -828,6 +1105,9 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
           sellerAvatar: seller.avatar,
           sellerJoinedAt: seller.joined_at,
           category: listingCategoryName(listing),
+          catalogCategoryId: catalogRefs.catalogCategoryId,
+          catalogSubcategoryId: catalogRefs.catalogSubcategoryId,
+          catalogItemId: catalogRefs.catalogItemId,
           sku: listing.sku,
           isNew: listing.condition === "NEW",
           isSale: salePrice !== null,
@@ -840,7 +1120,7 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
           sellerResponseTime,
           sellerListings,
           breadcrumbs: listingBreadcrumbs(listing),
-          specifications: listingSpecifications(listing.attributes),
+          specifications: listingSpecifications({ attributes: listing.attributes, techGrade: listing.tech_grade, techBatteryHealth: listing.tech_battery_health, techDefects: listing.tech_defects, techIncluded: listing.tech_included }),
           isPriceLower: salePrice !== null,
           condition: toClientCondition(listing.condition),
         };
@@ -922,7 +1202,7 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
         "Категория",
       );
       suggestions.push({
-        type: listing.type === "SERVICE" ? "service" : "product",
+        type: "product",
         title: listingTitle,
         subtitle: suggestionSubtitle,
         query: listingTitle,
@@ -1161,14 +1441,11 @@ catalogRouter.post(
         },
       });
 
-      // Create notification for the seller
-      await prisma.notification.create({
-        data: {
-          user_id: listing.seller_id,
-          type: "NEW_QUESTION",
-          message: `Новый вопрос по вашему товару "${listing.title}"`,
-          target_url: `/products/${listing.public_id}`, // Adjust URL as needed
-        },
+      await createNotification({
+        userId: listing.seller_id,
+        type: "NEW_QUESTION",
+        message: `Новый вопрос по вашему товару «${listing.title}».`,
+        targetUrl: buildTargetUrl("questions"),
       });
 
       res.status(201).json({
@@ -1310,6 +1587,18 @@ catalogRouter.post(
         });
 
         return complaint;
+      });
+
+      await notifyAdmins({
+        type: "SYSTEM",
+        message: `Новая жалоба на объявление «${listing.title}».`,
+        targetUrl: buildTargetUrl("admin", "complaints"),
+      });
+      await createNotification({
+        userId: listing.seller_id,
+        type: "SYSTEM",
+        message: `На объявление «${listing.title}» поступила жалоба. Мы проверим обращение.`,
+        targetUrl: buildTargetUrl("partner"),
       });
 
       res.status(201).json({

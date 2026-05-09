@@ -32,18 +32,16 @@ Optional backend env (`.env`):
 - `YOOKASSA_SECRET_KEY` - YooKassa secret key (test)
 - `YOOKASSA_RETURN_URL` - return URL after payment (default: `http://127.0.0.1:3000`)
 - `YOOKASSA_API_URL` - API base URL (default: `https://api.yookassa.ru/v3`)
-- `MODERATION_AI_PROVIDER` - `ollama` or `none` (default in this repo: `ollama`)
-- `MODERATION_AI_BASE_URL` - Ollama URL (default: `http://127.0.0.1:11434`)
-- `MODERATION_AI_TEXT_MODEL` - text moderation model (default: `qwen2.5:3b-instruct`)
-- `MODERATION_AI_VISION_MODEL` - image moderation model (default: `llava:7b`)
-- `MODERATION_AI_IMAGE_ENABLED` - enable/disable image AI check (`true` / `false`)
-- `MODERATION_AI_MAX_IMAGE_BYTES` - max downloaded image size for moderation (bytes)
-- `MODERATION_AI_FLAG_RISK_THRESHOLD` - AI risk threshold (0..100) to auto-flag into manual moderation (default: `60`)
 - `RUSSIAN_POST_API_BASE_URL` - base URL Почты России API (default: `https://www.pochta.ru`)
 - `RUSSIAN_POST_API_PATH` - path to tracking endpoint (default: `/tracking-api/v1/trackings/by-barcodes`)
 - `RUSSIAN_POST_ACCESS_TOKEN` - AccessToken for Почта России API
 - `RUSSIAN_POST_USER_AUTH` - base64 login:password for header `X-User-Authorization`
 - `RUSSIAN_POST_API_TIMEOUT_MS` - timeout for calls to Почта России API (default: `8000`)
+- `CDEK_API_BASE_URL` - CDEK API base URL (test default: `https://api.edu.cdek.ru/v2`)
+- `CDEK_CLIENT_ID` / `CDEK_CLIENT_SECRET` - CDEK API credentials
+- `CDEK_SHIPMENT_POINT_CODE` - fixed sender PVZ code for demo shipment creation
+- `CDEK_TARIFF_CODE` - tariff code for PVZ-to-PVZ delivery (default: `136`)
+- `CDEK_SENDER_NAME` / `CDEK_SENDER_PHONE` - demo sender contact for CDEK orders
 
 Useful scripts:
 
@@ -86,18 +84,10 @@ Legacy DB migration to normalized 3NF:
    - Expiry: `01/30`
    - CVC: `123`
 
-## Free AI moderation (local, no paid API)
+## Listing moderation
 
 This project uses a hybrid moderation pipeline for partner listings:
-- strict rule-based checks (always on),
-- optional free AI moderation via local Ollama (text + image).
-
-Setup:
-1. Start services (DB + Ollama): `docker compose up -d`
-2. Pull models once (if not already pulled): `docker compose run --rm ollama-init`
-3. Start backend/frontend: `npm run dev`
-
-If Ollama is unavailable, moderation automatically falls back to rule-based checks.
+- strict rule-based checks for contacts, off-platform payment, prohibited text, spam markers, suspicious image URLs, and price/content outliers.
 
 ## Delivery tracking (Russian Post)
 

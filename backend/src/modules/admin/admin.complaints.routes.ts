@@ -13,6 +13,10 @@ import {
   toClientComplaintSanctionStatus,
   writeAudit,
 } from "./admin.shared";
+import {
+  buildTargetUrl,
+  createNotifications,
+} from "../notifications/notification.service";
 
 const complaintsRouter = Router();
 
@@ -339,6 +343,7 @@ complaintsRouter.patch("/complaints/:publicId/legacy", async (req: Request, res:
         action_taken: true,
         complaint_type: true,
         seller_id: true,
+        reporter_id: true,
         listing_id: true,
         seller: {
           select: {
@@ -351,6 +356,7 @@ complaintsRouter.patch("/complaints/:publicId/legacy", async (req: Request, res:
         listing: {
           select: {
             public_id: true,
+            title: true,
             status: true,
             moderation_status: true,
           },
@@ -529,6 +535,7 @@ type ComplaintDto = {
   reporterId: string;
   reporterName: string;
   reporterEmail: string;
+  sellerComplaintsCount: number;
   sellerViolationsCount: number;
   sellerListingsCount: number;
   sellerOrdersCount: number;
@@ -1045,6 +1052,7 @@ async function mapComplaintsForAdmin(
       reporterId: complaint.reporter.public_id,
       reporterName: complaint.reporter.name,
       reporterEmail: complaint.reporter.email,
+      sellerComplaintsCount: complaint.seller._count.complaints_against,
       sellerViolationsCount,
       sellerListingsCount: complaint.seller._count.listings,
       sellerOrdersCount: complaint.seller._count.orders_as_seller,
@@ -1360,6 +1368,7 @@ async function handleComplaintStatusUpdate(
         action_taken: true,
         complaint_type: true,
         seller_id: true,
+        reporter_id: true,
         listing_id: true,
         seller: {
           select: {
@@ -1372,6 +1381,7 @@ async function handleComplaintStatusUpdate(
         listing: {
           select: {
             public_id: true,
+            title: true,
             status: true,
             moderation_status: true,
           },
@@ -1406,72 +1416,54 @@ async function handleComplaintStatusUpdate(
 
     const txResult = await prisma.$transaction(async (tx) => {
       const decisionAt = new Date();
-      const relatedOpenComplaints = await tx.complaint.findMany({
+      const primaryComplaint = await tx.complaint.findUnique({
         where: {
-          listing_id: existing.listing_id,
-          status: {
-            in: ["NEW", "PENDING"],
-          },
+          id: existing.id,
         },
         select: {
           id: true,
           public_id: true,
           status: true,
         },
-        orderBy: [{ created_at: "asc" }, { id: "asc" }],
       });
 
-      const primaryComplaint = relatedOpenComplaints.find(
-        (item) => item.id === existing.id,
-      );
-      if (!primaryComplaint) {
+      if (!primaryComplaint || primaryComplaint.status !== existing.status) {
         throw new Error("COMPLAINT_STATUS_CONFLICT");
       }
 
       const cascadedComplaintIds: string[] = [];
-      for (const relatedComplaint of relatedOpenComplaints) {
-        const nextUpdate = await tx.complaint.updateMany({
-          where: {
-            id: relatedComplaint.id,
-            status: relatedComplaint.status,
-          },
-          data: {
-            status: parsedStatus,
-            checked_at: decisionAt,
-            checked_by_id: access.user.id,
-            action_taken: actionTaken,
-          },
-        });
+      let cascadeUpdatedCount = 1;
+      const primaryUpdate = await tx.complaint.updateMany({
+        where: {
+          id: primaryComplaint.id,
+          status: primaryComplaint.status,
+        },
+        data: {
+          status: parsedStatus,
+          checked_at: decisionAt,
+          checked_by_id: access.user.id,
+          action_taken: actionTaken,
+        },
+      });
 
-        if (nextUpdate.count !== 1) {
-          throw new Error("COMPLAINT_STATUS_CONFLICT");
-        }
-
-        const isPrimary = relatedComplaint.id === existing.id;
-        if (!isPrimary) {
-          cascadedComplaintIds.push(relatedComplaint.public_id);
-        }
-
-        await tx.complaintEvent.create({
-          data: {
-            public_id: makePublicId("CME"),
-            complaint_id: relatedComplaint.id,
-            actor_user_id: access.user.id,
-            event_type: "STATUS_CHANGED",
-            from_status: relatedComplaint.status,
-            to_status: parsedStatus,
-            note: actionTaken,
-            metadata: isPrimary
-              ? {
-                  source: "admin_panel",
-                }
-              : {
-                  source: "admin_panel_cascade",
-                  triggerComplaintId: existing.public_id,
-                },
-          },
-        });
+      if (primaryUpdate.count !== 1) {
+        throw new Error("COMPLAINT_STATUS_CONFLICT");
       }
+
+      await tx.complaintEvent.create({
+        data: {
+          public_id: makePublicId("CME"),
+          complaint_id: primaryComplaint.id,
+          actor_user_id: access.user.id,
+          event_type: "STATUS_CHANGED",
+          from_status: primaryComplaint.status,
+          to_status: parsedStatus,
+          note: actionTaken,
+          metadata: {
+            source: "admin_panel",
+          },
+        },
+      });
 
       let enforcement:
         | {
@@ -1530,6 +1522,65 @@ async function handleComplaintStatusUpdate(
         });
       }
 
+      if (parsedStatus === "APPROVED" && enforcement?.level === "permanent") {
+        const relatedOpenComplaints = await tx.complaint.findMany({
+          where: {
+            seller_id: existing.seller_id,
+            id: {
+              not: existing.id,
+            },
+            status: {
+              in: ["NEW", "PENDING"],
+            },
+          },
+          select: {
+            id: true,
+            public_id: true,
+            status: true,
+          },
+          orderBy: [{ created_at: "asc" }, { id: "asc" }],
+        });
+
+        for (const relatedComplaint of relatedOpenComplaints) {
+          const nextUpdate = await tx.complaint.updateMany({
+            where: {
+              id: relatedComplaint.id,
+              status: relatedComplaint.status,
+            },
+            data: {
+              status: parsedStatus,
+              checked_at: decisionAt,
+              checked_by_id: access.user.id,
+              action_taken: actionTaken,
+            },
+          });
+
+          if (nextUpdate.count !== 1) {
+            throw new Error("COMPLAINT_STATUS_CONFLICT");
+          }
+
+          cascadedComplaintIds.push(relatedComplaint.public_id);
+          cascadeUpdatedCount += 1;
+
+          await tx.complaintEvent.create({
+            data: {
+              public_id: makePublicId("CME"),
+              complaint_id: relatedComplaint.id,
+              actor_user_id: access.user.id,
+              event_type: "STATUS_CHANGED",
+              from_status: relatedComplaint.status,
+              to_status: parsedStatus,
+              note: actionTaken,
+              metadata: {
+                source: "admin_panel_cascade_permanent_ban",
+                triggerComplaintId: existing.public_id,
+                sanctionLevel: enforcement.level,
+              },
+            },
+          });
+        }
+      }
+
       const updated = await tx.complaint.findUnique({
         where: { id: existing.id },
         select: {
@@ -1546,7 +1597,7 @@ async function handleComplaintStatusUpdate(
         updated,
         enforcement,
         cascade: {
-          updatedCount: relatedOpenComplaints.length,
+          updatedCount: cascadeUpdatedCount,
           cascadedComplaintIds,
         },
       };
@@ -1607,6 +1658,31 @@ async function handleComplaintStatusUpdate(
         },
       });
     }
+
+    await createNotifications([
+      {
+        userId: existing.reporter_id,
+        type: "INFO",
+        message:
+          txResult.updated.status === "APPROVED"
+            ? `Ваша жалоба по объявлению «${existing.listing.title}» одобрена.`
+            : txResult.updated.status === "REJECTED"
+              ? `Ваша жалоба по объявлению «${existing.listing.title}» отклонена.`
+              : `Статус вашей жалобы по объявлению «${existing.listing.title}» обновлён.`,
+        targetUrl: buildTargetUrl("listing", existing.listing.public_id),
+      },
+      {
+        userId: existing.seller_id,
+        type: txResult.updated.status === "APPROVED" ? "SYSTEM" : "INFO",
+        message:
+          txResult.updated.status === "APPROVED"
+            ? `Жалоба на объявление «${existing.listing.title}» одобрена.${txResult.enforcement?.message ? ` ${txResult.enforcement.message}` : ""}`
+            : txResult.updated.status === "REJECTED"
+              ? `Жалоба на объявление «${existing.listing.title}» отклонена.`
+              : `Статус жалобы на объявление «${existing.listing.title}» обновлён.`,
+        targetUrl: buildTargetUrl("partner"),
+      },
+    ]);
 
     const payload = {
       success: true,

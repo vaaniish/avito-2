@@ -90,7 +90,7 @@ export function parseLimit(value: unknown, defaultValue = 200): number {
 }
 
 export function buildListingPublicUrl(listingPublicId: string): string {
-  return `/?listingId=${encodeURIComponent(listingPublicId)}`;
+  return `/products/${encodeURIComponent(listingPublicId)}`;
 }
 
 export function extractPrimaryAddressInfo(

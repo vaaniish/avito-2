@@ -289,12 +289,16 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
       clearSessionUser();
     }
 
+    const htmlError =
+      typeof payload === "string" && /<(!doctype|html|head|body|pre)\b/i.test(payload);
     let message =
       typeof payload === "object" && payload !== null && "error" in payload
         ? String((payload as { error?: unknown }).error ?? "Ошибка запроса")
-        : typeof payload === "string" && payload.trim().length > 0
+        : typeof payload === "string" && payload.trim().length > 0 && !htmlError
           ? payload
-          : "Ошибка запроса";
+          : response.status === 404
+            ? "API endpoint не найден. Перезапустите backend и попробуйте снова."
+            : "Ошибка запроса";
     if (
       response.status === 401 &&
       !isAuthRoute &&
@@ -334,4 +338,73 @@ export function apiPatch<T>(
 
 export function apiDelete<T>(path: string): Promise<T> {
   return request<T>(path, { method: "DELETE" });
+}
+
+export type ApiNotification = {
+  id: number;
+  type: string;
+  message: string;
+  url: string;
+  isRead: boolean;
+  date: string;
+};
+
+export async function openNotificationStream(options: {
+  after?: number;
+  signal?: AbortSignal;
+  onNotification: (notification: ApiNotification) => void;
+}): Promise<void> {
+  const sessionToken = getSessionToken();
+  if (!sessionToken) {
+    throw new Error("Сессия истекла. Войдите снова.");
+  }
+
+  const params = new URLSearchParams();
+  if (options.after && options.after > 0) {
+    params.set("after", String(options.after));
+  }
+
+  const query = params.toString();
+  const response = await fetch(
+    `${API_BASE}/profile/notifications/stream${query ? `?${query}` : ""}`,
+    {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      signal: options.signal,
+    },
+  );
+
+  if (!response.ok || !response.body) {
+    throw new Error(response.status === 401 ? "Сессия истекла. Войдите снова." : "Поток уведомлений недоступен.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+
+    for (const chunk of chunks) {
+      const eventLine = chunk
+        .split("\n")
+        .find((line) => line.startsWith("event:"));
+      const dataLine = chunk
+        .split("\n")
+        .find((line) => line.startsWith("data:"));
+      const event = eventLine?.slice("event:".length).trim();
+      const data = dataLine?.slice("data:".length).trim();
+      if (event !== "notification" || !data) continue;
+      try {
+        options.onNotification(JSON.parse(data) as ApiNotification);
+      } catch (_error) {
+        // Ignore malformed stream chunks and keep the connection alive.
+      }
+    }
+  }
 }

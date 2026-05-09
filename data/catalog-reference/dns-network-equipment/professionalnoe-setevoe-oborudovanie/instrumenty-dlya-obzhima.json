@@ -1,0 +1,668 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Профессиональное сетевое оборудование",
+  "itemName": "Инструменты для обжима",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/e4de7fd026d4b8dd/instrumenty-dla-obzima/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:26.705Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 25,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/46896ac9433ab95c/instrument-dla-obzima-aceline-ht-n5684r/",
+      "title": "Инструмент для обжима Aceline HT-N5684R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "46896ac9433ab95c",
+      "cardText": "Инструмент для обжима Aceline HT-N5684R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.78 |409 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/591b1393ae0b8a5a/instrument-dla-obzima-5bites-ly-t2009r/",
+      "title": "Инструмент для обжима 5Bites LY-T2009R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "591b1393ae0b8a5a",
+      "cardText": "Инструмент для обжима 5Bites LY-T2009R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.82 |114 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b01d64e831f7d582/instrument-dla-obzima-aceline-acctsfs-r451112/",
+      "title": "Инструмент для обжима Aceline AcCTSFS-R451112 [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "b01d64e831f7d582",
+      "cardText": "Инструмент для обжима Aceline AcCTSFS-R451112 [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.75 |40 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/481d3fb8eb42ed20/instrument-dla-obzima-ugreen-nw136/",
+      "title": "Инструмент для обжима Ugreen NW136 [UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "481d3fb8eb42ed20",
+      "cardText": "Инструмент для обжима Ugreen NW136 [UTP, RJ-11, RJ-12, RJ-45, храповый]5 |6 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/517b17b6e428ed20/instrument-dla-obzima-cablexpert-t-568r/",
+      "title": "Инструмент для обжима Cablexpert T-568R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "517b17b6e428ed20",
+      "cardText": "Инструмент для обжима Cablexpert T-568R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.92 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fbef79481c422ff2/instrument-dla-obzima-rexant-ht-500r/",
+      "title": "Инструмент для обжима Rexant HT-500R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "fbef79481c422ff2",
+      "cardText": "Инструмент для обжима Rexant HT-500R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.81 |22 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/46d03f70bba352d7/instrument-dla-obzima-5bites-ly-t568a/",
+      "title": "Инструмент для обжима 5Bites LY-T568A [FTP, UTP, RJ-11, RJ-12, RJ-45]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "46d03f70bba352d7",
+      "cardText": "Инструмент для обжима 5Bites LY-T568A [FTP, UTP, RJ-11, RJ-12, RJ-45]4.11 |154 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/144122fb784f703d/instrument-dla-obzima-aceline-actrj45t/",
+      "title": "Инструмент для обжима Aceline ACTRJ45T [RJ-11, RJ-12, RJ-45]",
+      "specsText": "RJ-11, RJ-12, RJ-45",
+      "bracketGroups": [
+        "RJ-11, RJ-12, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "144122fb784f703d",
+      "cardText": "Инструмент для обжима Aceline ACTRJ45T [RJ-11, RJ-12, RJ-45]5 |2 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d46bd2b23330/instrument-dla-obzima-rexant-ht-200r/",
+      "title": "Инструмент для обжима Rexant HT-200R [UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "2cb8d46bd2b23330",
+      "cardText": "Инструмент для обжима Rexant HT-200R [UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый]4.57 |7 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fe27824ea5ab2ff4/instrument-dla-obzima-vention-kedb0/",
+      "title": "Инструмент для обжима Vention KEDB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "fe27824ea5ab2ff4",
+      "cardText": "Инструмент для обжима Vention KEDB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45]4.36 |24 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4b8a108d9f039599/instrument-dla-obzima-aceline-actptrj45s/",
+      "title": "Инструмент для обжима Aceline ACTptRJ45S [RJ-11, RJ-12, RJ-45]",
+      "specsText": "RJ-11, RJ-12, RJ-45",
+      "bracketGroups": [
+        "RJ-11, RJ-12, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "4b8a108d9f039599",
+      "cardText": "Инструмент для обжима Aceline ACTptRJ45S [RJ-11, RJ-12, RJ-45]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d471d2b23330/instrument-dla-obzima-rexant-ht-210t/",
+      "title": "Инструмент для обжима Rexant HT-210T [FTP, UTP, RJ-45]",
+      "specsText": "FTP, UTP, RJ-45",
+      "bracketGroups": [
+        "FTP, UTP, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "2cb8d471d2b23330",
+      "cardText": "Инструмент для обжима Rexant HT-210T [FTP, UTP, RJ-45]4.69 |26 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/517b0b07e428ed20/instrument-dla-obzima-cablexpert-t-210/",
+      "title": "Инструмент для обжима Cablexpert T-210 [FTP, SFTP, STP, UTP, RJ-45]",
+      "specsText": "FTP, SFTP, STP, UTP, RJ-45",
+      "bracketGroups": [
+        "FTP, SFTP, STP, UTP, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "517b0b07e428ed20",
+      "cardText": "Инструмент для обжима Cablexpert T-210 [FTP, SFTP, STP, UTP, RJ-45]4.35 |17 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/79a1fbf7679ff802/instrument-dla-obzima-lanmaster-twt-cri-568r/",
+      "title": "Инструмент для обжима Lanmaster TWT-CRI-568R [FTP, UTP, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "79a1fbf7679ff802",
+      "cardText": "Инструмент для обжима Lanmaster TWT-CRI-568R [FTP, UTP, RJ-12, RJ-45, храповый]5 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a8db74978405ed20/instrument-dla-obzima-5bites-ly-t2007c/",
+      "title": "Инструмент для обжима 5Bites LY-T2007C [FTP, UTP, RJ-11, RJ-12, RJ-45]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "a8db74978405ed20",
+      "cardText": "Инструмент для обжима 5Bites LY-T2007C [FTP, UTP, RJ-11, RJ-12, RJ-45]3.91 |48 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d203104933911100/instrument-dla-obzima-twt-twt-cri-468r/",
+      "title": "Инструмент для обжима TWT TWT-CRI-468R [FTP, UTP, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "d203104933911100",
+      "cardText": "Инструмент для обжима TWT TWT-CRI-468R [FTP, UTP, RJ-12, RJ-45, храповый] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6196c447cec13332/instrument-dla-obzima-rexant-ht-808/",
+      "title": "Инструмент для обжима Rexant HT-808 [FTP, UTP, RJ-45, торцевой, храповый]",
+      "specsText": "FTP, UTP, RJ-45, торцевой, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-45, торцевой, храповый"
+      ],
+      "priceText": "",
+      "productId": "6196c447cec13332",
+      "cardText": "Инструмент для обжима Rexant HT-808 [FTP, UTP, RJ-45, торцевой, храповый]4.26 |58 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d469d2b23330/instrument-dla-obzima-rexant-ht-376e/",
+      "title": "Инструмент для обжима Rexant HT-376E [FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный"
+      ],
+      "priceText": "",
+      "productId": "2cb8d469d2b23330",
+      "cardText": "Инструмент для обжима Rexant HT-376E [FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный]4.67 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c31bb9cecf292ff2/press-klesi-kvt-jt-01-55928/",
+      "title": "Пресс-клещи КВТ JT-01 55928 [STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14]",
+      "specsText": "STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14",
+      "bracketGroups": [
+        "STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14"
+      ],
+      "priceText": "",
+      "productId": "c31bb9cecf292ff2",
+      "cardText": "Пресс-клещи КВТ JT-01 55928 [STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14]4.73 |11 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2a7989d3870d0d3b/instrument-dla-obzima-rexant-ht-568r/",
+      "title": "Инструмент для обжима Rexant HT-568R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+      "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "2a7989d3870d0d3b",
+      "cardText": "Инструмент для обжима Rexant HT-568R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]4.38 |8 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a65ac89a5af2ff4/instrument-dla-obzima-vention-keab0/",
+      "title": "Инструмент для обжима Vention KEAB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый]",
+      "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый",
+      "bracketGroups": [
+        "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый"
+      ],
+      "priceText": "",
+      "productId": "1a65ac89a5af2ff4",
+      "cardText": "Инструмент для обжима Vention KEAB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый]4.05 |10 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4e75e47e6441fadb/instrument-dla-obzima-lanmaster-twt-slc-tool/",
+      "title": "Инструмент для обжима Lanmaster TWT-SLC-TOOL [UG, UR, UY, UY2]",
+      "specsText": "UG, UR, UY, UY2",
+      "bracketGroups": [
+        "UG, UR, UY, UY2"
+      ],
+      "priceText": "",
+      "productId": "4e75e47e6441fadb",
+      "cardText": "Инструмент для обжима Lanmaster TWT-SLC-TOOL [UG, UR, UY, UY2]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ce4eafd3b69ac5d2/instrument-dla-obzima-lanmaster-lan-ok180u-cri/",
+      "title": "Инструмент для обжима Lanmaster LAN-OK180U-CRI [UTP, Keystone RJ45]",
+      "specsText": "UTP, Keystone RJ45",
+      "bracketGroups": [
+        "UTP, Keystone RJ45"
+      ],
+      "priceText": "",
+      "productId": "ce4eafd3b69ac5d2",
+      "cardText": "Инструмент для обжима Lanmaster LAN-OK180U-CRI [UTP, Keystone RJ45]3 |1 отзыв"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/97534024528f933d/instrument-dla-obzima-5bites-ly-t210c/",
+      "title": "Инструмент для обжима 5Bites LY-T210C [UTP, RJ-45]",
+      "specsText": "UTP, RJ-45",
+      "bracketGroups": [
+        "UTP, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "97534024528f933d",
+      "cardText": "Инструмент для обжима 5Bites LY-T210C [UTP, RJ-45]3.82 |209 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2cb8d46dd2b23330/instrument-dla-obzima-rexant-ht-468s/",
+      "title": "Инструмент для обжима Rexant HT-468S [FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45]",
+      "specsText": "FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45",
+      "bracketGroups": [
+        "FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45"
+      ],
+      "priceText": "",
+      "productId": "2cb8d46dd2b23330",
+      "cardText": "Инструмент для обжима Rexant HT-468S [FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45]3.4 |5 отзывов"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Инструмент",
+      "models": [
+        {
+          "brand": "Инструмент",
+          "model": "для обжима 5Bites LY-T2007C",
+          "name": "Инструмент для обжима 5Bites LY-T2007C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a8db74978405ed20/instrument-dla-obzima-5bites-ly-t2007c/",
+              "title": "Инструмент для обжима 5Bites LY-T2007C [FTP, UTP, RJ-11, RJ-12, RJ-45]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима 5Bites LY-T2009R",
+          "name": "Инструмент для обжима 5Bites LY-T2009R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/591b1393ae0b8a5a/instrument-dla-obzima-5bites-ly-t2009r/",
+              "title": "Инструмент для обжима 5Bites LY-T2009R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима 5Bites LY-T210C",
+          "name": "Инструмент для обжима 5Bites LY-T210C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/97534024528f933d/instrument-dla-obzima-5bites-ly-t210c/",
+              "title": "Инструмент для обжима 5Bites LY-T210C [UTP, RJ-45]",
+              "specsText": "UTP, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима 5Bites LY-T568A",
+          "name": "Инструмент для обжима 5Bites LY-T568A",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/46d03f70bba352d7/instrument-dla-obzima-5bites-ly-t568a/",
+              "title": "Инструмент для обжима 5Bites LY-T568A [FTP, UTP, RJ-11, RJ-12, RJ-45]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Aceline AcCTSFS-R451112",
+          "name": "Инструмент для обжима Aceline AcCTSFS-R451112",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b01d64e831f7d582/instrument-dla-obzima-aceline-acctsfs-r451112/",
+              "title": "Инструмент для обжима Aceline AcCTSFS-R451112 [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Aceline ACTptRJ45S",
+          "name": "Инструмент для обжима Aceline ACTptRJ45S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4b8a108d9f039599/instrument-dla-obzima-aceline-actptrj45s/",
+              "title": "Инструмент для обжима Aceline ACTptRJ45S [RJ-11, RJ-12, RJ-45]",
+              "specsText": "RJ-11, RJ-12, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Aceline ACTRJ45T",
+          "name": "Инструмент для обжима Aceline ACTRJ45T",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/144122fb784f703d/instrument-dla-obzima-aceline-actrj45t/",
+              "title": "Инструмент для обжима Aceline ACTRJ45T [RJ-11, RJ-12, RJ-45]",
+              "specsText": "RJ-11, RJ-12, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Aceline HT-N5684R",
+          "name": "Инструмент для обжима Aceline HT-N5684R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/46896ac9433ab95c/instrument-dla-obzima-aceline-ht-n5684r/",
+              "title": "Инструмент для обжима Aceline HT-N5684R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Cablexpert T-210",
+          "name": "Инструмент для обжима Cablexpert T-210",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/517b0b07e428ed20/instrument-dla-obzima-cablexpert-t-210/",
+              "title": "Инструмент для обжима Cablexpert T-210 [FTP, SFTP, STP, UTP, RJ-45]",
+              "specsText": "FTP, SFTP, STP, UTP, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Cablexpert T-568R",
+          "name": "Инструмент для обжима Cablexpert T-568R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/517b17b6e428ed20/instrument-dla-obzima-cablexpert-t-568r/",
+              "title": "Инструмент для обжима Cablexpert T-568R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Lanmaster LAN-OK180U-CRI",
+          "name": "Инструмент для обжима Lanmaster LAN-OK180U-CRI",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ce4eafd3b69ac5d2/instrument-dla-obzima-lanmaster-lan-ok180u-cri/",
+              "title": "Инструмент для обжима Lanmaster LAN-OK180U-CRI [UTP, Keystone RJ45]",
+              "specsText": "UTP, Keystone RJ45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Lanmaster TWT-CRI-568R",
+          "name": "Инструмент для обжима Lanmaster TWT-CRI-568R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/79a1fbf7679ff802/instrument-dla-obzima-lanmaster-twt-cri-568r/",
+              "title": "Инструмент для обжима Lanmaster TWT-CRI-568R [FTP, UTP, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Lanmaster TWT-SLC-TOOL",
+          "name": "Инструмент для обжима Lanmaster TWT-SLC-TOOL",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4e75e47e6441fadb/instrument-dla-obzima-lanmaster-twt-slc-tool/",
+              "title": "Инструмент для обжима Lanmaster TWT-SLC-TOOL [UG, UR, UY, UY2]",
+              "specsText": "UG, UR, UY, UY2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-200R",
+          "name": "Инструмент для обжима Rexant HT-200R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d46bd2b23330/instrument-dla-obzima-rexant-ht-200r/",
+              "title": "Инструмент для обжима Rexant HT-200R [UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "UTP, RJ-10, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-210T",
+          "name": "Инструмент для обжима Rexant HT-210T",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d471d2b23330/instrument-dla-obzima-rexant-ht-210t/",
+              "title": "Инструмент для обжима Rexant HT-210T [FTP, UTP, RJ-45]",
+              "specsText": "FTP, UTP, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-376E",
+          "name": "Инструмент для обжима Rexant HT-376E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d469d2b23330/instrument-dla-obzima-rexant-ht-376e/",
+              "title": "Инструмент для обжима Rexant HT-376E [FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, возвратный",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-468S",
+          "name": "Инструмент для обжима Rexant HT-468S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2cb8d46dd2b23330/instrument-dla-obzima-rexant-ht-468s/",
+              "title": "Инструмент для обжима Rexant HT-468S [FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45]",
+              "specsText": "FTP, UTP, RJ-10, RJ-11, RJ-12, RJ-45",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-500R",
+          "name": "Инструмент для обжима Rexant HT-500R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fbef79481c422ff2/instrument-dla-obzima-rexant-ht-500r/",
+              "title": "Инструмент для обжима Rexant HT-500R [FTP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-568R",
+          "name": "Инструмент для обжима Rexant HT-568R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2a7989d3870d0d3b/instrument-dla-obzima-rexant-ht-568r/",
+              "title": "Инструмент для обжима Rexant HT-568R [FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, SFTP, STP, UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Rexant HT-808",
+          "name": "Инструмент для обжима Rexant HT-808",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6196c447cec13332/instrument-dla-obzima-rexant-ht-808/",
+              "title": "Инструмент для обжима Rexant HT-808 [FTP, UTP, RJ-45, торцевой, храповый]",
+              "specsText": "FTP, UTP, RJ-45, торцевой, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима TWT TWT-CRI-468R",
+          "name": "Инструмент для обжима TWT TWT-CRI-468R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d203104933911100/instrument-dla-obzima-twt-twt-cri-468r/",
+              "title": "Инструмент для обжима TWT TWT-CRI-468R [FTP, UTP, RJ-12, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Ugreen NW136",
+          "name": "Инструмент для обжима Ugreen NW136",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/481d3fb8eb42ed20/instrument-dla-obzima-ugreen-nw136/",
+              "title": "Инструмент для обжима Ugreen NW136 [UTP, RJ-11, RJ-12, RJ-45, храповый]",
+              "specsText": "UTP, RJ-11, RJ-12, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Vention KEAB0",
+          "name": "Инструмент для обжима Vention KEAB0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a65ac89a5af2ff4/instrument-dla-obzima-vention-keab0/",
+              "title": "Инструмент для обжима Vention KEAB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45, храповый",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Инструмент",
+          "model": "для обжима Vention KEDB0",
+          "name": "Инструмент для обжима Vention KEDB0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fe27824ea5ab2ff4/instrument-dla-obzima-vention-kedb0/",
+              "title": "Инструмент для обжима Vention KEDB0 [FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45]",
+              "specsText": "FTP, UTP, RJ-11, RJ-12, RJ-14, RJ-45",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Пресс-клещи",
+      "models": [
+        {
+          "brand": "Пресс-клещи",
+          "model": "КВТ JT-01 55928",
+          "name": "Пресс-клещи КВТ JT-01 55928",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c31bb9cecf292ff2/press-klesi-kvt-jt-01-55928/",
+              "title": "Пресс-клещи КВТ JT-01 55928 [STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14]",
+              "specsText": "STP, UTP, RJ-10, RJ-11, RJ-12, RJ-14",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/e4de7fd026d4b8dd/instrumenty-dla-obzima/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Инструменты для обжима купить в интернет-магазине DNS. Инструменты для обжима цены, большой каталог, новинки. - страница 1 из 2"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/e4de7fd026d4b8dd/instrumenty-dla-obzima/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 7,
+      "title": "Инструменты для обжима купить в интернет-магазине DNS. Инструменты для обжима цены, большой каталог, новинки. - страница 2 из 2"
+    }
+  ],
+  "errors": []
+}

@@ -11,6 +11,11 @@ const PartnerOrdersPage = lazy(() =>
     default: module.PartnerOrdersPage,
   })),
 );
+const PartnerFinancePage = lazy(() =>
+  import("./PartnerFinancePage").then((module) => ({
+    default: module.PartnerFinancePage,
+  })),
+);
 const QuestionsPage = lazy(() =>
   import("../partner/QuestionsPage").then((module) => ({
     default: module.QuestionsPage,
@@ -20,18 +25,26 @@ const QuestionsPage = lazy(() =>
 type ProfilePartnerTabProps = {
   activeTab: ProfileTab;
   onRequestAddressChange: () => void;
+  onOpenListing: (listingPublicId: string) => void;
+  onOpenCreateListing?: () => void;
 };
 
 export function ProfilePartnerTab({
   activeTab,
   onRequestAddressChange,
+  onOpenListing,
+  onOpenCreateListing,
 }: ProfilePartnerTabProps) {
   if (activeTab === "partner-listings") {
     return (
       <Suspense
         fallback={<div className="text-sm text-gray-500">Загрузка объявлений...</div>}
       >
-        <PartnerListingsPage onRequestAddressChange={onRequestAddressChange} />
+        <PartnerListingsPage
+          onRequestAddressChange={onRequestAddressChange}
+          onOpenListing={onOpenListing}
+          onOpenCreateListing={onOpenCreateListing}
+        />
       </Suspense>
     );
   }
@@ -46,12 +59,22 @@ export function ProfilePartnerTab({
     );
   }
 
+  if (activeTab === "partner-finance") {
+    return (
+      <Suspense
+        fallback={<div className="text-sm text-gray-500">Загрузка финансов...</div>}
+      >
+        <PartnerFinancePage />
+      </Suspense>
+    );
+  }
+
   if (activeTab === "partner-orders") {
     return (
       <Suspense
         fallback={<div className="text-sm text-gray-500">Загрузка заказов...</div>}
       >
-        <PartnerOrdersPage />
+        <PartnerOrdersPage onOpenListing={onOpenListing} />
       </Suspense>
     );
   }

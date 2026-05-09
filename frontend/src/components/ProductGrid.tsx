@@ -14,7 +14,7 @@ interface ProductGridProps {
   cartItems: CartItem[];
   sortBy: string;
   onSortChange: (sortBy: string) => void;
-  viewMode: "products" | "services";
+  viewMode: "products";
   wishlistProductIds: Set<string>;
   onWishlistToggle: (productId: string, isWishlisted: boolean) => void;
 }
@@ -30,7 +30,7 @@ export function ProductGrid({
   cartItems,
   sortBy,
   onSortChange,
-  viewMode,
+  viewMode: _viewMode,
   wishlistProductIds,
   onWishlistToggle,
 }: ProductGridProps) {
@@ -73,7 +73,7 @@ export function ProductGrid({
     <div>
       <div className="flex items-center justify-between mb-[20px] mt-[0px] mr-[0px] ml-[0px]">
         <div>
-          <h2 className="text-3xl text-gray-900">{viewMode === "products" ? "Товары" : "Услуги"}</h2>
+          <h2 className="text-3xl text-gray-900">Товары</h2>
           <p className="text-gray-600 mt-2 text-lg">Найдено: {products.length}</p>
         </div>
 
@@ -127,7 +127,7 @@ export function ProductGrid({
               onAddToCart={() => onAddToCart(product)}
               onUpdateQuantity={(quantity) => onUpdateQuantity(product.id, quantity)}
               cartQuantity={cartQuantity}
-              viewMode={viewMode}
+              viewMode="products"
               displayMode="grid"
               isWishlisted={wishlistProductIds.has(product.id)}
               onWishlistToggle={onWishlistToggle}

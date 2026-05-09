@@ -1,0 +1,3039 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Смартфоны и фототехника",
+  "subcategoryName": "Фототехника",
+  "itemName": "Объективы",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a81a16404e77/obektivy/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:40:43.092Z",
+  "status": "done",
+  "totalPages": 8,
+  "totalProducts": 122,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/62ba2b122f55ed20/obektiv-canon-ef-50mm-f18-stm/",
+      "title": "Объектив Canon EF 50mm f/1.8 STM [байонет - Canon EF]",
+      "specsText": "байонет - Canon EF",
+      "bracketGroups": [
+        "байонет - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "62ba2b122f55ed20",
+      "cardText": "Объектив Canon EF 50mm f/1.8 STM [байонет - Canon EF]4.82 |183 отзыва 6Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d6276f412f58ed20/obektiv-canon-rf-50mm-f18-stm/",
+      "title": "Объектив Canon RF 50mm f/1.8 STM [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "d6276f412f58ed20",
+      "cardText": "Объектив Canon RF 50mm f/1.8 STM [байонет - Canon RF]4.95 |106 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4d32aa2e2f58ed20/obektiv-canon-rf-35mm-f18-macro-is-stm/",
+      "title": "Объектив Canon RF 35mm f/1.8 Macro IS STM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "4d32aa2e2f58ed20",
+      "cardText": "Объектив Canon RF 35mm f/1.8 Macro IS STM [байонет - Canon RF, стабилизация]4.95 |39 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/809a22e02f54ed20/obektiv-canon-ef-s-24mm-f28-stm/",
+      "title": "Объектив Canon EF-S 24mm f/2.8 STM [байонет - Canon EF-S]",
+      "specsText": "байонет - Canon EF-S",
+      "bracketGroups": [
+        "байонет - Canon EF-S"
+      ],
+      "priceText": "",
+      "productId": "809a22e02f54ed20",
+      "cardText": "Объектив Canon EF-S 24mm f/2.8 STM [байонет - Canon EF-S]4.99 |78 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/524521272fd2ed20/obektiv-canon-rf-24-105mm-f40-l-is-usm/",
+      "title": "Объектив Canon RF 24-105mm f/4.0 L IS USM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "524521272fd2ed20",
+      "cardText": "Объектив Canon RF 24-105mm f/4.0 L IS USM [байонет - Canon RF, стабилизация]5 |14 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/53b2de5a1f98ed20/obektiv-sony-fe-50mm-f18/",
+      "title": "Объектив Sony FE 50mm f/1.8 [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "53b2de5a1f98ed20",
+      "cardText": "Объектив Sony FE 50mm f/1.8 [байонет - Sony E]5 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a9ce0e8e5a9b1b80/obektiv-canon-rf-24-105mm-f40-71-is-stm/",
+      "title": "Объектив Canon RF 24-105mm f/4.0-7.1 IS STM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "a9ce0e8e5a9b1b80",
+      "cardText": "Объектив Canon RF 24-105mm f/4.0-7.1 IS STM [байонет - Canon RF, стабилизация]4.64 |15 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/717344292fceed20/obektiv-canon-rf-85mm-f20-macro-is-stm/",
+      "title": "Объектив Canon RF 85mm f/2.0 Macro IS STM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "717344292fceed20",
+      "cardText": "Объектив Canon RF 85mm f/2.0 Macro IS STM [байонет - Canon RF, стабилизация]5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a91df5341f9eed20/obektiv-sony-e-55-210mm-f45-63-oss/",
+      "title": "Объектив Sony E 55-210mm f/4.5-6.3 OSS [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "a91df5341f9eed20",
+      "cardText": "Объектив Sony E 55-210mm f/4.5-6.3 OSS [байонет - Sony E, стабилизация]4.69 |26 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/67946786e68bed20/obektiv-sigma-18-50mm-f28-dc-dn-contemporary-sony-e/",
+      "title": "Объектив Sigma 18-50mm f/2.8 DC DN Contemporary Sony E [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "67946786e68bed20",
+      "cardText": "Объектив Sigma 18-50mm f/2.8 DC DN Contemporary Sony E [байонет - Sony E]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c5f3be7c4de3ed20/obektiv-nikon-nikkor-af-s-dx-35mm-f18-g/",
+      "title": "Объектив Nikon NIKKOR AF-S DX 35mm f/1.8 G [байонет - Nikon F]",
+      "specsText": "байонет - Nikon F",
+      "bracketGroups": [
+        "байонет - Nikon F"
+      ],
+      "priceText": "",
+      "productId": "c5f3be7c4de3ed20",
+      "cardText": "Объектив Nikon NIKKOR AF-S DX 35mm f/1.8 G [байонет - Nikon F]4.8 |23 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d67fb2f83721ed20/obektiv-tamron-28-200mm-f28-56-di-iii-rxd/",
+      "title": "Объектив Tamron 28-200mm f/2.8-5.6 Di III RXD [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "d67fb2f83721ed20",
+      "cardText": "Объектив Tamron 28-200mm f/2.8-5.6 Di III RXD [байонет - Sony E]5 |9 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2e2dea583720ed20/obektiv-tamron-28-75mm-f28-di-iii-vxd-g2/",
+      "title": "Объектив Tamron 28-75mm f/2.8 Di III VXD G2 [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "2e2dea583720ed20",
+      "cardText": "Объектив Tamron 28-75mm f/2.8 Di III VXD G2 [байонет - Sony E]4.76 |42 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9ea7ebf74dd8ed20/obektiv-nikon-nikkor-af-s-dx-18-140mm-f35-56-g-ed-vr/",
+      "title": "Объектив Nikon NIKKOR AF-S DX 18-140mm f/3.5-5.6 G ED VR [байонет - Nikon F, стабилизация]",
+      "specsText": "байонет - Nikon F, стабилизация",
+      "bracketGroups": [
+        "байонет - Nikon F, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "9ea7ebf74dd8ed20",
+      "cardText": "Объектив Nikon NIKKOR AF-S DX 18-140mm f/3.5-5.6 G ED VR [байонет - Nikon F, стабилизация]5 |7 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6a7a71e1150ad9cb/obektiv-canon-rf-s-55-210mm-f50-71-is-stm/",
+      "title": "Объектив Canon RF-S 55-210mm f/5.0-7.1 IS STM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "6a7a71e1150ad9cb",
+      "cardText": "Объектив Canon RF-S 55-210mm f/5.0-7.1 IS STM [байонет - Canon RF, стабилизация]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d2bad6312fceed20/obektiv-canon-ef-s-10-18mm-f45-56-is-stm/",
+      "title": "Объектив Canon EF-S 10-18mm f/4.5-5.6 IS STM [байонет - Canon EF-S, стабилизация]",
+      "specsText": "байонет - Canon EF-S, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon EF-S, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "d2bad6312fceed20",
+      "cardText": "Объектив Canon EF-S 10-18mm f/4.5-5.6 IS STM [байонет - Canon EF-S, стабилизация]4.91 |22 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9cc2b18f2fd5ed20/obektiv-canon-ef-75-300mm-f40-56-iii/",
+      "title": "Объектив Canon EF 75-300mm f/4.0-5.6 III [байонет - Canon EF]",
+      "specsText": "байонет - Canon EF",
+      "bracketGroups": [
+        "байонет - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "9cc2b18f2fd5ed20",
+      "cardText": "Объектив Canon EF 75-300mm f/4.0-5.6 III [байонет - Canon EF]4.81 |26 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a429befe3720ed20/obektiv-tamron-17-70mm-f28-di-iii-a-vc-rxd/",
+      "title": "Объектив Tamron 17-70mm f/2.8 Di III-A VC RXD [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "a429befe3720ed20",
+      "cardText": "Объектив Tamron 17-70mm f/2.8 Di III-A VC RXD [байонет - Sony E, стабилизация]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cb13f55d2fe2ed20/obektiv-sony-fe-90mm-f28-macro-g-oss/",
+      "title": "Объектив Sony FE 90mm f/2.8 Macro G OSS [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "cb13f55d2fe2ed20",
+      "cardText": "Объектив Sony FE 90mm f/2.8 Macro G OSS [байонет - Sony E, стабилизация]5 |10 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9624a5527cc3d9cb/obektiv-viltrox-af-56mm-f17-air-aps-c/",
+      "title": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "9624a5527cc3d9cb",
+      "cardText": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Sony E]5 |4 отзыва 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3ad0e4581f9ced20/obektiv-sony-fe-24-105mm-f40-g-oss/",
+      "title": "Объектив Sony FE 24-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "3ad0e4581f9ced20",
+      "cardText": "Объектив Sony FE 24-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]5 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/138a32d2e5beed20/obektiv-canon-rf-16mm-f28-stm/",
+      "title": "Объектив Canon RF 16mm f/2.8 STM [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "138a32d2e5beed20",
+      "cardText": "Объектив Canon RF 16mm f/2.8 STM [байонет - Canon RF]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/52b4c23d09af3332/obektiv-sigma-af-56mm-f14-dc-dn-contemporary/",
+      "title": "Объектив Sigma AF 56mm f/1.4 DC DN Contemporary [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "52b4c23d09af3332",
+      "cardText": "Объектив Sigma AF 56mm f/1.4 DC DN Contemporary [байонет - Sony E]5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7fe3572c1b3d8a5a/obektiv-yongnuo-af-35mm-f20/",
+      "title": "Объектив Yongnuo AF 35mm f/2.0 [байонет - Canon EF]",
+      "specsText": "байонет - Canon EF",
+      "bracketGroups": [
+        "байонет - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "7fe3572c1b3d8a5a",
+      "cardText": "Объектив Yongnuo AF 35mm f/2.0 [байонет - Canon EF]4.67 |63 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/365353c42fd3ed20/obektiv-canon-rf-24-70mm-f28-l-is-usm/",
+      "title": "Объектив Canon RF 24-70mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "365353c42fd3ed20",
+      "cardText": "Объектив Canon RF 24-70mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/117a0b3f18ced21a/obektiv-viltrox-af-20mm-f28-full-frame/",
+      "title": "Объектив Viltrox AF 20mm f/2.8 (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "117a0b3f18ced21a",
+      "cardText": "Объектив Viltrox AF 20mm f/2.8 (Full Frame) [байонет - Sony E]4.71 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a728b7ac1f99ed20/obektiv-sony-e-pz-18-105mm-f40-g-oss/",
+      "title": "Объектив Sony E PZ 18-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "a728b7ac1f99ed20",
+      "cardText": "Объектив Sony E PZ 18-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]4.8 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f1b3cb482f54ed20/obektiv-canon-ef-50mm-f14-usm/",
+      "title": "Объектив Canon EF 50mm f/1.4 USM [байонет - Canon EF]",
+      "specsText": "байонет - Canon EF",
+      "bracketGroups": [
+        "байонет - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "f1b3cb482f54ed20",
+      "cardText": "Объектив Canon EF 50mm f/1.4 USM [байонет - Canon EF]4.72 |36 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/33a06ae37cbbd9cb/obektiv-viltrox-af-40mm-f25-full-frame/",
+      "title": "Объектив Viltrox AF 40mm f/2.5 ( Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "33a06ae37cbbd9cb",
+      "cardText": "Объектив Viltrox AF 40mm f/2.5 ( Full Frame) [байонет - Sony E]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c25cf55c7cbbd9cb/obektiv-viltrox-af-35mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "c25cf55c7cbbd9cb",
+      "cardText": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f8f725d6c506d763/obektiv-tamron-150-500mm-f5-67-di-iii-vc-vxd/",
+      "title": "Объектив Tamron 150-500mm f/5-6.7 Di III VC VXD [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "f8f725d6c506d763",
+      "cardText": "Объектив Tamron 150-500mm f/5-6.7 Di III VC VXD [байонет - Sony E, стабилизация]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c691032d8a2ded20/obektiv-sigma-af-28-70mm-f28-dg-dn-contemporary/",
+      "title": "Объектив Sigma AF 28-70mm f/2.8 DG DN Contemporary [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "c691032d8a2ded20",
+      "cardText": "Объектив Sigma AF 28-70mm f/2.8 DG DN Contemporary [байонет - Sony E]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9fc1e38a7cb9d582/obektiv-viltrox-af-28mm-f45-full-frame/",
+      "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "9fc1e38a7cb9d582",
+      "cardText": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Sony E]4.5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/763d9451159cd9cb/obektiv-sigma-18-50mm-f28-dc-dn/",
+      "title": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "763d9451159cd9cb",
+      "cardText": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Canon RF]5 |2 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a94ee58c7cbfd9cb/obektiv-viltrox-af-50mm-f20-air-full-frame/",
+      "title": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "a94ee58c7cbfd9cb",
+      "cardText": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Sony E]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/85c8a943c8edd582/obektiv-sigma-af-30mm-f14-dc-dn-c-fse/",
+      "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "85c8a943c8edd582",
+      "cardText": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/SE [байонет - Sony E]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f69541422f43ed20/obektiv-sigma-af-35mm-f14-dg-dn-art/",
+      "title": "Объектив Sigma AF 35mm f/1.4 DG DN Art [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "f69541422f43ed20",
+      "cardText": "Объектив Sigma AF 35mm f/1.4 DG DN Art [байонет - Sony E]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6b57e8e76984ed20/obektiv-nikon-nikkor-z-28-75mm-f28/",
+      "title": "Объектив Nikon NIKKOR Z 28-75mm f/2.8 [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "6b57e8e76984ed20",
+      "cardText": "Объектив Nikon NIKKOR Z 28-75mm f/2.8 [байонет - Nikon Z]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ef65576d7cb9d582/obektiv-viltrox-af-28mm-f45-full-frame/",
+      "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "ef65576d7cb9d582",
+      "cardText": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Fujifilm X]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/14492ff218ced21a/obektiv-viltrox-af-27mm-f12-pro-aps-c/",
+      "title": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "14492ff218ced21a",
+      "cardText": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Sony E]5 |1 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f6e83a4afe243330/obektiv-sigma-af-24-70mm-f28-dg-os-hsm-art/",
+      "title": "Объектив Sigma AF 24-70mm f/2.8 DG OS HSM Art [байонет - Canon EF, Canon EF-S, стабилизация]",
+      "specsText": "байонет - Canon EF, Canon EF-S, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon EF, Canon EF-S, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "f6e83a4afe243330",
+      "cardText": "Объектив Sigma AF 24-70mm f/2.8 DG OS HSM Art [байонет - Canon EF, Canon EF-S, стабилизация]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1e17b9397cc0d9cb/obektiv-viltrox-af-50mm-f20-air-full-frame/",
+      "title": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "1e17b9397cc0d9cb",
+      "cardText": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Nikon Z]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a456f4b18ced21a/obektiv-viltrox-af-75mm-f12-pro-aps-c/",
+      "title": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "1a456f4b18ced21a",
+      "cardText": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/172a3b6118ced21a/obektiv-viltrox-af-27mm-f12-pro-aps-c/",
+      "title": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "172a3b6118ced21a",
+      "cardText": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]4.33 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1f103ad518ced21a/obektiv-viltrox-af-85mm-f18-ii-full-frame/",
+      "title": "Объектив Viltrox AF 85mm f/1.8 II (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "1f103ad518ced21a",
+      "cardText": "Объектив Viltrox AF 85mm f/1.8 II (Full Frame) [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/da4af8054ad5ed20/obektiv-nikon-nikkor-z-24-70mm-f28-s/",
+      "title": "Объектив Nikon NIKKOR Z 24-70mm f/2.8 S [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "da4af8054ad5ed20",
+      "cardText": "Объектив Nikon NIKKOR Z 24-70mm f/2.8 S [байонет - Nikon Z]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/728301102fe7ed20/obektiv-sony-fe-70-200mm-f28-gm-oss-ii/",
+      "title": "Объектив Sony FE 70-200mm f/2.8 GM OSS II [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "728301102fe7ed20",
+      "cardText": "Объектив Sony FE 70-200mm f/2.8 GM OSS II [байонет - Sony E, стабилизация]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5ebb168f7cbdd9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "5ebb168f7cbdd9cb",
+      "cardText": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Fujifilm X]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a87c8fde6986ed20/obektiv-canon-rf-70-200mm-f28-l-is-usm/",
+      "title": "Объектив Canon RF 70-200mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "a87c8fde6986ed20",
+      "cardText": "Объектив Canon RF 70-200mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6076919a7cbed9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "6076919a7cbed9cb",
+      "cardText": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Nikon Z]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e932c1067cbed9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "e932c1067cbed9cb",
+      "cardText": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a5f5362a7cbcd9cb/obektiv-viltrox-af-35mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "a5f5362a7cbcd9cb",
+      "cardText": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Nikon Z]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/972bbdf63725ed20/obektiv-tamron-sp-24-70mm-f28-di-vc-usd-g2/",
+      "title": "Объектив Tamron SP 24-70mm f/2.8 Di VC USD G2 [байонет - Canon EF, стабилизация]",
+      "specsText": "байонет - Canon EF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon EF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "972bbdf63725ed20",
+      "cardText": "Объектив Tamron SP 24-70mm f/2.8 Di VC USD G2 [байонет - Canon EF, стабилизация]4.57 |7 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/673cf1d73721ed20/obektiv-tamron-17-28mm-f28-di-iii-rxd/",
+      "title": "Объектив Tamron 17-28mm f/2.8 Di III RXD [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "673cf1d73721ed20",
+      "cardText": "Объектив Tamron 17-28mm f/2.8 Di III RXD [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a45637a18ced21a/obektiv-viltrox-af-56mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 56mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "1a45637a18ced21a",
+      "cardText": "Объектив Viltrox AF 56mm f/1.7 (APS-C) [байонет - Fujifilm X]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ed6ffafa3845d0a4/obektiv-canon-rf-24mm-f18-macro-is-stm/",
+      "title": "Объектив Canon RF 24mm F1.8 Macro IS STM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "ed6ffafa3845d0a4",
+      "cardText": "Объектив Canon RF 24mm F1.8 Macro IS STM [байонет - Canon RF, стабилизация]4 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/65cc863d8a2ded20/obektiv-sigma-18-50mm-f28-dc-dn/",
+      "title": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "65cc863d8a2ded20",
+      "cardText": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Sony E]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/79aa48ea7cc5d9cb/obektiv-viltrox-af-75mm-f12-pro-aps-c/",
+      "title": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "79aa48ea7cc5d9cb",
+      "cardText": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7082edc8b53eb051/obektiv-yongnuo-yn-50mm-f18-canon-ef/",
+      "title": "Объектив Yongnuo YN 50mm f/1.8 Canon EF [байонет - Canon EF]",
+      "specsText": "байонет - Canon EF",
+      "bracketGroups": [
+        "байонет - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "7082edc8b53eb051",
+      "cardText": "Объектив Yongnuo YN 50mm f/1.8 Canon EF [байонет - Canon EF]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d6f5b2817e5fbe94/obektiv-yongnuo-yn23mm-f14s-da-dsm-wl-pro/",
+      "title": "Объектив Yongnuo YN23MM F1.4S DA DSM WL PRO [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "d6f5b2817e5fbe94",
+      "cardText": "Объектив Yongnuo YN23MM F1.4S DA DSM WL PRO [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a8dcb739c903d9cb/obektiv-sigma-af-24-70mm-f28-dg-dn-ii-a-fse/",
+      "title": "Объектив Sigma AF 24-70MM F/2.8 DG DN II (A) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "a8dcb739c903d9cb",
+      "cardText": "Объектив Sigma AF 24-70MM F/2.8 DG DN II (A) F/SE [байонет - Sony E]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6752b0c1e71ced20/obektiv-tamron-35-150mm-f2-28-di-iii-vxd/",
+      "title": "Объектив Tamron 35-150mm f/2-2.8 Di III VXD [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "6752b0c1e71ced20",
+      "cardText": "Объектив Tamron 35-150mm f/2-2.8 Di III VXD [байонет - Sony E]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4a4014272fe5ed20/obektiv-sony-fe-24mm-f14-gm/",
+      "title": "Объектив Sony FE 24mm f/1.4 GM [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "4a4014272fe5ed20",
+      "cardText": "Объектив Sony FE 24mm f/1.4 GM [байонет - Sony E]4.14 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3eee6ef9add9171a/obektiv-yongnuo-50f18s-da/",
+      "title": "Объектив Yongnuo 50F1.8S DA [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "3eee6ef9add9171a",
+      "cardText": "Объектив Yongnuo 50F1.8S DA [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/95335715c8eed582/obektiv-sigma-af-30mm-f14-dc-dn-c-fx/",
+      "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "95335715c8eed582",
+      "cardText": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/44977e4918abd0a4/obektiv-viltrox-af-13mm-f14-aps-c/",
+      "title": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "44977e4918abd0a4",
+      "cardText": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Sony E]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a45599e18ced21a/obektiv-viltrox-af-56mm-f14-aps-c/",
+      "title": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "1a45599e18ced21a",
+      "cardText": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Nikon Z]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bd8a1835e5c4ed20/obektiv-canon-rf-100-500mm-f45-71-l-is-usm/",
+      "title": "Объектив Canon RF 100-500mm f/4.5-7.1 L IS USM [байонет - Canon RF, стабилизация]",
+      "specsText": "байонет - Canon RF, стабилизация",
+      "bracketGroups": [
+        "байонет - Canon RF, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "bd8a1835e5c4ed20",
+      "cardText": "Объектив Canon RF 100-500mm f/4.5-7.1 L IS USM [байонет - Canon RF, стабилизация]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bbbf2a882036ed20/obektiv-sony-fe-24-70mm-f28-gm/",
+      "title": "Объектив Sony FE 24-70mm F2.8 GM [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "bbbf2a882036ed20",
+      "cardText": "Объектив Sony FE 24-70mm F2.8 GM [байонет - Sony E]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b71d1992c8f4d582/obektiv-sigma-af-85mm-f14-dg-dn-a-fse/",
+      "title": "Объектив Sigma AF 85MM F/1.4 DG DN (A) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "b71d1992c8f4d582",
+      "cardText": "Объектив Sigma AF 85MM F/1.4 DG DN (A) F/SE [байонет - Sony E]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0f037e4b84a5d9cb/obektiv-tamron-50-400mm-f45-63-di-iii-vc-vxd/",
+      "title": "Объектив Tamron 50-400mm F4.5-6.3 Di III VC VXD [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "0f037e4b84a5d9cb",
+      "cardText": "Объектив Tamron 50-400mm F4.5-6.3 Di III VC VXD [байонет - Sony E, стабилизация]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/024f9594150cd9cb/obektiv-tamron-11-20mm-f28-di-iii-a-rxd/",
+      "title": "Объектив Tamron 11-20mm f/2.8 Di III-A RXD [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "024f9594150cd9cb",
+      "cardText": "Объектив Tamron 11-20mm f/2.8 Di III-A RXD [байонет - Canon RF]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8aed727e1c51d582/obektiv-sigma-af-12mm-f14-dc/",
+      "title": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "8aed727e1c51d582",
+      "cardText": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Sony E]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1839f72ec8f3d582/obektiv-sigma-af-16mm-f14-dc-dn-c-frf/",
+      "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "1839f72ec8f3d582",
+      "cardText": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f0538868c8edd582/obektiv-sigma-af-30mm-f14-dc-dn-c-frf/",
+      "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "f0538868c8edd582",
+      "cardText": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cf5fb79705abece9/obektiv-yongnuo-yn50mm-f18x-da-dsm/",
+      "title": "Объектив Yongnuo YN50mm F1.8X DA DSM [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "cf5fb79705abece9",
+      "cardText": "Объектив Yongnuo YN50mm F1.8X DA DSM [байонет - Fujifilm X]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9891e1af03b89f69/obektiv-yongnuo-yn35mm-f18z-da-dsm/",
+      "title": "Объектив Yongnuo YN35MM F1.8Z DA DSM [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "9891e1af03b89f69",
+      "cardText": "Объектив Yongnuo YN35MM F1.8Z DA DSM [байонет - Nikon Z]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/aca7e8ebba273330/obektiv-yongnuo-af-35mm-f20/",
+      "title": "Объектив YongNuo AF 35mm F2.0 [байонет - Nikon F]",
+      "specsText": "байонет - Nikon F",
+      "bracketGroups": [
+        "байонет - Nikon F"
+      ],
+      "priceText": "",
+      "productId": "aca7e8ebba273330",
+      "cardText": "Объектив YongNuo AF 35mm F2.0 [байонет - Nikon F]3.63 |5 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0bc8bb5c06b93332/obektiv-sigma-16mm-f14-dc-dn-contemporary/",
+      "title": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Canon EF-M]",
+      "specsText": "байонет - Canon EF-M",
+      "bracketGroups": [
+        "байонет - Canon EF-M"
+      ],
+      "priceText": "",
+      "productId": "0bc8bb5c06b93332",
+      "cardText": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Canon EF-M]4.81 |40 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7e5547651e89ed20/obektiv-nikon-nikkor-z-50mm-f18-s/",
+      "title": "Объектив Nikon NIKKOR Z 50mm f/1.8 S [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "7e5547651e89ed20",
+      "cardText": "Объектив Nikon NIKKOR Z 50mm f/1.8 S [байонет - Nikon Z]5 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/592416f57cc3d9cb/obektiv-viltrox-af-56mm-f17-air-aps-c/",
+      "title": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "592416f57cc3d9cb",
+      "cardText": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Nikon Z]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8c23ffe42e71ed20/obektiv-sigma-16mm-f14-dc-dn-contemporary/",
+      "title": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "8c23ffe42e71ed20",
+      "cardText": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Sony E]5 |7 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d35ed1ea2e73ed20/obektiv-sigma-af-35mm-f14-dg-hsm-art/",
+      "title": "Объектив Sigma AF 35mm f/1.4 DG HSM Art [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "d35ed1ea2e73ed20",
+      "cardText": "Объектив Sigma AF 35mm f/1.4 DG HSM Art [байонет - Sony E]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/106c145e18ced21a/obektiv-viltrox-af-16mm-f18-full-frame/",
+      "title": "Объектив Viltrox AF 16mm f/1.8 ( Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "106c145e18ced21a",
+      "cardText": "Объектив Viltrox AF 16mm f/1.8 ( Full Frame) [байонет - Sony E]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/12a23c5518ced21a/obektiv-viltrox-af-20mm-f28-nikon-full-frame/",
+      "title": "Объектив Viltrox AF 20mm f/2.8 Nikon (Full Frame) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "12a23c5518ced21a",
+      "cardText": "Объектив Viltrox AF 20mm f/2.8 Nikon (Full Frame) [байонет - Nikon Z]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/22f705397cc7d9cb/obektiv-viltrox-af-85mm-f14-pro-full-frame/",
+      "title": "Объектив Viltrox AF 85mm f/1.4 Pro (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "22f705397cc7d9cb",
+      "cardText": "Объектив Viltrox AF 85mm f/1.4 Pro (Full Frame) [байонет - Sony E]5 |2 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4b5b55d77cbad582/obektiv-viltrox-af-28mm-f45-full-frame/",
+      "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "4b5b55d77cbad582",
+      "cardText": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Nikon Z]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/602ebd512fe6ed20/obektiv-sony-fe-50-mm-f12-gm/",
+      "title": "Объектив Sony FE 50 mm f/1.2 GM [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "602ebd512fe6ed20",
+      "cardText": "Объектив Sony FE 50 mm f/1.2 GM [байонет - Sony E]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/25ed3a747cced582/obektiv-viltrox-af-15mm-f17-aps-c/",
+      "title": "Объектив Viltrox AF 15mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "25ed3a747cced582",
+      "cardText": "Объектив Viltrox AF 15mm f/1.7 (APS-C) [байонет - Fujifilm X]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3d778f347cb8d582/obektiv-viltrox-af-16mm-f18-full-frame/",
+      "title": "Объектив Viltrox AF 16mm f/1.8 (Full Frame) [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "3d778f347cb8d582",
+      "cardText": "Объектив Viltrox AF 16mm f/1.8 (Full Frame) [байонет - Nikon Z]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5f27fec27cc8d9cb/obektiv-viltrox-af-135mm-f18-lab-full-frame/",
+      "title": "Объектив Viltrox AF 135mm f/1.8 LAB (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "5f27fec27cc8d9cb",
+      "cardText": "Объектив Viltrox AF 135mm f/1.8 LAB (Full Frame) [байонет - Sony E]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/785e0487e72bed20/obektiv-tamron-70-180mm-f28-di-iii-vc-vxd-g2/",
+      "title": "Объектив Tamron 70-180mm f/2.8 Di III VC VXD G2 [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "785e0487e72bed20",
+      "cardText": "Объектив Tamron 70-180mm f/2.8 Di III VC VXD G2 [байонет - Sony E]5 |1 отзыв 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/97466e1438d0d9cb/obektiv-sony-fe-35mm-f14-gm/",
+      "title": "Объектив Sony FE 35mm F1.4 GM [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "97466e1438d0d9cb",
+      "cardText": "Объектив Sony FE 35mm F1.4 GM [байонет - Sony E]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bcfe7cc97cb5d582/obektiv-viltrox-af-13mm-f14-aps-c/",
+      "title": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "bcfe7cc97cb5d582",
+      "cardText": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Fujifilm X]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0a628e4f1c52d582/obektiv-sigma-af-12mm-f14-dc/",
+      "title": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "0a628e4f1c52d582",
+      "cardText": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Canon RF]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0d68e42d159dd9cb/obektiv-sigma-56mm-f14-dc-dn/",
+      "title": "Объектив Sigma 56mm f/1.4 DC DN [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "0d68e42d159dd9cb",
+      "cardText": "Объектив Sigma 56mm f/1.4 DC DN [байонет - Canon RF]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/144927db18ced21a/obektiv-viltrox-af-24mm-f18-full-frame/",
+      "title": "Объектив Viltrox AF 24mm f/1.8 (Full Frame) [байонет - Nikon Z, стабилизация]",
+      "specsText": "байонет - Nikon Z, стабилизация",
+      "bracketGroups": [
+        "байонет - Nikon Z, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "144927db18ced21a",
+      "cardText": "Объектив Viltrox AF 24mm f/1.8 (Full Frame) [байонет - Nikon Z, стабилизация]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a45546918ced21a/obektiv-viltrox-af-56mm-f14-aps-c/",
+      "title": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "1a45546918ced21a",
+      "cardText": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Fujifilm X]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/203dc40e18ced21a/obektiv-viltrox-af-85mm-f18-ii-aps-c/",
+      "title": "Объектив Viltrox AF 85mm f/1.8 II (APS-C) [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "203dc40e18ced21a",
+      "cardText": "Объектив Viltrox AF 85mm f/1.8 II (APS-C) [байонет - Fujifilm X]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/24895801234c29db/obektiv-yongnuo-yn-85mm-f18-s-df-dsm-sony/",
+      "title": "Объектив Yongnuo YN 85mm f/1.8 S DF DSM Sony [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "24895801234c29db",
+      "cardText": "Объектив Yongnuo YN 85mm f/1.8 S DF DSM Sony [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2c6e0a985e372073/obektiv-yongnuo-yn-33mm-f14s-da-dsm-wl-pro/",
+      "title": "Объектив Yongnuo YN 33mm f/1.4S DA DSM WL Pro [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "2c6e0a985e372073",
+      "cardText": "Объектив Yongnuo YN 33mm f/1.4S DA DSM WL Pro [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2f4013c2c903d9cb/obektiv-sigma-af-16-28mm-f28-dg-dn-c-fse/",
+      "title": "Объектив Sigma AF 16-28MM F/2.8 DG DN (C) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "2f4013c2c903d9cb",
+      "cardText": "Объектив Sigma AF 16-28MM F/2.8 DG DN (C) F/SE [байонет - Sony E]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6258e2061c52d9cb/obektiv-sigma-af-16mm-f14-dc-dn-c-fnz/",
+      "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/NZ [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "6258e2061c52d9cb",
+      "cardText": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/NZ [байонет - Nikon Z]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/641e2c26c8f3d582/obektiv-sigma-af-16mm-f14-dc-dn-c-fx/",
+      "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "641e2c26c8f3d582",
+      "cardText": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6479e394a12620b0/obektiv-yongnuo-yn-35mm-f2-s-df-dsm/",
+      "title": "Объектив Yongnuo YN 35mm f/2 S DF DSM [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "6479e394a12620b0",
+      "cardText": "Объектив Yongnuo YN 35mm f/2 S DF DSM [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6856dcdfc8f7d9cb/obektiv-sigma-af-10-18mm-f28-dc-dn-c-frf/",
+      "title": "Объектив Sigma AF 10-18MM F/2.8 DC DN (C) F/RF [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "6856dcdfc8f7d9cb",
+      "cardText": "Объектив Sigma AF 10-18MM F/2.8 DC DN (C) F/RF [байонет - Canon RF]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6db23ef37cc7d9cb/obektiv-viltrox-af-35mm-f12-lab-full-frame/",
+      "title": "Объектив Viltrox AF 35mm f/1.2 LAB (Full Frame) [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "6db23ef37cc7d9cb",
+      "cardText": "Объектив Viltrox AF 35mm f/1.2 LAB (Full Frame) [байонет - Sony E]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8b7e207ec3407ba3/obektiv-yongnuo-yn12-35mm-f28-4m/",
+      "title": "Объектив Yongnuo YN12-35mm F2.8-4M [байонет - Micro 4/3]",
+      "specsText": "байонет - Micro 4/3",
+      "bracketGroups": [
+        "байонет - Micro 4/3"
+      ],
+      "priceText": "",
+      "productId": "8b7e207ec3407ba3",
+      "cardText": "Объектив Yongnuo YN12-35mm F2.8-4M [байонет - Micro 4/3]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8dd495cd4ba14420/obektiv-yongnuo-yn35mm-f18z-da-dsm-wl/",
+      "title": "Объектив Yongnuo YN35mm f/1.8Z DA DSM WL [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "8dd495cd4ba14420",
+      "cardText": "Объектив Yongnuo YN35mm f/1.8Z DA DSM WL [байонет - Nikon Z]4.7|рейтинг бренда 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9c55adeb0a36f979/obektiv-yongnuo-yn56mm-f14z-da-dsm-wl-pro/",
+      "title": "Объектив Yongnuo YN56mm f/1.4Z DA DSM WL Pro [байонет - Nikon Z]",
+      "specsText": "байонет - Nikon Z",
+      "bracketGroups": [
+        "байонет - Nikon Z"
+      ],
+      "priceText": "",
+      "productId": "9c55adeb0a36f979",
+      "cardText": "Объектив Yongnuo YN56mm f/1.4Z DA DSM WL Pro [байонет - Nikon Z]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a01a93aeb4ddd784/obektiv-yongnuo-yn-50mm-f18-s-df-dsm-sony/",
+      "title": "Объектив Yongnuo YN 50mm f/1.8 S DF DSM Sony [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "a01a93aeb4ddd784",
+      "cardText": "Объектив Yongnuo YN 50mm f/1.8 S DF DSM Sony [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a53f8c86bf2502c6/obektiv-yongnuo-yn56mm-f14s-da-dsm-wl-pro/",
+      "title": "Объектив Yongnuo YN56MM F1.4S DA DSM WL PRO [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "a53f8c86bf2502c6",
+      "cardText": "Объектив Yongnuo YN56MM F1.4S DA DSM WL PRO [байонет - Sony E]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b141e6af1c52d9cb/obektiv-sigma-af-16-300mm-f35-67-dc-os/",
+      "title": "Объектив Sigma AF 16-300MM F/3.5-6.7 DC OS [байонет - Sony E, стабилизация]",
+      "specsText": "байонет - Sony E, стабилизация",
+      "bracketGroups": [
+        "байонет - Sony E, стабилизация"
+      ],
+      "priceText": "",
+      "productId": "b141e6af1c52d9cb",
+      "cardText": "Объектив Sigma AF 16-300MM F/3.5-6.7 DC OS [байонет - Sony E, стабилизация]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cd193f9d1fb16f9f/obektiv-sigma-af-105mm-f28-ex-dg-macro/",
+      "title": "Объектив Sigma AF 105mm F2.8 EX DG MACRO [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "cd193f9d1fb16f9f",
+      "cardText": "Объектив Sigma AF 105mm F2.8 EX DG MACRO [байонет - Sony E]5|рейтинг бренда 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e06d06eec8efd582/obektiv-sigma-af-50mm-f14-dg-dn-a-fse/",
+      "title": "Объектив Sigma AF 50MM F/1.4 DG DN (A) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "e06d06eec8efd582",
+      "cardText": "Объектив Sigma AF 50MM F/1.4 DG DN (A) F/SE [байонет - Sony E]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f0bab3faa5800fbb/obektiv-yongnuo-yn85mm-f18r-df-dsm/",
+      "title": "Объектив Yongnuo YN85mm F1.8R DF DSM [байонет - Canon RF]",
+      "specsText": "байонет - Canon RF",
+      "bracketGroups": [
+        "байонет - Canon RF"
+      ],
+      "priceText": "",
+      "productId": "f0bab3faa5800fbb",
+      "cardText": "Объектив Yongnuo YN85mm F1.8R DF DSM [байонет - Canon RF]4.7|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f14778d5c8ecd582/obektiv-sigma-af-23mm-f14-dc-dn-c-fx-mount/",
+      "title": "Объектив Sigma AF 23MM F/1.4 DC DN (C) F/X MOUNT [байонет - Fujifilm X]",
+      "specsText": "байонет - Fujifilm X",
+      "bracketGroups": [
+        "байонет - Fujifilm X"
+      ],
+      "priceText": "",
+      "productId": "f14778d5c8ecd582",
+      "cardText": "Объектив Sigma AF 23MM F/1.4 DC DN (C) F/X MOUNT [байонет - Fujifilm X]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fa51b8cdc905d9cb/obektiv-sigma-af-28-105mm-f28-dg-dn-a-fse/",
+      "title": "Объектив Sigma AF 28-105MM F/2.8 DG DN (A) F/SE [байонет - Sony E]",
+      "specsText": "байонет - Sony E",
+      "bracketGroups": [
+        "байонет - Sony E"
+      ],
+      "priceText": "",
+      "productId": "fa51b8cdc905d9cb",
+      "cardText": "Объектив Sigma AF 28-105MM F/2.8 DG DN (A) F/SE [байонет - Sony E]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fdbc802019dfed20/perehodnik-canon-mount-adapter-ef-eos-r/",
+      "title": "Переходник Canon Mount Adapter EF-EOS R [Canon EOS R - Canon EF, Canon EF-S]",
+      "specsText": "Canon EOS R - Canon EF, Canon EF-S",
+      "bracketGroups": [
+        "Canon EOS R - Canon EF, Canon EF-S"
+      ],
+      "priceText": "",
+      "productId": "fdbc802019dfed20",
+      "cardText": "Переходник Canon Mount Adapter EF-EOS R [Canon EOS R - Canon EF, Canon EF-S]4.86 |57 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f658417d5022ed20/perehodnik-nikon-ftz-ii/",
+      "title": "Переходник Nikon FTZ II [Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G]",
+      "specsText": "Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G",
+      "bracketGroups": [
+        "Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G"
+      ],
+      "priceText": "",
+      "productId": "f658417d5022ed20",
+      "cardText": "Переходник Nikon FTZ II [Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G]5 |22 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3ba5bb121e3ed0a4/perehodnik-viltrox-ef-l/",
+      "title": "Переходник Viltrox EF-L [L-mount - Canon EF]",
+      "specsText": "L-mount - Canon EF",
+      "bracketGroups": [
+        "L-mount - Canon EF"
+      ],
+      "priceText": "",
+      "productId": "3ba5bb121e3ed0a4",
+      "cardText": "Переходник Viltrox EF-L [L-mount - Canon EF]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3a1378ce1e3ed0a4/perehodnik-viltrox-ef-eosm/",
+      "title": "Переходник Viltrox EF-EOSM [Canon EOS M - Canon EF, Canon EF-S]",
+      "specsText": "Canon EOS M - Canon EF, Canon EF-S",
+      "bracketGroups": [
+        "Canon EOS M - Canon EF, Canon EF-S"
+      ],
+      "priceText": "",
+      "productId": "3a1378ce1e3ed0a4",
+      "cardText": "Переходник Viltrox EF-EOSM [Canon EOS M - Canon EF, Canon EF-S]1 |1 отзыв"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Объектив",
+      "models": [
+        {
+          "brand": "Объектив",
+          "model": "Canon EF 50mm f/1.4 USM",
+          "name": "Объектив Canon EF 50mm f/1.4 USM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f1b3cb482f54ed20/obektiv-canon-ef-50mm-f14-usm/",
+              "title": "Объектив Canon EF 50mm f/1.4 USM [байонет - Canon EF]",
+              "specsText": "байонет - Canon EF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon EF 50mm f/1.8 STM",
+          "name": "Объектив Canon EF 50mm f/1.8 STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/62ba2b122f55ed20/obektiv-canon-ef-50mm-f18-stm/",
+              "title": "Объектив Canon EF 50mm f/1.8 STM [байонет - Canon EF]",
+              "specsText": "байонет - Canon EF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon EF 75-300mm f/4.0-5.6 III",
+          "name": "Объектив Canon EF 75-300mm f/4.0-5.6 III",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9cc2b18f2fd5ed20/obektiv-canon-ef-75-300mm-f40-56-iii/",
+              "title": "Объектив Canon EF 75-300mm f/4.0-5.6 III [байонет - Canon EF]",
+              "specsText": "байонет - Canon EF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon EF-S 10-18mm f/4.5-5.6 IS STM",
+          "name": "Объектив Canon EF-S 10-18mm f/4.5-5.6 IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d2bad6312fceed20/obektiv-canon-ef-s-10-18mm-f45-56-is-stm/",
+              "title": "Объектив Canon EF-S 10-18mm f/4.5-5.6 IS STM [байонет - Canon EF-S, стабилизация]",
+              "specsText": "байонет - Canon EF-S, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon EF-S 24mm f/2.8 STM",
+          "name": "Объектив Canon EF-S 24mm f/2.8 STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/809a22e02f54ed20/obektiv-canon-ef-s-24mm-f28-stm/",
+              "title": "Объектив Canon EF-S 24mm f/2.8 STM [байонет - Canon EF-S]",
+              "specsText": "байонет - Canon EF-S",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 100-500mm f/4.5-7.1 L IS USM",
+          "name": "Объектив Canon RF 100-500mm f/4.5-7.1 L IS USM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bd8a1835e5c4ed20/obektiv-canon-rf-100-500mm-f45-71-l-is-usm/",
+              "title": "Объектив Canon RF 100-500mm f/4.5-7.1 L IS USM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 16mm f/2.8 STM",
+          "name": "Объектив Canon RF 16mm f/2.8 STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/138a32d2e5beed20/obektiv-canon-rf-16mm-f28-stm/",
+              "title": "Объектив Canon RF 16mm f/2.8 STM [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 24-105mm f/4.0 L IS USM",
+          "name": "Объектив Canon RF 24-105mm f/4.0 L IS USM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/524521272fd2ed20/obektiv-canon-rf-24-105mm-f40-l-is-usm/",
+              "title": "Объектив Canon RF 24-105mm f/4.0 L IS USM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 24-105mm f/4.0-7.1 IS STM",
+          "name": "Объектив Canon RF 24-105mm f/4.0-7.1 IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a9ce0e8e5a9b1b80/obektiv-canon-rf-24-105mm-f40-71-is-stm/",
+              "title": "Объектив Canon RF 24-105mm f/4.0-7.1 IS STM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 24-70mm f/2.8 L IS USM",
+          "name": "Объектив Canon RF 24-70mm f/2.8 L IS USM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/365353c42fd3ed20/obektiv-canon-rf-24-70mm-f28-l-is-usm/",
+              "title": "Объектив Canon RF 24-70mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 24mm F1.8 Macro IS STM",
+          "name": "Объектив Canon RF 24mm F1.8 Macro IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ed6ffafa3845d0a4/obektiv-canon-rf-24mm-f18-macro-is-stm/",
+              "title": "Объектив Canon RF 24mm F1.8 Macro IS STM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 35mm f/1.8 Macro IS STM",
+          "name": "Объектив Canon RF 35mm f/1.8 Macro IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4d32aa2e2f58ed20/obektiv-canon-rf-35mm-f18-macro-is-stm/",
+              "title": "Объектив Canon RF 35mm f/1.8 Macro IS STM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 50mm f/1.8 STM",
+          "name": "Объектив Canon RF 50mm f/1.8 STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d6276f412f58ed20/obektiv-canon-rf-50mm-f18-stm/",
+              "title": "Объектив Canon RF 50mm f/1.8 STM [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 70-200mm f/2.8 L IS USM",
+          "name": "Объектив Canon RF 70-200mm f/2.8 L IS USM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a87c8fde6986ed20/obektiv-canon-rf-70-200mm-f28-l-is-usm/",
+              "title": "Объектив Canon RF 70-200mm f/2.8 L IS USM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF 85mm f/2.0 Macro IS STM",
+          "name": "Объектив Canon RF 85mm f/2.0 Macro IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/717344292fceed20/obektiv-canon-rf-85mm-f20-macro-is-stm/",
+              "title": "Объектив Canon RF 85mm f/2.0 Macro IS STM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Canon RF-S 55-210mm f/5.0-7.1 IS STM",
+          "name": "Объектив Canon RF-S 55-210mm f/5.0-7.1 IS STM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6a7a71e1150ad9cb/obektiv-canon-rf-s-55-210mm-f50-71-is-stm/",
+              "title": "Объектив Canon RF-S 55-210mm f/5.0-7.1 IS STM [байонет - Canon RF, стабилизация]",
+              "specsText": "байонет - Canon RF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Nikon NIKKOR AF-S DX 18-140mm f/3.5-5.6 G ED VR",
+          "name": "Объектив Nikon NIKKOR AF-S DX 18-140mm f/3.5-5.6 G ED VR",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9ea7ebf74dd8ed20/obektiv-nikon-nikkor-af-s-dx-18-140mm-f35-56-g-ed-vr/",
+              "title": "Объектив Nikon NIKKOR AF-S DX 18-140mm f/3.5-5.6 G ED VR [байонет - Nikon F, стабилизация]",
+              "specsText": "байонет - Nikon F, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Nikon NIKKOR AF-S DX 35mm f/1.8 G",
+          "name": "Объектив Nikon NIKKOR AF-S DX 35mm f/1.8 G",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c5f3be7c4de3ed20/obektiv-nikon-nikkor-af-s-dx-35mm-f18-g/",
+              "title": "Объектив Nikon NIKKOR AF-S DX 35mm f/1.8 G [байонет - Nikon F]",
+              "specsText": "байонет - Nikon F",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Nikon NIKKOR Z 24-70mm f/2.8 S",
+          "name": "Объектив Nikon NIKKOR Z 24-70mm f/2.8 S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/da4af8054ad5ed20/obektiv-nikon-nikkor-z-24-70mm-f28-s/",
+              "title": "Объектив Nikon NIKKOR Z 24-70mm f/2.8 S [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Nikon NIKKOR Z 28-75mm f/2.8",
+          "name": "Объектив Nikon NIKKOR Z 28-75mm f/2.8",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6b57e8e76984ed20/obektiv-nikon-nikkor-z-28-75mm-f28/",
+              "title": "Объектив Nikon NIKKOR Z 28-75mm f/2.8 [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Nikon NIKKOR Z 50mm f/1.8 S",
+          "name": "Объектив Nikon NIKKOR Z 50mm f/1.8 S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7e5547651e89ed20/obektiv-nikon-nikkor-z-50mm-f18-s/",
+              "title": "Объектив Nikon NIKKOR Z 50mm f/1.8 S [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma 16mm f/1.4 DC DN Contemporary",
+          "name": "Объектив Sigma 16mm f/1.4 DC DN Contemporary",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0bc8bb5c06b93332/obektiv-sigma-16mm-f14-dc-dn-contemporary/",
+              "title": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Canon EF-M]",
+              "specsText": "байонет - Canon EF-M",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/8c23ffe42e71ed20/obektiv-sigma-16mm-f14-dc-dn-contemporary/",
+              "title": "Объектив Sigma 16mm f/1.4 DC DN Contemporary [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma 18-50mm f/2.8 DC DN",
+          "name": "Объектив Sigma 18-50mm f/2.8 DC DN",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/763d9451159cd9cb/obektiv-sigma-18-50mm-f28-dc-dn/",
+              "title": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/65cc863d8a2ded20/obektiv-sigma-18-50mm-f28-dc-dn/",
+              "title": "Объектив Sigma 18-50mm f/2.8 DC DN [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma 18-50mm f/2.8 DC DN Contemporary Sony E",
+          "name": "Объектив Sigma 18-50mm f/2.8 DC DN Contemporary Sony E",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/67946786e68bed20/obektiv-sigma-18-50mm-f28-dc-dn-contemporary-sony-e/",
+              "title": "Объектив Sigma 18-50mm f/2.8 DC DN Contemporary Sony E [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma 56mm f/1.4 DC DN",
+          "name": "Объектив Sigma 56mm f/1.4 DC DN",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0d68e42d159dd9cb/obektiv-sigma-56mm-f14-dc-dn/",
+              "title": "Объектив Sigma 56mm f/1.4 DC DN [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 10-18MM F/2.8 DC DN (C) F/RF",
+          "name": "Объектив Sigma AF 10-18MM F/2.8 DC DN (C) F/RF",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6856dcdfc8f7d9cb/obektiv-sigma-af-10-18mm-f28-dc-dn-c-frf/",
+              "title": "Объектив Sigma AF 10-18MM F/2.8 DC DN (C) F/RF [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 105mm F2.8 EX DG MACRO",
+          "name": "Объектив Sigma AF 105mm F2.8 EX DG MACRO",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cd193f9d1fb16f9f/obektiv-sigma-af-105mm-f28-ex-dg-macro/",
+              "title": "Объектив Sigma AF 105mm F2.8 EX DG MACRO [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 12MM F/1.4 DC",
+          "name": "Объектив Sigma AF 12MM F/1.4 DC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8aed727e1c51d582/obektiv-sigma-af-12mm-f14-dc/",
+              "title": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/0a628e4f1c52d582/obektiv-sigma-af-12mm-f14-dc/",
+              "title": "Объектив Sigma AF 12MM F/1.4 DC [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 16-28MM F/2.8 DG DN (C) F/SE",
+          "name": "Объектив Sigma AF 16-28MM F/2.8 DG DN (C) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2f4013c2c903d9cb/obektiv-sigma-af-16-28mm-f28-dg-dn-c-fse/",
+              "title": "Объектив Sigma AF 16-28MM F/2.8 DG DN (C) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 16-300MM F/3.5-6.7 DC OS",
+          "name": "Объектив Sigma AF 16-300MM F/3.5-6.7 DC OS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b141e6af1c52d9cb/obektiv-sigma-af-16-300mm-f35-67-dc-os/",
+              "title": "Объектив Sigma AF 16-300MM F/3.5-6.7 DC OS [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 16MM F/1.4 DC DN (C) F/NZ",
+          "name": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/NZ",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6258e2061c52d9cb/obektiv-sigma-af-16mm-f14-dc-dn-c-fnz/",
+              "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/NZ [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 16MM F/1.4 DC DN (C) F/RF",
+          "name": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/RF",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1839f72ec8f3d582/obektiv-sigma-af-16mm-f14-dc-dn-c-frf/",
+              "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 16MM F/1.4 DC DN (C) F/X",
+          "name": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/X",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/641e2c26c8f3d582/obektiv-sigma-af-16mm-f14-dc-dn-c-fx/",
+              "title": "Объектив Sigma AF 16MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 23MM F/1.4 DC DN (C) F/X MOUNT",
+          "name": "Объектив Sigma AF 23MM F/1.4 DC DN (C) F/X MOUNT",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f14778d5c8ecd582/obektiv-sigma-af-23mm-f14-dc-dn-c-fx-mount/",
+              "title": "Объектив Sigma AF 23MM F/1.4 DC DN (C) F/X MOUNT [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 24-70MM F/2.8 DG DN II (A) F/SE",
+          "name": "Объектив Sigma AF 24-70MM F/2.8 DG DN II (A) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a8dcb739c903d9cb/obektiv-sigma-af-24-70mm-f28-dg-dn-ii-a-fse/",
+              "title": "Объектив Sigma AF 24-70MM F/2.8 DG DN II (A) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 24-70mm f/2.8 DG OS HSM Art",
+          "name": "Объектив Sigma AF 24-70mm f/2.8 DG OS HSM Art",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f6e83a4afe243330/obektiv-sigma-af-24-70mm-f28-dg-os-hsm-art/",
+              "title": "Объектив Sigma AF 24-70mm f/2.8 DG OS HSM Art [байонет - Canon EF, Canon EF-S, стабилизация]",
+              "specsText": "байонет - Canon EF, Canon EF-S, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 28-105MM F/2.8 DG DN (A) F/SE",
+          "name": "Объектив Sigma AF 28-105MM F/2.8 DG DN (A) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fa51b8cdc905d9cb/obektiv-sigma-af-28-105mm-f28-dg-dn-a-fse/",
+              "title": "Объектив Sigma AF 28-105MM F/2.8 DG DN (A) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 28-70mm f/2.8 DG DN Contemporary",
+          "name": "Объектив Sigma AF 28-70mm f/2.8 DG DN Contemporary",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c691032d8a2ded20/obektiv-sigma-af-28-70mm-f28-dg-dn-contemporary/",
+              "title": "Объектив Sigma AF 28-70mm f/2.8 DG DN Contemporary [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 30MM F/1.4 DC DN (C) F/RF",
+          "name": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/RF",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f0538868c8edd582/obektiv-sigma-af-30mm-f14-dc-dn-c-frf/",
+              "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/RF [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 30MM F/1.4 DC DN (C) F/SE",
+          "name": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/85c8a943c8edd582/obektiv-sigma-af-30mm-f14-dc-dn-c-fse/",
+              "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 30MM F/1.4 DC DN (C) F/X",
+          "name": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/X",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/95335715c8eed582/obektiv-sigma-af-30mm-f14-dc-dn-c-fx/",
+              "title": "Объектив Sigma AF 30MM F/1.4 DC DN (C) F/X [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 35mm f/1.4 DG DN Art",
+          "name": "Объектив Sigma AF 35mm f/1.4 DG DN Art",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f69541422f43ed20/obektiv-sigma-af-35mm-f14-dg-dn-art/",
+              "title": "Объектив Sigma AF 35mm f/1.4 DG DN Art [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 35mm f/1.4 DG HSM Art",
+          "name": "Объектив Sigma AF 35mm f/1.4 DG HSM Art",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d35ed1ea2e73ed20/obektiv-sigma-af-35mm-f14-dg-hsm-art/",
+              "title": "Объектив Sigma AF 35mm f/1.4 DG HSM Art [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 50MM F/1.4 DG DN (A) F/SE",
+          "name": "Объектив Sigma AF 50MM F/1.4 DG DN (A) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e06d06eec8efd582/obektiv-sigma-af-50mm-f14-dg-dn-a-fse/",
+              "title": "Объектив Sigma AF 50MM F/1.4 DG DN (A) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 56mm f/1.4 DC DN Contemporary",
+          "name": "Объектив Sigma AF 56mm f/1.4 DC DN Contemporary",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/52b4c23d09af3332/obektiv-sigma-af-56mm-f14-dc-dn-contemporary/",
+              "title": "Объектив Sigma AF 56mm f/1.4 DC DN Contemporary [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sigma AF 85MM F/1.4 DG DN (A) F/SE",
+          "name": "Объектив Sigma AF 85MM F/1.4 DG DN (A) F/SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b71d1992c8f4d582/obektiv-sigma-af-85mm-f14-dg-dn-a-fse/",
+              "title": "Объектив Sigma AF 85MM F/1.4 DG DN (A) F/SE [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony E 55-210mm f/4.5-6.3 OSS",
+          "name": "Объектив Sony E 55-210mm f/4.5-6.3 OSS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a91df5341f9eed20/obektiv-sony-e-55-210mm-f45-63-oss/",
+              "title": "Объектив Sony E 55-210mm f/4.5-6.3 OSS [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony E PZ 18-105mm f/4.0 G OSS",
+          "name": "Объектив Sony E PZ 18-105mm f/4.0 G OSS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a728b7ac1f99ed20/obektiv-sony-e-pz-18-105mm-f40-g-oss/",
+              "title": "Объектив Sony E PZ 18-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 24-105mm f/4.0 G OSS",
+          "name": "Объектив Sony FE 24-105mm f/4.0 G OSS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3ad0e4581f9ced20/obektiv-sony-fe-24-105mm-f40-g-oss/",
+              "title": "Объектив Sony FE 24-105mm f/4.0 G OSS [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 24-70mm F2.8 GM",
+          "name": "Объектив Sony FE 24-70mm F2.8 GM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bbbf2a882036ed20/obektiv-sony-fe-24-70mm-f28-gm/",
+              "title": "Объектив Sony FE 24-70mm F2.8 GM [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 24mm f/1.4 GM",
+          "name": "Объектив Sony FE 24mm f/1.4 GM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4a4014272fe5ed20/obektiv-sony-fe-24mm-f14-gm/",
+              "title": "Объектив Sony FE 24mm f/1.4 GM [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 35mm F1.4 GM",
+          "name": "Объектив Sony FE 35mm F1.4 GM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/97466e1438d0d9cb/obektiv-sony-fe-35mm-f14-gm/",
+              "title": "Объектив Sony FE 35mm F1.4 GM [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 50 mm f/1.2 GM",
+          "name": "Объектив Sony FE 50 mm f/1.2 GM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/602ebd512fe6ed20/obektiv-sony-fe-50-mm-f12-gm/",
+              "title": "Объектив Sony FE 50 mm f/1.2 GM [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 50mm f/1.8",
+          "name": "Объектив Sony FE 50mm f/1.8",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/53b2de5a1f98ed20/obektiv-sony-fe-50mm-f18/",
+              "title": "Объектив Sony FE 50mm f/1.8 [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 70-200mm f/2.8 GM OSS II",
+          "name": "Объектив Sony FE 70-200mm f/2.8 GM OSS II",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/728301102fe7ed20/obektiv-sony-fe-70-200mm-f28-gm-oss-ii/",
+              "title": "Объектив Sony FE 70-200mm f/2.8 GM OSS II [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Sony FE 90mm f/2.8 Macro G OSS",
+          "name": "Объектив Sony FE 90mm f/2.8 Macro G OSS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cb13f55d2fe2ed20/obektiv-sony-fe-90mm-f28-macro-g-oss/",
+              "title": "Объектив Sony FE 90mm f/2.8 Macro G OSS [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 11-20mm f/2.8 Di III-A RXD",
+          "name": "Объектив Tamron 11-20mm f/2.8 Di III-A RXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/024f9594150cd9cb/obektiv-tamron-11-20mm-f28-di-iii-a-rxd/",
+              "title": "Объектив Tamron 11-20mm f/2.8 Di III-A RXD [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 150-500mm f/5-6.7 Di III VC VXD",
+          "name": "Объектив Tamron 150-500mm f/5-6.7 Di III VC VXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f8f725d6c506d763/obektiv-tamron-150-500mm-f5-67-di-iii-vc-vxd/",
+              "title": "Объектив Tamron 150-500mm f/5-6.7 Di III VC VXD [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 17-28mm f/2.8 Di III RXD",
+          "name": "Объектив Tamron 17-28mm f/2.8 Di III RXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/673cf1d73721ed20/obektiv-tamron-17-28mm-f28-di-iii-rxd/",
+              "title": "Объектив Tamron 17-28mm f/2.8 Di III RXD [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 17-70mm f/2.8 Di III-A VC RXD",
+          "name": "Объектив Tamron 17-70mm f/2.8 Di III-A VC RXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a429befe3720ed20/obektiv-tamron-17-70mm-f28-di-iii-a-vc-rxd/",
+              "title": "Объектив Tamron 17-70mm f/2.8 Di III-A VC RXD [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 28-200mm f/2.8-5.6 Di III RXD",
+          "name": "Объектив Tamron 28-200mm f/2.8-5.6 Di III RXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d67fb2f83721ed20/obektiv-tamron-28-200mm-f28-56-di-iii-rxd/",
+              "title": "Объектив Tamron 28-200mm f/2.8-5.6 Di III RXD [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 28-75mm f/2.8 Di III VXD G2",
+          "name": "Объектив Tamron 28-75mm f/2.8 Di III VXD G2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2e2dea583720ed20/obektiv-tamron-28-75mm-f28-di-iii-vxd-g2/",
+              "title": "Объектив Tamron 28-75mm f/2.8 Di III VXD G2 [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 35-150mm f/2-2.8 Di III VXD",
+          "name": "Объектив Tamron 35-150mm f/2-2.8 Di III VXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6752b0c1e71ced20/obektiv-tamron-35-150mm-f2-28-di-iii-vxd/",
+              "title": "Объектив Tamron 35-150mm f/2-2.8 Di III VXD [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 50-400mm F4.5-6.3 Di III VC VXD",
+          "name": "Объектив Tamron 50-400mm F4.5-6.3 Di III VC VXD",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0f037e4b84a5d9cb/obektiv-tamron-50-400mm-f45-63-di-iii-vc-vxd/",
+              "title": "Объектив Tamron 50-400mm F4.5-6.3 Di III VC VXD [байонет - Sony E, стабилизация]",
+              "specsText": "байонет - Sony E, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron 70-180mm f/2.8 Di III VC VXD G2",
+          "name": "Объектив Tamron 70-180mm f/2.8 Di III VC VXD G2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/785e0487e72bed20/obektiv-tamron-70-180mm-f28-di-iii-vc-vxd-g2/",
+              "title": "Объектив Tamron 70-180mm f/2.8 Di III VC VXD G2 [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Tamron SP 24-70mm f/2.8 Di VC USD G2",
+          "name": "Объектив Tamron SP 24-70mm f/2.8 Di VC USD G2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/972bbdf63725ed20/obektiv-tamron-sp-24-70mm-f28-di-vc-usd-g2/",
+              "title": "Объектив Tamron SP 24-70mm f/2.8 Di VC USD G2 [байонет - Canon EF, стабилизация]",
+              "specsText": "байонет - Canon EF, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 135mm f/1.8 LAB (Full Frame)",
+          "name": "Объектив Viltrox AF 135mm f/1.8 LAB (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5f27fec27cc8d9cb/obektiv-viltrox-af-135mm-f18-lab-full-frame/",
+              "title": "Объектив Viltrox AF 135mm f/1.8 LAB (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 13mm f/1.4 (APS-C)",
+          "name": "Объектив Viltrox AF 13mm f/1.4 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/44977e4918abd0a4/obektiv-viltrox-af-13mm-f14-aps-c/",
+              "title": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/bcfe7cc97cb5d582/obektiv-viltrox-af-13mm-f14-aps-c/",
+              "title": "Объектив Viltrox AF 13mm f/1.4 (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 15mm f/1.7 (APS-C)",
+          "name": "Объектив Viltrox AF 15mm f/1.7 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/25ed3a747cced582/obektiv-viltrox-af-15mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 15mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 16mm f/1.8 ( Full Frame)",
+          "name": "Объектив Viltrox AF 16mm f/1.8 ( Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/106c145e18ced21a/obektiv-viltrox-af-16mm-f18-full-frame/",
+              "title": "Объектив Viltrox AF 16mm f/1.8 ( Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 16mm f/1.8 (Full Frame)",
+          "name": "Объектив Viltrox AF 16mm f/1.8 (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3d778f347cb8d582/obektiv-viltrox-af-16mm-f18-full-frame/",
+              "title": "Объектив Viltrox AF 16mm f/1.8 (Full Frame) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 20mm f/2.8 (Full Frame)",
+          "name": "Объектив Viltrox AF 20mm f/2.8 (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/117a0b3f18ced21a/obektiv-viltrox-af-20mm-f28-full-frame/",
+              "title": "Объектив Viltrox AF 20mm f/2.8 (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 20mm f/2.8 Nikon (Full Frame)",
+          "name": "Объектив Viltrox AF 20mm f/2.8 Nikon (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/12a23c5518ced21a/obektiv-viltrox-af-20mm-f28-nikon-full-frame/",
+              "title": "Объектив Viltrox AF 20mm f/2.8 Nikon (Full Frame) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 24mm f/1.8 (Full Frame)",
+          "name": "Объектив Viltrox AF 24mm f/1.8 (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/144927db18ced21a/obektiv-viltrox-af-24mm-f18-full-frame/",
+              "title": "Объектив Viltrox AF 24mm f/1.8 (Full Frame) [байонет - Nikon Z, стабилизация]",
+              "specsText": "байонет - Nikon Z, стабилизация",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 25mm f/1.7 (APS-C)",
+          "name": "Объектив Viltrox AF 25mm f/1.7 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5ebb168f7cbdd9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/6076919a7cbed9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/e932c1067cbed9cb/obektiv-viltrox-af-25mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 25mm f/1.7 (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 27mm f/1.2 Pro (APS-C)",
+          "name": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/14492ff218ced21a/obektiv-viltrox-af-27mm-f12-pro-aps-c/",
+              "title": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/172a3b6118ced21a/obektiv-viltrox-af-27mm-f12-pro-aps-c/",
+              "title": "Объектив Viltrox AF 27mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 28mm f/4.5 (Full Frame)",
+          "name": "Объектив Viltrox AF 28mm f/4.5 (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9fc1e38a7cb9d582/obektiv-viltrox-af-28mm-f45-full-frame/",
+              "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/ef65576d7cb9d582/obektiv-viltrox-af-28mm-f45-full-frame/",
+              "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/4b5b55d77cbad582/obektiv-viltrox-af-28mm-f45-full-frame/",
+              "title": "Объектив Viltrox AF 28mm f/4.5 (Full Frame) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 35mm f/1.2 LAB (Full Frame)",
+          "name": "Объектив Viltrox AF 35mm f/1.2 LAB (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6db23ef37cc7d9cb/obektiv-viltrox-af-35mm-f12-lab-full-frame/",
+              "title": "Объектив Viltrox AF 35mm f/1.2 LAB (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 35mm f/1.7 (APS-C)",
+          "name": "Объектив Viltrox AF 35mm f/1.7 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c25cf55c7cbbd9cb/obektiv-viltrox-af-35mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/a5f5362a7cbcd9cb/obektiv-viltrox-af-35mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 35mm f/1.7 (APS-C) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 40mm f/2.5 ( Full Frame)",
+          "name": "Объектив Viltrox AF 40mm f/2.5 ( Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/33a06ae37cbbd9cb/obektiv-viltrox-af-40mm-f25-full-frame/",
+              "title": "Объектив Viltrox AF 40mm f/2.5 ( Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 50mm f/2.0 Air (Full Frame)",
+          "name": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a94ee58c7cbfd9cb/obektiv-viltrox-af-50mm-f20-air-full-frame/",
+              "title": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/1e17b9397cc0d9cb/obektiv-viltrox-af-50mm-f20-air-full-frame/",
+              "title": "Объектив Viltrox AF 50mm f/2.0 Air (Full Frame) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 56mm f/1.4 (APS-C)",
+          "name": "Объектив Viltrox AF 56mm f/1.4 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a45599e18ced21a/obektiv-viltrox-af-56mm-f14-aps-c/",
+              "title": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/1a45546918ced21a/obektiv-viltrox-af-56mm-f14-aps-c/",
+              "title": "Объектив Viltrox AF 56mm f/1.4 (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 56mm f/1.7 (APS-C)",
+          "name": "Объектив Viltrox AF 56mm f/1.7 (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a45637a18ced21a/obektiv-viltrox-af-56mm-f17-aps-c/",
+              "title": "Объектив Viltrox AF 56mm f/1.7 (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 56mm f/1.7 Air (APS-C)",
+          "name": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9624a5527cc3d9cb/obektiv-viltrox-af-56mm-f17-air-aps-c/",
+              "title": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/592416f57cc3d9cb/obektiv-viltrox-af-56mm-f17-air-aps-c/",
+              "title": "Объектив Viltrox AF 56mm f/1.7 Air (APS-C) [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 75mm f/1.2 Pro (APS-C)",
+          "name": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a456f4b18ced21a/obektiv-viltrox-af-75mm-f12-pro-aps-c/",
+              "title": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/79aa48ea7cc5d9cb/obektiv-viltrox-af-75mm-f12-pro-aps-c/",
+              "title": "Объектив Viltrox AF 75mm f/1.2 Pro (APS-C) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 85mm f/1.4 Pro (Full Frame)",
+          "name": "Объектив Viltrox AF 85mm f/1.4 Pro (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/22f705397cc7d9cb/obektiv-viltrox-af-85mm-f14-pro-full-frame/",
+              "title": "Объектив Viltrox AF 85mm f/1.4 Pro (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 85mm f/1.8 II (APS-C)",
+          "name": "Объектив Viltrox AF 85mm f/1.8 II (APS-C)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/203dc40e18ced21a/obektiv-viltrox-af-85mm-f18-ii-aps-c/",
+              "title": "Объектив Viltrox AF 85mm f/1.8 II (APS-C) [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Viltrox AF 85mm f/1.8 II (Full Frame)",
+          "name": "Объектив Viltrox AF 85mm f/1.8 II (Full Frame)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1f103ad518ced21a/obektiv-viltrox-af-85mm-f18-ii-full-frame/",
+              "title": "Объектив Viltrox AF 85mm f/1.8 II (Full Frame) [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo 50F1.8S DA",
+          "name": "Объектив Yongnuo 50F1.8S DA",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3eee6ef9add9171a/obektiv-yongnuo-50f18s-da/",
+              "title": "Объектив Yongnuo 50F1.8S DA [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo AF 35mm f/2.0",
+          "name": "Объектив Yongnuo AF 35mm f/2.0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7fe3572c1b3d8a5a/obektiv-yongnuo-af-35mm-f20/",
+              "title": "Объектив Yongnuo AF 35mm f/2.0 [байонет - Canon EF]",
+              "specsText": "байонет - Canon EF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "YongNuo AF 35mm F2.0",
+          "name": "Объектив YongNuo AF 35mm F2.0",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/aca7e8ebba273330/obektiv-yongnuo-af-35mm-f20/",
+              "title": "Объектив YongNuo AF 35mm F2.0 [байонет - Nikon F]",
+              "specsText": "байонет - Nikon F",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN 33mm f/1.4S DA DSM WL Pro",
+          "name": "Объектив Yongnuo YN 33mm f/1.4S DA DSM WL Pro",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2c6e0a985e372073/obektiv-yongnuo-yn-33mm-f14s-da-dsm-wl-pro/",
+              "title": "Объектив Yongnuo YN 33mm f/1.4S DA DSM WL Pro [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN 35mm f/2 S DF DSM",
+          "name": "Объектив Yongnuo YN 35mm f/2 S DF DSM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6479e394a12620b0/obektiv-yongnuo-yn-35mm-f2-s-df-dsm/",
+              "title": "Объектив Yongnuo YN 35mm f/2 S DF DSM [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN 50mm f/1.8 Canon EF",
+          "name": "Объектив Yongnuo YN 50mm f/1.8 Canon EF",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7082edc8b53eb051/obektiv-yongnuo-yn-50mm-f18-canon-ef/",
+              "title": "Объектив Yongnuo YN 50mm f/1.8 Canon EF [байонет - Canon EF]",
+              "specsText": "байонет - Canon EF",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN 50mm f/1.8 S DF DSM Sony",
+          "name": "Объектив Yongnuo YN 50mm f/1.8 S DF DSM Sony",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a01a93aeb4ddd784/obektiv-yongnuo-yn-50mm-f18-s-df-dsm-sony/",
+              "title": "Объектив Yongnuo YN 50mm f/1.8 S DF DSM Sony [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN 85mm f/1.8 S DF DSM Sony",
+          "name": "Объектив Yongnuo YN 85mm f/1.8 S DF DSM Sony",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/24895801234c29db/obektiv-yongnuo-yn-85mm-f18-s-df-dsm-sony/",
+              "title": "Объектив Yongnuo YN 85mm f/1.8 S DF DSM Sony [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN12-35mm F2.8-4M",
+          "name": "Объектив Yongnuo YN12-35mm F2.8-4M",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8b7e207ec3407ba3/obektiv-yongnuo-yn12-35mm-f28-4m/",
+              "title": "Объектив Yongnuo YN12-35mm F2.8-4M [байонет - Micro 4/3]",
+              "specsText": "байонет - Micro 4/3",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN23MM F1.4S DA DSM WL PRO",
+          "name": "Объектив Yongnuo YN23MM F1.4S DA DSM WL PRO",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d6f5b2817e5fbe94/obektiv-yongnuo-yn23mm-f14s-da-dsm-wl-pro/",
+              "title": "Объектив Yongnuo YN23MM F1.4S DA DSM WL PRO [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN35mm f/1.8Z DA DSM WL",
+          "name": "Объектив Yongnuo YN35mm f/1.8Z DA DSM WL",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8dd495cd4ba14420/obektiv-yongnuo-yn35mm-f18z-da-dsm-wl/",
+              "title": "Объектив Yongnuo YN35mm f/1.8Z DA DSM WL [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN35MM F1.8Z DA DSM",
+          "name": "Объектив Yongnuo YN35MM F1.8Z DA DSM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9891e1af03b89f69/obektiv-yongnuo-yn35mm-f18z-da-dsm/",
+              "title": "Объектив Yongnuo YN35MM F1.8Z DA DSM [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN50mm F1.8X DA DSM",
+          "name": "Объектив Yongnuo YN50mm F1.8X DA DSM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cf5fb79705abece9/obektiv-yongnuo-yn50mm-f18x-da-dsm/",
+              "title": "Объектив Yongnuo YN50mm F1.8X DA DSM [байонет - Fujifilm X]",
+              "specsText": "байонет - Fujifilm X",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN56mm f/1.4Z DA DSM WL Pro",
+          "name": "Объектив Yongnuo YN56mm f/1.4Z DA DSM WL Pro",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9c55adeb0a36f979/obektiv-yongnuo-yn56mm-f14z-da-dsm-wl-pro/",
+              "title": "Объектив Yongnuo YN56mm f/1.4Z DA DSM WL Pro [байонет - Nikon Z]",
+              "specsText": "байонет - Nikon Z",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN56MM F1.4S DA DSM WL PRO",
+          "name": "Объектив Yongnuo YN56MM F1.4S DA DSM WL PRO",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a53f8c86bf2502c6/obektiv-yongnuo-yn56mm-f14s-da-dsm-wl-pro/",
+              "title": "Объектив Yongnuo YN56MM F1.4S DA DSM WL PRO [байонет - Sony E]",
+              "specsText": "байонет - Sony E",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Объектив",
+          "model": "Yongnuo YN85mm F1.8R DF DSM",
+          "name": "Объектив Yongnuo YN85mm F1.8R DF DSM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f0bab3faa5800fbb/obektiv-yongnuo-yn85mm-f18r-df-dsm/",
+              "title": "Объектив Yongnuo YN85mm F1.8R DF DSM [байонет - Canon RF]",
+              "specsText": "байонет - Canon RF",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Переходник",
+      "models": [
+        {
+          "brand": "Переходник",
+          "model": "Canon Mount Adapter EF-EOS R",
+          "name": "Переходник Canon Mount Adapter EF-EOS R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fdbc802019dfed20/perehodnik-canon-mount-adapter-ef-eos-r/",
+              "title": "Переходник Canon Mount Adapter EF-EOS R [Canon EOS R - Canon EF, Canon EF-S]",
+              "specsText": "Canon EOS R - Canon EF, Canon EF-S",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Переходник",
+          "model": "Nikon FTZ II",
+          "name": "Переходник Nikon FTZ II",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f658417d5022ed20/perehodnik-nikon-ftz-ii/",
+              "title": "Переходник Nikon FTZ II [Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G]",
+              "specsText": "Nikon Z - Nikon D, Nikon E, Nikon F, Nikon G",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Переходник",
+          "model": "Viltrox EF-EOSM",
+          "name": "Переходник Viltrox EF-EOSM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3a1378ce1e3ed0a4/perehodnik-viltrox-ef-eosm/",
+              "title": "Переходник Viltrox EF-EOSM [Canon EOS M - Canon EF, Canon EF-S]",
+              "specsText": "Canon EOS M - Canon EF, Canon EF-S",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Переходник",
+          "model": "Viltrox EF-L",
+          "name": "Переходник Viltrox EF-L",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3ba5bb121e3ed0a4/perehodnik-viltrox-ef-l/",
+              "title": "Переходник Viltrox EF-L [L-mount - Canon EF]",
+              "specsText": "L-mount - Canon EF",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [
+    {
+      "text": "Объективы",
+      "href": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/"
+    },
+    {
+      "text": "Переходники и адаптеры",
+      "href": "https://www.dns-shop.ru/catalog/17a9a8b716404e77/perehodniki-i-adaptery/"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9a81a16404e77/obektivy/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 0,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки."
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 1 из 7"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 2 из 7"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 3 из 7"
+    },
+    {
+      "page": 4,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=4",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 4 из 7"
+    },
+    {
+      "page": 5,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=5",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 5 из 7"
+    },
+    {
+      "page": 6,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=6",
+      "status": 200,
+      "count": 18,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 6 из 7"
+    },
+    {
+      "page": 7,
+      "url": "https://www.dns-shop.ru/catalog/17a89dd516404e77/obektivy/?stock=now-today-tomorrow-later&p=7",
+      "status": 200,
+      "count": 10,
+      "title": "Объективы купить в интернет-магазине DNS. Объективы цены, большой каталог, новинки. - страница 7 из 7"
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9a8b716404e77/perehodniki-i-adaptery/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 4,
+      "title": "Переходники и адаптеры купить в интернет-магазине DNS. Переходники и адаптеры цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

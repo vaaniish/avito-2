@@ -16,7 +16,7 @@ import { ConfirmDialog, ToastViewport, type AppNotice } from "../ui/feedback";
 import type { OrderStatusValue } from "../checkout.models";
 
 type OrderStatus = OrderStatusValue;
-type TrackingProvider = "yandex_pvz" | "russian_post";
+type TrackingProvider = "yandex_pvz" | "russian_post" | "cdek";
 
 type PartnerOrder = {
   id: string;
@@ -31,12 +31,26 @@ type PartnerOrder = {
   tracking_url: string | null;
   delivery_ext_status: string | null;
   delivery_address: string | null;
+  finance: {
+    gross_amount: number;
+    commission_rate: number | null;
+    commission_amount: number | null;
+    seller_payout: number | null;
+    transaction_status: string | null;
+    payment_provider: string | null;
+    payment_intent_id: string | null;
+  };
   items: Array<{
     id: string;
+    listing_public_id?: string;
     name: string;
     quantity: number;
     price: number;
   }>;
+};
+
+type PartnerOrdersPageProps = {
+  onOpenListing?: (listingPublicId: string) => void;
 };
 
 type StatusMeta = {
@@ -102,6 +116,9 @@ function formatExternalDeliveryStatus(value: string | null): string {
     CONFIRMATION_CODE_RECEIVED: "Код подтверждения получен",
     DELIVERY_TRANSMITTED_TO_RECIPIENT: "Выдан получателю",
     DELIVERY_DELIVERED: "Доставка завершена",
+    ACCEPTED: "Заявка СДЭК принята",
+    READY_FOR_DELIVERY: "Прибыло в ПВЗ",
+    DELIVERED: "Выдано получателю",
     FINISHED: "Подтверждено",
     CANCELLED: "Отменено",
   };
@@ -121,6 +138,7 @@ function stripPickupPointTag(value: string | null | undefined): string {
 function formatPickupPointLabel(order: PartnerOrder): string {
   const cleanAddress = stripPickupPointTag(order.delivery_address);
   if (cleanAddress) return cleanAddress;
+  if (order.tracking_provider === "cdek") return "ПВЗ СДЭК";
   if (order.tracking_provider === "russian_post") return "Отделение Почты России";
   if (order.tracking_provider === "yandex_pvz") return "ПВЗ Яндекса";
   return "Пункт выдачи уточняется";
@@ -147,10 +165,22 @@ function buildTrackingLink(order: PartnerOrder): string | null {
   if (trackingNumber && order.tracking_provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
   }
+  if (trackingNumber && order.tracking_provider === "cdek") {
+    return `https://www.cdek.ru/ru/tracking?order_id=${encodeURIComponent(trackingNumber)}`;
+  }
   return null;
 }
 
-export function PartnerOrdersPage() {
+function formatCurrency(amount: number | null): string {
+  if (amount === null) return "—";
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function PartnerOrdersPage({ onOpenListing }: PartnerOrdersPageProps) {
   const [orders, setOrders] = useState<PartnerOrder[]>([]);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -235,10 +265,23 @@ export function PartnerOrdersPage() {
 
     setPreparingOrderId(target.id);
     try {
-      await apiPatch<{ success: boolean }>(`/partner/orders/${target.id}/status`, {
+      const result = await apiPatch<{
+        success: boolean;
+        deliveryError?: string | null;
+        tracking?: { trackingNumber: string; trackingUrl: string } | null;
+      }>(`/partner/orders/${target.id}/status`, {
         status: "PREPARED",
       });
-      showNotice(`Заказ ${target.id} отмечен как подготовленный`, "success");
+      if (result.deliveryError) {
+        showNotice(
+          `Заказ подготовлен, но заявка доставки не создана: ${result.deliveryError}`,
+          "error",
+        );
+      } else if (result.tracking?.trackingNumber) {
+        showNotice(`Заказ подготовлен. Трек СДЭК: ${result.tracking.trackingNumber}`, "success");
+      } else {
+        showNotice(`Заказ ${target.id} отмечен как подготовленный`, "success");
+      }
       await loadOrders(true);
     } catch (error) {
       showNotice(
@@ -344,7 +387,23 @@ export function PartnerOrdersPage() {
                       {new Date(order.created_at).toLocaleString("ru-RU")} • ПВЗ
                     </div>
                     <div className="mt-1 text-sm text-gray-700 break-words">
-                      {order.items.map((item) => `${item.name} x${item.quantity}`).join(", ")}
+                      {order.items.map((item, index) => (
+                        <span key={item.id}>
+                          {item.listing_public_id ? (
+                            <button
+                              type="button"
+                              onClick={() => onOpenListing?.(item.listing_public_id ?? "")}
+                              className="text-left text-blue-700 hover:underline"
+                            >
+                              {item.name}
+                            </button>
+                          ) : (
+                            item.name
+                          )}
+                          {" "}x{item.quantity}
+                          {index < order.items.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
@@ -407,7 +466,7 @@ export function PartnerOrdersPage() {
                         </p>
                       ) : (
                         <p className="text-slate-600">
-                          Трек-номер формируется автоматически после подтверждения оплаты.
+                          Трек-номер формируется автоматически после статуса «Подготовлен».
                         </p>
                       )}
 

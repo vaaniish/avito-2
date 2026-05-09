@@ -2,8 +2,8 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import {
   AlertTriangle,
   ClipboardList,
-  CreditCard,
   FileText,
+  ListPlus,
   LogOut,
   TrendingUp,
   UserCheck,
@@ -39,12 +39,18 @@ const AuditLogsPage = lazy(() =>
     default: module.AuditLogsPage,
   })),
 );
+const CatalogSuggestionsPage = lazy(() =>
+  import("./CatalogSuggestionsPage").then((module) => ({
+    default: module.CatalogSuggestionsPage,
+  })),
+);
 
 export type AdminPage =
   | "transactions"
   | "complaints"
   | "sellers"
   | "listings"
+  | "catalog"
   | "users"
   | "commissions"
   | "audit";
@@ -79,8 +85,8 @@ export function AdminPanel({
   const navigation = [
     {
       id: "transactions" as AdminPage,
-      name: "Сделки",
-      icon: CreditCard,
+      name: "Финансы",
+      icon: TrendingUp,
     },
     {
       id: "complaints" as AdminPage,
@@ -89,13 +95,18 @@ export function AdminPanel({
     },
     {
       id: "sellers" as AdminPage,
-      name: "Продавцы / KYC",
+      name: "Партнёры",
       icon: UserCheck,
     },
     {
       id: "listings" as AdminPage,
       name: "Объявления",
       icon: FileText,
+    },
+    {
+      id: "catalog" as AdminPage,
+      name: "Каталог",
+      icon: ListPlus,
     },
     {
       id: "users" as AdminPage,
@@ -124,6 +135,8 @@ export function AdminPanel({
         return <SellersPage />;
       case "listings":
         return <ListingsPage />;
+      case "catalog":
+        return <CatalogSuggestionsPage />;
       case "users":
         return <UsersPage />;
       case "commissions":

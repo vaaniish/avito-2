@@ -14,7 +14,6 @@ type CheckoutOrderSummaryProps = {
   hasActivePayment: boolean;
   isSubmitting: boolean;
   canCheckoutWithSelectedPoint: boolean;
-  policyAccepted: boolean;
   policyTitle: string;
   policyUrl: string;
   paymentIsPaid: boolean | undefined;
@@ -22,7 +21,6 @@ type CheckoutOrderSummaryProps = {
   paymentStatusMeta: PaymentStatusMeta | null;
   paymentStatusError: string | null;
   secondsLeft: number;
-  onPolicyAcceptedChange: (value: boolean) => void;
   onPrimaryAction: () => void;
   onBack: () => void;
 };
@@ -36,7 +34,6 @@ export function CheckoutOrderSummary({
   hasActivePayment,
   isSubmitting,
   canCheckoutWithSelectedPoint,
-  policyAccepted,
   policyTitle,
   policyUrl,
   paymentIsPaid,
@@ -44,7 +41,6 @@ export function CheckoutOrderSummary({
   paymentStatusMeta,
   paymentStatusError,
   secondsLeft,
-  onPolicyAcceptedChange,
   onPrimaryAction,
   onBack,
 }: CheckoutOrderSummaryProps) {
@@ -92,32 +88,24 @@ export function CheckoutOrderSummary({
 
         <div className="space-y-3">
           {!hasActivePayment && (
-            <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 md:text-sm">
-              <input
-                type="checkbox"
-                checked={policyAccepted}
-                onChange={(event) => onPolicyAcceptedChange(event.target.checked)}
-                className="mt-0.5"
-              />
-              <span>
-                Я принимаю{" "}
-                <a
-                  href={policyUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-700 underline"
-                >
-                  {policyTitle}
-                </a>
-              </span>
-            </label>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 md:text-sm">
+              Оформляя заказ, вы подтверждаете соблюдение{" "}
+              <a
+                href={policyUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-700 underline"
+              >
+                {policyTitle}
+              </a>
+              . Подтверждение сохраняется при регистрации/входе.
+            </div>
           )}
           <button
             onClick={onPrimaryAction}
             disabled={
               isSubmitting ||
-              (!hasActivePayment &&
-                (!canCheckoutWithSelectedPoint || !policyAccepted)) ||
+              (!hasActivePayment && !canCheckoutWithSelectedPoint) ||
               paymentIsPaid
             }
             className="btn-primary w-full py-4 text-sm disabled:bg-gray-400 md:text-base"

@@ -1,0 +1,880 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Wi-Fi роутеры и оборудование для малых сетей",
+  "itemName": "Маршрутизаторы",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/1f8bef2670f05456/marsrutizatory/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:03:21.962Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 34,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/c0c695dfa0d83330/marsrutizator-mikrotik-hex/",
+      "title": "Маршрутизатор Mikrotik hEX [WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6"
+      ],
+      "priceText": "",
+      "productId": "c0c695dfa0d83330",
+      "cardText": "Маршрутизатор Mikrotik hEX [WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6]4.91 |374 отзыва 12Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e0afd3c165623330/marsrutizator-mikrotik-hex-s/",
+      "title": "Маршрутизатор Mikrotik hEX S [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e0afd3c165623330",
+      "cardText": "Маршрутизатор Mikrotik hEX S [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]4.84 |242 отзыва 6Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3d1bf23e42a2ed20/marsrutizator-mikrotik-rb5009ugsin/",
+      "title": "Маршрутизатор Mikrotik RB5009UG+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]",
+      "specsText": "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0",
+      "bracketGroups": [
+        "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0"
+      ],
+      "priceText": "",
+      "productId": "3d1bf23e42a2ed20",
+      "cardText": "Маршрутизатор Mikrotik RB5009UG+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]4.96 |51 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cd457e797855ed20/marsrutizator-mikrotik-rb4011igsrm/",
+      "title": "Маршрутизатор Mikrotik RB4011IGS+RM [WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6]",
+      "specsText": "WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "cd457e797855ed20",
+      "cardText": "Маршрутизатор Mikrotik RB4011IGS+RM [WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6]4.88 |70 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ab33e09273fad582/marsrutizator-mikrotik-hex-refresh/",
+      "title": "Маршрутизатор Mikrotik hEX refresh [WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6"
+      ],
+      "priceText": "",
+      "productId": "ab33e09273fad582",
+      "cardText": "Маршрутизатор Mikrotik hEX refresh [WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6]4.77 |30 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/83c837bc9403ed20/marsrutizator-mikrotik-rb5009uprsin/",
+      "title": "Маршрутизатор Mikrotik RB5009UPR+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]",
+      "specsText": "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0",
+      "bracketGroups": [
+        "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0"
+      ],
+      "priceText": "",
+      "productId": "83c837bc9403ed20",
+      "cardText": "Маршрутизатор Mikrotik RB5009UPR+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]5 |16 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c9281b240eebed20/marsrutizator-mikrotik-ccr2004-16g-2s/",
+      "title": "Маршрутизатор Mikrotik CCR2004-16G-2S+ [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6]",
+      "specsText": "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "c9281b240eebed20",
+      "cardText": "Маршрутизатор Mikrotik CCR2004-16G-2S+ [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6]5 |9 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c27d89c630073361/marsrutizator-mikrotik-hex-lite/",
+      "title": "Маршрутизатор Mikrotik hEX lite [WAN/LAN 5x100 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x100 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "c27d89c630073361",
+      "cardText": "Маршрутизатор Mikrotik hEX lite [WAN/LAN 5x100 Мбит/с, IPv6]4.79 |86 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/673bd2f7fa60d9cb/marsrutizator-mikrotik-hex-s-2025/",
+      "title": "Маршрутизатор MikroTik hEX S (2025) [WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6"
+      ],
+      "priceText": "",
+      "productId": "673bd2f7fa60d9cb",
+      "cardText": "Маршрутизатор MikroTik hEX S (2025) [WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6]4.92 |12 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/02039ebb3175ed20/marsrutizator-tp-link-er605-tl-r605-v1/",
+      "title": "Маршрутизатор TP-Link ER605 (TL-R605) V1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6]",
+      "specsText": "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "02039ebb3175ed20",
+      "cardText": "Маршрутизатор TP-Link ER605 (TL-R605) V1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6]4.76 |106 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a98a2b22d15f3330/marsrutizator-mikrotik-hex-poe-lite/",
+      "title": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+      "specsText": "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "a98a2b22d15f3330",
+      "cardText": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]4.95 |20 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e98c31e89602ed20/marsrutizator-mikrotik-ccr2116-12g-4s/",
+      "title": "Маршрутизатор Mikrotik CCR2116-12G-4S+ [WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6]",
+      "specsText": "WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e98c31e89602ed20",
+      "cardText": "Маршрутизатор Mikrotik CCR2116-12G-4S+ [WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6]5 |2 отзываХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f929726d7854ed20/marsrutizator-mikrotik-ccr2004-16g-2spc/",
+      "title": "Маршрутизатор Mikrotik CCR2004-16G-2S+PC [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6]",
+      "specsText": "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "f929726d7854ed20",
+      "cardText": "Маршрутизатор Mikrotik CCR2004-16G-2S+PC [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6]5 |5 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2df5c7033bc23332/marsrutizator-mikrotik-rb1100ahx4-dude-edition/",
+      "title": "Маршрутизатор Mikrotik RB1100AHx4 Dude Edition [WAN/LAN 13x1000 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 13x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 13x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "2df5c7033bc23332",
+      "cardText": "Маршрутизатор Mikrotik RB1100AHx4 Dude Edition [WAN/LAN 13x1000 Мбит/с, IPv6]4.86 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e0a2418299e53330/marsrutizator-mikrotik-powerbox-pro/",
+      "title": "Маршрутизатор Mikrotik PowerBox Pro [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e0a2418299e53330",
+      "cardText": "Маршрутизатор Mikrotik PowerBox Pro [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8b53618066c13332/marsrutizator-tp-link-tl-er7206/",
+      "title": "Маршрутизатор TP-Link TL-ER7206 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+      "specsText": "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "8b53618066c13332",
+      "cardText": "Маршрутизатор TP-Link TL-ER7206 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]4.59 |67 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/95e6140b06a81b80/marsrutizator-mikrotik-ccr2004-1g-12s2xs/",
+      "title": "Маршрутизатор Mikrotik CCR2004-1G-12S+2XS [WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6]",
+      "specsText": "WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "95e6140b06a81b80",
+      "cardText": "Маршрутизатор Mikrotik CCR2004-1G-12S+2XS [WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6]4.67 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e76efa0875ba4b56/marsrutizator-asus-expertwifi-ebg15/",
+      "title": "Маршрутизатор ASUS ExpertWiFi EBG15 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]",
+      "specsText": "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6",
+      "bracketGroups": [
+        "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e76efa0875ba4b56",
+      "cardText": "Маршрутизатор ASUS ExpertWiFi EBG15 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bf3686905ccb3330/marsrutizator-ubiquiti-edgerouter-x-sfp/",
+      "title": "Маршрутизатор Ubiquiti EdgeRouter X SFP [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "bf3686905ccb3330",
+      "cardText": "Маршрутизатор Ubiquiti EdgeRouter X SFP [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]4.45 |12 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8fe9cf0a17abed20/marsrutizator-mikrotik-powerbox/",
+      "title": "Маршрутизатор Mikrotik PowerBox [WAN/LAN 5x100 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x100 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "8fe9cf0a17abed20",
+      "cardText": "Маршрутизатор Mikrotik PowerBox [WAN/LAN 5x100 Мбит/с, IPv6]4.57 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9424e7750fa4ed20/marsrutizator-tenda-hg1/",
+      "title": "Маршрутизатор Tenda HG1 [LAN 1x1000 Мбит/с, IPv6]",
+      "specsText": "LAN 1x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "LAN 1x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "9424e7750fa4ed20",
+      "cardText": "Маршрутизатор Tenda HG1 [LAN 1x1000 Мбит/с, IPv6]4.37 |74 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/07f5ef9bed3eed20/marsrutizator-mikrotik-hex-poe-lite/",
+      "title": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+      "specsText": "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "07f5ef9bed3eed20",
+      "cardText": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]5 |8 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/575ac4d4c3b43330/marsrutizator-ubiquiti-edgerouter-6p/",
+      "title": "Маршрутизатор Ubiquiti EdgeRouter 6P [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]",
+      "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "575ac4d4c3b43330",
+      "cardText": "Маршрутизатор Ubiquiti EdgeRouter 6P [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]5 |2 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/445e01f4791b6856/marsrutizator-asus-expertwifi-ebg19p/",
+      "title": "Маршрутизатор ASUS ExpertWiFi EBG19P [LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]",
+      "specsText": "LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6",
+      "bracketGroups": [
+        "LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "445e01f4791b6856",
+      "cardText": "Маршрутизатор ASUS ExpertWiFi EBG19P [LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/51b38b01e47fd9cb/marsrutizator-ubiquiti-unifi-cloud-gateway-ultra/",
+      "title": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Ultra [WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6]",
+      "specsText": "WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "51b38b01e47fd9cb",
+      "cardText": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Ultra [WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6]4.9|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ea9cff417c7d526f/marsrutizator-tp-link-tl-r480t/",
+      "title": "Маршрутизатор TP-Link TL-R480T+ [LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с]",
+      "specsText": "LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с",
+      "bracketGroups": [
+        "LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "ea9cff417c7d526f",
+      "cardText": "Маршрутизатор TP-Link TL-R480T+ [LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с]4.88 |43 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e4d4bf688b88d21a/marsrutizator-tenda-hg3/",
+      "title": "Маршрутизатор Tenda HG3 [LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6]",
+      "specsText": "LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6",
+      "bracketGroups": [
+        "LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e4d4bf688b88d21a",
+      "cardText": "Маршрутизатор Tenda HG3 [LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6]4.09 |6 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/67c11f026b203330/marsrutizator-ubiquiti-edgerouter-4/",
+      "title": "Маршрутизатор Ubiquiti EdgeRouter 4 [WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]",
+      "specsText": "WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "67c11f026b203330",
+      "cardText": "Маршрутизатор Ubiquiti EdgeRouter 4 [WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]4.56 |9 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a6c06e47a8de3330/marsrutizator-mikrotik-ccr1009-7g-1c-pc/",
+      "title": "Маршрутизатор Mikrotik CCR1009-7G-1C-PC [WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+      "specsText": "WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6"
+      ],
+      "priceText": "",
+      "productId": "a6c06e47a8de3330",
+      "cardText": "Маршрутизатор Mikrotik CCR1009-7G-1C-PC [WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/32d6a3bb9603ed20/marsrutizator-mikrotik-ccr2216-1g-12xs-2xq/",
+      "title": "Маршрутизатор Mikrotik CCR2216-1G-12XS-2XQ [WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6]",
+      "specsText": "WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "32d6a3bb9603ed20",
+      "cardText": "Маршрутизатор Mikrotik CCR2216-1G-12XS-2XQ [WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6]4.9|рейтинг бренда 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0bcfeddde47fd582/marsrutizator-ubiquiti-unifi-cloud-gateway-max/",
+      "title": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Max [WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6]",
+      "specsText": "WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6",
+      "bracketGroups": [
+        "WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "0bcfeddde47fd582",
+      "cardText": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Max [WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6]5 |1 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2ca8f71a70c63330/marsrutizator-mikrotik-powerbox-r2/",
+      "title": "Маршрутизатор Mikrotik PowerBOX r2 [WAN/LAN 5x100 Мбит/с, IPv6]",
+      "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+      "bracketGroups": [
+        "WAN/LAN 5x100 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "2ca8f71a70c63330",
+      "cardText": "Маршрутизатор Mikrotik PowerBOX r2 [WAN/LAN 5x100 Мбит/с, IPv6]4.5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b96d4c2c72186f9f/marsrutizator-d-link-dsa-3110/",
+      "title": "Маршрутизатор D-Link DSA-3110 [LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0]",
+      "specsText": "LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0",
+      "bracketGroups": [
+        "LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0"
+      ],
+      "priceText": "",
+      "productId": "b96d4c2c72186f9f",
+      "cardText": "Маршрутизатор D-Link DSA-3110 [LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3d5d97deca647e8e/marsrutizator-tenda-g1/",
+      "title": "Маршрутизатор Tenda G1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6]",
+      "specsText": "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6",
+      "bracketGroups": [
+        "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6"
+      ],
+      "priceText": "",
+      "productId": "3d5d97deca647e8e",
+      "cardText": "Маршрутизатор Tenda G1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6]3 |1 отзыв"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Маршрутизатор",
+      "models": [
+        {
+          "brand": "Маршрутизатор",
+          "model": "ASUS ExpertWiFi EBG15",
+          "name": "Маршрутизатор ASUS ExpertWiFi EBG15",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e76efa0875ba4b56/marsrutizator-asus-expertwifi-ebg15/",
+              "title": "Маршрутизатор ASUS ExpertWiFi EBG15 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]",
+              "specsText": "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "ASUS ExpertWiFi EBG19P",
+          "name": "Маршрутизатор ASUS ExpertWiFi EBG19P",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/445e01f4791b6856/marsrutizator-asus-expertwifi-ebg19p/",
+              "title": "Маршрутизатор ASUS ExpertWiFi EBG19P [LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6]",
+              "specsText": "LAN 6x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, USB 3.2 Gen 1 Type-A x 1, 4G, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "D-Link DSA-3110",
+          "name": "Маршрутизатор D-Link DSA-3110",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b96d4c2c72186f9f/marsrutizator-d-link-dsa-3110/",
+              "title": "Маршрутизатор D-Link DSA-3110 [LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0]",
+              "specsText": "LAN 5x100 Мбит/с, WAN 1x100 Мбит/с, 2 х USB 2.0",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR1009-7G-1C-PC",
+          "name": "Маршрутизатор Mikrotik CCR1009-7G-1C-PC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a6c06e47a8de3330/marsrutizator-mikrotik-ccr1009-7g-1c-pc/",
+              "title": "Маршрутизатор Mikrotik CCR1009-7G-1C-PC [WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+              "specsText": "WAN/LAN 8x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR2004-16G-2S+",
+          "name": "Маршрутизатор Mikrotik CCR2004-16G-2S+",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c9281b240eebed20/marsrutizator-mikrotik-ccr2004-16g-2s/",
+              "title": "Маршрутизатор Mikrotik CCR2004-16G-2S+ [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6]",
+              "specsText": "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR2004-16G-2S+PC",
+          "name": "Маршрутизатор Mikrotik CCR2004-16G-2S+PC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f929726d7854ed20/marsrutizator-mikrotik-ccr2004-16g-2spc/",
+              "title": "Маршрутизатор Mikrotik CCR2004-16G-2S+PC [WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6]",
+              "specsText": "WAN/LAN 16x1000 Мбит/с, SFP 2x10 Гбит/с, 1 x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR2004-1G-12S+2XS",
+          "name": "Маршрутизатор Mikrotik CCR2004-1G-12S+2XS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/95e6140b06a81b80/marsrutizator-mikrotik-ccr2004-1g-12s2xs/",
+              "title": "Маршрутизатор Mikrotik CCR2004-1G-12S+2XS [WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6]",
+              "specsText": "WAN/LAN 1x1000 Мбит/с, SFP 12x10 Гбит/с, 2x25 Гбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR2116-12G-4S+",
+          "name": "Маршрутизатор Mikrotik CCR2116-12G-4S+",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e98c31e89602ed20/marsrutizator-mikrotik-ccr2116-12g-4s/",
+              "title": "Маршрутизатор Mikrotik CCR2116-12G-4S+ [WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6]",
+              "specsText": "WAN/LAN 13x1000 Мбит/с, SFP 4x10 Гбит/с, 1 x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik CCR2216-1G-12XS-2XQ",
+          "name": "Маршрутизатор Mikrotik CCR2216-1G-12XS-2XQ",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/32d6a3bb9603ed20/marsrutizator-mikrotik-ccr2216-1g-12xs-2xq/",
+              "title": "Маршрутизатор Mikrotik CCR2216-1G-12XS-2XQ [WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6]",
+              "specsText": "WAN/LAN 1x1000 Мбит/с, SFP 12x25 Гбит/с, 2x100 Гбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik hEX",
+          "name": "Маршрутизатор Mikrotik hEX",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c0c695dfa0d83330/marsrutizator-mikrotik-hex/",
+              "title": "Маршрутизатор Mikrotik hEX [WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, USB 2.0 x1, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik hEX lite",
+          "name": "Маршрутизатор Mikrotik hEX lite",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c27d89c630073361/marsrutizator-mikrotik-hex-lite/",
+              "title": "Маршрутизатор Mikrotik hEX lite [WAN/LAN 5x100 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik hEX PoE lite",
+          "name": "Маршрутизатор Mikrotik hEX PoE lite",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/a98a2b22d15f3330/marsrutizator-mikrotik-hex-poe-lite/",
+              "title": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+              "specsText": "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/07f5ef9bed3eed20/marsrutizator-mikrotik-hex-poe-lite/",
+              "title": "Маршрутизатор Mikrotik hEX PoE lite [WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+              "specsText": "WAN/LAN 5x100 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik hEX refresh",
+          "name": "Маршрутизатор Mikrotik hEX refresh",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ab33e09273fad582/marsrutizator-mikrotik-hex-refresh/",
+              "title": "Маршрутизатор Mikrotik hEX refresh [WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, USB 2.0 Type-A x 1, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik hEX S",
+          "name": "Маршрутизатор Mikrotik hEX S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e0afd3c165623330/marsrutizator-mikrotik-hex-s/",
+              "title": "Маршрутизатор Mikrotik hEX S [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, USB 2.0 x1, 3G, 4G, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "MikroTik hEX S (2025)",
+          "name": "Маршрутизатор MikroTik hEX S (2025)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/673bd2f7fa60d9cb/marsrutizator-mikrotik-hex-s-2025/",
+              "title": "Маршрутизатор MikroTik hEX S (2025) [WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x2.5 Гбит/с, USB 3.2 Gen 1 Type-A x 1, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik PowerBox",
+          "name": "Маршрутизатор Mikrotik PowerBox",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8fe9cf0a17abed20/marsrutizator-mikrotik-powerbox/",
+              "title": "Маршрутизатор Mikrotik PowerBox [WAN/LAN 5x100 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik PowerBox Pro",
+          "name": "Маршрутизатор Mikrotik PowerBox Pro",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e0a2418299e53330/marsrutizator-mikrotik-powerbox-pro/",
+              "title": "Маршрутизатор Mikrotik PowerBox Pro [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik PowerBOX r2",
+          "name": "Маршрутизатор Mikrotik PowerBOX r2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2ca8f71a70c63330/marsrutizator-mikrotik-powerbox-r2/",
+              "title": "Маршрутизатор Mikrotik PowerBOX r2 [WAN/LAN 5x100 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 5x100 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik RB1100AHx4 Dude Edition",
+          "name": "Маршрутизатор Mikrotik RB1100AHx4 Dude Edition",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2df5c7033bc23332/marsrutizator-mikrotik-rb1100ahx4-dude-edition/",
+              "title": "Маршрутизатор Mikrotik RB1100AHx4 Dude Edition [WAN/LAN 13x1000 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 13x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik RB4011IGS+RM",
+          "name": "Маршрутизатор Mikrotik RB4011IGS+RM",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cd457e797855ed20/marsrutizator-mikrotik-rb4011igsrm/",
+              "title": "Маршрутизатор Mikrotik RB4011IGS+RM [WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6]",
+              "specsText": "WAN/LAN 10x1000 Мбит/с, SFP 1x10 Гбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik RB5009UG+S+IN",
+          "name": "Маршрутизатор Mikrotik RB5009UG+S+IN",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3d1bf23e42a2ed20/marsrutizator-mikrotik-rb5009ugsin/",
+              "title": "Маршрутизатор Mikrotik RB5009UG+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]",
+              "specsText": "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Mikrotik RB5009UPR+S+IN",
+          "name": "Маршрутизатор Mikrotik RB5009UPR+S+IN",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/83c837bc9403ed20/marsrutizator-mikrotik-rb5009uprsin/",
+              "title": "Маршрутизатор Mikrotik RB5009UPR+S+IN [WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0]",
+              "specsText": "WAN/LAN 1x2.5 Гбит/с, 7x1000 Мбит/с, SFP 1x10 Гбит/с, 1 x USB 3.0",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Tenda G1",
+          "name": "Маршрутизатор Tenda G1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3d5d97deca647e8e/marsrutizator-tenda-g1/",
+              "title": "Маршрутизатор Tenda G1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6]",
+              "specsText": "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, USB 2.0 x1, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Tenda HG1",
+          "name": "Маршрутизатор Tenda HG1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9424e7750fa4ed20/marsrutizator-tenda-hg1/",
+              "title": "Маршрутизатор Tenda HG1 [LAN 1x1000 Мбит/с, IPv6]",
+              "specsText": "LAN 1x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Tenda HG3",
+          "name": "Маршрутизатор Tenda HG3",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e4d4bf688b88d21a/marsrutizator-tenda-hg3/",
+              "title": "Маршрутизатор Tenda HG3 [LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6]",
+              "specsText": "LAN 1x1000 Мбит/с, 1x100 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "TP-Link ER605 (TL-R605) V1",
+          "name": "Маршрутизатор TP-Link ER605 (TL-R605) V1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/02039ebb3175ed20/marsrutizator-tp-link-er605-tl-r605-v1/",
+              "title": "Маршрутизатор TP-Link ER605 (TL-R605) V1 [LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6]",
+              "specsText": "LAN 1x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 3x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "TP-Link TL-ER7206",
+          "name": "Маршрутизатор TP-Link TL-ER7206",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8b53618066c13332/marsrutizator-tp-link-tl-er7206/",
+              "title": "Маршрутизатор TP-Link TL-ER7206 [LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+              "specsText": "LAN 2x1000 Мбит/с, WAN 1x1000 Мбит/с, WAN/LAN 2x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "TP-Link TL-R480T+",
+          "name": "Маршрутизатор TP-Link TL-R480T+",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ea9cff417c7d526f/marsrutizator-tp-link-tl-r480t/",
+              "title": "Маршрутизатор TP-Link TL-R480T+ [LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с]",
+              "specsText": "LAN 1x100 Мбит/с, WAN 1x100 Мбит/с, WAN/LAN 3x100 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Ubiquiti EdgeRouter 4",
+          "name": "Маршрутизатор Ubiquiti EdgeRouter 4",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/67c11f026b203330/marsrutizator-ubiquiti-edgerouter-4/",
+              "title": "Маршрутизатор Ubiquiti EdgeRouter 4 [WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]",
+              "specsText": "WAN/LAN 3x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Ubiquiti EdgeRouter 6P",
+          "name": "Маршрутизатор Ubiquiti EdgeRouter 6P",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/575ac4d4c3b43330/marsrutizator-ubiquiti-edgerouter-6p/",
+              "title": "Маршрутизатор Ubiquiti EdgeRouter 6P [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, 1 x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Ubiquiti EdgeRouter X SFP",
+          "name": "Маршрутизатор Ubiquiti EdgeRouter X SFP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bf3686905ccb3330/marsrutizator-ubiquiti-edgerouter-x-sfp/",
+              "title": "Маршрутизатор Ubiquiti EdgeRouter X SFP [WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6]",
+              "specsText": "WAN/LAN 5x1000 Мбит/с, SFP 1x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Ubiquiti UniFi Cloud Gateway Max",
+          "name": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Max",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0bcfeddde47fd582/marsrutizator-ubiquiti-unifi-cloud-gateway-max/",
+              "title": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Max [WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6]",
+              "specsText": "WAN 1x2.5 Гбит/с, WAN/LAN 4x2.5 Гбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Маршрутизатор",
+          "model": "Ubiquiti UniFi Cloud Gateway Ultra",
+          "name": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Ultra",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/51b38b01e47fd9cb/marsrutizator-ubiquiti-unifi-cloud-gateway-ultra/",
+              "title": "Маршрутизатор Ubiquiti UniFi Cloud Gateway Ultra [WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6]",
+              "specsText": "WAN 1x2.5 Гбит/с, WAN/LAN 4x1000 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/1f8bef2670f05456/marsrutizatory/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Маршрутизаторы купить в интернет-магазине DNS. Маршрутизаторы цены, большой каталог, новинки. - страница 1 из 2"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/1f8bef2670f05456/marsrutizatory/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 16,
+      "title": "Маршрутизаторы купить в интернет-магазине DNS. Маршрутизаторы цены, большой каталог, новинки. - страница 2 из 2"
+    }
+  ],
+  "errors": []
+}

@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Search, ShoppingCart, User, Menu, X, Bell } from "lucide-react";
-import { apiGet, apiPatch } from "../lib/api";
+import { Bell, ChevronDown, Menu, Search, ShoppingCart, Trash2, User, X } from "lucide-react";
+import { apiGet } from "../lib/api";
+import { confirmDialog } from "./ui/notifications";
+import { useRealtimeNotifications } from "../lib/useRealtimeNotifications";
+import { DnsCatalogOverlay } from "./DnsCatalogOverlay";
+import type { CatalogCategory, CatalogItem } from "./FilterPanel";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -8,6 +12,8 @@ interface HeaderProps {
   onSearchSubmit: (query: string) => void;
   onLogoClick?: () => void;
   onProfileClick?: () => void;
+  catalogCategories: CatalogCategory[];
+  onCatalogItemSelect: (item: CatalogItem) => void;
   isAuthenticated: boolean;
 }
 
@@ -18,32 +24,32 @@ type SearchSuggestion = {
   query: string;
 };
 
-type Notification = {
-  id: number;
-  type: string;
-  message: string;
-  url: string;
-  isRead: boolean;
-  date: string;
-};
-
 export function Header({
   cartItemCount,
   onCartClick,
   onSearchSubmit,
   onLogoClick,
   onProfileClick,
+  catalogCategories,
+  onCatalogItemSelect,
   isAuthenticated,
 }: HeaderProps) {
   const headerRef = useRef<HTMLElement | null>(null);
+  const catalogRef = useRef<HTMLDivElement | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [activeCatalogCategoryId, setActiveCatalogCategoryId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const {
+    notifications,
+    unreadCount,
+    markAllAsRead,
+    deleteAll: deleteAllNotifications,
+  } = useRealtimeNotifications(isAuthenticated);
 
   const canQuerySuggestions = useMemo(
     () => searchQuery.trim().length >= 2,
@@ -51,23 +57,13 @@ export function Header({
   );
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const fetchNotifications = async () => {
-      try {
-        const data = await apiGet<{ notifications: Notification[]; unreadCount: number }>("/profile/notifications");
-        setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      }
-    };
-
-    void fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+    if (!catalogCategories.length) return;
+    setActiveCatalogCategoryId((current) =>
+      catalogCategories.some((category) => category.id === current)
+        ? current
+        : catalogCategories[0].id,
+    );
+  }, [catalogCategories]);
 
   useEffect(() => {
     if (!canQuerySuggestions) {
@@ -122,6 +118,37 @@ export function Header({
     };
   }, []);
 
+  useEffect(() => {
+    if (!catalogOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (catalogRef.current?.contains(target)) return;
+      if (
+        target instanceof Element &&
+        (target.closest("#dns-catalog-overlay") || target.closest(".dns-mobile-catalog-toggle"))
+      ) {
+        return;
+      }
+      setCatalogOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCatalogOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [catalogOpen]);
+
   const handleSearchSubmit = (query: string) => {
     const normalized = query.trim();
     setShowSuggestions(false);
@@ -147,12 +174,21 @@ export function Header({
     onLogoClick?.();
   };
 
+  const handleCatalogToggle = () => {
+    setCatalogOpen((open) => !open);
+    setActiveCatalogCategoryId((current) => current || catalogCategories[0]?.id || "");
+  };
+
+  const handleCatalogItemSelect = (item: CatalogItem) => {
+    setCatalogOpen(false);
+    setMobileMenuOpen(false);
+    onCatalogItemSelect(item);
+  };
+
   const handleToggleNotifications = async () => {
     if (!showNotifications && unreadCount > 0) {
       try {
-        await apiPatch("/profile/notifications/mark-as-read");
-        setUnreadCount(0);
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        await markAllAsRead();
       } catch (error) {
         console.error("Failed to mark notifications as read:", error);
       }
@@ -160,19 +196,65 @@ export function Header({
     setShowNotifications(!showNotifications);
   };
 
+  const handleDeleteNotifications = async () => {
+    const confirmed = await confirmDialog({
+      title: "Удалить все уведомления?",
+      description: "Старые уведомления будут удалены из вашего списка. Это действие нельзя отменить.",
+      confirmLabel: "Удалить",
+      confirmTone: "danger",
+    });
+    if (!confirmed) return;
+    try {
+      await deleteAllNotifications();
+    } catch (error) {
+      console.error("Failed to delete notifications:", error);
+    }
+  };
+
   return (
     <header ref={headerRef} className="sticky top-0 z-50 bg-white text-gray-900 shadow-sm border-b border-gray-200">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6">
         <div className="hidden md:block">
-          <div className="flex items-center justify-between h-24">
-            <button
-              onClick={handleLogoClick}
-              className="text-[40px] leading-none tracking-tight hover:text-gray-600 transition-colors duration-300 text-[rgb(38,83,141)]"
-            >
-              Ecomm
-            </button>
+          <div className="flex items-center justify-between h-24 gap-5">
+            <div ref={catalogRef} className="relative shrink-0">
+              <div className="dns-header-brand">
+                <button
+                  onClick={handleLogoClick}
+                  className="dns-header-logo"
+                  aria-label="На главную"
+                >
+                  Ecomm
+                </button>
+                <button
+                  className="dns-header-catalog-button"
+                  type="button"
+                  onClick={handleCatalogToggle}
+                  aria-expanded={catalogOpen}
+                  aria-controls="dns-catalog-overlay"
+                >
+                  <span>Каталог</span>
+                  <ChevronDown
+                    className={`dns-header-catalog-button__icon${
+                      catalogOpen ? " dns-header-catalog-button__icon--open" : ""
+                    }`}
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
 
-            <div className="hidden min-[830px]:flex max-w-2xl flex-1 mx-8">
+              {catalogOpen && (
+                <div id="dns-catalog-overlay">
+                  <DnsCatalogOverlay
+                    activeCategoryId={activeCatalogCategoryId}
+                    categories={catalogCategories}
+                    onActiveCategoryChange={setActiveCatalogCategoryId}
+                    onCatalogItemSelect={handleCatalogItemSelect}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="hidden min-[830px]:flex max-w-2xl flex-1">
               <div className="relative w-full rounded-[1px] bg-white">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
                 <input
@@ -182,7 +264,7 @@ export function Header({
                   onKeyDown={handleKeyDown}
                   onFocus={() => canQuerySuggestions && setShowSuggestions(true)}
                   onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
-                  placeholder="Поиск товаров или услуг..."
+                  placeholder="Поиск товаров..."
                   className="w-full pl-14 pr-4 py-4 rounded-xl bg-gray-50 text-black text-lg placeholder:text-gray-400 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all duration-300"
                 />
 
@@ -222,7 +304,29 @@ export function Header({
                   </button>
                   {showNotifications && (
                     <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
-                      <div className="p-4 font-semibold border-b">Уведомления</div>
+                      <div className="flex items-center justify-between gap-2 border-b p-4">
+                        <div className="font-semibold">Уведомления</div>
+                        {notifications.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void markAllAsRead()}
+                              className="text-xs font-semibold text-blue-700 transition hover:text-blue-900"
+                            >
+                              Прочитать все
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteNotifications()}
+                              className="inline-flex items-center text-red-600 transition hover:text-red-800"
+                              title="Удалить все уведомления"
+                              aria-label="Удалить все уведомления"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length > 0 ? (
                           notifications.map((n) => (
@@ -273,7 +377,7 @@ export function Header({
                 onKeyDown={handleKeyDown}
                 onFocus={() => canQuerySuggestions && setShowSuggestions(true)}
                 onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="Поиск товаров или услуг..."
+                placeholder="Поиск товаров..."
                 className="w-full pl-14 pr-4 py-4 rounded-xl bg-gray-50 text-black text-lg placeholder:text-gray-400 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all duration-300"
               />
 
@@ -328,6 +432,27 @@ export function Header({
 
         {mobileMenuOpen && (
           <div className="md:hidden pb-4 space-y-2">
+            <button
+              onClick={handleCatalogToggle}
+              className="dns-mobile-catalog-toggle w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-orange-50 text-orange-700 transition-all duration-300"
+            >
+              <span className="font-semibold">Каталог</span>
+              <ChevronDown
+                className={`w-5 h-5 transition-transform${catalogOpen ? " rotate-180" : ""}`}
+              />
+            </button>
+
+            {catalogOpen && (
+              <div className="px-4">
+                <DnsCatalogOverlay
+                  activeCategoryId={activeCatalogCategoryId}
+                  categories={catalogCategories}
+                  onActiveCategoryChange={setActiveCatalogCategoryId}
+                  onCatalogItemSelect={handleCatalogItemSelect}
+                />
+              </div>
+            )}
+
             <div className="px-4 pb-2">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -336,7 +461,7 @@ export function Header({
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Поиск товаров или услуг..."
+                  placeholder="Поиск товаров..."
                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
               </div>

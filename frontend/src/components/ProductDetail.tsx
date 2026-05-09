@@ -17,17 +17,18 @@ import {
   Star,
   ThumbsUp,
   User,
-  X,
   Zap,
 } from "lucide-react";
 import type { Product, Review } from "../types";
 import { apiDelete, apiGet, apiPost, getSessionUser } from "../lib/api";
 import { trackListingViewInMetrika } from "../lib/metrika";
+import { AppModal } from "./ui/app-modal";
 import { notifyError, notifyInfo, notifySuccess } from "./ui/notifications";
 
 interface ProductDetailProps {
   product: Product;
   onBack: () => void;
+  backLabel?: string;
   onOpenSellerStore?: (sellerId: string) => void;
   onAddToCart: (product: Product) => void;
   onBuyNow: (product: Product) => void;
@@ -64,7 +65,7 @@ type ListingViewTrackResponse = {
   views: number;
 };
 
-type ReviewSort = "newest" | "highest" | "lowest";
+type ReviewSort = "newest" | "oldest" | "highest" | "lowest";
 type QuestionSort = "useful" | "newest" | "with_answer" | "without_answer";
 type ComplaintModalStep = "category" | "details" | "success";
 type ComplaintCategoryKey = "listing_info" | "communication" | "fraud";
@@ -210,6 +211,93 @@ function toDateLabel(value: string): string {
   return date.toLocaleDateString("ru-RU");
 }
 
+const REVIEW_MONTH_INDEX: Record<string, number> = {
+  января: 0,
+  февраль: 1,
+  февраля: 1,
+  март: 2,
+  марта: 2,
+  апрель: 3,
+  апреля: 3,
+  май: 4,
+  мая: 4,
+  июнь: 5,
+  июня: 5,
+  июль: 6,
+  июля: 6,
+  август: 7,
+  августа: 7,
+  сентябрь: 8,
+  сентября: 8,
+  октябрь: 9,
+  октября: 9,
+  ноябрь: 10,
+  ноября: 10,
+  декабрь: 11,
+  декабря: 11,
+};
+
+function parseReviewDateLabel(value: string): number {
+  const nativeTime = new Date(value).getTime();
+  if (!Number.isNaN(nativeTime)) return nativeTime;
+
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d{1,2})\s+([а-яё]+)(?:\s+|\s*,\s*| в )(\d{1,2}):(\d{2})/u);
+  if (!match) return 0;
+
+  const [, dayRaw, monthRaw, hourRaw, minuteRaw] = match;
+  const month = REVIEW_MONTH_INDEX[monthRaw];
+  if (month === undefined) return 0;
+
+  const now = new Date();
+  const parsed = new Date(
+    now.getFullYear(),
+    month,
+    Number(dayRaw),
+    Number(hourRaw),
+    Number(minuteRaw),
+  );
+  return parsed.getTime();
+}
+
+function toSortTime(review: Review): number {
+  if (typeof review.sortTs === "number") return review.sortTs;
+  return parseReviewDateLabel(review.date);
+}
+
+function ModalRatingStars({
+  value,
+  size = 16,
+  gap = 1,
+}: {
+  value: number;
+  size?: number;
+  gap?: number;
+}) {
+  return (
+    <span className="inline-flex items-center" style={{ gap }} aria-label={`Рейтинг ${value.toFixed(1)}`}>
+      {[0, 1, 2, 3, 4].map((index) => {
+        const fillPercent = Math.max(0, Math.min(1, value - index)) * 100;
+        return (
+          <span
+            key={index}
+            className="relative inline-block flex-shrink-0 overflow-hidden"
+            style={{ width: size, height: size, fontSize: size, lineHeight: `${size}px` }}
+            aria-hidden="true"
+          >
+            <span className="absolute inset-0 text-gray-300">★</span>
+            <span className="absolute inset-0 overflow-hidden text-yellow-400" style={{ width: `${fillPercent}%` }}>
+              ★
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 function formatSpecificationLabel(rawKey: string): string {
   const cleaned = rawKey.replace(/^_+/, "").trim();
   const normalized = cleaned.toLowerCase();
@@ -219,6 +307,10 @@ function formatSpecificationLabel(rawKey: string): string {
     address: "Адрес",
     city: "Город",
     condition: "Состояние",
+    grade: "Класс восстановления",
+    battery_health_percent: "Здоровье батареи",
+    defects: "Дефекты",
+    included: "Комплектация",
     brand: "Бренд",
     model: "Модель",
     memory: "Память",
@@ -276,6 +368,7 @@ function normalizeSpecificationEntry(
 export function ProductDetail({
   product,
   onBack,
+  backLabel = "Назад к каталогу",
   onOpenSellerStore,
   onAddToCart,
   onBuyNow,
@@ -286,7 +379,7 @@ export function ProductDetail({
   onWishlistToggle,
 }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedImageFitMode, setSelectedImageFitMode] = useState<SelectedImageFitMode>("fit-width");
+  const [selectedImageFitMode, setSelectedImageFitMode] = useState<SelectedImageFitMode>("fit-height");
   const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
 
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -330,6 +423,22 @@ export function ProductDetail({
   }, [isComplaintModalOpen]);
 
   useEffect(() => {
+    if (!isReviewsModalOpen || typeof document === "undefined") return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsReviewsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isReviewsModalOpen]);
+
+  useEffect(() => {
     setSelectedImage(0);
     setQuestionSort("useful");
     setShowLocationMap(false);
@@ -353,9 +462,9 @@ export function ProductDetail({
     return raw.length > 0 ? raw : [product.image];
   }, [product.image, product.images]);
   const selectedImageSrc = images[selectedImage] ?? images[0];
-
   const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
   const isInCart = cartQuantity > 0;
+  const isUnavailable = product.isAvailable === false;
 
   const sellerReviewsCount =
     sellerMetrics?.reviewsCount ??
@@ -401,7 +510,7 @@ export function ProductDetail({
 
   useEffect(() => {
     if (!selectedImageSrc || typeof Image === "undefined") {
-      setSelectedImageFitMode("fit-width");
+      setSelectedImageFitMode("fit-height");
       return;
     }
 
@@ -410,12 +519,13 @@ export function ProductDetail({
 
     image.onload = () => {
       if (cancelled) return;
-      setSelectedImageFitMode(image.naturalHeight >= image.naturalWidth ? "fit-height" : "fit-width");
+      const isWide = image.naturalWidth > image.naturalHeight;
+      setSelectedImageFitMode(isWide ? "fit-width" : "fit-height");
     };
 
     image.onerror = () => {
       if (cancelled) return;
-      setSelectedImageFitMode("fit-width");
+      setSelectedImageFitMode("fit-height");
     };
 
     image.src = selectedImageSrc;
@@ -424,6 +534,7 @@ export function ProductDetail({
       cancelled = true;
     };
   }, [selectedImageSrc]);
+
   const specificationColumns = useMemo(() => {
     const mid = Math.ceil(specificationRows.length / 2);
     return [specificationRows.slice(0, mid), specificationRows.slice(mid)];
@@ -435,7 +546,7 @@ export function ProductDetail({
     if (reviewSort === "highest") {
       source.sort((a, b) => {
         if (b.rating !== a.rating) return b.rating - a.rating;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return toSortTime(b) - toSortTime(a);
       });
       return source;
     }
@@ -443,12 +554,17 @@ export function ProductDetail({
     if (reviewSort === "lowest") {
       source.sort((a, b) => {
         if (a.rating !== b.rating) return a.rating - b.rating;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return toSortTime(b) - toSortTime(a);
       });
       return source;
     }
 
-    source.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (reviewSort === "oldest") {
+      source.sort((a, b) => toSortTime(a) - toSortTime(b));
+      return source;
+    }
+
+    source.sort((a, b) => toSortTime(b) - toSortTime(a));
     return source;
   }, [reviewSort, sellerReviews]);
 
@@ -461,6 +577,17 @@ export function ProductDetail({
     }
     return counts;
   }, [sellerReviews]);
+
+  const modalReviewsTotal = sellerReviews.length || sellerReviewsCount;
+  const modalRatingTotal = Math.max(1, modalReviewsTotal);
+  const modalAverageRating = sellerReviews.length > 0
+    ? sellerReviews.reduce((sum, review) => sum + review.rating, 0) / sellerReviews.length
+    : sellerReviewsCount > 0
+      ? sellerRating
+      : 0;
+  const modalAverageRatingLabel = sellerReviewsCount > 0 || sellerReviews.length > 0
+    ? modalAverageRating.toFixed(1).replace(".", ",")
+    : "-";
 
   const sortedQuestions = useMemo(() => {
     const source = [...questions];
@@ -630,6 +757,10 @@ export function ProductDetail({
   };
 
   const handleAddToCart = () => {
+    if (isUnavailable) {
+      notifyInfo(product.unavailableReason || "Объявление снято с публикации.");
+      return;
+    }
     if (!isInCart) {
       onAddToCart(product);
     }
@@ -642,6 +773,10 @@ export function ProductDetail({
   };
 
   const handleSubmitQuestion = async () => {
+    if (isUnavailable) {
+      notifyInfo("По снятому с публикации объявлению нельзя задать новый вопрос.");
+      return;
+    }
     const questionText = newQuestion.trim();
     if (questionText.length < 3) return;
 
@@ -687,6 +822,10 @@ export function ProductDetail({
   };
 
   const handleToggleWishlist = async () => {
+    if (isUnavailable) {
+      notifyInfo("Снятое с публикации объявление доступно только для просмотра.");
+      return;
+    }
     try {
       if (isWishlisted) {
         await apiDelete<{ success: boolean }>(`/profile/wishlist/${product.id}`);
@@ -708,6 +847,10 @@ export function ProductDetail({
   };
 
   const handleOpenComplaintModal = () => {
+    if (isUnavailable) {
+      notifyInfo("Снятое с публикации объявление доступно только для просмотра.");
+      return;
+    }
     resetComplaintFlow();
     setIsComplaintModalOpen(true);
   };
@@ -781,20 +924,28 @@ export function ProductDetail({
       <div className="page-container py-4 md:py-6">
         <button onClick={onBack} className="back-link text-sm md:text-base">
           <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-          Назад к каталогу
+          {backLabel}
         </button>
+      </div>
+
+      <div className="page-container">
+        <h1 className="mb-6 text-2xl text-black md:text-4xl">{product.title}</h1>
+        {isUnavailable ? (
+          <div className="mb-6 inline-flex rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+            {product.unavailableReason || "Снято с публикации"}
+          </div>
+        ) : null}
       </div>
 
       <div className="page-container grid grid-cols-1 gap-8 pb-8 md:pb-16 lg:grid-cols-[1fr_400px]">
         <div className="min-w-0">
-          <h1 className="mb-6 text-2xl text-black md:text-4xl">{product.title}</h1>
 
           <div className="mb-8">
             <div
               className="relative mb-3 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100"
-              style={{ maxWidth: 760 }}
+              style={{ height: "min(69vh)" }}
             >
-              <div className="relative w-full" style={{ aspectRatio: "4 / 3" }}>
+              <div className="relative h-full w-full">
                 <img
                   src={images[selectedImage]}
                   alt=""
@@ -816,9 +967,9 @@ export function ProductDetail({
                     draggable={false}
                     className="block select-none rounded-md"
                     style={
-                      selectedImageFitMode === "fit-height"
-                        ? { width: "auto", height: "100%", maxWidth: "none", maxHeight: "none" }
-                        : { width: "100%", height: "auto", maxWidth: "none", maxHeight: "none" }
+                      selectedImageFitMode === "fit-width"
+                        ? { width: "100%", height: "auto", maxWidth: "100%", maxHeight: "100%" }
+                        : { width: "auto", height: "100%", maxWidth: "100%", maxHeight: "100%" }
                     }
                   />
                 </div>
@@ -934,23 +1085,27 @@ export function ProductDetail({
 
             <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
               <p className="mb-3 text-sm text-gray-700">
-                Задайте вопрос о товаре. Ответ продавца появится здесь.
+                {isUnavailable
+                  ? "Объявление снято с публикации. Старые вопросы доступны для чтения, новые действия отключены."
+                  : "Задайте вопрос о товаре. Ответ продавца появится здесь."}
               </p>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <input
-                  type="text"
-                  placeholder="Задайте вопрос продавцу"
-                  value={newQuestion}
-                  onChange={(event) => setNewQuestion(event.target.value)}
-                  className="field-control text-sm"
-                />
-                <button
-                  onClick={() => void handleSubmitQuestion()}
-                  className="btn-primary flex items-center justify-center gap-2 px-6 py-3 text-sm"
-                >
-                  <Send className="h-4 w-4" /> Отправить
-                </button>
-              </div>
+              {!isUnavailable ? (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    type="text"
+                    placeholder="Задайте вопрос продавцу"
+                    value={newQuestion}
+                    onChange={(event) => setNewQuestion(event.target.value)}
+                    className="field-control text-sm"
+                  />
+                  <button
+                    onClick={() => void handleSubmitQuestion()}
+                    className="btn-primary flex items-center justify-center gap-2 px-6 py-3 text-sm"
+                  >
+                    <Send className="h-4 w-4" /> Отправить
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="mb-5 w-full sm:w-[360px]">
@@ -1031,13 +1186,18 @@ export function ProductDetail({
               </div>
               <button
                 onClick={() => void handleToggleWishlist()}
+                disabled={isUnavailable}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50"
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
               </button>
             </div>
 
-            {isInCart ? (
+            {isUnavailable ? (
+              <div className="mb-4 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-700">
+                {product.unavailableReason || "Снято с публикации"}
+              </div>
+            ) : isInCart ? (
               <div className="mb-4 flex w-full items-center justify-center gap-6 rounded-xl border border-gray-200 bg-gray-100 py-3 text-gray-900">
                 <button
                   onClick={() => handleQuantityChange(cartQuantity - 1)}
@@ -1086,9 +1246,9 @@ export function ProductDetail({
 
                 <div className="min-w-0 flex-1">
                   <div className="min-w-0 truncate text-lg font-semibold leading-tight text-gray-900">{product.seller}</div>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-gray-900">
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-900">
                     <span className="tabular-nums font-semibold">{sellerRatingValue}</span>
-                    <div className="flex items-center gap-0.5">
+                    <div className="flex items-center gap-0.5" aria-label={`Рейтинг продавца ${sellerRatingValue}`}>
                       {[...Array(5)].map((_, index) => (
                         <Star
                           key={index}
@@ -1098,13 +1258,20 @@ export function ProductDetail({
                         />
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      className="inline-flex items-center rounded-full bg-gray-100/90 px-2.5 py-0.5 text-sm text-gray-700 transition hover:bg-gray-200 hover:text-[rgb(38,83,141)] hover:underline"
-                      onClick={() => setIsReviewsModalOpen(true)}
-                    >
-                      {sellerReviewsCount} {formatReviewsWord(sellerReviewsCount)}
-                    </button>
+                    {sellerReviewsCount > 0 ? (
+                      <button
+                        type="button"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-[rgb(38,83,141)] transition hover:border-[rgb(38,83,141)] hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-[rgb(38,83,141)] focus:ring-offset-1"
+                        onClick={() => setIsReviewsModalOpen(true)}
+                        aria-label={`Открыть отзывы продавца: ${sellerReviewsCount} ${formatReviewsWord(sellerReviewsCount)}`}
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Смотреть {sellerReviewsCount} {formatReviewsWord(sellerReviewsCount)}
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">Пока нет отзывов</span>
+                    )}
                   </div>
                   <p className="mt-1 text-xs text-gray-600">
                     {sellerJoinedYear ? `На Ecomm с ${sellerJoinedYear}` : "На Ecomm"}
@@ -1130,6 +1297,7 @@ export function ProductDetail({
               <p className="text-center text-sm text-gray-700">
                 № {product.id} • {product.publishDate || "дата публикации не указана"} • {viewsLabel}
               </p>
+              {!isUnavailable ? (
               <div className="mt-3 flex justify-center">
                 <button
                   type="button"
@@ -1140,47 +1308,21 @@ export function ProductDetail({
                   Пожаловаться на объявление
                 </button>
               </div>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
       {isComplaintModalOpen && typeof document !== "undefined"
         ? createPortal(
-            <div
-              className="fixed inset-0 z-[140] flex items-center justify-center p-4"
-              style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 1400,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "16px",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-              }}
-              onClick={handleCloseComplaintModal}
+            <AppModal
+              open={isComplaintModalOpen}
+              onClose={handleCloseComplaintModal}
+              size="md"
+              bodyClassName="app-modal__body--wide"
             >
-              <div
-                className="relative z-[1] rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.6)] md:p-6"
-                style={{
-                  width: "min(660px, 94vw)",
-                  maxHeight: "min(92vh, 860px)",
-                  overflow: "hidden",
-                }}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  onClick={handleCloseComplaintModal}
-                  className="absolute right-4 top-4 rounded-lg p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
-                  aria-label="Закрыть"
-                  disabled={isComplaintSending}
-                >
-                  <X className="h-6 w-6" />
-                </button>
-
                 {complaintStep === "category" ? (
-                  <div className="px-5 pb-4 pt-4 md:px-6">
+                  <div>
                     <h3 className="mb-6 text-3xl font-semibold leading-tight text-gray-900">
                       Выберите причину жалобы
                     </h3>
@@ -1208,7 +1350,7 @@ export function ProductDetail({
                 ) : null}
 
                 {complaintStep === "details" && selectedComplaintCategory ? (
-                  <div className="flex h-[min(84vh,760px)] flex-col px-5 pt-4 md:px-6">
+                  <div className="flex min-h-[520px] flex-col">
                     <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                       <h3 className="mb-4 text-3xl font-semibold leading-tight text-gray-900">
                         {selectedComplaintCategory.detailsTitle}
@@ -1287,131 +1429,104 @@ export function ProductDetail({
                     </button>
                   </div>
                 ) : null}
-              </div>
-            </div>,
+            </AppModal>,
             document.body,
           )
         : null}
 
       {isReviewsModalOpen && typeof document !== "undefined"
         ? createPortal(
-        <div
-          className="fixed inset-0 z-[1600] flex items-center justify-center bg-black/50 p-3 md:p-4"
-          onClick={() => setIsReviewsModalOpen(false)}
-        >
-          <div
-            className="flex max-h-[90vh] w-[min(760px,96vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
+          <AppModal
+            open={isReviewsModalOpen}
+            onClose={() => setIsReviewsModalOpen(false)}
+            title="Отзывы о продавце"
+            size="lg"
+            bodyClassName="app-modal__body--wide"
           >
-            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-              <h3 className="text-2xl text-gray-900">Отзывы о пользователе</h3>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
-                onClick={() => setIsReviewsModalOpen(false)}
-                aria-label="Закрыть"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-              <div className="grid grid-cols-1 gap-6 border-b border-gray-200 pb-6 md:grid-cols-[180px_1fr]">
-                <div>
-                  <div className="text-6xl font-semibold leading-none text-gray-900">{sellerRatingValue}</div>
-                  <div className="mt-2 flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.round(sellerRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                        }`}
-                      />
-                    ))}
+            <div className="px-1 pb-2">
+              <div className="flex flex-col gap-8 sm:flex-row sm:gap-12">
+                <div className="flex flex-col items-center">
+                  <div className="mb-1 text-5xl font-black leading-none text-black">
+                    {modalAverageRatingLabel}
                   </div>
-                  <p className="mt-2 text-xl text-gray-900">{sellerReviewsCount} {formatReviewsWord(sellerReviewsCount)}</p>
+                  <div className="mb-2 flex gap-1">
+                    <ModalRatingStars value={modalAverageRating} size={24} gap={1} />
+                  </div>
+                  <div className="text-base text-black">
+                    {modalReviewsTotal} {formatReviewsWord(modalReviewsTotal)}
+                  </div>
                 </div>
 
-                <div className="grid gap-2">
+                <div className="flex-1 space-y-2">
                   {[5, 4, 3, 2, 1].map((score) => {
                     const count = ratingDistribution[score - 1] ?? 0;
-                    const width = sellerReviewsCount > 0 ? (count / sellerReviewsCount) * 100 : 0;
+                    const width = (count / modalRatingTotal) * 100;
                     return (
-                      <div key={score} className="grid grid-cols-[72px_1fr_38px] items-center gap-2">
-                        <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <span>{score}</span>
-                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                      <div key={score} className="flex items-center gap-3">
+                        <div className="flex w-[112px] gap-1" aria-label={`${score} звезд`}>
+                          <ModalRatingStars value={score} size={19} gap={0} />
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-                          <div className="h-full rounded-full bg-gray-500" style={{ width: `${width}%` }} />
+                        <div
+                          className="h-2.5 flex-1 overflow-hidden rounded-full"
+                          style={{ backgroundColor: "#d4d8de" }}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${width}%`,
+                              minWidth: count > 0 ? 5 : 0,
+                              backgroundColor: "#777777",
+                            }}
+                          />
                         </div>
-                        <span className="text-right text-sm text-gray-700">{count}</span>
+                        <div className="w-8 text-right text-black">{count}</div>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "newest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("newest")}
+              <div className="mt-8">
+                <select
+                  className="rounded-full bg-gray-100 px-5 py-3 text-base font-medium text-black outline-none transition hover:bg-gray-200"
+                  value={reviewSort}
+                  onChange={(event) => setReviewSort(event.target.value as ReviewSort)}
+                  aria-label="Сортировка отзывов"
                 >
-                  Сначала новые
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "highest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("highest")}
-                >
-                  Высокая оценка
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    reviewSort === "lowest" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setReviewSort("lowest")}
-                >
-                  Низкая оценка
-                </button>
+                  <option value="newest">Сначала новые</option>
+                  <option value="oldest">Сначала старые</option>
+                  <option value="highest">Высокая оценка</option>
+                  <option value="lowest">Низкая оценка</option>
+                </select>
               </div>
-              <div className="mt-5 space-y-5">
+            </div>
+
+            <div className="mt-6 space-y-4">
                 {sortedSellerReviews.map((review) => (
-                  <article key={review.id} className="rounded-2xl border border-gray-200 p-4">
+                  <article key={review.id} className="border-b border-gray-200 pb-4 last:border-0">
                     <div className="flex items-start gap-3">
-                      <div className="h-12 w-12 overflow-hidden rounded-full bg-gray-200">
+                      <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-[rgb(38,83,141)]">
                         {review.avatar ? (
                           <img src={review.avatar} alt={review.author} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-500">
-                            <User className="h-5 w-5" />
+                          <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-white">
+                            {review.author.trim().charAt(0).toUpperCase() || <User className="h-5 w-5" />}
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="text-lg font-semibold text-gray-900">{review.author}</span>
-                          <span className="text-sm text-gray-500">{toDateLabel(review.date)}</span>
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="font-medium text-black">{review.author}</span>
+                          <span className="text-xs text-gray-500">{toDateLabel(review.date)}</span>
                         </div>
-                        <div className="mt-1 flex items-center gap-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                              }`}
-                            />
-                          ))}
+                        <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <ModalRatingStars value={review.rating} size={16} gap={0} />
+                          {review.listingTitle ? (
+                            <span className="ml-2 text-xs text-gray-600">Сделка состоялась · {review.listingTitle}</span>
+                          ) : null}
                         </div>
-                        {review.listingTitle ? <p className="mt-2 text-sm text-gray-500">Сделка: {review.listingTitle}</p> : null}
-                        <p className="mt-2 whitespace-pre-line text-base leading-6 text-gray-800">{review.comment}</p>
+                        <p className="text-sm text-gray-700">{review.comment}</p>
                       </div>
                     </div>
                   </article>
@@ -1421,17 +1536,14 @@ export function ProductDetail({
                   <p className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
                     {sellerReviewsCount > 0
                       ? "Отзывы есть, но список пока не удалось загрузить. Попробуйте открыть позже."
-                      : "Пока нет отзывов о продавце."}
+                    : "Пока нет отзывов о продавце."}
                   </p>
                 ) : null}
               </div>
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )
+          </AppModal>,
+          document.body,
+        )
         : null}
     </div>
   );
 }
-

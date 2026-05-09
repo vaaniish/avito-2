@@ -128,6 +128,26 @@ export function createProfileUserRouter(deps: ProfileUserRouterDeps): Router {
       };
 
       const userWithRelations = user as UserWithRelations;
+      const listingIds = userWithRelations.orders_as_buyer.flatMap((order) =>
+        order.items
+          .map((item) => item.listing_id)
+          .filter((listingId): listingId is number => typeof listingId === "number"),
+      );
+      const reviewedListingIds = new Set(
+        (
+          await deps.prisma.listingReview.findMany({
+            where: {
+              author_id: session.user.id,
+              listing_id: {
+                in: [...new Set(listingIds)],
+              },
+            },
+            select: {
+              listing_id: true,
+            },
+          })
+        ).map((review) => review.listing_id),
+      );
 
       res.json({
         user: {
@@ -165,14 +185,19 @@ export function createProfileUserRouter(deps: ProfileUserRouterDeps): Router {
             address: `${deps.extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
             workingHours: "пн — вс: 9:00-21:00",
           },
-          items: order.items.map((item) => ({
-            id: String(item.id),
-            listingPublicId: item.listing?.public_id ?? "",
-            name: item.name,
-            image: item.image ?? "",
-            price: item.price,
-            quantity: item.quantity,
-          })),
+          items: order.items.map((item) => {
+            const reviewed = item.listing_id !== null && reviewedListingIds.has(item.listing_id);
+            return {
+              id: String(item.id),
+              listingPublicId: item.listing?.public_id ?? "",
+              name: item.name,
+              image: item.image ?? "",
+              price: item.price,
+              quantity: item.quantity,
+              reviewed,
+              canReview: order.status === "COMPLETED" && item.listing_id !== null && !reviewed,
+            };
+          }),
         })),
         wishlist: userWithRelations.wishlist_items.map((item) => ({
           id: item.listing.public_id,

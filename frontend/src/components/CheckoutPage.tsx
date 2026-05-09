@@ -88,10 +88,12 @@ export function CheckoutPage({
   const [deliveryCity, setDeliveryCity] = useState("");
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
   const [deliveryProviders, setDeliveryProviders] = useState<DeliveryProvider[]>(
-    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled).map((tab) => ({
-      code: tab.code,
-      label: tab.label,
-    })),
+    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled && tab.code !== "cdek").map(
+      (tab) => ({
+        code: tab.code,
+        label: tab.label,
+      }),
+    ),
   );
   const [activeDeliveryProvider, setActiveDeliveryProvider] =
     useState<DeliveryProvider["code"]>(DELIVERY_PICKUP_PROVIDER);
@@ -115,7 +117,6 @@ export function CheckoutPage({
     title: "правила оформления и безопасной сделки",
     contentUrl: "/terms",
   });
-  const [policyAccepted, setPolicyAccepted] = useState(false);
 
   const isPlacingOrderRef = useRef(false);
   const hasCompletedRef = useRef(false);
@@ -639,10 +640,6 @@ export function CheckoutPage({
       return;
     }
 
-    if (!policyAccepted) {
-      notifyInfo("Перед оплатой нужно принять правила оформления и безопасной сделки.");
-      return;
-    }
     const effectivePickupPoint =
       deliveryType === "delivery"
         ? `${selectedPoint?.name || ""}, ${selectedPoint?.address || ""}`
@@ -662,13 +659,10 @@ export function CheckoutPage({
       paymentWindow.document.body.innerHTML =
         "<p style='font-family:Arial,sans-serif;padding:16px'>Подготавливаем страницу оплаты...</p>";
 
-      const [productListings, serviceListings] = await Promise.all([
-        apiGet<Product[]>("/catalog/listings?type=products"),
-        apiGet<Product[]>("/catalog/listings?type=services"),
-      ]);
+      const productListings = await apiGet<Product[]>("/catalog/listings?type=products");
 
       const availableIds = new Set(
-        [...productListings, ...serviceListings].map((listing) => listing.id),
+        productListings.map((listing) => listing.id),
       );
       const unavailableItemIds = items
         .map((item) => item.id)
@@ -713,14 +707,6 @@ export function CheckoutPage({
         key: idempotencyKey,
         fingerprint: checkoutFingerprint,
       };
-
-      await apiPost<{ success: boolean }>(
-        "/profile/policy-acceptance",
-        {
-          scope: "checkout",
-          policyId: checkoutPolicy.id || undefined,
-        },
-      );
 
       const response = await apiPost<CreateOrdersResponse>(
         "/profile/orders",
@@ -851,7 +837,6 @@ export function CheckoutPage({
             hasActivePayment={hasActivePayment}
             isSubmitting={isSubmitting}
             canCheckoutWithSelectedPoint={canCheckoutWithSelectedPoint}
-            policyAccepted={policyAccepted}
             policyTitle={
               checkoutPolicy.version
                 ? `${checkoutPolicy.title} (v${checkoutPolicy.version})`
@@ -863,7 +848,6 @@ export function CheckoutPage({
             paymentStatusMeta={paymentStatusMeta}
             paymentStatusError={paymentStatusError}
             secondsLeft={secondsLeft}
-            onPolicyAcceptedChange={setPolicyAccepted}
             onPrimaryAction={() => {
               if (hasActivePayment) {
                 handleOpenPayment();

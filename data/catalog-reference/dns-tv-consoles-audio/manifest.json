@@ -1,0 +1,554 @@
+{
+  "source": "DNS catalog",
+  "categoryName": "ТВ, консоли и аудио",
+  "categoryUrl": "https://www.dns-shop.ru/catalog/17a8bfb516404e77/tv-konsoli-i-audio/",
+  "status": "done",
+  "totalItems": 41,
+  "items": [
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Телевизоры",
+      "file": "televizory-i-aksessuary/televizory.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8ae4916404e77/televizory/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Кронштейны для телевизоров",
+      "file": "televizory-i-aksessuary/kronshteyny-dlya-televizorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a37116404e77/kronstejny-dla-televizorov/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Аксессуары для кронштейн-стоек",
+      "file": "televizory-i-aksessuary/aksessuary-dlya-kronshteyn-stoek.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/c5f923331f98e246/aksessuary-dla-kronstejn-stoek/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Прием ТВ-сигнала",
+      "file": "televizory-i-aksessuary/priem-tv-signala.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9eee216404e77/priem-tv-signala/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Саундбары",
+      "file": "televizory-i-aksessuary/saundbary.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8c51716404e77/saundbary/?fr%5B1tt%5D=700-1446&virtual_category_uid=f29763d671d7452f"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Видеокабели и переходники",
+      "file": "televizory-i-aksessuary/videokabeli-i-perehodniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/f560e18fea43043b/videokabeli-i-perehodniki/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Проекторы",
+      "file": "televizory-i-aksessuary/proektory.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8e3e116404e77/proektory/?virtual_category_uid=f5bb4ee09d697440"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Подписки медиасервисов",
+      "file": "televizory-i-aksessuary/podpiski-mediaservisov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/8dffc705614fd104/podpiski-mediaservisov/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Экраны для проекторов",
+      "file": "televizory-i-aksessuary/ekrany-dlya-proektorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a88b3e16404e77/ekrany-dla-proektorov/?virtual_category_uid=fad5ef00ddcf8455"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Медиаплееры и DVD",
+      "file": "televizory-i-aksessuary/mediapleery-i-dvd.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8c12b16404e77/mediapleery-i-dvd/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Пульты ДУ",
+      "file": "televizory-i-aksessuary/pulty-du.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a48016404e77/pulty-du/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Аксессуары для телевизоров",
+      "file": "televizory-i-aksessuary/aksessuary-dlya-televizorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9eddc16404e77/aksessuary-dla-televizorov/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Стойки для ТВ",
+      "file": "televizory-i-aksessuary/stoyki-dlya-tv.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8ba1b16404e77/stojki-dla-tv/"
+    },
+    {
+      "subcategoryName": "Телевизоры и аксессуары",
+      "itemName": "Крепления для аудио-/видеотехники",
+      "file": "televizory-i-aksessuary/krepleniya-dlya-audio-videotehniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a3dc16404e77/kreplenia-dla-audio-videotehniki/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Видеоигры",
+      "file": "konsoli-i-videoigry/videoigry.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/03b480976d6c5c19/videoigry/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Карты оплаты и цифровой контент",
+      "file": "konsoli-i-videoigry/karty-oplaty-i-cifrovoy-kontent.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/884fcc247988678f/karty-oplaty-i-cifrovoj-kontent/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Microsoft Xbox",
+      "file": "konsoli-i-videoigry/microsoft-xbox.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8e51d16404e77/microsoft-xbox/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "PlayStation",
+      "file": "konsoli-i-videoigry/playstation.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/88af77e223b1ede4/playstation-4/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Nintendo",
+      "file": "konsoli-i-videoigry/nintendo.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/90d2c7cbf68b0113/dla-nintendo/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Консоли 8bit и 16bit",
+      "file": "konsoli-i-videoigry/konsoli-8bit-i-16bit.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8c26816404e77/konsoli-8bit-i-16bit/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Виртуальная реальность",
+      "file": "konsoli-i-videoigry/virtualnaya-realnost.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/a949784ab05cf540/virtualnaa-realnost/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Портативные игровые консоли",
+      "file": "konsoli-i-videoigry/portativnye-igrovye-konsoli.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8e27f16404e77/portativnye-igrovye-konsoli/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Контроллеры и геймпады",
+      "file": "konsoli-i-videoigry/kontrollery-i-geympady.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/33ddaa5f0e06c3d1/kontrollery-i-gejmpady/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Аксессуары для геймпадов",
+      "file": "konsoli-i-videoigry/aksessuary-dlya-geympadov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/7da80c27b1c07b16/aksessuary-dla-gejmpadov/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Игровые рули и аксессуары для гонок",
+      "file": "konsoli-i-videoigry/igrovye-ruli-i-aksessuary-dlya-gonok.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/941e68d24baf0ae0/igrovye-ruli-i-aksessuary-dla-gonok/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Контроллеры для авиасимуляторов",
+      "file": "konsoli-i-videoigry/kontrollery-dlya-aviasimulyatorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/5a0974750e067fd7/kontrollery-dla-aviasimulatorov/"
+    },
+    {
+      "subcategoryName": "Консоли и видеоигры",
+      "itemName": "Крепления для консолей",
+      "file": "konsoli-i-videoigry/krepleniya-dlya-konsoley.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/70f4b323b7c95d54/kreplenia-dla-konsolej/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Наушники и гарнитуры",
+      "file": "audiotehnika/naushniki-i-garnitury.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9ef1716404e77/nausniki-i-garnitury/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Колонки",
+      "file": "audiotehnika/kolonki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8925616404e77/kolonki/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Умные колонки",
+      "file": "audiotehnika/umnye-kolonki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/a589994efd586a9a/umnye-kolonki/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Портативные колонки и аудиосистемы",
+      "file": "audiotehnika/portativnye-kolonki-i-audiosistemy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8c3d816404e77/portativnye-kolonki-i-audiosistemy/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Микрофоны, радиосистемы и аксессуары",
+      "file": "audiotehnika/mikrofony-radiosistemy-i-aksessuary.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/433d8b2d7cf7fb58/mikrofony-radiosistemy-i-aksessuary/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Домашняя акустика",
+      "file": "audiotehnika/domashnyaya-akustika.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/f4be00593ba77fd7/domasnaa-akustika/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Музыкальное оборудование и инструменты",
+      "file": "audiotehnika/muzykalnoe-oborudovanie-i-instrumenty.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9ef4b16404e77/muzykalnoe-oborudovanie-i-instrumenty/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Звуковые карты",
+      "file": "audiotehnika/zvukovye-karty.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a89b4f16404e77/zvukovye-karty/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Усилители для аудиотехники",
+      "file": "audiotehnika/usiliteli-dlya-audiotehniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a902bd16404e77/usiliteli-dla-audiotehniki/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Hi-Fi аудио",
+      "file": "audiotehnika/hifi-audio.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/2f78b9d13ba87fd7/hi-fi-audio/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Радиоприемники и радиобудильники",
+      "file": "audiotehnika/radiopriemniki-i-radiobudilniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/9fbb3c8cc1f84e43/radiopriemniki-i-radiobudilniki/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Портативные плееры и диктофоны",
+      "file": "audiotehnika/portativnye-pleery-i-diktofony.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/1a97a4b074a65791/portativnye-pleery-i-diktofony/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Аудиокабели и переходники",
+      "file": "audiotehnika/audiokabeli-i-perehodniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17aa958916404e77/audiokabeli-i-perehodniki/"
+    },
+    {
+      "subcategoryName": "Аудиотехника",
+      "itemName": "Принадлежности и аксессуары для аудиотехники",
+      "file": "audiotehnika/prinadlezhnosti-i-aksessuary-dlya-audiotehniki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/4c3dd1a13ba77fd7/prinadleznosti-i-aksessuary-dla-audiotehniki/"
+    }
+  ],
+  "collectedAt": "2026-05-07T16:41:14.004Z",
+  "summary": {
+    "done": 41,
+    "failed": 0,
+    "empty": 0,
+    "totalProducts": 18254
+  },
+  "lastRun": {
+    "collectedAt": "2026-05-07T16:49:13.166Z",
+    "summary": [
+      {
+        "file": "televizory-i-aksessuary/televizory.json",
+        "itemName": "Телевизоры",
+        "status": "done",
+        "products": 1138
+      },
+      {
+        "file": "televizory-i-aksessuary/kronshteyny-dlya-televizorov.json",
+        "itemName": "Кронштейны для телевизоров",
+        "status": "done",
+        "products": 491
+      },
+      {
+        "file": "televizory-i-aksessuary/aksessuary-dlya-kronshteyn-stoek.json",
+        "itemName": "Аксессуары для кронштейн-стоек",
+        "status": "done",
+        "products": 3
+      },
+      {
+        "file": "televizory-i-aksessuary/priem-tv-signala.json",
+        "itemName": "Прием ТВ-сигнала",
+        "status": "done",
+        "products": 276
+      },
+      {
+        "file": "televizory-i-aksessuary/saundbary.json",
+        "itemName": "Саундбары",
+        "status": "done",
+        "products": 89
+      },
+      {
+        "file": "televizory-i-aksessuary/videokabeli-i-perehodniki.json",
+        "itemName": "Видеокабели и переходники",
+        "status": "done",
+        "products": 1013
+      },
+      {
+        "file": "televizory-i-aksessuary/proektory.json",
+        "itemName": "Проекторы",
+        "status": "done",
+        "products": 133
+      },
+      {
+        "file": "televizory-i-aksessuary/podpiski-mediaservisov.json",
+        "itemName": "Подписки медиасервисов",
+        "status": "done",
+        "products": 101
+      },
+      {
+        "file": "televizory-i-aksessuary/ekrany-dlya-proektorov.json",
+        "itemName": "Экраны для проекторов",
+        "status": "done",
+        "products": 125
+      },
+      {
+        "file": "televizory-i-aksessuary/mediapleery-i-dvd.json",
+        "itemName": "Медиаплееры и DVD",
+        "status": "done",
+        "products": 51
+      },
+      {
+        "file": "televizory-i-aksessuary/pulty-du.json",
+        "itemName": "Пульты ДУ",
+        "status": "done",
+        "products": 34
+      },
+      {
+        "file": "televizory-i-aksessuary/aksessuary-dlya-televizorov.json",
+        "itemName": "Аксессуары для телевизоров",
+        "status": "done",
+        "products": 133
+      },
+      {
+        "file": "televizory-i-aksessuary/stoyki-dlya-tv.json",
+        "itemName": "Стойки для ТВ",
+        "status": "done",
+        "products": 78
+      },
+      {
+        "file": "televizory-i-aksessuary/krepleniya-dlya-audio-videotehniki.json",
+        "itemName": "Крепления для аудио-/видеотехники",
+        "status": "done",
+        "products": 25
+      },
+      {
+        "file": "konsoli-i-videoigry/videoigry.json",
+        "itemName": "Видеоигры",
+        "status": "done",
+        "products": 3038
+      },
+      {
+        "file": "konsoli-i-videoigry/karty-oplaty-i-cifrovoy-kontent.json",
+        "itemName": "Карты оплаты и цифровой контент",
+        "status": "done",
+        "products": 2823
+      },
+      {
+        "file": "konsoli-i-videoigry/microsoft-xbox.json",
+        "itemName": "Microsoft Xbox",
+        "status": "done",
+        "products": 169
+      },
+      {
+        "file": "konsoli-i-videoigry/playstation.json",
+        "itemName": "PlayStation",
+        "status": "done",
+        "products": 141
+      },
+      {
+        "file": "konsoli-i-videoigry/nintendo.json",
+        "itemName": "Nintendo",
+        "status": "done",
+        "products": 33
+      },
+      {
+        "file": "konsoli-i-videoigry/konsoli-8bit-i-16bit.json",
+        "itemName": "Консоли 8bit и 16bit",
+        "status": "done",
+        "products": 12
+      },
+      {
+        "file": "konsoli-i-videoigry/virtualnaya-realnost.json",
+        "itemName": "Виртуальная реальность",
+        "status": "done",
+        "products": 51
+      },
+      {
+        "file": "konsoli-i-videoigry/portativnye-igrovye-konsoli.json",
+        "itemName": "Портативные игровые консоли",
+        "status": "done",
+        "products": 49
+      },
+      {
+        "file": "konsoli-i-videoigry/kontrollery-i-geympady.json",
+        "itemName": "Контроллеры и геймпады",
+        "status": "done",
+        "products": 248
+      },
+      {
+        "file": "konsoli-i-videoigry/aksessuary-dlya-geympadov.json",
+        "itemName": "Аксессуары для геймпадов",
+        "status": "done",
+        "products": 29
+      },
+      {
+        "file": "konsoli-i-videoigry/igrovye-ruli-i-aksessuary-dlya-gonok.json",
+        "itemName": "Игровые рули и аксессуары для гонок",
+        "status": "done",
+        "products": 87
+      },
+      {
+        "file": "konsoli-i-videoigry/kontrollery-dlya-aviasimulyatorov.json",
+        "itemName": "Контроллеры для авиасимуляторов",
+        "status": "done",
+        "products": 21
+      },
+      {
+        "file": "konsoli-i-videoigry/krepleniya-dlya-konsoley.json",
+        "itemName": "Крепления для консолей",
+        "status": "done",
+        "products": 17
+      },
+      {
+        "file": "audiotehnika/naushniki-i-garnitury.json",
+        "itemName": "Наушники и гарнитуры",
+        "status": "done",
+        "products": 3666
+      },
+      {
+        "file": "audiotehnika/kolonki.json",
+        "itemName": "Колонки",
+        "status": "done",
+        "products": 660
+      },
+      {
+        "file": "audiotehnika/umnye-kolonki.json",
+        "itemName": "Умные колонки",
+        "status": "done",
+        "products": 67
+      },
+      {
+        "file": "audiotehnika/portativnye-kolonki-i-audiosistemy.json",
+        "itemName": "Портативные колонки и аудиосистемы",
+        "status": "done",
+        "products": 1117
+      },
+      {
+        "file": "audiotehnika/mikrofony-radiosistemy-i-aksessuary.json",
+        "itemName": "Микрофоны, радиосистемы и аксессуары",
+        "status": "done",
+        "products": 674
+      },
+      {
+        "file": "audiotehnika/domashnyaya-akustika.json",
+        "itemName": "Домашняя акустика",
+        "status": "done",
+        "products": 263
+      },
+      {
+        "file": "audiotehnika/muzykalnoe-oborudovanie-i-instrumenty.json",
+        "itemName": "Музыкальное оборудование и инструменты",
+        "status": "done",
+        "products": 257
+      },
+      {
+        "file": "audiotehnika/zvukovye-karty.json",
+        "itemName": "Звуковые карты",
+        "status": "done",
+        "products": 79
+      },
+      {
+        "file": "audiotehnika/usiliteli-dlya-audiotehniki.json",
+        "itemName": "Усилители для аудиотехники",
+        "status": "done",
+        "products": 61
+      },
+      {
+        "file": "audiotehnika/hifi-audio.json",
+        "itemName": "Hi-Fi аудио",
+        "status": "done",
+        "products": 20
+      },
+      {
+        "file": "audiotehnika/radiopriemniki-i-radiobudilniki.json",
+        "itemName": "Радиоприемники и радиобудильники",
+        "status": "done",
+        "products": 146
+      },
+      {
+        "file": "audiotehnika/portativnye-pleery-i-diktofony.json",
+        "itemName": "Портативные плееры и диктофоны",
+        "status": "done",
+        "products": 65
+      },
+      {
+        "file": "audiotehnika/audiokabeli-i-perehodniki.json",
+        "itemName": "Аудиокабели и переходники",
+        "status": "done",
+        "products": 510
+      },
+      {
+        "file": "audiotehnika/prinadlezhnosti-i-aksessuary-dlya-audiotehniki.json",
+        "itemName": "Принадлежности и аксессуары для аудиотехники",
+        "status": "done",
+        "products": 261
+      }
+    ]
+  }
+}

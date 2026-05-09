@@ -16,7 +16,7 @@ interface ProductCardProps {
   onAddToCart: () => void;
   onUpdateQuantity?: (quantity: number) => void;
   cartQuantity?: number;
-  viewMode: "products" | "services";
+  viewMode: "products";
   displayMode?: "grid" | "list";
   isWishlisted?: boolean;
   onWishlistToggle?: (productId: string, isWishlisted: boolean) => void;

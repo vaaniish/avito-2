@@ -47,6 +47,14 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
 
     try {
       if (isSignUp) {
+        if (!formData.agreeToTerms) {
+          const message =
+            "Для регистрации нужно подтвердить правила оформления и безопасной сделки.";
+          setSubmitError(message);
+          notifyError(message);
+          return;
+        }
+
         const response = await apiPost<AuthResponse>("/auth/signup", {
           name: formData.name.trim(),
           username: formData.username.trim(),
@@ -182,6 +190,33 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
             </button>
           </div>
 
+          {isSignUp && (
+            <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 md:text-sm">
+              <input
+                type="checkbox"
+                checked={formData.agreeToTerms}
+                onChange={(event) => {
+                  setSubmitError(null);
+                  setFormData({ ...formData, agreeToTerms: event.target.checked });
+                }}
+                className="mt-0.5"
+                required
+              />
+              <span>
+                Подтверждаю{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[rgb(38,83,141)] underline"
+                >
+                  правила оформления и безопасной сделки
+                </a>
+                .
+              </span>
+            </label>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
@@ -191,7 +226,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           </button>
 
           {submitError && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="whitespace-pre-line rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {submitError}
             </p>
           )}
@@ -218,6 +253,7 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           </button>
         </div>
       </div>
+
     </div>
   );
 }

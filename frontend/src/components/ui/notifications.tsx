@@ -69,7 +69,7 @@ export function NotificationHost() {
       setNotices((prev) => [...prev, { id, message, tone }]);
       const timer = window.setTimeout(() => {
         closeNotice(id);
-      }, 4500);
+      }, 5000);
       timersRef.current.push(timer);
     },
     [closeNotice],

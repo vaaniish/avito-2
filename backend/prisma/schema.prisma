@@ -26,7 +26,6 @@ enum NotificationType {
 
 enum ListingType {
   PRODUCT
-  SERVICE
 }
 
 enum ListingCondition {
@@ -117,6 +116,14 @@ enum SellerType {
 }
 
 enum PartnershipRequestStatus {
+  DRAFT
+  SUBMITTED
+  LEGAL_REVIEW
+  REPRESENTATIVE_REVIEW
+  PAYOUT_REVIEW
+  QUALITY_REVIEW
+  APPROVED_LIMITED
+  NEEDS_MORE_INFO
   PENDING
   APPROVED
   REJECTED
@@ -131,6 +138,37 @@ enum PayoutProfileStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum ListingModerationActorType {
+  SYSTEM
+  ADMIN
+}
+
+enum ListingModerationDecision {
+  QUEUED
+  AUTO_APPROVED
+  AUTO_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum CatalogSuggestionEntityType {
+  CATEGORY
+  SUBCATEGORY
+  ITEM
+  MANUFACTURER
+  MODEL
+  ATTRIBUTE_VALUE
+  ATTRIBUTE_SCHEMA
+}
+
+enum CatalogSuggestionStatus {
+  PENDING
+  AUTO_APPROVED
+  APPROVED
+  REJECTED
+  MERGED
 }
 
 model AppUser {
@@ -169,6 +207,7 @@ model AppUser {
   reviewed_kyc         KycRequest[]          @relation("kyc_reviewer")
   partnership_requests PartnershipRequest[]
   reviewed_partnership_requests PartnershipRequest[] @relation("partnership_reviewer")
+  catalog_suggestions  CatalogSuggestion[]   @relation("catalog_suggestion_proposer")
   reviews              ListingReview[]       @relation("user_reviews")
   notifications        Notification[]
   audit_logs           AuditLog[]            @relation("audit_actor")
@@ -176,11 +215,13 @@ model AppUser {
   complaint_sanctions_received ComplaintSanction[] @relation("complaint_sanction_seller")
   complaint_sanctions_created  ComplaintSanction[] @relation("complaint_sanction_admin")
   complaint_events     ComplaintEvent[]      @relation("complaint_event_actor")
+  listing_moderation_events ListingModerationEvent[] @relation("listing_moderation_actor")
   admin_idempotency_keys AdminIdempotencyKey[] @relation("admin_idempotency_actor")
   checkout_idempotency_keys CheckoutIdempotencyKey[] @relation("checkout_idempotency_actor")
   policy_acceptances   PolicyAcceptance[]
   payout_profile       SellerPayoutProfile?
   payout_profiles_reviewed SellerPayoutProfile[] @relation("payout_profile_reviewer")
+  listing_drafts       ListingDraft[]       @relation("seller_listing_drafts")
 
   @@index([role, status])
   @@index([created_at])
@@ -250,6 +291,8 @@ model CatalogCategory {
   updated_at    DateTime             @updatedAt
 
   subcategories CatalogSubcategory[]
+  attribute_definitions CatalogAttributeDefinition[]
+  suggestions    CatalogSuggestion[] @relation("catalog_suggestion_category")
 
   @@unique([type, name])
 }
@@ -265,6 +308,8 @@ model CatalogSubcategory {
 
   category       CatalogCategory  @relation(fields: [category_id], references: [id], onDelete: Cascade)
   items          CatalogItem[]
+  attribute_definitions CatalogAttributeDefinition[]
+  suggestions    CatalogSuggestion[] @relation("catalog_suggestion_subcategory")
 
   @@unique([category_id, name])
 }
@@ -280,8 +325,145 @@ model CatalogItem {
 
   subcategory    CatalogSubcategory @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
   listings       MarketplaceListing[]
+  attribute_definitions CatalogAttributeDefinition[]
+  reference_brands CatalogReferenceBrand[]
+  suggestions    CatalogSuggestion[] @relation("catalog_suggestion_item")
 
   @@unique([subcategory_id, name])
+}
+
+model CatalogReferenceBrand {
+  id             Int                     @id @default(autoincrement())
+  public_id      String                  @unique
+  item_id        Int
+  name           String
+  order_index    Int                     @default(0)
+  created_at     DateTime                @default(now())
+  updated_at     DateTime                @updatedAt
+
+  item           CatalogItem             @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  models         CatalogReferenceModel[]
+
+  @@unique([item_id, name])
+  @@index([item_id, order_index])
+  @@index([name])
+}
+
+model CatalogReferenceModel {
+  id             Int                       @id @default(autoincrement())
+  public_id      String                    @unique
+  brand_id       Int
+  name           String
+  order_index    Int                       @default(0)
+  created_at     DateTime                  @default(now())
+  updated_at     DateTime                  @updatedAt
+
+  brand          CatalogReferenceBrand     @relation(fields: [brand_id], references: [id], onDelete: Cascade)
+  variants       CatalogReferenceVariant[]
+
+  @@unique([brand_id, name])
+  @@index([brand_id, order_index])
+  @@index([name])
+}
+
+model CatalogReferenceVariant {
+  id             Int                              @id @default(autoincrement())
+  public_id      String                           @unique
+  model_id       Int
+  external_product_id String?
+  title          String
+  order_index    Int                              @default(0)
+  created_at     DateTime                         @default(now())
+  updated_at     DateTime                         @updatedAt
+
+  model          CatalogReferenceModel            @relation(fields: [model_id], references: [id], onDelete: Cascade)
+  characteristics CatalogReferenceCharacteristic[]
+
+  @@unique([model_id, external_product_id])
+  @@index([model_id, order_index])
+  @@index([title])
+}
+
+model CatalogReferenceCharacteristic {
+  id                 Int                     @id @default(autoincrement())
+  variant_id         Int
+  key                String
+  label              String
+  value              String
+  raw_value          String
+  source_group_index Int
+  source             String                  @default("bracketGroups")
+  order_index        Int                     @default(0)
+  created_at         DateTime                @default(now())
+  updated_at         DateTime                @updatedAt
+
+  variant            CatalogReferenceVariant @relation(fields: [variant_id], references: [id], onDelete: Cascade)
+
+  @@index([variant_id, order_index])
+  @@index([key])
+  @@index([value])
+}
+
+model CatalogAttributeDefinition {
+  id             Int                 @id @default(autoincrement())
+  public_id      String              @unique
+  type           ListingType
+  category_id    Int?
+  subcategory_id Int?
+  item_id        Int?
+  key            String
+  label          String
+  input_type     String              @default("text")
+  required       Boolean             @default(false)
+  options        Json?
+  unit           String?
+  min_value      Float?
+  max_value      Float?
+  default_value  String?
+  order_index    Int                 @default(0)
+  created_at     DateTime            @default(now())
+  updated_at     DateTime            @updatedAt
+
+  category       CatalogCategory?    @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  subcategory    CatalogSubcategory? @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
+  item           CatalogItem?        @relation(fields: [item_id], references: [id], onDelete: Cascade)
+
+  @@index([type, category_id])
+  @@index([type, subcategory_id])
+  @@index([type, item_id])
+  @@index([key])
+}
+
+model CatalogSuggestion {
+  id                      Int                         @id @default(autoincrement())
+  public_id               String                      @unique
+  entity_type             CatalogSuggestionEntityType
+  status                  CatalogSuggestionStatus     @default(PENDING)
+  type                    ListingType
+  category_id             Int?
+  subcategory_id          Int?
+  item_id                 Int?
+  proposed_by_id          Int?
+  raw_value               String
+  normalized_value        String
+  reason                  String?
+  payload                 Json?
+  admin_note              String?
+  reviewed_by_id          Int?
+  reviewed_at             DateTime?
+  usage_count             Int                         @default(1)
+  merged_target_public_id String?
+  created_at              DateTime                    @default(now())
+  updated_at              DateTime                    @updatedAt
+
+  category                CatalogCategory?            @relation("catalog_suggestion_category", fields: [category_id], references: [id], onDelete: SetNull)
+  subcategory             CatalogSubcategory?         @relation("catalog_suggestion_subcategory", fields: [subcategory_id], references: [id], onDelete: SetNull)
+  item                    CatalogItem?                @relation("catalog_suggestion_item", fields: [item_id], references: [id], onDelete: SetNull)
+  proposed_by             AppUser?                    @relation("catalog_suggestion_proposer", fields: [proposed_by_id], references: [id], onDelete: SetNull)
+
+  @@unique([entity_type, type, category_id, subcategory_id, normalized_value], map: "CatalogSuggestion_scope_value")
+  @@index([status, created_at])
+  @@index([entity_type, type])
 }
 
 model MarketplaceListing {
@@ -301,6 +483,15 @@ model MarketplaceListing {
   views                Int               @default(0)
   shipping_by_seller   Boolean           @default(true)
   sku                  String?
+  tech_grade           String?
+  tech_battery_health  Int?
+  tech_defects         String?
+  tech_included        String?
+  photo_count          Int               @default(0)
+  photo_front_present  Boolean           @default(false)
+  photo_back_present   Boolean           @default(false)
+  photo_left_present   Boolean           @default(false)
+  photo_right_present  Boolean           @default(false)
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
 
@@ -310,6 +501,7 @@ model MarketplaceListing {
   attributes           ListingAttribute[]
   reviews              ListingReview[]
   questions            ListingQuestion[]
+  moderation_events    ListingModerationEvent[]
   complaints           Complaint[]
   order_items          MarketOrderItem[]
   wishlist_items       WishlistItem[]
@@ -319,6 +511,27 @@ model MarketplaceListing {
   @@index([type, status, moderation_status])
   @@index([status, moderation_status, created_at])
   @@index([type, status, moderation_status, created_at(sort: Desc), id(sort: Desc)], map: "MarketplaceListing_type_status_moderation_created_id_idx")
+}
+
+model ListingDraft {
+  id             Int         @id @default(autoincrement())
+  public_id      String      @unique
+  seller_id      Int
+  type           ListingType
+  title          String?
+  category_id    Int?
+  subcategory_id Int?
+  item_id        Int?
+  payload        Json
+  current_screen String
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  seller         AppUser     @relation("seller_listing_drafts", fields: [seller_id], references: [id], onDelete: Cascade)
+
+  @@index([seller_id, updated_at])
+  @@index([seller_id, type])
+  @@index([item_id])
 }
 
 model ListingImage {
@@ -344,6 +557,28 @@ model ListingAttribute {
 
   @@unique([listing_id, key], map: "ListingAttribute_listing_id_attr_key")
   @@index([listing_id])
+}
+
+model ListingModerationEvent {
+  id            Int                        @id @default(autoincrement())
+  public_id     String                     @unique
+  listing_id    Int
+  actor_user_id Int?
+  actor_type    ListingModerationActorType
+  decision      ListingModerationDecision
+  reason_code   String
+  reason_note   String?
+  risk_score    Int?
+  signals       Json?
+  metadata      Json?
+  created_at    DateTime                   @default(now())
+
+  listing       MarketplaceListing         @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  actor         AppUser?                   @relation("listing_moderation_actor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([listing_id, created_at(sort: Desc), id(sort: Desc)], map: "ListingModerationEvent_listing_created_id_idx")
+  @@index([decision, created_at(sort: Desc), id(sort: Desc)], map: "ListingModerationEvent_decision_created_id_idx")
+  @@index([reason_code])
 }
 
 model ListingReview {
@@ -632,9 +867,73 @@ model PartnershipRequest {
 
   user            AppUser     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   reviewed_by     AppUser?    @relation("partnership_reviewer", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+  onboarding_profile PartnerOnboardingProfile?
 
   @@index([status, created_at])
   @@index([reviewed_by_id])
+  @@index([created_at])
+}
+
+model PartnerOnboardingProfile {
+  id                         Int      @id @default(autoincrement())
+  public_id                  String   @unique
+  request_id                 Int      @unique
+  legal_type                 SellerType
+  inn                        String
+  ogrn                       String
+  kpp                        String?
+  legal_name                 String
+  registration_status        String
+  registered_address         String
+  tax_region                 String
+  representative_full_name   String
+  representative_role        String
+  representative_phone       String
+  representative_email       String
+  authority_type             String
+  authority_document         String?
+  website_url                String
+  business_email             String
+  domain_ownership_method    String
+  public_profile_urls        Json
+  business_role              String
+  categories                 Json
+  fulfillment_model          String
+  country                    String
+  region                     String
+  city                       String
+  warehouse_address          String
+  service_center_address     String
+  delivery_coverage_regions  Json
+  pickup_available           Boolean  @default(false)
+  return_address             String
+  support_phone              String
+  support_email              String
+  service_hours              String
+  monthly_capacity           Int
+  product_source_type        String
+  supplier_documents         String
+  diagnostic_process         String
+  grading_standard           String
+  warranty_days              Int
+  return_days                Int
+  serial_check_policy        String
+  quality_charter_accepted   Boolean  @default(false)
+  legal_lookup_verified      Boolean  @default(false)
+  email_verified             Boolean  @default(false)
+  domain_verified            Boolean  @default(false)
+  representative_verified    Boolean  @default(false)
+  payout_verified            Boolean  @default(false)
+  allowed_categories         Json?
+  listing_limit              Int      @default(20)
+  created_at                 DateTime @default(now())
+  updated_at                 DateTime @updatedAt
+
+  request                    PartnershipRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([legal_type, inn])
+  @@index([registration_status])
+  @@index([city, region])
   @@index([created_at])
 }
 

@@ -20,20 +20,41 @@ export type AutoModerationDecision = {
 
 type RuleEvaluation = {
   riskScore: number;
-  hasAutoFlag: boolean;
+  hardSignals: string[];
+  mediumSignals: string[];
+  softSignals: string[];
   signals: string[];
 };
 
-type AiEvaluation = {
-  riskScore: number;
-  hardReject: boolean;
-  needsReview: boolean;
-  signals: string[];
-};
+export type ImageModerationSignal =
+  | "image_exact_duplicate"
+  | "image_near_duplicate"
+  | "image_low_contrast"
+  | "image_low_resolution"
+  | "image_similar_composition";
+
+const IMAGE_SIGNAL_SET = new Set<string>([
+  "image_exact_duplicate",
+  "image_near_duplicate",
+  "image_low_contrast",
+  "image_low_resolution",
+  "image_similar_composition",
+]);
+
+function pushSignal(
+  groups: Pick<RuleEvaluation, "hardSignals" | "mediumSignals" | "softSignals" | "signals">,
+  level: "hard" | "medium" | "soft",
+  signal: string,
+): void {
+  groups.signals.push(signal);
+  if (level === "hard") groups.hardSignals.push(signal);
+  if (level === "medium") groups.mediumSignals.push(signal);
+  if (level === "soft") groups.softSignals.push(signal);
+}
 
 const CONTACT_PATTERNS: RegExp[] = [
-  /(t(?:elegram)?|tg|telega|телеграм|тг)/iu,
-  /(whatsapp|wa|ватсап|вотсап)/iu,
+  /(\bt(?:elegram)?\b|\btg\b|\btelega\b|телеграм|(?:^|[^а-яa-z0-9])тг(?:$|[^а-яa-z0-9]))/iu,
+  /(whatsapp|\bwa\b|ватсап|вотсап)/iu,
   /(viber|вайбер)/iu,
   /(discord|дискорд)/iu,
   /(в\s*лс|личк[ауе]|пиши\s*в\s*личк)/iu,
@@ -80,6 +101,11 @@ const DRUG_PATTERNS: RegExp[] = [
 const WEAPON_PATTERNS: RegExp[] = [
   /(оружи|пистолет|автомат|патрон|гранат|взрывчат)/iu,
   /(weapon|gun|ammo|explosive)/iu,
+];
+
+const SCAM_PATTERNS: RegExp[] = [
+  /(гарантированн[а-я\s]*доход|быстр[а-я\s]*заработ|без\s*риска|удвою\s*деньги)/iu,
+  /(guaranteed\s*profit|quick\s*money|no\s*risk|double\s*your\s*money)/iu,
 ];
 
 const IMAGE_RISKY_WORDS: RegExp[] = [
@@ -132,14 +158,18 @@ function evaluateRules(params: {
   category: string;
   price: number;
   imageUrl?: string | null;
+  imageModerationSignals?: string[];
 }): RuleEvaluation {
   const bodyText = normalizeText(
     `${params.title} ${params.description} ${params.category}`,
   );
   const imageText = normalizeText(params.imageUrl ?? "");
   const signals: string[] = [];
+  const hardSignals: string[] = [];
+  const mediumSignals: string[] = [];
+  const softSignals: string[] = [];
+  const groups = { hardSignals, mediumSignals, softSignals, signals };
   let riskScore = 0;
-  let hasAutoFlag = false;
 
   const contactHits = countPatternMatches(bodyText, CONTACT_PATTERNS);
   const offplatformHits = countPatternMatches(bodyText, OFFPLATFORM_PATTERNS);
@@ -149,296 +179,92 @@ function evaluateRules(params: {
   const spamHits = countPatternMatches(bodyText, SPAM_PATTERNS);
   const drugHits = countPatternMatches(bodyText, DRUG_PATTERNS);
   const weaponHits = countPatternMatches(bodyText, WEAPON_PATTERNS);
+  const scamHits = countPatternMatches(bodyText, SCAM_PATTERNS);
   const imageWordHits = countPatternMatches(imageText, IMAGE_RISKY_WORDS);
 
   if (contactHits > 0) {
-    signals.push("contact_details_detected");
-    riskScore += 35;
-    hasAutoFlag = true;
+    pushSignal(groups, "hard", "contact_details_detected");
+    riskScore += 32;
   }
 
   if (offplatformHits > 0) {
-    signals.push("offplatform_payment_detected");
+    pushSignal(groups, "hard", "offplatform_payment_detected");
     riskScore += 45;
-    hasAutoFlag = true;
   }
 
   if (explicitHits > 0) {
-    signals.push("sexual_explicit_text_detected");
-    riskScore += 55;
-    hasAutoFlag = true;
+    pushSignal(groups, "hard", "sexual_explicit_text_detected");
+    riskScore += 70;
   }
 
   if (violenceHits > 0) {
-    signals.push("violence_gore_text_detected");
-    riskScore += 45;
-    hasAutoFlag = true;
+    pushSignal(groups, "hard", "violence_gore_text_detected");
+    riskScore += 70;
   }
 
   if (drugHits > 0) {
-    signals.push("drug_related_text_detected");
-    riskScore += 40;
-    hasAutoFlag = true;
+    pushSignal(groups, "hard", "drug_related_text_detected");
+    riskScore += 75;
   }
 
   if (weaponHits > 0) {
-    signals.push("weapon_related_text_detected");
-    riskScore += 30;
-    hasAutoFlag = true;
+    pushSignal(groups, "hard", "weapon_related_text_detected");
+    riskScore += 70;
+  }
+
+  if (scamHits > 0) {
+    pushSignal(groups, "hard", "scam_language_detected");
+    riskScore += 50;
   }
 
   if (profanityHits > 0) {
-    signals.push("profanity_detected");
+    pushSignal(groups, "soft", "profanity_detected");
     riskScore += 20;
-    hasAutoFlag = true;
   }
 
   if (spamHits > 0) {
-    signals.push("spam_markers_detected");
+    pushSignal(groups, "soft", "spam_markers_detected");
     riskScore += 15;
   }
 
   if (imageWordHits > 0) {
-    signals.push("suspicious_image_url_markers");
+    pushSignal(groups, "soft", "suspicious_image_url_markers");
     riskScore += 20;
   }
 
   if (params.price < 50 || params.price > 10_000_000) {
-    signals.push("price_outlier");
+    pushSignal(groups, "medium", "price_outlier");
     riskScore += 12;
   }
 
   if (params.title.trim().length < 6) {
-    signals.push("too_short_title");
+    pushSignal(groups, "soft", "too_short_title");
     riskScore += 10;
   }
 
   if (params.description.trim().length < 20) {
-    signals.push("too_short_description");
+    pushSignal(groups, "medium", "too_short_description");
     riskScore += 10;
+  }
+
+  for (const signal of params.imageModerationSignals ?? []) {
+    if (!IMAGE_SIGNAL_SET.has(signal)) continue;
+    if (signal === "image_exact_duplicate" || signal === "image_near_duplicate") {
+      pushSignal(groups, "medium", signal);
+      riskScore += 14;
+      continue;
+    }
+    pushSignal(groups, "soft", signal);
+    riskScore += signal === "image_low_resolution" ? 8 : 6;
   }
 
   return {
     riskScore: Math.min(100, riskScore),
-    hasAutoFlag,
+    hardSignals,
+    mediumSignals,
+    softSignals,
     signals,
   };
-}
-
-function parseJsonObjectFromText(raw: string): Record<string, unknown> | null {
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object") {
-      return parsed as Record<string, unknown>;
-    }
-    return null;
-  } catch (_error) {
-    const match = raw.match(/\{[\s\S]*\}/u);
-    if (!match) return null;
-    try {
-      const parsed = JSON.parse(match[0]) as unknown;
-      if (parsed && typeof parsed === "object") {
-        return parsed as Record<string, unknown>;
-      }
-    } catch (_nestedError) {
-      return null;
-    }
-    return null;
-  }
-}
-
-async function fetchWithTimeout(
-  url: string,
-  init: RequestInit,
-  timeoutMs: number,
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, {
-      ...init,
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function fetchImageBase64(
-  imageUrl: string,
-  maxBytes: number,
-): Promise<string | null> {
-  try {
-    const response = await fetchWithTimeout(
-      imageUrl,
-      { method: "GET" },
-      7_500,
-    );
-    if (!response.ok) return null;
-    const contentType = response.headers.get("content-type") ?? "";
-    if (!contentType.startsWith("image/")) return null;
-    const contentLength = Number(response.headers.get("content-length") ?? "0");
-    if (contentLength > 0 && contentLength > maxBytes) return null;
-    const data = Buffer.from(await response.arrayBuffer());
-    if (data.byteLength > maxBytes) return null;
-    return data.toString("base64");
-  } catch (_error) {
-    return null;
-  }
-}
-
-function parseOllamaRiskPayload(raw: string): AiEvaluation | null {
-  const payload = parseJsonObjectFromText(raw);
-  if (!payload) return null;
-
-  const riskRaw = Number(payload.risk_score ?? payload.risk ?? 0);
-  const hardReject = Boolean(payload.block ?? payload.hard_reject ?? false);
-  const needsReview = Boolean(payload.review ?? payload.needs_review ?? false);
-  const labelsRaw = Array.isArray(payload.labels) ? payload.labels : [];
-  const reasonsRaw = Array.isArray(payload.reasons) ? payload.reasons : [];
-
-  const labels = labelsRaw
-    .filter((item) => typeof item === "string")
-    .map((item) => `ai_label:${item}`);
-  const reasons = reasonsRaw
-    .filter((item) => typeof item === "string")
-    .map((item) => `ai_reason:${item}`);
-
-  return {
-    riskScore: Number.isFinite(riskRaw) ? Math.max(0, Math.min(100, riskRaw)) : 0,
-    hardReject,
-    needsReview,
-    signals: [...labels, ...reasons],
-  };
-}
-
-async function runFreeAiModeration(params: {
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  imageUrl?: string | null;
-}): Promise<AiEvaluation | null> {
-  const provider = (process.env.MODERATION_AI_PROVIDER ?? "none")
-    .trim()
-    .toLowerCase();
-  if (provider !== "ollama") {
-    return null;
-  }
-
-  const baseUrl =
-    process.env.MODERATION_AI_BASE_URL?.trim() || "http://127.0.0.1:11434";
-  const textModel =
-    process.env.MODERATION_AI_TEXT_MODEL?.trim() || "qwen2.5:3b-instruct";
-  const visionModel =
-    process.env.MODERATION_AI_VISION_MODEL?.trim() || "llava:7b";
-  const imageAiEnabled = (process.env.MODERATION_AI_IMAGE_ENABLED ?? "false")
-    .trim()
-    .toLowerCase() === "true";
-  const maxImageBytes = Number(process.env.MODERATION_AI_MAX_IMAGE_BYTES ?? "5242880");
-  const textTimeoutMs = Number(process.env.MODERATION_AI_TEXT_TIMEOUT_MS ?? "8000");
-  const imageTimeoutMs = Number(process.env.MODERATION_AI_IMAGE_TIMEOUT_MS ?? "12000");
-
-  const textPrompt = [
-    "You are a strict marketplace moderator.",
-    "Return JSON only with keys: risk_score (0..100), block (bool), review (bool), labels (string[]), reasons (string[]).",
-    "Detect: explicit sexual, nudity, gore, hate, scam, external contacts, off-platform payment, spam, prohibited content.",
-    `Title: ${params.title}`,
-    `Description: ${params.description}`,
-    `Category: ${params.category}`,
-    `Price: ${params.price}`,
-  ].join("\n");
-
-  try {
-    const textResponse = await fetchWithTimeout(
-      `${baseUrl}/api/chat`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: textModel,
-          stream: false,
-          format: "json",
-          messages: [
-            {
-              role: "user",
-              content: textPrompt,
-            },
-          ],
-        }),
-      },
-      Number.isFinite(textTimeoutMs) ? Math.max(2_000, textTimeoutMs) : 8_000,
-    );
-
-    if (!textResponse.ok) {
-      return null;
-    }
-
-    const textPayload = (await textResponse.json()) as {
-      message?: { content?: string };
-    };
-    const textEval = parseOllamaRiskPayload(textPayload.message?.content ?? "");
-    if (!textEval) {
-      return null;
-    }
-
-    if (!imageAiEnabled || !params.imageUrl) {
-      return textEval;
-    }
-
-    const imageBase64 = await fetchImageBase64(params.imageUrl, maxImageBytes);
-    if (!imageBase64) {
-      return textEval;
-    }
-
-    const imagePrompt = [
-      "You are a strict image moderator for marketplace listings.",
-      "Return JSON only with keys: risk_score (0..100), block (bool), review (bool), labels (string[]), reasons (string[]).",
-      "Focus on nudity, sexual content, minors, gore, violence, offensive symbols, illegal items, spam text in image.",
-    ].join("\n");
-
-    const imageResponse = await fetchWithTimeout(
-      `${baseUrl}/api/chat`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: visionModel,
-          stream: false,
-          format: "json",
-          messages: [
-            {
-              role: "user",
-              content: imagePrompt,
-              images: [imageBase64],
-            },
-          ],
-        }),
-      },
-      Number.isFinite(imageTimeoutMs) ? Math.max(4_000, imageTimeoutMs) : 12_000,
-    );
-
-    if (!imageResponse.ok) {
-      return textEval;
-    }
-
-    const imagePayload = (await imageResponse.json()) as {
-      message?: { content?: string };
-    };
-    const imageEval = parseOllamaRiskPayload(imagePayload.message?.content ?? "");
-    if (!imageEval) {
-      return textEval;
-    }
-
-    return {
-      riskScore: Math.max(textEval.riskScore, imageEval.riskScore),
-      hardReject: textEval.hardReject || imageEval.hardReject,
-      needsReview: textEval.needsReview || imageEval.needsReview,
-      signals: [...textEval.signals, ...imageEval.signals],
-    };
-  } catch (_error) {
-    return null;
-  }
 }
 
 export async function evaluateListingModeration(params: {
@@ -447,6 +273,7 @@ export async function evaluateListingModeration(params: {
   category: string;
   price: number;
   imageUrl?: string | null;
+  imageModerationSignals?: string[];
   seller: SellerModerationContext | null;
 }): Promise<AutoModerationDecision> {
   const rule = evaluateRules({
@@ -455,18 +282,10 @@ export async function evaluateListingModeration(params: {
     category: params.category,
     price: params.price,
     imageUrl: params.imageUrl,
+    imageModerationSignals: params.imageModerationSignals,
   });
-  const ai = await runFreeAiModeration({
-    title: params.title,
-    description: params.description,
-    category: params.category,
-    price: params.price,
-    imageUrl: params.imageUrl,
-  });
-
   let riskScore = rule.riskScore;
   const signals = [...rule.signals];
-  const autoFlagged = rule.hasAutoFlag;
 
   if (params.seller) {
     const accountAgeDays = Math.floor(
@@ -484,45 +303,58 @@ export async function evaluateListingModeration(params: {
       riskScore += 12;
       signals.push("seller_many_complaints");
     }
-  }
-
-  let aiFlagged = false;
-  const aiFlagRiskThresholdRaw = Number(
-    process.env.MODERATION_AI_FLAG_RISK_THRESHOLD ?? "65",
-  );
-  const aiHardRiskThresholdRaw = Number(
-    process.env.MODERATION_AI_HARD_RISK_THRESHOLD ?? "85",
-  );
-  const aiFlagRiskThreshold = Number.isFinite(aiFlagRiskThresholdRaw)
-    ? Math.max(0, Math.min(100, Math.round(aiFlagRiskThresholdRaw)))
-    : 65;
-  const aiHardRiskThreshold = Number.isFinite(aiHardRiskThresholdRaw)
-    ? Math.max(0, Math.min(100, Math.round(aiHardRiskThresholdRaw)))
-    : 85;
-
-  if (ai) {
-    riskScore = Math.round(riskScore * 0.6 + ai.riskScore * 0.4);
-    aiFlagged =
-      ai.hardReject ||
-      ai.riskScore >= aiHardRiskThreshold ||
-      (ai.needsReview && ai.riskScore >= aiFlagRiskThreshold) ||
-      (ai.riskScore >= aiFlagRiskThreshold && autoFlagged);
-    signals.push(...ai.signals);
-  } else {
-    signals.push("ai_not_available_fallback_rules");
+    if (
+      accountAgeDays >= 90 &&
+      params.seller.isVerified &&
+      params.seller.complaintsCount === 0 &&
+      params.seller.sellerOrdersCount >= 3
+    ) {
+      riskScore -= 10;
+      signals.push("trusted_seller_discount");
+    }
+    if (params.seller.complaintsCount >= 1 && params.seller.complaintsCount < 3) {
+      riskScore += 6;
+      signals.push("seller_has_complaints");
+    }
   }
 
   const uniqueSignals = Array.from(new Set(signals));
+  const normalizedRiskScore = Math.max(0, Math.min(100, Math.round(riskScore)));
+  const hasHardViolation = rule.hardSignals.length > 0;
+  const hasCriticalHardViolation = rule.hardSignals.some((signal) =>
+    [
+      "sexual_explicit_text_detected",
+      "violence_gore_text_detected",
+      "drug_related_text_detected",
+      "weapon_related_text_detected",
+    ].includes(signal),
+  );
+  const hasContactAndPayment =
+    uniqueSignals.includes("contact_details_detected") &&
+    uniqueSignals.includes("offplatform_payment_detected");
 
-  // Any deterministic marker, or strong AI signal, sends listing to manual review.
-  if (autoFlagged || aiFlagged) {
+  if (
+    normalizedRiskScore >= 70 &&
+    (hasCriticalHardViolation || hasContactAndPayment || hasHardViolation)
+  ) {
+    return {
+      moderationStatus: "REJECTED",
+      listingStatus: "INACTIVE",
+      reason: "auto_reject_high_confidence_violation",
+      riskScore: normalizedRiskScore,
+      signals: uniqueSignals,
+      aiUsed: false,
+    };
+  }
+
+  if (normalizedRiskScore >= 30 || hasHardViolation) {
     return {
       moderationStatus: "PENDING",
       listingStatus: "MODERATION",
-      reason: "manual_review_flagged_by_ai_or_rules",
-      riskScore: Math.min(100, riskScore),
+      reason: "manual_review_risk_score_gray_zone",
+      riskScore: normalizedRiskScore,
       signals: uniqueSignals,
-      aiUsed: Boolean(ai),
+      aiUsed: false,
     };
   }
 
@@ -530,8 +362,8 @@ export async function evaluateListingModeration(params: {
     moderationStatus: "APPROVED",
     listingStatus: "ACTIVE",
     reason: "auto_approve_no_flags",
-    riskScore: Math.min(100, riskScore),
+    riskScore: normalizedRiskScore,
     signals: uniqueSignals,
-    aiUsed: Boolean(ai),
+    aiUsed: false,
   };
 }

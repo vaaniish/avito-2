@@ -1,0 +1,863 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Профессиональное сетевое оборудование",
+  "itemName": "Кабельные тестеры",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/29082725e99312df/kabelnye-testery/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:27.614Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 33,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/66423e0f43f73333/kabelnyj-tester-proconnect-12-1006-4/",
+      "title": "Кабельный тестер PROconnect 12-1006-4 [разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "66423e0f43f73333",
+      "cardText": "Кабельный тестер PROconnect 12-1006-4 [разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка]4.72 |772 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/daa12b5233daed20/kabelnyj-tester-5bites-ly-ct003/",
+      "title": "Кабельный тестер 5bites LY-CT003 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "daa12b5233daed20",
+      "cardText": "Кабельный тестер 5bites LY-CT003 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]4.92 |73 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f44e76359a24d620/kabelnyj-tester-lanmaster-lan-tst-wrm-300/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-WRM-300 [разъем RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "f44e76359a24d620",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-WRM-300 [разъем RJ-45, кабели STP, UTP, питание-батарейка]4.67 |21 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/51cf4755e97bed20/kabelnyj-tester-5bites-ly-ct021/",
+      "title": "Кабельный тестер 5bites LY-CT021 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "51cf4755e97bed20",
+      "cardText": "Кабельный тестер 5bites LY-CT021 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]4.8 |15 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e4e72b6833c9ed20/kabelnyj-tester-5bites-ly-ct005/",
+      "title": "Кабельный тестер 5bites LY-CT005 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "e4e72b6833c9ed20",
+      "cardText": "Кабельный тестер 5bites LY-CT005 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]4.58 |88 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4bc4f6f6e97bed20/kabelnyj-tester-5bites-ly-ct004/",
+      "title": "Кабельный тестер 5bites LY-CT004 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "4bc4f6f6e97bed20",
+      "cardText": "Кабельный тестер 5bites LY-CT004 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]4.88 |16 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/46d03f77bba352d7/kabelnyj-tester-cablexpert-nct-1/",
+      "title": "Кабельный тестер Cablexpert NCT-1 [разъем BNC, RJ-45, до 300 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-45, до 300 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-45, до 300 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "46d03f77bba352d7",
+      "cardText": "Кабельный тестер Cablexpert NCT-1 [разъем BNC, RJ-45, до 300 м, питание-батарейка]4.48 |161 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4bc4f6f7e97bed20/kabelnyj-tester-5bites-ly-ct009/",
+      "title": "Кабельный тестер 5bites LY-CT009 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "4bc4f6f7e97bed20",
+      "cardText": "Кабельный тестер 5bites LY-CT009 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]4.76 |13 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6811dcc7d97a8bef/kabelnyj-tester-5bites-ly-ct023/",
+      "title": "Кабельный тестер 5Bites LY-CT023 [разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор]",
+      "specsText": "разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "6811dcc7d97a8bef",
+      "cardText": "Кабельный тестер 5Bites LY-CT023 [разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/66423e1943f73333/kabelnyj-tester-rexant-12-1011/",
+      "title": "Кабельный тестер Rexant 12-1011 [разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "66423e1943f73333",
+      "cardText": "Кабельный тестер Rexant 12-1011 [разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка]5 |4 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b02573670b751ad7/kabelnyj-tester-lanmaster-lan-tst-wrm-310-poe/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-WRM-310-POE [разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "b02573670b751ad7",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-WRM-310-POE [разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/526c40ffe3ccdeba/kabelnyj-tester-lanmaster-lan-pro-ltpk-n-8r/",
+      "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N-8R [разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "526c40ffe3ccdeba",
+      "cardText": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N-8R [разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/63504b2a13563332/kabelnyj-tester-lanmaster-lan-pro-ltpk-n/",
+      "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "63504b2a13563332",
+      "cardText": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]4.47 |10 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/64e5b479a5fe9c74/kabelnyj-tester-lanmaster-lan-tst-wrm-400-poe/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-WRM-400-POE [разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]",
+      "specsText": "разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "64e5b479a5fe9c74",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-WRM-400-POE [разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ee5bbd5a9f66c664/kabelnyj-tester-lanmaster-lan-pro-ltpk-tdr/",
+      "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-TDR [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор]",
+      "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "ee5bbd5a9f66c664",
+      "cardText": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-TDR [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1fa9eacdd69aaec4/kabelnyj-tester-lanmaster-lan-tst-tpk-300n/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-TPK-300N [разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "1fa9eacdd69aaec4",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-TPK-300N [разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка]4.67 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/57dde43a812a7c32/kabelnyj-tester-lanmaster-lan-tst-lptvp-c/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-LPTVP-C [разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор]",
+      "specsText": "разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "57dde43a812a7c32",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-LPTVP-C [разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/70d2db2f6ec6ed20/kabelnyj-tester-aceline-t-1/",
+      "title": "Кабельный тестер Aceline T-1 [разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "70d2db2f6ec6ed20",
+      "cardText": "Кабельный тестер Aceline T-1 [разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]3.94 |102 отзываCредняя надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/272f5fef33dced20/kabelnyj-tester-5bites-ly-ct008/",
+      "title": "Кабельный тестер 5bites LY-CT008 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "272f5fef33dced20",
+      "cardText": "Кабельный тестер 5bites LY-CT008 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка]4.04 |23 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3999c22e0f7d1b80/kabelnyj-tester-mastech-ms6810/",
+      "title": "Кабельный тестер Mastech MS6810 [разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "3999c22e0f7d1b80",
+      "cardText": "Кабельный тестер Mastech MS6810 [разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка]4.73 |25 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/66423e1143f73333/kabelnyj-tester-rexant-12-1006/",
+      "title": "Кабельный тестер Rexant 12-1006 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "66423e1143f73333",
+      "cardText": "Кабельный тестер Rexant 12-1006 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]4 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f730c1e96c1ed582/kabelnyj-tester-5bites-ly-ct022/",
+      "title": "Кабельный тестер 5bites LY-CT022 [разъем RJ-12, RJ-45, питание-аккумулятор]",
+      "specsText": "разъем RJ-12, RJ-45, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем RJ-12, RJ-45, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "f730c1e96c1ed582",
+      "cardText": "Кабельный тестер 5bites LY-CT022 [разъем RJ-12, RJ-45, питание-аккумулятор]3 |2 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/13b80ad00570027f/kabelnyj-tester-lanmaster-lan-tst-lptve-c/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-LPTVE-C [разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор]",
+      "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "13b80ad00570027f",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-LPTVE-C [разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e7d892152380f126/kabelnyj-tester-lanmaster-lan-ft-opmm-ms/",
+      "title": "Кабельный тестер Lanmaster LAN-FT-OPM/M-MS [разъем FC, SC, ST, питание-батарейка]",
+      "specsText": "разъем FC, SC, ST, питание-батарейка",
+      "bracketGroups": [
+        "разъем FC, SC, ST, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "e7d892152380f126",
+      "cardText": "Кабельный тестер Lanmaster LAN-FT-OPM/M-MS [разъем FC, SC, ST, питание-батарейка]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/66423e0d43f73333/kabelnyj-tester-rexant-12-1001/",
+      "title": "Кабельный тестер Rexant 12-1001 [разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "66423e0d43f73333",
+      "cardText": "Кабельный тестер Rexant 12-1001 [разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка]3.5 |2 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5c1eb6dc5ee91125/kabelnyj-tester-lanmaster-lan-pro-l-8r/",
+      "title": "Кабельный тестер Lanmaster LAN-PRO-L-8R [разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка]",
+      "specsText": "разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "5c1eb6dc5ee91125",
+      "cardText": "Кабельный тестер Lanmaster LAN-PRO-L-8R [разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b4bd39c10f7d1b80/kabelnyj-tester-mastech-ms6813t/",
+      "title": "Кабельный тестер Mastech MS6813T [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "b4bd39c10f7d1b80",
+      "cardText": "Кабельный тестер Mastech MS6813T [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]3.33 |24 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/47674e70f40982bb/kabelnyj-tester-lanmaster-lan-tpk-200n/",
+      "title": "Кабельный тестер Lanmaster LAN-TPK-200N [разъем RJ-12, RJ-45, питание-аккумулятор]",
+      "specsText": "разъем RJ-12, RJ-45, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем RJ-12, RJ-45, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "47674e70f40982bb",
+      "cardText": "Кабельный тестер Lanmaster LAN-TPK-200N [разъем RJ-12, RJ-45, питание-аккумулятор]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/591b1397ae0b8a5a/kabelnyj-tester-5bites-ly-ct030-pro/",
+      "title": "Кабельный тестер 5bites LY-CT030 PRO [разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+      "specsText": "разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка"
+      ],
+      "priceText": "",
+      "productId": "591b1397ae0b8a5a",
+      "cardText": "Кабельный тестер 5bites LY-CT030 PRO [разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7fa2e6f56100bfdd/kabelnyj-tester-lanmaster-lan-teleset-100/",
+      "title": "Кабельный тестер Lanmaster LAN-TELESET-100 [разъем RJ-11]",
+      "specsText": "разъем RJ-11",
+      "bracketGroups": [
+        "разъем RJ-11"
+      ],
+      "priceText": "",
+      "productId": "7fa2e6f56100bfdd",
+      "cardText": "Кабельный тестер Lanmaster LAN-TELESET-100 [разъем RJ-11]4.8|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b46f3f5b0454c18f/kabelnyj-tester-lanmaster-lan-ppi-chktool/",
+      "title": "Кабельный тестер Lanmaster LAN-PPi-CHKTOOL [разъем RJ-45, кабели STP, UTP]",
+      "specsText": "разъем RJ-45, кабели STP, UTP",
+      "bracketGroups": [
+        "разъем RJ-45, кабели STP, UTP"
+      ],
+      "priceText": "",
+      "productId": "b46f3f5b0454c18f",
+      "cardText": "Кабельный тестер Lanmaster LAN-PPi-CHKTOOL [разъем RJ-45, кабели STP, UTP]4.8|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c985850413563332/kabelnyj-tester-lanmaster-lan-pro-ltpk-poe-8r/",
+      "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-POE-8R [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор]",
+      "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "c985850413563332",
+      "cardText": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-POE-8R [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор]4.18 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f9c6c0e914ac16b2/kabelnyj-tester-lanmaster-lan-tst-cctv/",
+      "title": "Кабельный тестер Lanmaster LAN-TST-CCTV [разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор]",
+      "specsText": "разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор",
+      "bracketGroups": [
+        "разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор"
+      ],
+      "priceText": "",
+      "productId": "f9c6c0e914ac16b2",
+      "cardText": "Кабельный тестер Lanmaster LAN-TST-CCTV [разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор]1 |1 отзыв"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Кабельный",
+      "models": [
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT003",
+          "name": "Кабельный тестер 5bites LY-CT003",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/daa12b5233daed20/kabelnyj-tester-5bites-ly-ct003/",
+              "title": "Кабельный тестер 5bites LY-CT003 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT004",
+          "name": "Кабельный тестер 5bites LY-CT004",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4bc4f6f6e97bed20/kabelnyj-tester-5bites-ly-ct004/",
+              "title": "Кабельный тестер 5bites LY-CT004 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT005",
+          "name": "Кабельный тестер 5bites LY-CT005",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e4e72b6833c9ed20/kabelnyj-tester-5bites-ly-ct005/",
+              "title": "Кабельный тестер 5bites LY-CT005 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT008",
+          "name": "Кабельный тестер 5bites LY-CT008",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/272f5fef33dced20/kabelnyj-tester-5bites-ly-ct008/",
+              "title": "Кабельный тестер 5bites LY-CT008 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 1000 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT009",
+          "name": "Кабельный тестер 5bites LY-CT009",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4bc4f6f7e97bed20/kabelnyj-tester-5bites-ly-ct009/",
+              "title": "Кабельный тестер 5bites LY-CT009 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 600 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT021",
+          "name": "Кабельный тестер 5bites LY-CT021",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/51cf4755e97bed20/kabelnyj-tester-5bites-ly-ct021/",
+              "title": "Кабельный тестер 5bites LY-CT021 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT022",
+          "name": "Кабельный тестер 5bites LY-CT022",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f730c1e96c1ed582/kabelnyj-tester-5bites-ly-ct022/",
+              "title": "Кабельный тестер 5bites LY-CT022 [разъем RJ-12, RJ-45, питание-аккумулятор]",
+              "specsText": "разъем RJ-12, RJ-45, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5Bites LY-CT023",
+          "name": "Кабельный тестер 5Bites LY-CT023",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6811dcc7d97a8bef/kabelnyj-tester-5bites-ly-ct023/",
+              "title": "Кабельный тестер 5Bites LY-CT023 [разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор]",
+              "specsText": "разъем RJ-45, кабели FTP, UTP, до 600 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер 5bites LY-CT030 PRO",
+          "name": "Кабельный тестер 5bites LY-CT030 PRO",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/591b1397ae0b8a5a/kabelnyj-tester-5bites-ly-ct030-pro/",
+              "title": "Кабельный тестер 5bites LY-CT030 PRO [разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-11, RJ-12, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Aceline T-1",
+          "name": "Кабельный тестер Aceline T-1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/70d2db2f6ec6ed20/kabelnyj-tester-aceline-t-1/",
+              "title": "Кабельный тестер Aceline T-1 [разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 305 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Cablexpert NCT-1",
+          "name": "Кабельный тестер Cablexpert NCT-1",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/46d03f77bba352d7/kabelnyj-tester-cablexpert-nct-1/",
+              "title": "Кабельный тестер Cablexpert NCT-1 [разъем BNC, RJ-45, до 300 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-45, до 300 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-FT-OPM/M-MS",
+          "name": "Кабельный тестер Lanmaster LAN-FT-OPM/M-MS",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e7d892152380f126/kabelnyj-tester-lanmaster-lan-ft-opmm-ms/",
+              "title": "Кабельный тестер Lanmaster LAN-FT-OPM/M-MS [разъем FC, SC, ST, питание-батарейка]",
+              "specsText": "разъем FC, SC, ST, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PPi-CHKTOOL",
+          "name": "Кабельный тестер Lanmaster LAN-PPi-CHKTOOL",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b46f3f5b0454c18f/kabelnyj-tester-lanmaster-lan-ppi-chktool/",
+              "title": "Кабельный тестер Lanmaster LAN-PPi-CHKTOOL [разъем RJ-45, кабели STP, UTP]",
+              "specsText": "разъем RJ-45, кабели STP, UTP",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PRO-L-8R",
+          "name": "Кабельный тестер Lanmaster LAN-PRO-L-8R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5c1eb6dc5ee91125/kabelnyj-tester-lanmaster-lan-pro-l-8r/",
+              "title": "Кабельный тестер Lanmaster LAN-PRO-L-8R [разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка]",
+              "specsText": "разъем RJ-45, кабели STP, UTP, до 1350 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PRO-L/TPK-N",
+          "name": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/63504b2a13563332/kabelnyj-tester-lanmaster-lan-pro-ltpk-n/",
+              "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PRO-L/TPK-N-8R",
+          "name": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N-8R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/526c40ffe3ccdeba/kabelnyj-tester-lanmaster-lan-pro-ltpk-n-8r/",
+              "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-N-8R [разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-11, RJ-45, USB, кабели STP, UTP, до 1000 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PRO-L/TPK-POE-8R",
+          "name": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-POE-8R",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c985850413563332/kabelnyj-tester-lanmaster-lan-pro-ltpk-poe-8r/",
+              "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-POE-8R [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор]",
+              "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1000 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-PRO-L/TPK-TDR",
+          "name": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-TDR",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ee5bbd5a9f66c664/kabelnyj-tester-lanmaster-lan-pro-ltpk-tdr/",
+              "title": "Кабельный тестер Lanmaster LAN-PRO-L/TPK-TDR [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор]",
+              "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 1500 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TELESET-100",
+          "name": "Кабельный тестер Lanmaster LAN-TELESET-100",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7fa2e6f56100bfdd/kabelnyj-tester-lanmaster-lan-teleset-100/",
+              "title": "Кабельный тестер Lanmaster LAN-TELESET-100 [разъем RJ-11]",
+              "specsText": "разъем RJ-11",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TPK-200N",
+          "name": "Кабельный тестер Lanmaster LAN-TPK-200N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/47674e70f40982bb/kabelnyj-tester-lanmaster-lan-tpk-200n/",
+              "title": "Кабельный тестер Lanmaster LAN-TPK-200N [разъем RJ-12, RJ-45, питание-аккумулятор]",
+              "specsText": "разъем RJ-12, RJ-45, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-CCTV",
+          "name": "Кабельный тестер Lanmaster LAN-TST-CCTV",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f9c6c0e914ac16b2/kabelnyj-tester-lanmaster-lan-tst-cctv/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-CCTV [разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор]",
+              "specsText": "разъем BNC, RJ-45, кабели STP, UTP, до 620 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-LPTVE-C",
+          "name": "Кабельный тестер Lanmaster LAN-TST-LPTVE-C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/13b80ad00570027f/kabelnyj-tester-lanmaster-lan-tst-lptve-c/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-LPTVE-C [разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор]",
+              "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 200 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-LPTVP-C",
+          "name": "Кабельный тестер Lanmaster LAN-TST-LPTVP-C",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/57dde43a812a7c32/kabelnyj-tester-lanmaster-lan-tst-lptvp-c/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-LPTVP-C [разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор]",
+              "specsText": "разъем RJ-11, RJ-45, SC, кабели STP, UTP, до 200 м, питание-аккумулятор",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-TPK-300N",
+          "name": "Кабельный тестер Lanmaster LAN-TST-TPK-300N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1fa9eacdd69aaec4/kabelnyj-tester-lanmaster-lan-tst-tpk-300n/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-TPK-300N [разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, до 2000 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-WRM-300",
+          "name": "Кабельный тестер Lanmaster LAN-TST-WRM-300",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f44e76359a24d620/kabelnyj-tester-lanmaster-lan-tst-wrm-300/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-WRM-300 [разъем RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-WRM-310-POE",
+          "name": "Кабельный тестер Lanmaster LAN-TST-WRM-310-POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b02573670b751ad7/kabelnyj-tester-lanmaster-lan-tst-wrm-310-poe/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-WRM-310-POE [разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Lanmaster LAN-TST-WRM-400-POE",
+          "name": "Кабельный тестер Lanmaster LAN-TST-WRM-400-POE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/64e5b479a5fe9c74/kabelnyj-tester-lanmaster-lan-tst-wrm-400-poe/",
+              "title": "Кабельный тестер Lanmaster LAN-TST-WRM-400-POE [разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка]",
+              "specsText": "разъем RJ-45, кабели STP, UTP, до 600 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Mastech MS6810",
+          "name": "Кабельный тестер Mastech MS6810",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3999c22e0f7d1b80/kabelnyj-tester-mastech-ms6810/",
+              "title": "Кабельный тестер Mastech MS6810 [разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-45, кабели STP, UTP, до 200 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Mastech MS6813T",
+          "name": "Кабельный тестер Mastech MS6813T",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b4bd39c10f7d1b80/kabelnyj-tester-mastech-ms6813t/",
+              "title": "Кабельный тестер Mastech MS6813T [разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-11, RJ-45, кабели STP, UTP, до 300 м, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер PROconnect 12-1006-4",
+          "name": "Кабельный тестер PROconnect 12-1006-4",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/66423e0f43f73333/kabelnyj-tester-proconnect-12-1006-4/",
+              "title": "Кабельный тестер PROconnect 12-1006-4 [разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Rexant 12-1001",
+          "name": "Кабельный тестер Rexant 12-1001",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/66423e0d43f73333/kabelnyj-tester-rexant-12-1001/",
+              "title": "Кабельный тестер Rexant 12-1001 [разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем BNC, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Rexant 12-1006",
+          "name": "Кабельный тестер Rexant 12-1006",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/66423e1143f73333/kabelnyj-tester-rexant-12-1006/",
+              "title": "Кабельный тестер Rexant 12-1006 [разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кабельный",
+          "model": "тестер Rexant 12-1011",
+          "name": "Кабельный тестер Rexant 12-1011",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/66423e1943f73333/kabelnyj-tester-rexant-12-1011/",
+              "title": "Кабельный тестер Rexant 12-1011 [разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка]",
+              "specsText": "разъем RJ-11, RJ-12, RJ-45, USB, кабели STP, UTP, питание-батарейка",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/29082725e99312df/kabelnye-testery/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Кабельные тестеры купить в интернет-магазине DNS. Кабельные тестеры цены, большой каталог, новинки. - страница 1 из 2"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/29082725e99312df/kabelnye-testery/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 15,
+      "title": "Кабельные тестеры купить в интернет-магазине DNS. Кабельные тестеры цены, большой каталог, новинки. - страница 2 из 2"
+    }
+  ],
+  "errors": []
+}

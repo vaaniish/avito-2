@@ -7,6 +7,7 @@ export type ProfileTab =
   | "wishlist"
   | "partnership"
   | "partner-listings"
+  | "partner-finance"
   | "partner-questions"
   | "partner-orders";
 
@@ -16,8 +17,10 @@ export interface ProfilePageProps {
   userType: UserType;
   initialTab?: ProfileTab;
   onTabChange?: (tab: ProfileTab) => void;
+  onPartnershipClick?: () => void;
   onWishlistUpdate?: (productId: string, isWishlisted: boolean) => void;
   onOpenListing?: (listingPublicId: string) => void;
+  onOpenCreateListing?: () => void;
 }
 
 export type ProfileUser = {
@@ -97,6 +100,8 @@ export type OrderItem = {
   image: string;
   price: number;
   quantity: number;
+  canReview?: boolean;
+  reviewed?: boolean;
 };
 
 export type Order = {
@@ -109,6 +114,10 @@ export type Order = {
   deliveryAddress: string;
   deliveryCost: number;
   discount: number;
+  trackingProvider?: "yandex_pvz" | "russian_post" | "cdek" | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  deliveryExternalStatus?: string | null;
   seller: {
     name: string;
     avatar?: string | null;
@@ -151,7 +160,7 @@ export type ProfileUpdateResponse = {
 };
 
 export type PartnershipForm = {
-  sellerType: "company" | "ip" | "brand" | "admin_approved";
+  sellerType: "company" | "ip" | "brand";
   name: string;
   email: string;
   contact: string;

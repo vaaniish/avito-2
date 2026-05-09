@@ -15,12 +15,16 @@ type ProfileTabRouterProps = {
   activeTab: ProfileTab;
   baseTabRenderers: BaseTabRenderers;
   onRequestAddressChange: () => void;
+  onOpenListing: (listingPublicId: string) => void;
+  onOpenCreateListing?: () => void;
 };
 
 export function ProfileTabRouter({
   activeTab,
   baseTabRenderers,
   onRequestAddressChange,
+  onOpenListing,
+  onOpenCreateListing,
 }: ProfileTabRouterProps) {
   if (activeTab in baseTabRenderers) {
     return baseTabRenderers[activeTab as BaseTabRendererKey]();
@@ -30,6 +34,8 @@ export function ProfileTabRouter({
     <ProfilePartnerTab
       activeTab={activeTab}
       onRequestAddressChange={onRequestAddressChange}
+      onOpenListing={onOpenListing}
+      onOpenCreateListing={onOpenCreateListing}
     />
   );
 }

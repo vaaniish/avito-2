@@ -4,7 +4,7 @@
 - `smoke-regression.e2e.mjs`: широкий сквозной smoke по API (auth, catalog, profile, partner, admin, concurrency).
 - `critical-regression.e2e.mjs`: критичные регрессии (антифрод, инварианты checkout, блокировки активации, finance fields).
 - `phase-a-critical-flows.e2e.mjs`: ключевые MVP-цепочки фазы A:
-  - checkout + acceptance policy
+  - checkout policy enforcement (acceptance хранится с регистрации/входа)
   - partnership request -> admin approve -> seller access
   - payout profile submit -> admin verify
 
@@ -45,15 +45,13 @@ npm run dev:frontend
 - В таблице Network включи колонки `Status`, `Waterfall`, `Duration`.
 - В фильтре введи `api/`, чтобы видеть только API.
 
-### 3) Сценарий A: Checkout + Policy Acceptance
+### 3) Сценарий A: Checkout
 - Залогинься под buyer (`buyer1@ecomm.local / buyer123`).
 - Добавь товар в корзину и перейди в checkout.
-- На этапе policy acceptance отметь чекбокс политики.
 - Заверши заказ.
 
 Ожидаемые запросы:
 - `GET /api/public/policy/current?scope=checkout` -> `200`
-- `POST /api/profile/policy-acceptance` -> `201`
 - `POST /api/profile/orders` -> `201`
 
 ### 4) Сценарий B: Partnership -> Admin Approve -> Seller Access

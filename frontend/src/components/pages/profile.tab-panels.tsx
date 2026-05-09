@@ -1,4 +1,5 @@
-import { Star, X } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
+import { AppModal } from "../ui/app-modal";
 import type {
   Order,
   OrderItem,
@@ -21,6 +22,40 @@ type ProfileOrdersTabProps = {
   onReviewCommentChange: (comment: string) => void;
   onSubmitReview: () => void;
 };
+
+function formatBuyerDeliveryStatus(value: string | null | undefined): string {
+  const key = String(value ?? "").trim().toUpperCase();
+  if (!key) return "Ожидает передачи в доставку";
+  const labels: Record<string, string> = {
+    CREATED: "Заявка доставки создана",
+    ACCEPTED: "Заявка принята службой доставки",
+    IN_TRANSIT: "В пути",
+    READY_FOR_DELIVERY: "Прибыло в ПВЗ",
+    DELIVERED: "Выдано получателю",
+    DELIVERY_ARRIVED_PICKUP_POINT: "Доставлен в ПВЗ",
+    DELIVERY_TRANSMITTED_TO_RECIPIENT: "Выдан получателю",
+    FINISHED: "Доставка завершена",
+    CANCELLED: "Доставка отменена",
+  };
+  return labels[key] ?? value ?? "Ожидает передачи в доставку";
+}
+
+function buildBuyerTrackingLink(order: Order): string | null {
+  const trackingNumber = order.trackingNumber?.trim() ?? "";
+  const trackingUrl = order.trackingUrl?.trim();
+  if (trackingUrl) return trackingUrl;
+  if (!trackingNumber) return null;
+  if (order.trackingProvider === "cdek") {
+    return `https://www.cdek.ru/ru/tracking?order_id=${encodeURIComponent(trackingNumber)}`;
+  }
+  if (order.trackingProvider === "russian_post") {
+    return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
+  }
+  if (order.trackingProvider === "yandex_pvz") {
+    return `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
+  }
+  return null;
+}
 
 export function ProfileOrdersTab({
   orders,
@@ -86,16 +121,45 @@ export function ProfileOrdersTab({
                     {item.price.toLocaleString("ru-RU")} ₽ x {item.quantity}
                   </p>
                 </div>
-                {order.status === "completed" && (
+                {item.canReview ? (
                   <button
                     onClick={() => onStartReview(item)}
-                    className="btn-secondary text-xs px-2 py-1.5"
+                    className="rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition hover:border-blue-200 hover:text-blue-700"
                   >
                     Оставить отзыв
                   </button>
-                )}
+                ) : item.reviewed ? (
+                  <span className="text-xs text-gray-500">Отзыв оставлен</span>
+                ) : null}
               </div>
             ))}
+          </div>
+          <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+            <div className="font-medium text-gray-900">Доставка</div>
+            <div className="mt-1">ПВЗ: {order.deliveryAddress}</div>
+            <div className="mt-1">
+              Этап: {formatBuyerDeliveryStatus(order.deliveryExternalStatus)}
+            </div>
+            {order.trackingNumber ? (
+              <div className="mt-1">
+                Трек: <span className="font-medium">{order.trackingNumber}</span>
+              </div>
+            ) : null}
+            {buildBuyerTrackingLink(order) ? (
+              <a
+                href={buildBuyerTrackingLink(order) ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-blue-700 hover:text-blue-800"
+              >
+                Отследить доставку
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            ) : (
+              <div className="mt-2 text-xs text-gray-500">
+                Ссылка отслеживания появится после передачи заказа в доставку.
+              </div>
+            )}
           </div>
         </div>
       ))}
@@ -104,14 +168,22 @@ export function ProfileOrdersTab({
       )}
 
       {reviewModalOpen && itemToReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="app-modal-panel p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-semibold">Отзыв о товаре</h4>
-              <button onClick={onReviewModalClose}>
-                <X className="w-5 h-5" />
+        <AppModal
+          open={reviewModalOpen}
+          onClose={onReviewModalClose}
+          title="Отзыв о товаре"
+          size="md"
+          footer={
+            <>
+              <button onClick={onReviewModalClose} className="btn-secondary flex-1 py-2.5">
+                Отмена
               </button>
-            </div>
+              <button onClick={onSubmitReview} className="btn-primary flex-1 py-2.5">
+                Отправить отзыв
+              </button>
+            </>
+          }
+        >
             <p className="text-sm font-medium mb-2">{itemToReview.name}</p>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -138,16 +210,7 @@ export function ProfileOrdersTab({
                 className="field-control"
               />
             </div>
-            <div className="flex gap-2 mt-4">
-              <button onClick={onSubmitReview} className="btn-primary flex-1 py-2.5">
-                Отправить отзыв
-              </button>
-              <button onClick={onReviewModalClose} className="btn-secondary flex-1 py-2.5">
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
+        </AppModal>
       )}
     </div>
   );
@@ -222,6 +285,23 @@ export function ProfilePartnershipTab({
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold md:text-xl">Заявка на партнерство</h3>
+      <p className="text-xs text-gray-500">
+        Отбор только для ИП, юрлиц и брендов из электроники, бытовой техники и профильного ремонта. Частных продавцов в MVP не подключаем.
+      </p>
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600 md:grid-cols-3">
+        <div>
+          <div className="mb-1 font-semibold text-gray-900">Юридическая проверка</div>
+          <div>ИНН, сайт или витрина, контакт ответственного.</div>
+        </div>
+        <div>
+          <div className="mb-1 font-semibold text-gray-900">Профильность</div>
+          <div>Только техника, электроника, ремонт и диагностика.</div>
+        </div>
+        <div>
+          <div className="mb-1 font-semibold text-gray-900">Надежность</div>
+          <div>Публичный профиль, гарантия, возвраты и сервисный процесс.</div>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <select
           value={partnershipForm.sellerType}
@@ -231,12 +311,11 @@ export function ProfilePartnershipTab({
           <option value="company">Компания</option>
           <option value="ip">ИП</option>
           <option value="brand">Бренд</option>
-          <option value="admin_approved">Индивидуальное одобрение</option>
         </select>
         <input
           value={partnershipForm.name}
           onChange={(event) => onFieldChange("name", event.target.value)}
-          placeholder="Название / ФИО"
+          placeholder="Название компании / ИП"
           className="field-control"
         />
       </div>
@@ -250,14 +329,14 @@ export function ProfilePartnershipTab({
         <input
           value={partnershipForm.contact}
           onChange={(event) => onFieldChange("contact", event.target.value)}
-          placeholder="Контакт"
+          placeholder="Телефон ответственного / Telegram"
           className="field-control"
         />
       </div>
       <input
         value={partnershipForm.link}
         onChange={(event) => onFieldChange("link", event.target.value)}
-        placeholder="Ссылка на сайт/профиль"
+        placeholder="Сайт компании или витрина в маркетплейсе (https://...)"
         className="field-control"
       />
       <select
@@ -282,13 +361,32 @@ export function ProfilePartnershipTab({
       <input
         value={partnershipForm.inn}
         onChange={(event) => onFieldChange("inn", event.target.value)}
-        placeholder="ИНН (опционально)"
+        placeholder="ИНН (10 или 12 цифр)"
+        className="field-control"
+      />
+      <input
+        value={partnershipForm.geography}
+        onChange={(event) => onFieldChange("geography", event.target.value)}
+        placeholder="География работы (города, регионы)"
+        className="field-control"
+      />
+      <input
+        value={partnershipForm.socialProfile}
+        onChange={(event) => onFieldChange("socialProfile", event.target.value)}
+        placeholder="Публичный профиль компании: 2GIS / Я.Карты / отзывы / B2B-каталог (https://...)"
+        className="field-control"
+      />
+      <textarea
+        value={partnershipForm.credibility}
+        onChange={(event) => onFieldChange("credibility", event.target.value)}
+        placeholder="Почему вам можно доверять: опыт в нише, гарантия, возвраты, SLA ответа, диагностика, сервисный процесс"
+        rows={3}
         className="field-control"
       />
       <textarea
         value={partnershipForm.whyUs}
         onChange={(event) => onFieldChange("whyUs", event.target.value)}
-        placeholder="Почему хотите работать с нами"
+        placeholder="Что будете продавать или ремонтировать, какой объем готовы держать и какую категорию закроете лучше конкурентов"
         rows={4}
         className="field-control"
       />

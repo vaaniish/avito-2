@@ -1,0 +1,450 @@
+{
+  "source": "DNS catalog",
+  "categoryName": "Смартфоны и фототехника",
+  "categoryUrl": "https://www.dns-shop.ru/catalog/17a890dc16404e77/smartfony-i-fototehnika/",
+  "status": "done",
+  "totalItems": 33,
+  "items": [
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Смартфоны",
+      "file": "smartfony-i-gadzhety/smartfony.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a01d16404e77/smartfony/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Смарт-часы и браслеты",
+      "file": "smartfony-i-gadzhety/smart-chasy-i-braslety.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/251c82c88ed24e77/smart-casy-i-braslety/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Детские часы",
+      "file": "smartfony-i-gadzhety/detskie-chasy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/fa58a48980ca51bf/detskie-casy/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Умные кольца",
+      "file": "smartfony-i-gadzhety/umnye-kolca.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/b561851e545fc5e3/umnye-kolca/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Сотовые телефоны",
+      "file": "smartfony-i-gadzhety/sotovye-telefony.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a89fea16404e77/sotovye-telefony/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Стационарные сотовые телефоны",
+      "file": "smartfony-i-gadzhety/stacionarnye-sotovye-telefony.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17aa84ec16404e77/stacionarnye-sotovye-telefony/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Портативные колонки",
+      "file": "smartfony-i-gadzhety/portativnye-kolonki.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/fb5350ddbe836023/portativnye-kolonki/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Наушники и гарнитуры",
+      "file": "smartfony-i-gadzhety/naushniki-i-garnitury.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/6eb1256d2e16cc49/nausniki-i-garnitury/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Защита и поддержка для смартфонов",
+      "file": "smartfony-i-gadzhety/zaschita-i-podderzhka-dlya-smartfonov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/4b5ecfeef208ea88/zasita-i-podderzka-dla-smartfonov/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Зарядка и подключение для смартфонов",
+      "file": "smartfony-i-gadzhety/zaryadka-i-podklyuchenie-dlya-smartfonov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9ab6516404e77/zaradka-i-podklucenie-dla-smartfonov/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Аксессуары для смарт-часов и браслетов",
+      "file": "smartfony-i-gadzhety/aksessuary-dlya-smart-chasov-i-brasletov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/892a8929bc144e77/aksessuary-dla-smart-casov-i-brasletov/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Прочие аксессуары для смартфонов",
+      "file": "smartfony-i-gadzhety/prochie-aksessuary-dlya-smartfonov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/62b126933baf7fd7/procie-aksessuary-dla-smartfonov/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Тарифы операторов",
+      "file": "smartfony-i-gadzhety/tarify-operatorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/8ccf9d205ab44e77/tarify-operatorov/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Радиостанции",
+      "file": "smartfony-i-gadzhety/radiostancii.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a90cea16404e77/radiostancii/?virtual_category_uid=984bf21896b74312"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Аксессуары для радиостанций",
+      "file": "smartfony-i-gadzhety/aksessuary-dlya-radiostanciy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/5a9aceaa6c984e0a/aksessuary-dla-radiostancij/"
+    },
+    {
+      "subcategoryName": "Смартфоны и гаджеты",
+      "itemName": "Антивирусы",
+      "file": "smartfony-i-gadzhety/antivirusy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/recipe/3efd93fe8c3bcfc3/antivirusy/"
+    },
+    {
+      "subcategoryName": "Планшеты, электронные книги",
+      "itemName": "Планшеты",
+      "file": "planshety-elektronnye-knigi/planshety.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a05316404e77/plansety/"
+    },
+    {
+      "subcategoryName": "Планшеты, электронные книги",
+      "itemName": "Электронные книги",
+      "file": "planshety-elektronnye-knigi/elektronnye-knigi.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8a0f116404e77/elektronnye-knigi/"
+    },
+    {
+      "subcategoryName": "Планшеты, электронные книги",
+      "itemName": "Цифровые блокноты",
+      "file": "planshety-elektronnye-knigi/cifrovye-bloknoty.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/aaf2b6f69b96be06/cifrovye-bloknoty/"
+    },
+    {
+      "subcategoryName": "Планшеты, электронные книги",
+      "itemName": "Аксессуары для планшетов и электронных книг",
+      "file": "planshety-elektronnye-knigi/aksessuary-dlya-planshetov-i-elektronnyh-knig.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a7b116404e77/aksessuary-dla-plansetov-i-elektronnyh-knig/"
+    },
+    {
+      "subcategoryName": "Планшеты, электронные книги",
+      "itemName": "Тарифы операторов",
+      "file": "planshety-elektronnye-knigi/tarify-operatorov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/8ccf9d205ab44e77/tarify-operatorov/?virtual_category_uid=2ef98ed0e8db5376"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Фотоаппараты",
+      "file": "fototehnika/fotoapparaty.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a77d16404e77/fotoapparaty/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Экшн-камеры",
+      "file": "fototehnika/ekshn-kamery.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a8c08c16404e77/eksn-kamery/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Квадрокоптеры с камерами",
+      "file": "fototehnika/kvadrokoptery-s-kamerami.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/23728c1b2c654e77/kvadrokoptery-i-drony/?f%5B4tb%5D=21&virtual_category_uid=c63689bb39c596e3"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Видеокамеры",
+      "file": "fototehnika/videokamery.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a89cc016404e77/videokamery/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Объективы",
+      "file": "fototehnika/obektivy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a81a16404e77/obektivy/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Штативы и стабилизаторы",
+      "file": "fototehnika/shtativy-i-stabilizatory.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/d471c64d15137fd7/stativy-i-stabilizatory/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Осветительное оборудование",
+      "file": "fototehnika/osvetitelnoe-oborudovanie.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a98c16404e77/osvetitelnoe-oborudovanie/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Питание для фотоаппаратов",
+      "file": "fototehnika/pitanie-dlya-fotoapparatov.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9aa9316404e77/pitanie-dla-fotoapparatov/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Аудиооборудование для камеры",
+      "file": "fototehnika/audiooborudovanie-dlya-kamery.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9dd4316404e77/audiooborudovanie-dla-kamery/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Чистка оптики и матрицы",
+      "file": "fototehnika/chistka-optiki-i-matricy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/17a9af5c16404e77/cistka-optiki-i-matricy/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Печать и хранение фотографий",
+      "file": "fototehnika/pechat-i-hranenie-fotografiy.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/04a1418b1a907fd7/pecat-i-hranenie-fotografij/"
+    },
+    {
+      "subcategoryName": "Фототехника",
+      "itemName": "Дополнительные фотоаксессуары",
+      "file": "fototehnika/dopolnitelnye-fotoaksessuary.json",
+      "status": "done",
+      "dnsUrl": "https://www.dns-shop.ru/catalog/f38578ce4701166a/dopolnitelnye-fotoaksessuary/"
+    }
+  ],
+  "collectedAt": "2026-05-07T16:28:41.231Z",
+  "summary": {
+    "done": 33,
+    "failed": 0,
+    "empty": 0,
+    "totalProducts": 35077
+  },
+  "lastRun": {
+    "collectedAt": "2026-05-07T16:41:11.092Z",
+    "summary": [
+      {
+        "file": "smartfony-i-gadzhety/smartfony.json",
+        "itemName": "Смартфоны",
+        "status": "done",
+        "products": 1818
+      },
+      {
+        "file": "smartfony-i-gadzhety/smart-chasy-i-braslety.json",
+        "itemName": "Смарт-часы и браслеты",
+        "status": "done",
+        "products": 566
+      },
+      {
+        "file": "smartfony-i-gadzhety/detskie-chasy.json",
+        "itemName": "Детские часы",
+        "status": "done",
+        "products": 60
+      },
+      {
+        "file": "smartfony-i-gadzhety/umnye-kolca.json",
+        "itemName": "Умные кольца",
+        "status": "done",
+        "products": 40
+      },
+      {
+        "file": "smartfony-i-gadzhety/sotovye-telefony.json",
+        "itemName": "Сотовые телефоны",
+        "status": "done",
+        "products": 258
+      },
+      {
+        "file": "smartfony-i-gadzhety/stacionarnye-sotovye-telefony.json",
+        "itemName": "Стационарные сотовые телефоны",
+        "status": "done",
+        "products": 3
+      },
+      {
+        "file": "smartfony-i-gadzhety/portativnye-kolonki.json",
+        "itemName": "Портативные колонки",
+        "status": "done",
+        "products": 855
+      },
+      {
+        "file": "smartfony-i-gadzhety/naushniki-i-garnitury.json",
+        "itemName": "Наушники и гарнитуры",
+        "status": "done",
+        "products": 3666
+      },
+      {
+        "file": "smartfony-i-gadzhety/zaschita-i-podderzhka-dlya-smartfonov.json",
+        "itemName": "Защита и поддержка для смартфонов",
+        "status": "done",
+        "products": 11485
+      },
+      {
+        "file": "smartfony-i-gadzhety/zaryadka-i-podklyuchenie-dlya-smartfonov.json",
+        "itemName": "Зарядка и подключение для смартфонов",
+        "status": "done",
+        "products": 5867
+      },
+      {
+        "file": "smartfony-i-gadzhety/aksessuary-dlya-smart-chasov-i-brasletov.json",
+        "itemName": "Аксессуары для смарт-часов и браслетов",
+        "status": "done",
+        "products": 757
+      },
+      {
+        "file": "smartfony-i-gadzhety/prochie-aksessuary-dlya-smartfonov.json",
+        "itemName": "Прочие аксессуары для смартфонов",
+        "status": "done",
+        "products": 345
+      },
+      {
+        "file": "smartfony-i-gadzhety/tarify-operatorov.json",
+        "itemName": "Тарифы операторов",
+        "status": "done",
+        "products": 211
+      },
+      {
+        "file": "smartfony-i-gadzhety/radiostancii.json",
+        "itemName": "Радиостанции",
+        "status": "done",
+        "products": 44
+      },
+      {
+        "file": "smartfony-i-gadzhety/aksessuary-dlya-radiostanciy.json",
+        "itemName": "Аксессуары для радиостанций",
+        "status": "done",
+        "products": 7
+      },
+      {
+        "file": "smartfony-i-gadzhety/antivirusy.json",
+        "itemName": "Антивирусы",
+        "status": "done",
+        "products": 31
+      },
+      {
+        "file": "planshety-elektronnye-knigi/planshety.json",
+        "itemName": "Планшеты",
+        "status": "done",
+        "products": 697
+      },
+      {
+        "file": "planshety-elektronnye-knigi/elektronnye-knigi.json",
+        "itemName": "Электронные книги",
+        "status": "done",
+        "products": 72
+      },
+      {
+        "file": "planshety-elektronnye-knigi/cifrovye-bloknoty.json",
+        "itemName": "Цифровые блокноты",
+        "status": "done",
+        "products": 2
+      },
+      {
+        "file": "planshety-elektronnye-knigi/aksessuary-dlya-planshetov-i-elektronnyh-knig.json",
+        "itemName": "Аксессуары для планшетов и электронных книг",
+        "status": "done",
+        "products": 6603
+      },
+      {
+        "file": "planshety-elektronnye-knigi/tarify-operatorov.json",
+        "itemName": "Тарифы операторов",
+        "status": "done",
+        "products": 211
+      },
+      {
+        "file": "fototehnika/fotoapparaty.json",
+        "itemName": "Фотоаппараты",
+        "status": "done",
+        "products": 247
+      },
+      {
+        "file": "fototehnika/ekshn-kamery.json",
+        "itemName": "Экшн-камеры",
+        "status": "done",
+        "products": 92
+      },
+      {
+        "file": "fototehnika/kvadrokoptery-s-kamerami.json",
+        "itemName": "Квадрокоптеры с камерами",
+        "status": "done",
+        "products": 13
+      },
+      {
+        "file": "fototehnika/videokamery.json",
+        "itemName": "Видеокамеры",
+        "status": "done",
+        "products": 14
+      },
+      {
+        "file": "fototehnika/obektivy.json",
+        "itemName": "Объективы",
+        "status": "done",
+        "products": 122
+      },
+      {
+        "file": "fototehnika/shtativy-i-stabilizatory.json",
+        "itemName": "Штативы и стабилизаторы",
+        "status": "done",
+        "products": 123
+      },
+      {
+        "file": "fototehnika/osvetitelnoe-oborudovanie.json",
+        "itemName": "Осветительное оборудование",
+        "status": "done",
+        "products": 160
+      },
+      {
+        "file": "fototehnika/pitanie-dlya-fotoapparatov.json",
+        "itemName": "Питание для фотоаппаратов",
+        "status": "done",
+        "products": 6
+      },
+      {
+        "file": "fototehnika/audiooborudovanie-dlya-kamery.json",
+        "itemName": "Аудиооборудование для камеры",
+        "status": "done",
+        "products": 58
+      },
+      {
+        "file": "fototehnika/chistka-optiki-i-matricy.json",
+        "itemName": "Чистка оптики и матрицы",
+        "status": "done",
+        "products": 3
+      },
+      {
+        "file": "fototehnika/pechat-i-hranenie-fotografiy.json",
+        "itemName": "Печать и хранение фотографий",
+        "status": "done",
+        "products": 639
+      },
+      {
+        "file": "fototehnika/dopolnitelnye-fotoaksessuary.json",
+        "itemName": "Дополнительные фотоаксессуары",
+        "status": "done",
+        "products": 2
+      }
+    ]
+  }
+}

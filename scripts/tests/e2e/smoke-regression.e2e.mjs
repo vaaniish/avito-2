@@ -43,6 +43,15 @@ function authHeaders(token) {
   };
 }
 
+function testCatalogAttributes(itemName) {
+  return [
+    { key: "__catalog_category", value: "Комплектующие для ПК" },
+    { key: "__catalog_subcategory", value: "Основные комплектующие для ПК" },
+    { key: "__catalog_item", value: itemName },
+    { key: "__catalog_item_custom", value: itemName },
+  ];
+}
+
 function toBase64Url(input) {
   return Buffer.from(input, "utf8")
     .toString("base64")
@@ -568,15 +577,19 @@ async function main() {
       },
       body: {
         type: "products",
-        title: `CI listing ${Date.now()}`,
+        title: "CI safe sale",
         price: 12345,
         condition: "new",
-        description: "Smoke test listing",
-        category: "Электроника",
-        images: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80"],
+        description: "clean sale approved by rules",
+        category: "CI smoke goods",
+        images: [
+          "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
+          "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=1200&q=80",
+          "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200&q=80",
+          "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=80",
+        ],
         attributes: [
-          { key: "brand", value: "ci" },
-          { key: "model", value: "smoke" },
+          ...testCatalogAttributes("CI smoke goods"),
         ],
       },
       expected: [201],
@@ -590,15 +603,19 @@ async function main() {
         ...authHeaders(requireToken(sellerToken, "seller")),
       },
       body: {
-        title: `CI listing updated ${Date.now()}`,
+        title: "CI safe sale revised",
         price: 12456,
         condition: "new",
-        description: "Smoke test listing updated",
-        category: "Электроника",
-        images: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80"],
+        description: "clean sale approved by rules revised",
+        category: "CI smoke goods revised",
+        images: [
+          "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
+          "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=1200&q=80",
+          "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200&q=80",
+          "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=80",
+        ],
         attributes: [
-          { key: "brand", value: "ci-updated" },
-          { key: "model", value: "smoke-updated" },
+          ...testCatalogAttributes("CI smoke goods revised"),
         ],
       },
       expected: [200],
@@ -888,9 +905,29 @@ async function main() {
         ...jsonHeaders,
         ...authHeaders(requireToken(adminToken, "admin")),
       },
-      body: { status: "pending" },
+      body: {
+        status: "rejected",
+        reasonCode: "ADMIN_REJECT_QUALITY_INCOMPLETE",
+        reasonNote: "CI moderation reason check",
+      },
       expected: [200],
     });
+    const moderationEvents = await apiRequest(
+      "GET",
+      `/admin/listings/${targetListing.id}/moderation-events`,
+      {
+        headers: authHeaders(requireToken(adminToken, "admin")),
+      },
+    );
+    invariant(Array.isArray(moderationEvents.data?.events), "moderation events malformed");
+    invariant(
+      moderationEvents.data.events.some(
+        (event) =>
+          event.reasonCode === "ADMIN_REJECT_QUALITY_INCOMPLETE" &&
+          event.decision === "rejected",
+      ),
+      "expected moderation event with reason code",
+    );
 
     const tiers = await apiRequest("GET", "/admin/commission-tiers", {
       headers: authHeaders(requireToken(adminToken, "admin")),

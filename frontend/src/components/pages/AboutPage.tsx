@@ -13,85 +13,85 @@ export function AboutPage({ onBack }: AboutPageProps) {
           className="back-link mb-7 text-sm sm:text-base"
         >
           <ArrowLeft className="h-5 w-5" />
-          РќР°Р·Р°Рґ
+          Назад
         </button>
 
         <div className="content-page">
-          <h1 className="mb-6 text-slate-900">Рћ РЅР°СЃ</h1>
+          <h1 className="mb-6 text-slate-900">О нас</h1>
           
           <div className="space-y-8">
             <div>
-              <h2 className="mb-3 text-slate-900">РќР°С€Р° РјРёСЃСЃРёСЏ</h2>
+              <h2 className="mb-3 text-slate-900">Наша миссия</h2>
               <p>
-                Ecom вЂ” СЌС‚Рѕ СѓРЅРёРІРµСЂСЃР°Р»СЊРЅР°СЏ B2C РїР»РѕС‰Р°РґРєР°, РєРѕС‚РѕСЂР°СЏ РѕР±СЉРµРґРёРЅСЏРµС‚ РєР°С‡РµСЃС‚РІРµРЅРЅС‹Рµ С‚РѕРІР°СЂС‹ Рё СѓСЃР»СѓРіРё РІ РѕРґРЅРѕРј РјРµСЃС‚Рµ. 
-                РњС‹ СЃРѕР·РґР°Р»Рё РїР»Р°С‚С„РѕСЂРјСѓ, РіРґРµ РїРѕРєСѓРїР°С‚РµР»Рё РЅР°С…РѕРґСЏС‚ РІСЃС‘ РЅРµРѕР±С…РѕРґРёРјРѕРµ, Р° РїСЂРѕРІРµСЂРµРЅРЅС‹Рµ РїСЂРѕРґР°РІС†С‹ РїРѕР»СѓС‡Р°СЋС‚ РґРѕСЃС‚СѓРї 
-                Рє РїР»Р°С‚С‘Р¶РµСЃРїРѕСЃРѕР±РЅРѕР№ Р°СѓРґРёС‚РѕСЂРёРё.
+                Ecom — это универсальная B2C площадка, которая объединяет качественные товары в одном месте. 
+                Мы создали платформу, где покупатели находят всё необходимое, а проверенные продавцы получают доступ 
+                к платёжеспособной аудитории.
               </p>
             </div>
 
             <div>
-              <h2 className="mb-3 text-slate-900">РќР°С€Рё РїСЂРёРЅС†РёРїС‹</h2>
+              <h2 className="mb-3 text-slate-900">Наши принципы</h2>
               <div className="space-y-4">
                 <div className="surface-card p-5">
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900">РљР°С‡РµСЃС‚РІРѕ</h3>
+                  <h3 className="mb-2 text-xl font-semibold text-gray-900">Качество</h3>
                   <p>
-                    РњС‹ С‚С‰Р°С‚РµР»СЊРЅРѕ РїСЂРѕРІРµСЂСЏРµРј РєР°Р¶РґРѕРіРѕ РїСЂРѕРґР°РІС†Р° РїРµСЂРµРґ РґРѕРїСѓСЃРєРѕРј РЅР° РїР»Р°С‚С„РѕСЂРјСѓ. 
-                    РўРѕР»СЊРєРѕ Р±СЂРµРЅРґС‹, РјР°РіР°Р·РёРЅС‹ Рё РґРѕРІРµСЂРµРЅРЅС‹Рµ С‡Р°СЃС‚РЅС‹Рµ РїСЂРѕРґР°РІС†С‹.
+                    Мы тщательно проверяем каждого продавца перед допуском на платформу. 
+                    Только бренды, магазины и доверенные частные продавцы.
                   </p>
                 </div>
 
                 <div className="surface-card p-5">
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900">Р”РѕРІРµСЂРёРµ</h3>
+                  <h3 className="mb-2 text-xl font-semibold text-gray-900">Доверие</h3>
                   <p>
-                    РЎРёСЃС‚РµРјР° СЂРµР№С‚РёРЅРіРѕРІ, РѕС‚Р·С‹РІРѕРІ Рё РІРµСЂРёС„РёРєР°С†РёРё РїСЂРѕРґР°РІС†РѕРІ СЃРѕР·РґР°С‘С‚ Р±РµР·РѕРїР°СЃРЅСѓСЋ 
-                    СЃСЂРµРґСѓ РґР»СЏ РїРѕРєСѓРїРѕРє.
+                    Система рейтингов, отзывов и верификации продавцов создаёт безопасную 
+                    среду для покупок.
                   </p>
                 </div>
 
                 <div className="surface-card p-5">
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900">РЈРґРѕР±СЃС‚РІРѕ</h3>
+                  <h3 className="mb-2 text-xl font-semibold text-gray-900">Удобство</h3>
                   <p>
-                    РњРёРЅРёРјР°Р»РёСЃС‚РёС‡РЅС‹Р№ РґРёР·Р°Р№РЅ, СѓРјРЅС‹Р№ РїРѕРёСЃРє Рё РёРЅС‚СѓРёС‚РёРІРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ вЂ” 
-                    РІСЃС‘ РґР»СЏ РІР°С€РµРіРѕ РєРѕРјС„РѕСЂС‚Р°.
+                    Минималистичный дизайн, умный поиск и интуитивная навигация — 
+                    всё для вашего комфорта.
                   </p>
                 </div>
               </div>
             </div>
 
             <div>
-              <h2 className="mb-3 text-slate-900">РџРѕС‡РµРјСѓ РІС‹Р±РёСЂР°СЋС‚ РЅР°СЃ</h2>
+              <h2 className="mb-3 text-slate-900">Почему выбирают нас</h2>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>РЁРёСЂРѕРєРёР№ Р°СЃСЃРѕСЂС‚РёРјРµРЅС‚ С‚РѕРІР°СЂРѕРІ Рё СѓСЃР»СѓРі РІ РѕРґРЅРѕРј РјРµСЃС‚Рµ</span>
+                  <span>Широкий ассортимент товаров в одном месте</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>РџСЂРѕРІРµСЂРµРЅРЅС‹Рµ РїСЂРѕРґР°РІС†С‹ СЃ РіР°СЂР°РЅС‚РёРµР№ РєР°С‡РµСЃС‚РІР°</span>
+                  <span>Проверенные продавцы с гарантией качества</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>РџСЂРѕР·СЂР°С‡РЅР°СЏ СЃРёСЃС‚РµРјР° РѕС‚Р·С‹РІРѕРІ Рё СЂРµР№С‚РёРЅРіРѕРІ</span>
+                  <span>Прозрачная система отзывов и рейтингов</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>РЈРґРѕР±РЅС‹Рµ СЃРїРѕСЃРѕР±С‹ РѕРїР»Р°С‚С‹ Рё Р±С‹СЃС‚СЂР°СЏ РґРѕСЃС‚Р°РІРєР°</span>
+                  <span>Удобные способы оплаты и быстрая доставка</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>РџРѕРґРґРµСЂР¶РєР° РїРѕРєСѓРїР°С‚РµР»РµР№ 24/7</span>
+                  <span>Поддержка покупателей 24/7</span>
                 </li>
               </ul>
             </div>
 
             <div className="rounded-2xl bg-[rgb(15,30,53)] p-6 text-white sm:p-10">
-              <h2 className="mb-3 text-2xl font-semibold sm:text-3xl">РџСЂРёСЃРѕРµРґРёРЅСЏР№С‚РµСЃСЊ Рє РЅР°Рј</h2>
+              <h2 className="mb-3 text-2xl font-semibold sm:text-3xl">Присоединяйтесь к нам</h2>
               <p className="mb-6 text-sm text-blue-100 sm:text-lg">
-                РЎС‚Р°РЅСЊС‚Рµ С‡Р°СЃС‚СЊСЋ СЌРєРѕСЃРёСЃС‚РµРјС‹, РіРґРµ РєР°С‡РµСЃС‚РІРѕ РІСЃС‚СЂРµС‡Р°РµС‚СЃСЏ СЃ СѓРґРѕР±СЃС‚РІРѕРј, 
-                Р° РґРѕРІРµСЂРёРµ СЏРІР»СЏРµС‚СЃСЏ РѕСЃРЅРѕРІРѕР№ РєР°Р¶РґРѕР№ СЃРґРµР»РєРё.
+                Станьте частью экосистемы, где качество встречается с удобством, 
+                а доверие является основой каждой сделки.
               </p>
               <button className="btn-secondary px-6 py-3 text-sm font-semibold sm:text-base">
-                РќР°С‡Р°С‚СЊ РїСЂРѕРґР°РІР°С‚СЊ
+                Начать продавать
               </button>
             </div>
           </div>

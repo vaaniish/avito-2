@@ -3,12 +3,36 @@ import { prisma } from "../../lib/prisma";
 import { getSessionUser } from "../../lib/session";
 import { signSessionToken } from "../../lib/session-token";
 import { toClientRole } from "../../utils/format";
+import {
+  acceptPolicyForUser,
+  getRequestMetaFromExpressLike,
+} from "../policy/policy.shared";
 import bcrypt from "bcrypt";
 
 const authRouter = Router();
+const SUPPORT_CONTACT_MESSAGE =
+  "Если вы считаете блокировку ошибочной, свяжитесь с поддержкой площадки: support@ecom.ru, 8-800-123-45-67.";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
+}
+
+async function ensureCheckoutPolicyAccepted(params: {
+  req: Request;
+  userId: number;
+}): Promise<void> {
+  const requestMeta = getRequestMetaFromExpressLike(params.req);
+  try {
+    await acceptPolicyForUser({
+      prisma,
+      userId: params.userId,
+      scope: "CHECKOUT",
+      requestIp: requestMeta.ipAddress,
+      requestUserAgent: requestMeta.userAgent,
+    });
+  } catch (error) {
+    console.error("Error auto-accepting checkout policy:", error);
+  }
 }
 
 authRouter.post("/login", async (req: Request, res: Response) => {
@@ -37,6 +61,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         email: true,
         name: true,
         password: true,
+        block_reason: true,
         wishlist_items: {
           select: {
             listing: {
@@ -71,13 +96,20 @@ authRouter.post("/login", async (req: Request, res: Response) => {
           },
         });
       } else {
-        const blockMessage = user.blocked_until
-          ? `Пользователь временно заблокирован до ${user.blocked_until.toISOString()}`
-          : "Пользователь заблокирован";
+        const reason = user.block_reason?.trim() || "Аккаунт заблокирован администрацией площадки.";
+        const blockPrefix = user.blocked_until
+          ? `Аккаунт временно заблокирован до ${user.blocked_until.toLocaleString("ru-RU")}.`
+          : "Аккаунт заблокирован.";
+        const blockMessage = `${blockPrefix}\n\nПричина: ${reason}\n\n${SUPPORT_CONTACT_MESSAGE}`;
         res.status(403).json({ error: blockMessage });
         return;
       }
     }
+
+    await ensureCheckoutPolicyAccepted({
+      req,
+      userId: user.id,
+    });
 
     res.json({
       user: {
@@ -153,6 +185,11 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
       },
     });
 
+    await ensureCheckoutPolicyAccepted({
+      req,
+      userId: user.id,
+    });
+
     res.status(201).json({
       user: {
         id: user.id,
@@ -179,6 +216,11 @@ authRouter.get("/me", async (req: Request, res: Response) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+
+    await ensureCheckoutPolicyAccepted({
+      req,
+      userId: user.id,
+    });
 
     res.json({
       user: {

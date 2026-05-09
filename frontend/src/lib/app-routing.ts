@@ -7,6 +7,7 @@ export type AppView =
   | "checkout"
   | "orderComplete"
   | "paymentReturn"
+  | "catalogItem"
   | "product"
   | "sellerStore"
   | "about"
@@ -16,6 +17,7 @@ export type AppView =
   | "terms"
   | "auth"
   | "profile"
+  | "partnerListingCreate"
   | "adminLogin"
   | "adminPanel";
 
@@ -24,6 +26,7 @@ const ADMIN_ROUTE_PAGES: AdminPage[] = [
   "complaints",
   "sellers",
   "listings",
+  "catalog",
   "users",
   "commissions",
   "audit",
@@ -43,9 +46,11 @@ const PROFILE_ROUTE_TABS: ProfileTab[] = [
 export type ParsedRoute = {
   view: AppView;
   listingId: string | null;
+  catalogItemId: string | null;
   sellerId: string | null;
   adminPage: AdminPage;
   profileTab: ProfileTab;
+  productReturnTo: "admin-listings" | null;
 };
 
 function isAdminRoutePage(value: string): value is AdminPage {
@@ -76,9 +81,11 @@ export function parseRoute(pathname: string, search: string): ParsedRoute {
   const defaultRoute: ParsedRoute = {
     view: "home",
     listingId: listingIdFromQuery || null,
+    catalogItemId: null,
     sellerId: null,
     adminPage: "transactions",
     profileTab: "profile",
+    productReturnTo: query.get("from") === "admin-listings" ? "admin-listings" : null,
   };
 
   if (normalizedPath === "/") return defaultRoute;
@@ -117,6 +124,18 @@ export function parseRoute(pathname: string, search: string): ParsedRoute {
     return { ...defaultRoute, view: "profile", profileTab: "profile" };
   }
 
+  if (normalizedPath === "/profile/partnership") {
+    return { ...defaultRoute, view: "partnership", profileTab: "partnership" };
+  }
+
+  if (normalizedPath === "/profile/partner-listings/new") {
+    return {
+      ...defaultRoute,
+      view: "partnerListingCreate",
+      profileTab: "partner-listings",
+    };
+  }
+
   if (normalizedPath.startsWith("/profile/")) {
     const segment = normalizedPath.slice("/profile/".length).trim();
     return {
@@ -132,6 +151,17 @@ export function parseRoute(pathname: string, search: string): ParsedRoute {
       ...defaultRoute,
       view: "product",
       listingId: listingId || defaultRoute.listingId,
+    };
+  }
+
+  if (normalizedPath.startsWith("/catalog/")) {
+    const catalogItemId = decodeRouteSegment(
+      normalizedPath.slice("/catalog/".length).trim(),
+    );
+    return {
+      ...defaultRoute,
+      view: "catalogItem",
+      catalogItemId: catalogItemId || null,
     };
   }
 
@@ -161,11 +191,21 @@ export function parseRoute(pathname: string, search: string): ParsedRoute {
 export function buildPathForView(params: {
   view: AppView;
   listingId: string | null;
+  catalogItemId: string | null;
   sellerId: string | null;
   adminPage: AdminPage;
   profileTab: ProfileTab;
+  productReturnTo?: "admin-listings" | null;
 }): string {
-  const { view, listingId, sellerId, adminPage, profileTab } = params;
+  const {
+    view,
+    listingId,
+    catalogItemId,
+    sellerId,
+    adminPage,
+    profileTab,
+    productReturnTo = null,
+  } = params;
   switch (view) {
     case "home":
       return "/";
@@ -177,14 +217,18 @@ export function buildPathForView(params: {
       return "/order-complete";
     case "paymentReturn":
       return "/payment-return";
+    case "catalogItem":
+      return catalogItemId ? `/catalog/${encodeURIComponent(catalogItemId)}` : "/";
     case "product":
-      return listingId ? `/products/${listingId}` : "/";
+      return listingId
+        ? `/products/${listingId}${productReturnTo === "admin-listings" ? "?from=admin-listings" : ""}`
+        : "/";
     case "sellerStore":
       return sellerId ? `/sellers/${encodeURIComponent(sellerId)}` : "/";
     case "about":
       return "/about";
     case "partnership":
-      return "/partnership";
+      return profileTab === "partnership" ? "/profile/partnership" : "/partnership";
     case "faq":
       return "/faq";
     case "privacy":
@@ -195,6 +239,8 @@ export function buildPathForView(params: {
       return "/auth";
     case "profile":
       return profileTab === "profile" ? "/profile" : `/profile/${profileTab}`;
+    case "partnerListingCreate":
+      return "/profile/partner-listings/new";
     case "adminLogin":
       return "/admin/login";
     case "adminPanel":

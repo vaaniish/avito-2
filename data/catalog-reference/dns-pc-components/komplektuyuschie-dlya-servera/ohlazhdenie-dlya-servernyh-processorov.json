@@ -1,0 +1,81 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Комплектующие для сервера",
+  "itemName": "Охлаждение для серверных процессоров",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/bbbfd86bd37e0b91/ohlazdenie-dla-servernyh-processorov/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:56.140Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 2,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/8c7aff288378fcc2/kuler-dla-processora-arctic-freezer-4u-m-rev-2/",
+      "title": "Кулер для процессора ARCTIC Freezer 4U-M Rev. 2 [сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin]",
+      "specsText": "сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin",
+      "bracketGroups": [
+        "сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin"
+      ],
+      "priceText": "",
+      "productId": "8c7aff288378fcc2",
+      "cardText": "Кулер для процессора ARCTIC Freezer 4U-M Rev. 2 [сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin]4.89 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/000f2d2becabf89e/kuler-dla-processora-arctic-freezer-4u-sp5/",
+      "title": "Кулер для процессора ARCTIC Freezer 4U-SP5 [сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin]",
+      "specsText": "сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin",
+      "bracketGroups": [
+        "сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin"
+      ],
+      "priceText": "",
+      "productId": "000f2d2becabf89e",
+      "cardText": "Кулер для процессора ARCTIC Freezer 4U-SP5 [сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin]4.8 |5 отзывов 1Отличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Кулер",
+      "models": [
+        {
+          "brand": "Кулер",
+          "model": "для процессора ARCTIC Freezer 4U-M Rev. 2",
+          "name": "Кулер для процессора ARCTIC Freezer 4U-M Rev. 2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8c7aff288378fcc2/kuler-dla-processora-arctic-freezer-4u-m-rev-2/",
+              "title": "Кулер для процессора ARCTIC Freezer 4U-M Rev. 2 [сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin]",
+              "specsText": "сокет LGA 4189, LGA 4677, LGA 4710, SP3, рассеиваемая мощность, Вт - 350 Вт, основание - алюминий\\медь, 2300 об/мин, 40 дБ, 4 pin",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Кулер",
+          "model": "для процессора ARCTIC Freezer 4U-SP5",
+          "name": "Кулер для процессора ARCTIC Freezer 4U-SP5",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/000f2d2becabf89e/kuler-dla-processora-arctic-freezer-4u-sp5/",
+              "title": "Кулер для процессора ARCTIC Freezer 4U-SP5 [сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin]",
+              "specsText": "сокет SP5, рассеиваемая мощность, Вт - 360 Вт, основание - алюминий/медь, 3300 об/мин, 45.3 дБ, 4 pin",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/bbbfd86bd37e0b91/ohlazdenie-dla-servernyh-processorov/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 2,
+      "title": "Системы охлаждения для серверных процессоров купить в интернет-магазине DNS. Системы охлаждения для серверных процессоров цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

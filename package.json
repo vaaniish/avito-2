@@ -35,10 +35,14 @@
     "db:generate": "node node_modules/prisma/build/index.js generate --schema backend/prisma/schema.prisma",
     "db:migrate": "node node_modules/prisma/build/index.js migrate dev --schema backend/prisma/schema.prisma",
     "db:seed": "node node_modules/tsx/dist/cli.mjs backend/prisma/seed.ts",
+    "db:import-catalog-reference": "node node_modules/tsx/dist/cli.mjs scripts/catalog/import-catalog-reference-to-db.ts",
     "db:push": "node node_modules/prisma/build/index.js db push --schema backend/prisma/schema.prisma",
     "db:migrate:deploy": "node node_modules/prisma/build/index.js migrate deploy --schema backend/prisma/schema.prisma"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@radix-ui/react-dialog": "^1.1.15",
