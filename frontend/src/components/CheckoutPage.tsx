@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CartItem, Product } from "../types";
-import { apiGet, apiPost } from "../lib/api";
+import type { CartItem } from "../types";
 import { type YandexMapMarker } from "./YandexMapPicker";
 import { notifyError, notifyInfo } from "./ui/notifications";
+import {
+  createCheckoutOrders,
+  fetchCheckoutPolicy,
+  fetchCheckoutProductListings,
+  fetchDeliveryPoints,
+  fetchPaymentStatus,
+  type CheckoutPolicy,
+} from "./checkout.api";
 import { CheckoutDeliverySection } from "./checkout.delivery-section";
 import {
   DELIVERY_PICKUP_PROVIDER,
@@ -16,12 +23,9 @@ import {
   YANDEX_GEOSUGGEST_API_KEY,
   getPaymentStatusMeta,
   type ActivePayment,
-  type CreateOrdersResponse,
   type DeliveryPoint,
-  type DeliveryPointsResponse,
   type DeliveryProvider,
   type PaymentMethod,
-  type PaymentStatusResponse,
 } from "./checkout.models";
 import { CheckoutOrderSummary } from "./checkout.order-summary";
 import { CheckoutPaymentMethodSection } from "./checkout.payment-method-section";
@@ -42,13 +46,6 @@ interface CheckoutPageProps {
     deliveryType: "delivery" | "pickup";
   }) => void;
 }
-
-type CheckoutPolicy = {
-  id: string;
-  version: string;
-  title: string;
-  contentUrl: string;
-};
 
 function makeCheckoutIdempotencyFingerprint(params: {
   items: Array<{ id: string; quantity: number }>;
@@ -88,12 +85,10 @@ export function CheckoutPage({
   const [deliveryCity, setDeliveryCity] = useState("");
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
   const [deliveryProviders, setDeliveryProviders] = useState<DeliveryProvider[]>(
-    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled && tab.code !== "cdek").map(
-      (tab) => ({
-        code: tab.code,
-        label: tab.label,
-      }),
-    ),
+    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled).map((tab) => ({
+      code: tab.code,
+      label: tab.label,
+    })),
   );
   const [activeDeliveryProvider, setActiveDeliveryProvider] =
     useState<DeliveryProvider["code"]>(DELIVERY_PICKUP_PROVIDER);
@@ -193,12 +188,7 @@ export function CheckoutPage({
     let cancelled = false;
     const loadCheckoutPolicy = async () => {
       try {
-        const policy = await apiGet<{
-          id: string;
-          version: string;
-          title: string;
-          contentUrl: string;
-        }>("/public/policy/current?scope=checkout");
+        const policy = await fetchCheckoutPolicy();
         if (cancelled) return;
         if (
           typeof policy.id === "string" &&
@@ -239,19 +229,7 @@ export function CheckoutPage({
       setIsPointsLoading(true);
     }
     try {
-      const params = new URLSearchParams({
-        city: query,
-      });
-      if (provider && provider !== "all") {
-        params.set("provider", provider);
-      }
-      if (provider === "russian_post") {
-        params.set("cursor", String(Math.max(0, cursor)));
-        params.set("limit", "250");
-      }
-      const response = await apiGet<DeliveryPointsResponse>(
-        `/profile/delivery-points?${params.toString()}`,
-      );
+      const response = await fetchDeliveryPoints({ city: query, provider, cursor });
       if (append && provider === "russian_post") {
         setDeliveryPoints((prev) => {
           const byId = new Map(prev.map((point) => [point.id, point]));
@@ -500,14 +478,10 @@ export function CheckoutPage({
 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
-    const encodedOrderIds = encodeURIComponent(activePayment.orderIds.join(","));
-
     const poll = async () => {
       try {
         if (cancelled) return;
-        const response = await apiGet<PaymentStatusResponse>(
-          `/profile/orders/payment-status?orderIds=${encodedOrderIds}`,
-        );
+        const response = await fetchPaymentStatus(activePayment.orderIds);
         if (cancelled) return;
         setPaymentStatusError(null);
         setActivePayment((prev) => (prev ? { ...prev, summary: response.summary } : prev));
@@ -554,13 +528,9 @@ export function CheckoutPage({
 
     let cancelled = false;
     let channel: BroadcastChannel | null = null;
-    const encodedOrderIds = encodeURIComponent(activePayment.orderIds.join(","));
-
     const refreshPaymentStatusNow = async () => {
       try {
-        const response = await apiGet<PaymentStatusResponse>(
-          `/profile/orders/payment-status?orderIds=${encodedOrderIds}`,
-        );
+        const response = await fetchPaymentStatus(activePayment.orderIds);
         if (cancelled) return;
 
         setPaymentStatusError(null);
@@ -659,7 +629,7 @@ export function CheckoutPage({
       paymentWindow.document.body.innerHTML =
         "<p style='font-family:Arial,sans-serif;padding:16px'>Подготавливаем страницу оплаты...</p>";
 
-      const productListings = await apiGet<Product[]>("/catalog/listings?type=products");
+      const productListings = await fetchCheckoutProductListings();
 
       const availableIds = new Set(
         productListings.map((listing) => listing.id),
@@ -708,13 +678,7 @@ export function CheckoutPage({
         fingerprint: checkoutFingerprint,
       };
 
-      const response = await apiPost<CreateOrdersResponse>(
-        "/profile/orders",
-        checkoutPayload,
-        {
-          "Idempotency-Key": idempotencyKey,
-        },
-      );
+      const response = await createCheckoutOrders(checkoutPayload, idempotencyKey);
 
       const orderIds = response.orders.map((order) => order.order_id);
       if (orderIds.length === 0) {

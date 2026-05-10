@@ -1,10 +1,5 @@
 import { promises as fs } from "fs";
 import {
-  findCdekCities,
-  isCdekConfigured,
-  loadCdekDeliveryPoints,
-} from "../delivery/cdek-api";
-import {
   DELIVERY_PROVIDER_LABELS,
   DeliveryProviderCode,
   DeliveryProviderFilter,
@@ -76,7 +71,6 @@ const RUSSIAN_POST_PAGE_SIZE_DEFAULT = Number(
 const RUSSIAN_POST_PAGE_SIZE_MAX = Number(
   process.env.RUSSIAN_POST_PAGE_SIZE_MAX ?? "600",
 );
-const CDEK_PAGE_SIZE_DEFAULT = Number(process.env.CDEK_PAGE_SIZE_DEFAULT ?? "300");
 type GeoBounds = {
   minLat: number;
   maxLat: number;
@@ -1260,67 +1254,6 @@ async function loadYandexPickupPoints(
   */
 }
 
-async function loadCdekPickupPoints(
-  location: GeocodedLocation,
-  normalizedQuery: string,
-): Promise<DeliveryPoint[]> {
-  if (!isCdekConfigured()) {
-    return [];
-  }
-
-  const embeddedIndexMatch = normalizedQuery.match(/(?:^|\D)(\d{6})(?:\D|$)/u);
-  const postalCode = /^\d{6}$/u.test(normalizedQuery)
-    ? normalizedQuery
-    : embeddedIndexMatch?.[1] ?? "";
-
-  const cities = postalCode
-    ? []
-    : await findCdekCities(location.city || normalizedQuery);
-  const cityCode = cities[0]?.code;
-
-  const points = await loadCdekDeliveryPoints({
-    cityCode,
-    postalCode,
-    countryCode: cityCode || postalCode ? undefined : "RU",
-    size: Number.isFinite(CDEK_PAGE_SIZE_DEFAULT)
-      ? Math.max(1, Math.min(Math.floor(CDEK_PAGE_SIZE_DEFAULT), 1000))
-      : 300,
-  });
-
-  const minLat = location.bounds?.minLat;
-  const maxLat = location.bounds?.maxLat;
-  const minLng = location.bounds?.minLng;
-  const maxLng = location.bounds?.maxLng;
-  const hasBounds =
-    Number.isFinite(minLat) &&
-    Number.isFinite(maxLat) &&
-    Number.isFinite(minLng) &&
-    Number.isFinite(maxLng);
-
-  return points
-    .filter((point) => {
-      if (cityCode || postalCode || !hasBounds) return true;
-      return (
-        point.lat >= (minLat ?? -90) - 0.1 &&
-        point.lat <= (maxLat ?? 90) + 0.1 &&
-        point.lng >= (minLng ?? -180) - 0.1 &&
-        point.lng <= (maxLng ?? 180) + 0.1
-      );
-    })
-    .map((point) => ({
-      id: point.id,
-      provider: "cdek" as const,
-      providerLabel: DELIVERY_PROVIDER_LABELS.cdek,
-      name: point.name,
-      address: point.address,
-      city: point.city || location.city || normalizedQuery,
-      lat: point.lat,
-      lng: point.lng,
-      workHours: point.workHours,
-      etaDays: 2,
-      cost: 500,
-    }));
-}
 export async function getDeliveryPoints(
   query: string,
   providerFilter: DeliveryProviderFilter = "all",
@@ -1388,13 +1321,6 @@ export async function getDeliveryPoints(
     });
   }
 
-  if (providerFilter === "all" || providerFilter === "cdek") {
-    loaders.push({
-      provider: "cdek",
-      run: () => loadCdekPickupPoints(location, normalizedQuery),
-    });
-  }
-
   if (providerFilter === "all") {
     loaders.push({
       provider: "russian_post",
@@ -1427,8 +1353,6 @@ export async function getDeliveryPoints(
     }
     if (loader.provider === "yandex_pvz") {
       console.warn("Failed to load Yandex pickup points:", result.reason);
-    } else if (loader.provider === "cdek") {
-      console.warn("Failed to load CDEK pickup points:", result.reason);
     } else {
       console.warn("Failed to load Russian Post pickup points:", result.reason);
     }

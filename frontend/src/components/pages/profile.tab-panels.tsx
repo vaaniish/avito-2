@@ -45,9 +45,6 @@ function buildBuyerTrackingLink(order: Order): string | null {
   const trackingUrl = order.trackingUrl?.trim();
   if (trackingUrl) return trackingUrl;
   if (!trackingNumber) return null;
-  if (order.trackingProvider === "cdek") {
-    return `https://www.cdek.ru/ru/tracking?order_id=${encodeURIComponent(trackingNumber)}`;
-  }
   if (order.trackingProvider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
   }

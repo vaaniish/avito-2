@@ -114,7 +114,7 @@ export type Order = {
   deliveryAddress: string;
   deliveryCost: number;
   discount: number;
-  trackingProvider?: "yandex_pvz" | "russian_post" | "cdek" | null;
+  trackingProvider?: "yandex_pvz" | "russian_post" | null;
   trackingNumber?: string | null;
   trackingUrl?: string | null;
   deliveryExternalStatus?: string | null;

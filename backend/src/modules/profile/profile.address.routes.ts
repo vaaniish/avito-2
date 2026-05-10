@@ -6,7 +6,7 @@ type SessionResult =
   | { ok: true; user: { id: number } }
   | { ok: false; status: number; message: string };
 
-type DeliveryProviderFilter = "all" | "russian_post" | "yandex_pvz" | "cdek";
+type DeliveryProviderFilter = "all" | "russian_post" | "yandex_pvz";
 
 type LocationPayload = {
   city: string;

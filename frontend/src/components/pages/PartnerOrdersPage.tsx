@@ -16,7 +16,7 @@ import { ConfirmDialog, ToastViewport, type AppNotice } from "../ui/feedback";
 import type { OrderStatusValue } from "../checkout.models";
 
 type OrderStatus = OrderStatusValue;
-type TrackingProvider = "yandex_pvz" | "russian_post" | "cdek";
+type TrackingProvider = "yandex_pvz" | "russian_post";
 
 type PartnerOrder = {
   id: string;
@@ -116,7 +116,7 @@ function formatExternalDeliveryStatus(value: string | null): string {
     CONFIRMATION_CODE_RECEIVED: "Код подтверждения получен",
     DELIVERY_TRANSMITTED_TO_RECIPIENT: "Выдан получателю",
     DELIVERY_DELIVERED: "Доставка завершена",
-    ACCEPTED: "Заявка СДЭК принята",
+    ACCEPTED: "Заявка принята службой доставки",
     READY_FOR_DELIVERY: "Прибыло в ПВЗ",
     DELIVERED: "Выдано получателю",
     FINISHED: "Подтверждено",
@@ -138,7 +138,6 @@ function stripPickupPointTag(value: string | null | undefined): string {
 function formatPickupPointLabel(order: PartnerOrder): string {
   const cleanAddress = stripPickupPointTag(order.delivery_address);
   if (cleanAddress) return cleanAddress;
-  if (order.tracking_provider === "cdek") return "ПВЗ СДЭК";
   if (order.tracking_provider === "russian_post") return "Отделение Почты России";
   if (order.tracking_provider === "yandex_pvz") return "ПВЗ Яндекса";
   return "Пункт выдачи уточняется";
@@ -165,19 +164,7 @@ function buildTrackingLink(order: PartnerOrder): string | null {
   if (trackingNumber && order.tracking_provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
   }
-  if (trackingNumber && order.tracking_provider === "cdek") {
-    return `https://www.cdek.ru/ru/tracking?order_id=${encodeURIComponent(trackingNumber)}`;
-  }
   return null;
-}
-
-function formatCurrency(amount: number | null): string {
-  if (amount === null) return "—";
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 export function PartnerOrdersPage({ onOpenListing }: PartnerOrdersPageProps) {
@@ -278,7 +265,7 @@ export function PartnerOrdersPage({ onOpenListing }: PartnerOrdersPageProps) {
           "error",
         );
       } else if (result.tracking?.trackingNumber) {
-        showNotice(`Заказ подготовлен. Трек СДЭК: ${result.tracking.trackingNumber}`, "success");
+        showNotice(`Заказ подготовлен. Трек: ${result.tracking.trackingNumber}`, "success");
       } else {
         showNotice(`Заказ ${target.id} отмечен как подготовленный`, "success");
       }

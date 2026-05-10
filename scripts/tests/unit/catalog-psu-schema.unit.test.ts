@@ -7,6 +7,18 @@ const frontendPage = readFileSync(
   "frontend/src/components/pages/PartnerListingsPage.tsx",
   "utf8",
 );
+const frontendCreateFlow = readFileSync(
+  "frontend/src/components/pages/partner-listings.create-flow.tsx",
+  "utf8",
+);
+const frontendApi = readFileSync(
+  "frontend/src/components/pages/partner-listings.api.ts",
+  "utf8",
+);
+const frontendUtils = readFileSync(
+  "frontend/src/components/pages/partner-listings.utils.ts",
+  "utf8",
+);
 const adminRoutes = readFileSync(
   "backend/src/modules/admin/admin.routes.ts",
   "utf8",
@@ -34,17 +46,6 @@ const backendGpuBlock = extractBlock(
   '"ITM-037": {',
   '    "ITM-038":',
 );
-const frontendPsuBlock = extractBlock(
-  frontendPage,
-  '"Блок питания": makeFallbackSchema({',
-  "  PlayStation:",
-);
-const frontendGpuBlock = extractBlock(
-  frontendPage,
-  "  Видеокарта: makeFallbackSchema({",
-  "  Процессор:",
-);
-
 const expectedPsuKeys = [
   "manufacturer",
   "power",
@@ -69,19 +70,6 @@ const expectedBackendGpuKeys = [
   "length_mm",
   "mining_usage",
   "warranty_months_left",
-];
-const expectedFrontendGpuKeys = ["brand", "model"];
-const mvpItems = [
-  "iPhone",
-  "Ноутбук",
-  "Видеокарта",
-  "Блок питания",
-  "Apple Watch",
-  "Холодильник",
-  "Стиральная машина",
-  "Духовой шкаф",
-  "Кофемашина",
-  "Робот-пылесос",
 ];
 
 test("catalog item schema: graphics card keeps a dedicated backend schema", () => {
@@ -108,25 +96,14 @@ test("catalog item schema: graphics card keeps a dedicated backend schema", () =
   );
 });
 
-test("catalog item schema: graphics card frontend fallback mirrors backend fields", () => {
-  const keys = extractKeys(
-    frontendGpuBlock,
-    /\b(selectField|numberField|textField|textareaField)\(\s*"([^"]+)"/g,
-  );
-
-  assert.deepEqual(keys, expectedFrontendGpuKeys);
-  assert.match(frontendPage, /<CatalogReferenceCascadeEditor/);
-  assert.match(frontendGpuBlock, /textField\("brand", "Бренд"\)/);
-  assert.match(frontendGpuBlock, /textField\("model", "Модель"\)/);
-  assert.doesNotMatch(frontendGpuBlock, /producerCode|Код производителя/);
-  assert.doesNotMatch(
-    frontendGpuBlock,
-    /\b(socket|chipset|cpu_power_connector|atx_version|screen_size|capacity)\b/,
-  );
-  assert.doesNotMatch(
-    frontendGpuBlock,
-    /"Apple"|"Samsung"|"Xiaomi"|"Seasonic"|"Corsair"|"PowerColor"/,
-  );
+test("catalog item schema: frontend reads product characteristic schema from catalog API only", () => {
+  assert.match(frontendPage, /PartnerListingCreateFlow/);
+  assert.match(frontendCreateFlow, /<CatalogReferenceCascadeEditor/);
+  assert.match(frontendApi, /apiGet<CatalogCategoryDto\[]>\(\s*`\/catalog\/categories\?type=\$\{type\}`/);
+  assert.match(frontendUtils, /selectedSubcategory\.itemAttributeSchemas\?\.\[catalogItem\]/);
+  assert.doesNotMatch(frontendPage, /makeFallbackSchema|PARTNER_CATALOG|SUPPORTED_MVP_ITEMS/);
+  assert.doesNotMatch(frontendCreateFlow, /makeFallbackSchema|PARTNER_CATALOG|SUPPORTED_MVP_ITEMS/);
+  assert.doesNotMatch(frontendUtils, /makeFallbackSchema|PARTNER_CATALOG|SUPPORTED_MVP_ITEMS/);
 });
 
 test("catalog item schema: power supply keeps a dedicated backend schema", () => {
@@ -147,43 +124,17 @@ test("catalog item schema: power supply keeps a dedicated backend schema", () =>
   assert.doesNotMatch(backendPsuBlock, /"Apple"|"Samsung"|"Xiaomi"/);
 });
 
-test("catalog item schema: power supply frontend fallback mirrors backend fields", () => {
-  const keys = extractKeys(
-    frontendPsuBlock,
-    /\b(selectField|numberField|textField|textareaField)\(\s*"([^"]+)"/g,
-  );
-
-  assert.deepEqual(keys, expectedPsuKeys);
-  assert.match(frontendPsuBlock, /selectField\("manufacturer"/);
-  assert.match(frontendPsuBlock, /"Corsair"/);
-  assert.match(frontendPsuBlock, /"80 PLUS Gold"/);
-  assert.match(frontendPsuBlock, /"Нет части модульных кабелей"/);
-  assert.doesNotMatch(
-    frontendPsuBlock,
-    /\b(socket|chipset|memory_type|gpu_chip|screen_size)\b/,
-  );
-  assert.doesNotMatch(frontendPsuBlock, /"Apple"|"Samsung"|"Xiaomi"/);
-});
-
 test("catalog item schema: product condition is only the system listing state", () => {
   assert.doesNotMatch(adminRoutes, /key:\s*"condition_grade"/);
-  assert.match(frontendPage, /isSystemBackedCharacteristicField/);
-  assert.match(frontendPage, /key === "condition_grade"/);
+  assert.match(frontendUtils, /isSystemBackedCharacteristicField/);
+  assert.match(frontendUtils, /key === "condition_grade"/);
 });
 
-test("catalog creation: frontend no longer gates product characteristics by MVP item list", () => {
-  const partnerCatalogBlock = extractBlock(
-    frontendPage,
-    "const PARTNER_CATALOG:",
-    "  services:",
-  );
-
-  for (const item of mvpItems) {
-    assert.match(partnerCatalogBlock, new RegExp(`"${item}"`));
-  }
+test("catalog creation: frontend no longer gates product characteristics by local lists", () => {
+  assert.doesNotMatch(frontendPage, /const PARTNER_CATALOG:/);
+  assert.doesNotMatch(frontendPage, /makeFallbackSchema/);
   assert.doesNotMatch(frontendPage, /SUPPORTED_MVP_ITEMS/);
-  assert.match(frontendPage, /if \(type === "products"\) return \[\];/);
-  assert.match(frontendPage, /form\.type === "services" && characteristicFields\.length > 0/);
+  assert.match(frontendUtils, /return sortFields\(selectedSubcategory\.attributeSchema \?\? \[]\)/);
 });
 
 test("catalog creation: backend binds existing product items without deferred MVP mode", () => {
@@ -193,7 +144,7 @@ test("catalog creation: backend binds existing product items without deferred MV
     "const expandedProductAttributes",
   );
   const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.routes.ts",
+    "backend/src/modules/partner/partner.listings.routes.ts",
     "utf8",
   );
 
@@ -207,7 +158,7 @@ test("catalog creation: backend binds existing product items without deferred MV
 
 test("catalog custom flow: category, subcategory, item and attribute values go to suggestions", () => {
   const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.routes.ts",
+    "backend/src/modules/partner/partner.listings.routes.ts",
     "utf8",
   );
 
@@ -223,7 +174,7 @@ test("catalog custom flow: category, subcategory, item and attribute values go t
 
 test("catalog creation suggestions: backend searches generic catalog item names", () => {
   const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.routes.ts",
+    "backend/src/modules/partner/partner.listings.routes.ts",
     "utf8",
   );
 

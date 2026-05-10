@@ -20,7 +20,7 @@ type SessionResult =
   | { ok: true; user: { id: number } }
   | { ok: false; status: number; message: string };
 
-type DeliveryProviderCode = "russian_post" | "yandex_pvz" | "cdek";
+type DeliveryProviderCode = "russian_post" | "yandex_pvz";
 
 type YooKassaPayment = {
   id: string;

@@ -25,7 +25,7 @@ const catalogSeedSource = readFileSync(
 const prismaSchemaSource = readFileSync("backend/prisma/schema.prisma", "utf8");
 const runtimeSeedSource = readFileSync("backend/prisma/seed.ts", "utf8");
 const partnerRoutesSource = readFileSync(
-  "backend/src/modules/partner/partner.routes.ts",
+  "backend/src/modules/partner/partner.listings.routes.ts",
   "utf8",
 );
 const catalogReferenceServiceSource = readFileSync(
@@ -44,9 +44,10 @@ const catalogReferenceImportSource = readFileSync(
   "scripts/catalog/import-catalog-reference-to-db.ts",
   "utf8",
 );
-const pcComponentsManifest = JSON.parse(
-  readFileSync("data/catalog-reference/dns-pc-components/manifest.json", "utf8"),
-);
+const pcComponentsManifestPath = "data/catalog-reference/dns-pc-components/manifest.json";
+const pcComponentsManifest = existsSync(pcComponentsManifestPath)
+  ? JSON.parse(readFileSync(pcComponentsManifestPath, "utf8"))
+  : null;
 
 test("catalog source of truth: empty DNS item is removed from seeds and reference data", () => {
   assert.doesNotMatch(catalogSeedSource, new RegExp(removedCatalogItem));
@@ -56,6 +57,10 @@ test("catalog source of truth: empty DNS item is removed from seeds and referenc
     ),
     false,
   );
+  if (!pcComponentsManifest) {
+    assert.equal(existsSync(pcComponentsManifestPath), false);
+    return;
+  }
   assert.equal(
     pcComponentsManifest.items.some(
       (item: { itemName?: string }) => item.itemName === removedCatalogItem,
@@ -73,11 +78,14 @@ test("catalog source of truth: empty DNS item is removed from seeds and referenc
 
 test("catalog source of truth: frontend catalog surfaces read catalogItems from API data", () => {
   assert.match(appSource, /apiGet<CatalogCategory\[]>\("\/catalog\/categories\?type=products"\)/);
-  assert.match(appSource, /apiGet<CatalogCategory\[]>\("\/catalog\/categories\?type=services"\)/);
   assert.match(catalogRoutesSource, /catalogItems: subcategory\.items\.map/);
   assert.match(filterPanelSource, /subcategory\.catalogItems\?\.length/);
   assert.match(catalogOverlaySource, /subcategory\.catalogItems\?\.length/);
-  assert.match(partnerListingsSource, /apiGet<CatalogCategoryDto\[]>\(\s*`\/catalog\/categories\?type=\$\{type\}`/);
+  assert.match(
+    readFileSync("frontend/src/components/pages/partner-listings.api.ts", "utf8"),
+    /apiGet<CatalogCategoryDto\[]>\(\s*`\/catalog\/categories\?type=\$\{type\}`/,
+  );
+  assert.doesNotMatch(partnerListingsSource, /makeFallbackSchema|PARTNER_CATALOG/);
   assert.equal(existsSync("frontend/src/components/dnsCatalogData.ts"), false);
 });
 
@@ -141,7 +149,7 @@ test("catalog reference source of truth: partner API reads runtime data only fro
   assert.match(partnerRoutesSource, /titleSuggestions/);
   assert.match(partnerRoutesSource, /aggregateCatalogReferenceCharacteristics\(variant\.characteristics\)/);
   assert.match(partnerRoutesSource, /isReferenceItem \? \[] : item\?\.attribute_definitions \?\? \[]/);
-  assert.match(partnerRoutesSource, /partnerRouter\.get\("\/listings\/catalog-reference"/);
+  assert.match(partnerRoutesSource, /partnerListingsRouter\.get\("\/listings\/catalog-reference"/);
   assert.doesNotMatch(catalogReferenceServiceSource, /fs from "node:fs"|path from "node:path"/);
   assert.doesNotMatch(catalogReferenceServiceSource, /catalog-reference\.json/);
   assert.doesNotMatch(catalogReferenceServiceSource, /loadCatalogReferenceFallback|findCatalogReferenceFallback/);

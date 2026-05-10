@@ -37,11 +37,6 @@ Optional backend env (`.env`):
 - `RUSSIAN_POST_ACCESS_TOKEN` - AccessToken for Почта России API
 - `RUSSIAN_POST_USER_AUTH` - base64 login:password for header `X-User-Authorization`
 - `RUSSIAN_POST_API_TIMEOUT_MS` - timeout for calls to Почта России API (default: `8000`)
-- `CDEK_API_BASE_URL` - CDEK API base URL (test default: `https://api.edu.cdek.ru/v2`)
-- `CDEK_CLIENT_ID` / `CDEK_CLIENT_SECRET` - CDEK API credentials
-- `CDEK_SHIPMENT_POINT_CODE` - fixed sender PVZ code for demo shipment creation
-- `CDEK_TARIFF_CODE` - tariff code for PVZ-to-PVZ delivery (default: `136`)
-- `CDEK_SENDER_NAME` / `CDEK_SENDER_PHONE` - demo sender contact for CDEK orders
 
 Useful scripts:
 

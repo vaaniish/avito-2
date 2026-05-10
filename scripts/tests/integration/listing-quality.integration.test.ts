@@ -108,7 +108,13 @@ async function waitForListingEvent(params: {
       },
     });
 
-    if (listing && listing.moderation_events.length > 0) {
+    if (
+      listing &&
+      listing.moderation_events.length > 0 &&
+      (params.decision !== "AUTO_APPROVED" ||
+        (listing.status === "ACTIVE" &&
+          listing.moderation_status === "APPROVED"))
+    ) {
       return listing;
     }
 

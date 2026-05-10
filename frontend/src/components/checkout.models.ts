@@ -61,7 +61,7 @@ export type ActivePayment = {
 };
 
 export type DeliveryProvider = {
-  code: "yandex_pvz" | "russian_post" | "cdek";
+  code: "yandex_pvz" | "russian_post";
   label: string;
 };
 
@@ -116,7 +116,6 @@ export const DELIVERY_PROVIDER_TABS: Array<{
 }> = [
   { code: "yandex_pvz", label: "Яндекс ПВЗ", enabled: true },
   { code: "russian_post", label: "Почта России", enabled: true },
-  { code: "cdek", label: "СДЭК", enabled: true },
 ];
 
 export type PaymentStatusMeta = {
