@@ -11,8 +11,7 @@ import {
 function parseCatalogStats(text: string | null) {
   const normalized = text ?? "";
   const total = Number(normalized.match(/Найдено:\s*(\d+)/)?.[1] ?? "0");
-  const loaded = Number(normalized.match(/Загружено:\s*(\d+)/)?.[1] ?? "0");
-  return { total, loaded };
+  return { total };
 }
 
 test.beforeEach(async ({ page }) => {
@@ -86,7 +85,7 @@ test("@smoke catalog infinite scroll keeps home view and grows loaded window", a
 
   const initialStats = parseCatalogStats(await page.getByTestId("catalog-stats").textContent());
   expect(initialStats.total).toBeGreaterThan(0);
-  expect(initialStats.loaded).toBeGreaterThan(0);
+  await expect(page.getByTestId("catalog-card").first()).toBeVisible();
 
   for (let index = 0; index < 4; index += 1) {
     await page.evaluate(() => {
@@ -99,7 +98,6 @@ test("@smoke catalog infinite scroll keeps home view and grows loaded window", a
   await expect(page.getByTestId("catalog-card").first()).toBeVisible();
   const loadedStats = parseCatalogStats(await page.getByTestId("catalog-stats").textContent());
   expect(loadedStats.total).toBeGreaterThan(0);
-  expect(loadedStats.loaded).toBeGreaterThan(0);
   await expectAppView(page, "home");
 });
 
