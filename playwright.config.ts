@@ -28,7 +28,8 @@ export default defineConfig({
       command: "npm run start:dev",
       port: 3001,
       timeout: 120_000,
-      reuseExistingServer: !CI,
+      // CI can inherit a backend started by earlier gate steps in the same job.
+      reuseExistingServer: true,
       env: {
         ...process.env,
         PORT: "3001",
