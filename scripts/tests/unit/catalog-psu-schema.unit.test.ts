@@ -4,19 +4,19 @@ import test from "node:test";
 
 const backendSeed = readFileSync("backend/prisma/seed.ts", "utf8");
 const frontendPage = readFileSync(
-  "frontend/src/components/pages/PartnerListingsPage.tsx",
+  "frontend/src/pages/partner-listings/PartnerListingsPage.tsx",
   "utf8",
 );
 const frontendCreateFlow = readFileSync(
-  "frontend/src/components/pages/partner-listings.create-flow.tsx",
+  "frontend/src/pages/partner-listings/partner-listings.create-flow.tsx",
   "utf8",
 );
 const frontendApi = readFileSync(
-  "frontend/src/components/pages/partner-listings.api.ts",
+  "frontend/src/pages/partner-listings/partner-listings.api.ts",
   "utf8",
 );
 const frontendUtils = readFileSync(
-  "frontend/src/components/pages/partner-listings.utils.ts",
+  "frontend/src/pages/partner-listings/partner-listings.utils.ts",
   "utf8",
 );
 const adminRoutes = readFileSync(

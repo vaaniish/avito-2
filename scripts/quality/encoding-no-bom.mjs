@@ -73,6 +73,7 @@ const filesWithBom = [];
 
 for (const absolutePath of listTrackedFiles()) {
   if (!isTextFile(absolutePath)) continue;
+  if (!fs.existsSync(absolutePath)) continue;
   const data = fs.readFileSync(absolutePath);
   if (!hasUtf8Bom(data)) continue;
   filesWithBom.push(absolutePath);

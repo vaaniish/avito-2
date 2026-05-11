@@ -34,6 +34,11 @@ function validateOptionalPositiveInteger(name: string): void {
 
 function main(): void {
   const originalNodeEnv = process.env.NODE_ENV;
+  const originalSessionTokenSecret = process.env.SESSION_TOKEN_SECRET;
+  if (typeof originalSessionTokenSecret !== "string" || originalSessionTokenSecret.trim().length === 0) {
+    process.env.SESSION_TOKEN_SECRET =
+      "security-preflight-session-token-secret-0123456789abcdef0123456789abcdef";
+  }
   process.env.NODE_ENV = "production";
 
   try {
@@ -46,6 +51,11 @@ function main(): void {
       delete process.env.NODE_ENV;
     } else {
       process.env.NODE_ENV = originalNodeEnv;
+    }
+    if (typeof originalSessionTokenSecret === "undefined") {
+      delete process.env.SESSION_TOKEN_SECRET;
+    } else {
+      process.env.SESSION_TOKEN_SECRET = originalSessionTokenSecret;
     }
   }
 

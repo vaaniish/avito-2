@@ -12,10 +12,17 @@ import {
 const MAX_BLOCK_REASON_LENGTH = 500;
 
 type UserStatusValue = "ACTIVE" | "BLOCKED";
+type UserRoleValue = "BUYER" | "SELLER";
 
 function parseUserStatus(status: unknown): UserStatusValue | null {
   if (status === "active") return "ACTIVE";
   if (status === "blocked") return "BLOCKED";
+  return null;
+}
+
+function parseUserRole(role: unknown): UserRoleValue | null {
+  if (role === "regular") return "BUYER";
+  if (role === "partner") return "SELLER";
   return null;
 }
 
@@ -339,6 +346,84 @@ export function registerAdminUserRoutes(adminRouter: Router) {
       });
     } catch (error) {
       console.error("Error updating user status:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  adminRouter.patch("/users/:publicId/role", async (req: Request, res: Response) => {
+    try {
+      const access = await requireAdmin(req, res);
+      if (!access.ok) return;
+
+      const { publicId } = req.params;
+      const body = (req.body ?? {}) as { role?: unknown };
+      const nextRole = parseUserRole(body.role);
+      if (!nextRole) {
+        res.status(400).json({ error: "Invalid user role" });
+        return;
+      }
+
+      const existing = await prisma.appUser.findUnique({
+        where: { public_id: String(publicId) },
+        select: {
+          id: true,
+          role: true,
+        },
+      });
+
+      if (!existing) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      if (existing.role === "ADMIN") {
+        res.status(400).json({ error: "Cannot update admin role" });
+        return;
+      }
+
+      if (existing.role === nextRole) {
+        res.json({ success: true, role: nextRole === "SELLER" ? "partner" : "regular" });
+        return;
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.appUser.update({
+          where: { id: existing.id },
+          data: {
+            role: nextRole,
+          },
+        });
+
+        if (nextRole === "SELLER") {
+          await tx.sellerProfile.upsert({
+            where: { user_id: existing.id },
+            create: {
+              user_id: existing.id,
+              is_verified: false,
+            },
+            update: {},
+          });
+        }
+      });
+
+      await writeAudit({
+        req,
+        actorUserId: access.user.id,
+        action: "user.role_changed",
+        entityType: "user",
+        entityPublicId: String(publicId),
+        details: {
+          beforeRole: existing.role,
+          afterRole: nextRole,
+        },
+      });
+
+      res.json({
+        success: true,
+        role: nextRole === "SELLER" ? "partner" : "regular",
+      });
+    } catch (error) {
+      console.error("Error updating user role:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

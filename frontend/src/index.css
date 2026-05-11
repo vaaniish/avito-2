@@ -5821,7 +5821,7 @@ button {
   left: 0;
   bottom: calc(100% + 0.55rem);
   z-index: 30;
-  display: grid;
+  display: none;
   width: min(25rem, calc(100vw - 2rem));
   max-height: min(28rem, calc(100vh - 5rem));
   overflow: auto;
@@ -5840,6 +5840,7 @@ button {
 
 .score-explanation:hover .score-explanation__panel,
 .score-explanation:focus-within .score-explanation__panel {
+  display: grid;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
@@ -6337,6 +6338,14 @@ button {
   backdrop-filter: blur(18px) saturate(1.1);
 }
 
+.app-modal__frame {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  max-height: 100%;
+}
+
 .app-modal__panel {
   position: relative;
   display: flex;
@@ -6345,7 +6354,8 @@ button {
   --app-modal-body-width: 880px;
   width: min(var(--app-modal-panel-width), calc(100vw - 96px));
   max-height: min(860px, calc(100dvh - 32px));
-  overflow: visible;
+  overflow: hidden;
+  border-radius: 26px;
 }
 
 .app-modal__panel--md {
@@ -6373,6 +6383,7 @@ button {
   min-height: 0;
   padding: 0;
   pointer-events: none;
+  overflow: visible;
 }
 
 .app-modal__bar--end {
@@ -6423,6 +6434,7 @@ button {
 .app-modal__content {
   flex: 1;
   min-height: 0;
+  max-height: inherit;
   overflow-y: auto;
   overflow-x: hidden;
   border: 1px solid rgba(226, 232, 240, 0.92);
@@ -9149,6 +9161,10 @@ button {
   .app-modal__panel--xl {
     width: calc(100vw - 20px);
     max-height: calc(100dvh - 20px);
+  }
+
+  .app-modal__frame {
+    width: 100%;
   }
 
   .app-modal__content,

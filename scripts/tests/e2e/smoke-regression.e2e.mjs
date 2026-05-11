@@ -146,6 +146,7 @@ async function main() {
   let seller = null;
   let admin = null;
   let buyerToken = null;
+  let buyerAltToken = null;
   let sellerToken = null;
   let adminToken = null;
   let firstListing = null;
@@ -195,6 +196,11 @@ async function main() {
       body: { email: "seller1@ecomm.local", password: "seller123" },
       expected: [200],
     });
+    const buyerAltRes = await apiRequest("POST", "/auth/login", {
+      headers: jsonHeaders,
+      body: { email: "buyer2@ecomm.local", password: "buyer123" },
+      expected: [200],
+    });
     const adminRes = await apiRequest("POST", "/auth/login", {
       headers: jsonHeaders,
       body: { email: "admin@ecomm.local", password: "admin123" },
@@ -203,6 +209,7 @@ async function main() {
 
     buyer = buyerRes.data?.user;
     seller = sellerRes.data?.user;
+    buyerAltToken = requireToken(buyerAltRes.data?.sessionToken, "buyerAlt");
     admin = adminRes.data?.user;
     buyerToken = requireToken(buyerRes.data?.sessionToken, "buyer");
     sellerToken = requireToken(sellerRes.data?.sessionToken, "seller");
@@ -306,7 +313,7 @@ async function main() {
     const created = await apiRequest("POST", `/catalog/listings/${firstListing.id}/complaints`, {
       headers: {
         ...jsonHeaders,
-        ...authHeaders(requireToken(buyerToken, "buyer")),
+        ...authHeaders(requireToken(buyerAltToken, "buyerAlt")),
       },
       body: {
         complaintType,

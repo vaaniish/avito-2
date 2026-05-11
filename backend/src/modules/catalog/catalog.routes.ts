@@ -3,8 +3,10 @@ import {
   CatalogCategory,
   CatalogItem,
   CatalogSubcategory,
+  ListingCondition,
   ListingAttribute,
   MarketplaceListing,
+  Prisma,
 } from "@prisma/client";
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../../lib/prisma";
@@ -20,6 +22,16 @@ import {
 
 const catalogRouter = Router();
 type ListingTypeValue = "PRODUCT";
+type CatalogSortBy = "popular" | "price-asc" | "price-desc" | "rating" | "newest";
+type CatalogPaginatedResponse<T> = {
+  items: T[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+    hasMore: boolean;
+  };
+};
 
 const FALLBACK_LISTING_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80";
@@ -261,6 +273,246 @@ function extractSellerCity(seller: { addresses: Array<{ city: string }> }): stri
   return seller.addresses[0]?.city?.trim() ?? "";
 }
 
+function parseBooleanFlag(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+}
+
+function parseCatalogSortBy(value: unknown): CatalogSortBy {
+  if (
+    value === "price-asc" ||
+    value === "price-desc" ||
+    value === "rating" ||
+    value === "newest"
+  ) {
+    return value;
+  }
+  return "popular";
+}
+
+function normalizeWords(value: string): string[] {
+  return value
+    .split(/\s+/)
+    .map((part) => normalizeDisplayText(part, "").trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function normalizeSearchToken(value: unknown): string {
+  return normalizeSearchTarget(value)
+    .toLocaleLowerCase("ru-RU")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeSearchTarget(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value.trim().toLowerCase();
+  if (typeof value === "number" || typeof value === "boolean") return String(value).toLowerCase();
+  if (value instanceof Date) return value.toISOString().toLowerCase();
+  if (Array.isArray(value)) return value.map((item) => normalizeSearchTarget(item)).join(" ");
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .map((item) => normalizeSearchTarget(item))
+      .join(" ");
+  }
+  return "";
+}
+
+function resolveEffectivePrice(listing: { price: number; sale_price: number | null }): number {
+  if (listing.sale_price !== null && listing.sale_price < listing.price) {
+    return listing.sale_price;
+  }
+  return listing.price;
+}
+
+function listingAttributeSearchText(
+  attributes: Array<{ key: string; value: string }> | undefined,
+): string {
+  if (!attributes?.length) return "";
+  return attributes
+    .filter((attribute) => !INTERNAL_LISTING_ATTRIBUTE_KEYS.has(attribute.key))
+    .map((attribute) => `${normalizeDisplayText(attribute.key, "")} ${normalizeDisplayText(attribute.value, "")}`)
+    .join(" ");
+}
+
+function buildCatalogSearchText(listing: {
+  title: string;
+  description?: string | null;
+  sku?: string | null;
+  seller?: { name?: string | null; addresses?: Array<{ city?: string | null }> };
+  item?: {
+    name?: string | null;
+    subcategory?: {
+      name?: string | null;
+      category?: { name?: string | null };
+    } | null;
+  } | null;
+  attributes?: Array<{ key: string; value: string }>;
+}): string {
+  return normalizeSearchToken({
+    title: normalizeDisplayText(listing.title, ""),
+    description: normalizeDisplayText(listing.description ?? "", ""),
+    seller: normalizeDisplayText(listing.seller?.name ?? "", ""),
+    city: normalizeDisplayText(listing.seller?.addresses?.[0]?.city ?? "", ""),
+    sku: normalizeDisplayText(listing.sku ?? "", ""),
+    category: normalizeDisplayText(listing.item?.name ?? "", ""),
+    subcategory: normalizeDisplayText(listing.item?.subcategory?.name ?? "", ""),
+    catalogCategory: normalizeDisplayText(listing.item?.subcategory?.category?.name ?? "", ""),
+    attributes: listingAttributeSearchText(listing.attributes),
+  });
+}
+
+function buildCatalogSearchRank(listing: {
+  title: string;
+  sku?: string | null;
+  item?: { name?: string | null } | null;
+}, normalizedQuery: string): number {
+  if (!normalizedQuery) return 0;
+  const candidates = [
+    normalizeSearchToken(listing.sku ?? ""),
+    normalizeSearchToken(listing.item?.name ?? ""),
+    normalizeSearchToken(listing.title),
+  ].filter(Boolean);
+
+  let rank = 0;
+  for (const candidate of candidates) {
+    if (candidate === normalizedQuery) {
+      rank = Math.max(rank, 300);
+      continue;
+    }
+    if (candidate.startsWith(normalizedQuery)) {
+      rank = Math.max(rank, 200);
+      continue;
+    }
+    if (candidate.includes(normalizedQuery)) {
+      rank = Math.max(rank, 100);
+    }
+  }
+  return rank;
+}
+
+type CatalogFilterParams = {
+  searchQuery: string;
+  minPrice: number;
+  maxPrice: number;
+  minRating: number;
+  showOnlySale: boolean;
+  condition: ListingCondition | null;
+  includeWords: string[];
+  excludeWords: string[];
+};
+
+function listingMatchesCatalogFilters(
+  listing: {
+    seller_id?: number;
+    title: string;
+    description?: string | null;
+    sku?: string | null;
+    price: number;
+    sale_price: number | null;
+    rating: number;
+    condition: ListingCondition;
+    seller?: { name?: string | null; addresses?: Array<{ city?: string | null }> };
+    item?: {
+      name?: string | null;
+      subcategory?: {
+        name?: string | null;
+        category?: { name?: string | null };
+      } | null;
+    } | null;
+    attributes?: Array<{ key: string; value: string }>;
+  },
+  filters: CatalogFilterParams,
+): { matches: boolean; searchText: string; searchRank: number } {
+  const effectivePrice = resolveEffectivePrice(listing);
+  if (effectivePrice < filters.minPrice || effectivePrice > filters.maxPrice) {
+    return { matches: false, searchText: "", searchRank: 0 };
+  }
+  if (listing.rating < filters.minRating) {
+    return { matches: false, searchText: "", searchRank: 0 };
+  }
+  if (filters.showOnlySale && effectivePrice >= listing.price) {
+    return { matches: false, searchText: "", searchRank: 0 };
+  }
+  if (filters.condition && listing.condition !== filters.condition) {
+    return { matches: false, searchText: "", searchRank: 0 };
+  }
+
+  const normalizedQuery = normalizeSearchToken(filters.searchQuery);
+  const searchText = buildCatalogSearchText(listing);
+  const searchRank = buildCatalogSearchRank(listing, normalizedQuery);
+
+  if (normalizedQuery && !searchText.includes(normalizedQuery)) {
+    return { matches: false, searchText, searchRank };
+  }
+  if (
+    filters.includeWords.length > 0 &&
+    filters.includeWords.some((word) => !searchText.includes(normalizeSearchToken(word)))
+  ) {
+    return { matches: false, searchText, searchRank };
+  }
+  if (
+    filters.excludeWords.length > 0 &&
+    filters.excludeWords.some((word) => searchText.includes(normalizeSearchToken(word)))
+  ) {
+    return { matches: false, searchText, searchRank };
+  }
+
+  return { matches: true, searchText, searchRank };
+}
+
+function sortCatalogCandidates<T extends {
+  id: number;
+  price: number;
+  sale_price: number | null;
+  rating: number;
+  created_at: Date;
+  views: number;
+}>(
+  candidates: Array<T & { searchRank: number }>,
+  sortBy: CatalogSortBy,
+): Array<T & { searchRank: number }> {
+  return [...candidates].sort((left, right) => {
+    if (left.searchRank !== right.searchRank) {
+      return right.searchRank - left.searchRank;
+    }
+
+    const leftPrice = resolveEffectivePrice(left);
+    const rightPrice = resolveEffectivePrice(right);
+    switch (sortBy) {
+      case "price-asc":
+        if (leftPrice !== rightPrice) return leftPrice - rightPrice;
+        break;
+      case "price-desc":
+        if (leftPrice !== rightPrice) return rightPrice - leftPrice;
+        break;
+      case "rating":
+        if (left.rating !== right.rating) return right.rating - left.rating;
+        break;
+      case "newest":
+        if (left.created_at.getTime() !== right.created_at.getTime()) {
+          return right.created_at.getTime() - left.created_at.getTime();
+        }
+        break;
+      default:
+        if (left.views !== right.views) return right.views - left.views;
+        if (left.created_at.getTime() !== right.created_at.getTime()) {
+          return right.created_at.getTime() - left.created_at.getTime();
+        }
+        break;
+    }
+    return right.id - left.id;
+  });
+}
+
+function parseCatalogCondition(value: unknown): ListingCondition | null {
+  if (value === "new") return "NEW";
+  if (value === "used") return "USED";
+  return null;
+}
+
 function listingStatusToClient(status: string): "active" | "inactive" | "moderation" {
   if (status === "ACTIVE") return "active";
   if (status === "MODERATION") return "moderation";
@@ -477,6 +729,111 @@ async function loadSellerReviews(sellerId: number, limit = 50): Promise<
   }));
 }
 
+const catalogListingDetailInclude = {
+  seller: {
+    select: {
+      public_id: true,
+      name: true,
+      avatar: true,
+      joined_at: true,
+      addresses: {
+        select: {
+          city: true,
+        },
+        orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+        take: 1,
+      },
+      _count: {
+        select: {
+          listings: true,
+        },
+      },
+      seller_profile: {
+        select: {
+          is_verified: true,
+          average_response_minutes: true,
+        },
+      },
+    },
+  },
+  item: {
+    include: {
+      subcategory: {
+        include: {
+          category: true,
+        },
+      },
+    },
+  },
+  images: {
+    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+  },
+  attributes: {
+    orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+  },
+} satisfies Prisma.MarketplaceListingInclude;
+
+type CatalogListingDetail = Prisma.MarketplaceListingGetPayload<{
+  include: typeof catalogListingDetailInclude;
+}>;
+
+function mapCatalogListingToProduct(
+  listing: CatalogListingDetail,
+  sellerReviewMetricsBySellerId: Map<number, SellerReviewMetrics>,
+) {
+  const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
+  const salePrice =
+    listing.sale_price !== null && listing.sale_price < listing.price
+      ? listing.sale_price
+      : null;
+  const catalogRefs = listingCatalogRefs(listing);
+
+  return {
+    id: listing.public_id,
+    title: normalizeDisplayText(listing.title, "Без названия"),
+    price: listing.price,
+    salePrice,
+    image: primaryImage,
+    images: listing.images.map((image) => image.url),
+    rating: sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? listing.rating,
+    sellerRating:
+      sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? listing.rating,
+    sellerReviewsCount:
+      sellerReviewMetricsBySellerId.get(listing.seller_id)?.reviewsCount ?? 0,
+    seller: normalizeDisplayText(listing.seller.name, "Продавец"),
+    sellerId: listing.seller.public_id,
+    sellerAvatar: listing.seller.avatar,
+    sellerJoinedAt: listing.seller.joined_at,
+    category: listingCategoryName(listing),
+    catalogCategoryId: catalogRefs.catalogCategoryId,
+    catalogSubcategoryId: catalogRefs.catalogSubcategoryId,
+    catalogItemId: catalogRefs.catalogItemId,
+    sku: listing.sku,
+    isNew: listing.condition === "NEW",
+    isSale: salePrice !== null,
+    isVerified: Boolean(listing.seller.seller_profile?.is_verified),
+    description: normalizeDisplayText(listing.description ?? "", ""),
+    shippingBySeller: listing.shipping_by_seller,
+    city: normalizeDisplayText(extractSellerCity(listing.seller), ""),
+    publishDate: formatPublishDate(listing.created_at),
+    views: listing.views,
+    sellerResponseTime: formatResponseTime(
+      listing.seller.seller_profile?.average_response_minutes,
+    ),
+    sellerListings: listing.seller._count.listings,
+    breadcrumbs: listingBreadcrumbs(listing),
+    specifications: listingSpecifications({
+      attributes: listing.attributes,
+      techGrade: listing.tech_grade,
+      techBatteryHealth: listing.tech_battery_health,
+      techDefects: listing.tech_defects,
+      techIncluded: listing.tech_included,
+    }),
+    isPriceLower: salePrice !== null,
+    condition: toClientCondition(listing.condition),
+  };
+}
+
 catalogRouter.get("/categories", async (req: Request, res: Response) => {
   try {
     const type = resolveListingType(req.query.type);
@@ -594,8 +951,18 @@ catalogRouter.get("/categories", async (req: Request, res: Response) => {
 catalogRouter.get("/listings", async (req: Request, res: Response) => {
   try {
     const type = resolveListingType(req.query.type);
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const usePagination = req.query.paginated === "1";
+    const limit = req.query.limit ? Number(req.query.limit) : usePagination ? 24 : undefined;
     const offset = req.query.offset ? Number(req.query.offset) : 0;
+    const sortBy = parseCatalogSortBy(req.query.sortBy);
+    const searchQuery = normalizeDisplayText(String(req.query.searchQuery ?? ""), "");
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : 0;
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : Number.MAX_SAFE_INTEGER;
+    const minRating = req.query.minRating ? Number(req.query.minRating) : 0;
+    const showOnlySale = parseBooleanFlag(req.query.showOnlySale);
+    const condition = parseCatalogCondition(req.query.condition);
+    const includeWords = normalizeWords(String(req.query.includeWords ?? ""));
+    const excludeWords = normalizeWords(String(req.query.excludeWords ?? ""));
     const itemPublicId = String(req.query.itemId ?? "").trim();
     const itemPublicIds = String(req.query.itemIds ?? "")
       .split(",")
@@ -607,6 +974,18 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
     }
     if (req.query.offset && (!Number.isInteger(offset) || offset < 0)) {
       return res.status(400).json({ error: "Invalid offset" });
+    }
+    if (req.query.minPrice && (!Number.isFinite(minPrice) || minPrice < 0)) {
+      return res.status(400).json({ error: "Invalid minPrice" });
+    }
+    if (req.query.maxPrice && (!Number.isFinite(maxPrice) || maxPrice < 0)) {
+      return res.status(400).json({ error: "Invalid maxPrice" });
+    }
+    if (req.query.minRating && (!Number.isFinite(minRating) || minRating < 0)) {
+      return res.status(400).json({ error: "Invalid minRating" });
+    }
+    if (maxPrice < minPrice) {
+      return res.status(400).json({ error: "Invalid price range" });
     }
 
     let itemId: number | undefined;
@@ -647,25 +1026,55 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
 
     const take = typeof limit === "number" ? Math.min(limit, 100) : undefined;
     const skip = take ? offset : undefined;
+    const baseWhere: Prisma.MarketplaceListingWhereInput = {
+      type,
+      status: "ACTIVE",
+      moderation_status: "APPROVED",
+      ...(typeof itemId === "number"
+        ? { item_id: itemId }
+        : itemIds
+          ? { item_id: { in: itemIds.length > 0 ? itemIds : [-1] } }
+          : {}),
+      ...(condition ? { condition } : {}),
+    };
 
-    const listings = await prisma.marketplaceListing.findMany({
-      where: {
-        type,
-        status: "ACTIVE",
-        moderation_status: "APPROVED",
-        ...(typeof itemId === "number"
-          ? { item_id: itemId }
-          : itemIds
-            ? { item_id: { in: itemIds.length > 0 ? itemIds : [-1] } }
-            : {}),
-      },
-      include: {
+    if (!usePagination) {
+      const listings = await prisma.marketplaceListing.findMany({
+        where: baseWhere,
+        include: catalogListingDetailInclude,
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        ...(typeof take === "number" ? { take, skip } : {}),
+      });
+
+      const sellerReviewMetricsBySellerId = await loadSellerReviewMetrics(
+        listings.map((listing) => listing.seller_id),
+      );
+
+      return res.json(
+        listings.map((listing) =>
+          mapCatalogListingToProduct(listing, sellerReviewMetricsBySellerId),
+        ),
+      );
+    }
+
+    const candidateListings = await prisma.marketplaceListing.findMany({
+      where: baseWhere,
+      select: {
+        id: true,
+        seller_id: true,
+        public_id: true,
+        title: true,
+        description: true,
+        price: true,
+        sale_price: true,
+        rating: true,
+        condition: true,
+        created_at: true,
+        views: true,
+        sku: true,
         seller: {
           select: {
-            public_id: true,
             name: true,
-            avatar: true,
-            joined_at: true,
             addresses: {
               select: {
                 city: true,
@@ -673,94 +1082,122 @@ catalogRouter.get("/listings", async (req: Request, res: Response) => {
               orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
               take: 1,
             },
-            _count: {
-              select: {
-                listings: true,
-              },
-            },
-            seller_profile: {
-              select: {
-                is_verified: true,
-                average_response_minutes: true,
-              },
-            },
           },
         },
         item: {
-          include: {
+          select: {
+            public_id: true,
+            name: true,
             subcategory: {
-              include: {
-                category: true,
+              select: {
+                public_id: true,
+                name: true,
+                category: {
+                  select: {
+                    public_id: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
         },
-        images: {
-          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
-        },
         attributes: {
-          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+          select: {
+            key: true,
+            value: true,
+          },
         },
       },
-      orderBy: [{ created_at: "desc" }, { id: "desc" }],
-      ...(typeof take === "number" ? { take, skip } : {}),
     });
 
-    const sellerReviewMetricsBySellerId = await loadSellerReviewMetrics(
-      listings.map((listing) => listing.seller_id),
+    const sellerReviewMetricsBySellerIdForCandidates = await loadSellerReviewMetrics(
+      candidateListings.map((listing) => listing.seller_id),
     );
 
-    return res.json(
-      listings.map((listing) => {
-          const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
-          const salePrice =
-            listing.sale_price !== null && listing.sale_price < listing.price
-              ? listing.sale_price
-              : null;
-          const catalogRefs = listingCatalogRefs(listing);
-
-          return {
-            id: listing.public_id,
-            title: normalizeDisplayText(listing.title, "Без названия"),
-            price: listing.price,
-            salePrice,
-            image: primaryImage,
-            images: listing.images.map((image) => image.url),
-            rating:
-              sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? 0,
-            sellerRating:
-              sellerReviewMetricsBySellerId.get(listing.seller_id)?.rating ?? 0,
-            sellerReviewsCount:
-              sellerReviewMetricsBySellerId.get(listing.seller_id)?.reviewsCount ?? 0,
-            seller: normalizeDisplayText(listing.seller.name, "Продавец"),
-            sellerId: listing.seller.public_id,
-            sellerAvatar: listing.seller.avatar,
-            sellerJoinedAt: listing.seller.joined_at,
-            category: listingCategoryName(listing),
-            catalogCategoryId: catalogRefs.catalogCategoryId,
-            catalogSubcategoryId: catalogRefs.catalogSubcategoryId,
-            catalogItemId: catalogRefs.catalogItemId,
-            sku: listing.sku,
-            isNew: listing.condition === "NEW",
-            isSale: salePrice !== null,
-            isVerified: Boolean(listing.seller.seller_profile?.is_verified),
-            description: normalizeDisplayText(listing.description ?? "", ""),
-            shippingBySeller: listing.shipping_by_seller,
-            city: normalizeDisplayText(extractSellerCity(listing.seller), ""),
-            publishDate: formatPublishDate(listing.created_at),
-            views: listing.views,
-            sellerResponseTime: formatResponseTime(
-              listing.seller.seller_profile?.average_response_minutes,
-            ),
-            sellerListings: listing.seller._count.listings,
-            breadcrumbs: listingBreadcrumbs(listing),
-            specifications: listingSpecifications({ attributes: listing.attributes, techGrade: listing.tech_grade, techBatteryHealth: listing.tech_battery_health, techDefects: listing.tech_defects, techIncluded: listing.tech_included }),
-            isPriceLower: salePrice !== null,
-            condition: toClientCondition(listing.condition),
+    const filteredCandidates = sortCatalogCandidates(
+      candidateListings
+        .map((listing) => {
+          const sellerRating =
+            sellerReviewMetricsBySellerIdForCandidates.get(listing.seller_id)?.rating ??
+            listing.rating;
+          const candidateWithEffectiveRating = {
+            ...listing,
+            rating: sellerRating,
           };
-        },
-      ),
+          const result = listingMatchesCatalogFilters(candidateWithEffectiveRating, {
+            searchQuery,
+            minPrice,
+            maxPrice,
+            minRating,
+            showOnlySale,
+            condition,
+            includeWords,
+            excludeWords,
+          });
+          if (!result.matches) return null;
+          return {
+            ...candidateWithEffectiveRating,
+            searchRank: result.searchRank,
+          };
+        })
+        .filter(
+          (
+            listing,
+          ): listing is (typeof candidateListings)[number] & { searchRank: number; rating: number } =>
+            Boolean(listing),
+        ),
+      sortBy,
     );
+
+    const total = filteredCandidates.length;
+    const pagedCandidateIds = filteredCandidates
+      .slice(offset, offset + (take ?? 24))
+      .map((listing) => listing.id);
+
+    if (pagedCandidateIds.length === 0) {
+      const emptyResponse: CatalogPaginatedResponse<ReturnType<typeof mapCatalogListingToProduct>> = {
+        items: [],
+        pagination: {
+          limit: take ?? 24,
+          offset,
+          total,
+          hasMore: false,
+        },
+      };
+      return res.json(emptyResponse);
+    }
+
+    const listings = await prisma.marketplaceListing.findMany({
+      where: {
+        id: {
+          in: pagedCandidateIds,
+        },
+      },
+      include: catalogListingDetailInclude,
+    });
+
+    const listingsById = new Map(listings.map((listing) => [listing.id, listing]));
+    const orderedListings = pagedCandidateIds
+      .map((id) => listingsById.get(id))
+      .filter((listing): listing is CatalogListingDetail => Boolean(listing));
+    const sellerReviewMetricsBySellerId = await loadSellerReviewMetrics(
+      orderedListings.map((listing) => listing.seller_id),
+    );
+
+    const response: CatalogPaginatedResponse<ReturnType<typeof mapCatalogListingToProduct>> = {
+      items: orderedListings.map((listing) =>
+        mapCatalogListingToProduct(listing, sellerReviewMetricsBySellerId),
+      ),
+      pagination: {
+        limit: take ?? 24,
+        offset,
+        total,
+        hasMore: offset + orderedListings.length < total,
+      },
+    };
+
+    return res.json(response);
   } catch (error) {
     console.error("Error fetching listings:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -831,8 +1268,14 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
 
     const isPubliclyAvailable =
       listing.status === "ACTIVE" && listing.moderation_status === "APPROVED";
+    const isPubliclyAccessibleInactiveApproved =
+      listing.status === "INACTIVE" && listing.moderation_status === "APPROVED";
+    const isDirectlyAccessiblePublicly =
+      isPubliclyAvailable || isPubliclyAccessibleInactiveApproved;
 
-    if (!isPubliclyAvailable) {
+    let relatedOrderItemExists = false;
+
+    if (!isDirectlyAccessiblePublicly) {
       if (!sessionUser) {
         return res.status(404).json({ error: "Listing not found" });
       }
@@ -851,11 +1294,31 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
           select: { id: true },
         });
 
-        hasRelatedAccess = Boolean(relatedOrderItem);
+        relatedOrderItemExists = Boolean(relatedOrderItem);
+        hasRelatedAccess = relatedOrderItemExists;
       }
 
       if (!hasRelatedAccess) {
         return res.status(404).json({ error: "Listing not found" });
+      }
+    }
+
+    let unavailableReason = getListingUnavailableReason(listing);
+    if (
+      !isPubliclyAvailable &&
+      sessionUser &&
+      listing.status === "INACTIVE" &&
+      listing.moderation_status === "APPROVED"
+    ) {
+      if (listing.seller_id === sessionUser.id) {
+        unavailableReason =
+          "Товар уже находится в истории сделки и недоступен для повторной покупки.";
+      } else if (relatedOrderItemExists) {
+        unavailableReason =
+          "Этот товар уже куплен и находится в вашей истории заказов.";
+      } else if (sessionUser.role === "ADMIN") {
+        unavailableReason =
+          "Товар уже недоступен для покупки и открыт только для просмотра истории сделки.";
       }
     }
 
@@ -912,7 +1375,7 @@ catalogRouter.get("/listings/:publicId", async (req: Request, res: Response) => 
       listingStatus: listingStatusToClient(listing.status),
       moderationStatus: moderationStatusToClient(listing.moderation_status),
       isAvailable: isPubliclyAvailable,
-      unavailableReason: getListingUnavailableReason(listing),
+      unavailableReason,
       reviews: sellerReviews,
     });
   } catch (error) {
@@ -1025,36 +1488,204 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
       moderation_status: "APPROVED" as const,
     };
 
-    const [total, listings, sellerReviewMetricsBySellerId, sellerReviews] = await Promise.all([
-      prisma.marketplaceListing.count({
-        where: listingWhere,
-      }),
+    const sortBy = parseCatalogSortBy(req.query.sortBy);
+    const searchQuery = normalizeDisplayText(String(req.query.searchQuery ?? ""), "");
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : 0;
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : Number.MAX_SAFE_INTEGER;
+    const minRating = req.query.minRating ? Number(req.query.minRating) : 0;
+    const showOnlySale = parseBooleanFlag(req.query.showOnlySale);
+    const condition = parseCatalogCondition(req.query.condition);
+    const includeWords = normalizeWords(String(req.query.includeWords ?? ""));
+    const excludeWords = normalizeWords(String(req.query.excludeWords ?? ""));
+    const itemPublicId = String(req.query.itemId ?? "").trim();
+    const itemPublicIds = String(req.query.itemIds ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    if (req.query.minPrice && (!Number.isFinite(minPrice) || minPrice < 0)) {
+      return res.status(400).json({ error: "Invalid minPrice" });
+    }
+    if (req.query.maxPrice && (!Number.isFinite(maxPrice) || maxPrice < 0)) {
+      return res.status(400).json({ error: "Invalid maxPrice" });
+    }
+    if (req.query.minRating && (!Number.isFinite(minRating) || minRating < 0)) {
+      return res.status(400).json({ error: "Invalid minRating" });
+    }
+    if (maxPrice < minPrice) {
+      return res.status(400).json({ error: "Invalid price range" });
+    }
+
+    let itemId: number | undefined;
+    let itemIds: number[] | undefined;
+    if (itemPublicId) {
+      const item = await prisma.catalogItem.findFirst({
+        where: {
+          public_id: itemPublicId,
+          subcategory: {
+            category: {
+              type: "PRODUCT",
+            },
+          },
+        },
+        select: { id: true },
+      });
+      if (!item) {
+        return res.status(404).json({ error: "Catalog item not found" });
+      }
+      itemId = item.id;
+    } else if (itemPublicIds.length > 0) {
+      const items = await prisma.catalogItem.findMany({
+        where: {
+          public_id: {
+            in: Array.from(new Set(itemPublicIds)).slice(0, 200),
+          },
+          subcategory: {
+            category: {
+              type: "PRODUCT",
+            },
+          },
+        },
+        select: { id: true },
+      });
+      itemIds = items.map((item) => item.id);
+    }
+
+    const [candidateListings, sellerReviewMetricsBySellerId, sellerReviews] = await Promise.all([
       prisma.marketplaceListing.findMany({
-        where: listingWhere,
-        include: {
+        where: {
+          ...listingWhere,
+          ...(typeof itemId === "number"
+            ? { item_id: itemId }
+            : itemIds
+              ? { item_id: { in: itemIds.length > 0 ? itemIds : [-1] } }
+              : {}),
+          ...(condition ? { condition } : {}),
+        },
+        select: {
+          id: true,
+          public_id: true,
+          title: true,
+          description: true,
+          price: true,
+          sale_price: true,
+          rating: true,
+          condition: true,
+          created_at: true,
+          views: true,
+          sku: true,
+          seller: {
+            select: {
+              name: true,
+              addresses: {
+                select: {
+                  city: true,
+                },
+                orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+                take: 1,
+              },
+            },
+          },
           item: {
-            include: {
+            select: {
+              public_id: true,
+              name: true,
               subcategory: {
-                include: {
-                  category: true,
+                select: {
+                  public_id: true,
+                  name: true,
+                  category: {
+                    select: {
+                      public_id: true,
+                      name: true,
+                    },
+                  },
                 },
               },
             },
           },
-          images: {
-            orderBy: [{ sort_order: "asc" }, { id: "asc" }],
-          },
           attributes: {
-            orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+            select: {
+              key: true,
+              value: true,
+            },
           },
         },
-        orderBy: [{ created_at: "desc" }, { id: "desc" }],
-        take,
-        skip,
       }),
       loadSellerReviewMetrics([seller.id]),
       loadSellerReviews(seller.id, 50),
     ]);
+
+    const filteredCandidates = sortCatalogCandidates(
+      candidateListings
+        .map((listing) => {
+          const sellerRating =
+            sellerReviewMetricsBySellerId.get(seller.id)?.rating ?? listing.rating;
+          const candidateWithEffectiveRating = {
+            ...listing,
+            rating: sellerRating,
+          };
+          const result = listingMatchesCatalogFilters(candidateWithEffectiveRating, {
+            searchQuery,
+            minPrice,
+            maxPrice,
+            minRating,
+            showOnlySale,
+            condition,
+            includeWords,
+            excludeWords,
+          });
+          if (!result.matches) return null;
+          return {
+            ...candidateWithEffectiveRating,
+            searchRank: result.searchRank,
+          };
+        })
+        .filter(
+          (
+            listing,
+          ): listing is (typeof candidateListings)[number] & { searchRank: number; rating: number } =>
+            Boolean(listing),
+        ),
+      sortBy,
+    );
+
+    const total = filteredCandidates.length;
+    const pagedCandidateIds = filteredCandidates
+      .slice(skip, skip + take)
+      .map((listing) => listing.id);
+
+    const listings =
+      pagedCandidateIds.length > 0
+        ? await prisma.marketplaceListing.findMany({
+            where: {
+              id: {
+                in: pagedCandidateIds,
+              },
+            },
+            include: {
+              item: {
+                include: {
+                  subcategory: {
+                    include: {
+                      category: true,
+                    },
+                  },
+                },
+              },
+              images: {
+                orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+              },
+              attributes: {
+                orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+              },
+            },
+          })
+        : [];
+    const listingsById = new Map(listings.map((listing) => [listing.id, listing]));
+    const orderedListings = pagedCandidateIds
+      .map((id) => listingsById.get(id))
+      .filter((listing): listing is (typeof listings)[number] => Boolean(listing));
 
     const sellerName = normalizeDisplayText(seller.name, "Продавец");
     const sellerCity = normalizeDisplayText(extractSellerCity(seller), "");
@@ -1082,7 +1713,7 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
         joinedAt: seller.joined_at,
       },
       reviews: sellerReviews,
-      items: listings.map((listing) => {
+      items: orderedListings.map((listing) => {
         const primaryImage = listing.images[0]?.url ?? FALLBACK_LISTING_IMAGE;
         const salePrice =
           listing.sale_price !== null && listing.sale_price < listing.price
@@ -1129,7 +1760,7 @@ catalogRouter.get("/sellers/:publicId/listings", async (req: Request, res: Respo
         limit: take,
         offset: skip,
         total,
-        hasMore: skip + listings.length < total,
+        hasMore: skip + orderedListings.length < total,
       },
     });
   } catch (error) {
@@ -1146,7 +1777,7 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
       return;
     }
 
-    const normalized = query.toLowerCase();
+    const normalized = normalizeSearchToken(query);
     const [listings, categories] = await Promise.all([
       prisma.marketplaceListing.findMany({
         where: {
@@ -1155,6 +1786,8 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
         },
         select: {
           title: true,
+          description: true,
+          sku: true,
           type: true,
           item: {
             select: {
@@ -1191,9 +1824,38 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
       query: string;
     }> = [];
 
+    const pushSuggestion = (suggestion: {
+      type: "product" | "service" | "category";
+      title: string;
+      subtitle?: string;
+      query: string;
+      rank: number;
+    }) => {
+      suggestions.push({
+        type: suggestion.type,
+        title: suggestion.title,
+        subtitle: suggestion.subtitle,
+        query: suggestion.query,
+        rank: suggestion.rank,
+      } as (typeof suggestions)[number] & { rank: number });
+    };
+
     for (const listing of listings) {
       const listingTitle = normalizeDisplayText(listing.title, "");
-      if (!listingTitle.toLowerCase().includes(normalized)) continue;
+      const listingSku = normalizeDisplayText(listing.sku ?? "", "");
+      const listingItemName = normalizeDisplayText(listing.item?.name ?? "", "");
+      const listingDescription = normalizeDisplayText(listing.description ?? "", "");
+      const titleToken = normalizeSearchToken(listingTitle);
+      const skuToken = normalizeSearchToken(listingSku);
+      const itemToken = normalizeSearchToken(listingItemName);
+      const descriptionToken = normalizeSearchToken(listingDescription);
+      const rank = Math.max(
+        titleToken === normalized ? 300 : titleToken.startsWith(normalized) ? 200 : titleToken.includes(normalized) ? 120 : 0,
+        skuToken === normalized ? 320 : skuToken.startsWith(normalized) ? 220 : skuToken.includes(normalized) ? 130 : 0,
+        itemToken === normalized ? 310 : itemToken.startsWith(normalized) ? 210 : itemToken.includes(normalized) ? 125 : 0,
+        descriptionToken.includes(normalized) ? 40 : 0,
+      );
+      if (rank <= 0) continue;
 
       const suggestionSubtitle = normalizeDisplayText(
         listing.item?.subcategory.name ??
@@ -1201,55 +1863,67 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
           "Категория",
         "Категория",
       );
-      suggestions.push({
+      pushSuggestion({
         type: "product",
         title: listingTitle,
-        subtitle: suggestionSubtitle,
-        query: listingTitle,
+        subtitle: listingSku ? `${suggestionSubtitle} · ${listingSku}` : suggestionSubtitle,
+        query: listingSku || listingTitle || listingItemName,
+        rank,
       });
     }
 
     for (const category of categories) {
       const categoryName = normalizeDisplayText(category.name, "Категория");
-      if (categoryName.toLowerCase().includes(normalized)) {
-        suggestions.push({
+      const categoryToken = normalizeSearchToken(categoryName);
+      if (categoryToken.includes(normalized)) {
+        pushSuggestion({
           type: "category",
           title: categoryName,
           subtitle: "Категория",
           query: categoryName,
+          rank: categoryToken === normalized ? 220 : categoryToken.startsWith(normalized) ? 160 : 90,
         });
       }
 
       for (const subcategory of category.subcategories) {
         const subcategoryName = normalizeDisplayText(subcategory.name, "Категория");
-        if (subcategoryName.toLowerCase().includes(normalized)) {
-          suggestions.push({
+        const subcategoryToken = normalizeSearchToken(subcategoryName);
+        if (subcategoryToken.includes(normalized)) {
+          pushSuggestion({
             type: "category",
             title: subcategoryName,
             subtitle: categoryName,
             query: subcategoryName,
+            rank:
+              subcategoryToken === normalized
+                ? 230
+                : subcategoryToken.startsWith(normalized)
+                  ? 170
+                  : 100,
           });
         }
 
         for (const item of subcategory.items) {
           const itemName = normalizeDisplayText(item.name, "Без названия");
-          if (!itemName.toLowerCase().includes(normalized)) continue;
-          suggestions.push({
+          const itemToken = normalizeSearchToken(itemName);
+          if (!itemToken.includes(normalized)) continue;
+          pushSuggestion({
             type: "category",
             title: itemName,
             subtitle: subcategoryName,
             query: itemName,
+            rank: itemToken === normalized ? 250 : itemToken.startsWith(normalized) ? 190 : 110,
           });
         }
       }
     }
 
     const deduped = suggestions
-      .sort((left: { title: string }, right: { title: string }) => {
-        const leftStarts = left.title.toLowerCase().startsWith(normalized);
-        const rightStarts = right.title.toLowerCase().startsWith(normalized);
-        if (leftStarts === rightStarts) return 0;
-        return leftStarts ? -1 : 1;
+      .sort((left, right) => {
+        const leftRank = "rank" in left ? Number(left.rank) : 0;
+        const rightRank = "rank" in right ? Number(right.rank) : 0;
+        if (leftRank !== rightRank) return rightRank - leftRank;
+        return left.title.localeCompare(right.title, "ru");
       })
       .filter(
         (item: { title: string }, index: number, list: { title: string }[]) =>
@@ -1259,7 +1933,13 @@ catalogRouter.get("/suggestions", async (req: Request, res: Response) => {
               candidate.title.toLowerCase() === item.title.toLowerCase(),
           ),
       )
-      .slice(0, 7);
+      .slice(0, 7)
+      .map(({ type, title, subtitle, query }) => ({
+        type,
+        title,
+        subtitle,
+        query,
+      }));
 
     res.json(deduped);
   } catch (error) {
@@ -1381,7 +2061,7 @@ catalogRouter.post(
         return;
       }
 
-      const session = await requireAnyRole(req, ["BUYER"]);
+      const session = await requireAnyRole(req, ["BUYER", "SELLER"]);
       if (!session.ok) {
         res.status(session.status).json({ error: session.message });
         return;
@@ -1389,11 +2069,28 @@ catalogRouter.post(
 
       const listing = await prisma.marketplaceListing.findUnique({
         where: { public_id: String(publicId) },
-        select: { id: true, title: true, seller_id: true, public_id: true },
+        select: {
+          id: true,
+          title: true,
+          seller_id: true,
+          public_id: true,
+          status: true,
+          moderation_status: true,
+        },
       });
 
       if (!listing) {
         res.status(404).json({ error: "Listing not found" });
+        return;
+      }
+
+      if (listing.status !== "ACTIVE" || listing.moderation_status !== "APPROVED") {
+        res.status(400).json({ error: "По этому объявлению нельзя задать вопрос." });
+        return;
+      }
+
+      if (listing.seller_id === session.user.id) {
+        res.status(400).json({ error: "Нельзя задавать вопрос по собственному объявлению." });
         return;
       }
 
@@ -1540,6 +2237,9 @@ catalogRouter.post(
           reporter_id: access.user.id,
           listing_id: listing.id,
           complaint_type: complaintType,
+          status: {
+            in: ["NEW", "PENDING"],
+          },
           created_at: {
             gte: dedupeWindowStart,
           },

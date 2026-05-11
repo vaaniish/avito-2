@@ -49,13 +49,16 @@ async function apiRequest(params: {
   token?: string;
   body?: unknown;
   expected: number;
+  idempotencyKey?: string;
 }) {
   const response = await fetch(`${baseUrl}${params.path}`, {
     method: params.method,
     headers: {
       "content-type": "application/json",
       ...(params.token ? { authorization: `Bearer ${params.token}` } : {}),
-      ...(params.method === "PATCH" ? { "Idempotency-Key": randomUUID() } : {}),
+      ...(params.method === "PATCH"
+        ? { "Idempotency-Key": params.idempotencyKey ?? randomUUID() }
+        : {}),
     },
     body: params.body === undefined ? undefined : JSON.stringify(params.body),
   });
@@ -68,7 +71,7 @@ async function apiRequest(params: {
   return payload;
 }
 
-async function loginAdmin(): Promise<string> {
+async function loginAdmin(): Promise<{ token: string; userId: number }> {
   const payload = await apiRequest({
     method: "POST",
     path: "/api/auth/login",
@@ -79,7 +82,8 @@ async function loginAdmin(): Promise<string> {
     },
   });
   assert.equal(typeof payload.sessionToken, "string");
-  return payload.sessionToken;
+  assert.equal(typeof payload.user?.id, "number");
+  return { token: payload.sessionToken, userId: payload.user.id };
 }
 
 async function createUser(prefix: string, role: "BUYER" | "SELLER") {
@@ -149,7 +153,7 @@ test(
   "integration: approving non-permanent complaint does not cascade related seller complaints",
   { skip: !safeDb },
   async () => {
-    const adminToken = await loginAdmin();
+    const admin = await loginAdmin();
     const seller = await createUser("CASCADE-NONPERM-SELLER", "SELLER");
     const reporter = await createUser("CASCADE-NONPERM-BUYER", "BUYER");
     const listing = await createListing(seller.id, "CASCADE-NONPERM-LST");
@@ -172,7 +176,7 @@ test(
       const payload = await apiRequest({
         method: "PATCH",
         path: `/api/admin/complaints/${primary.public_id}/status`,
-        token: adminToken,
+        token: admin.token,
         expected: 200,
         body: {
           status: "approved",
@@ -200,7 +204,7 @@ test(
   "integration: permanent seller ban cascades open seller complaints",
   { skip: !safeDb },
   async () => {
-    const adminToken = await loginAdmin();
+    const admin = await loginAdmin();
     const seller = await createUser("CASCADE-PERM-SELLER", "SELLER");
     const reporter = await createUser("CASCADE-PERM-BUYER", "BUYER");
     const listings = await Promise.all(
@@ -241,7 +245,7 @@ test(
       const payload = await apiRequest({
         method: "PATCH",
         path: `/api/admin/complaints/${primary.public_id}/status`,
-        token: adminToken,
+        token: admin.token,
         expected: 200,
         body: {
           status: "approved",
@@ -277,6 +281,162 @@ test(
       assert.equal(sellerAfter?.blocked_until, null);
 
       assert.equal(existingApproved.length, 3);
+    } finally {
+      await prisma.appUser.deleteMany({
+        where: { id: { in: [seller.id, reporter.id] } },
+      });
+    }
+  },
+);
+
+test(
+  "integration: admin complaint status idempotency replays cached response without duplicating side effects",
+  { skip: !safeDb },
+  async () => {
+    const admin = await loginAdmin();
+    const seller = await createUser("COMPLAINT-IDEMP-SELLER", "SELLER");
+    const reporter = await createUser("COMPLAINT-IDEMP-BUYER", "BUYER");
+    const listing = await createListing(seller.id, "COMPLAINT-IDEMP-LST");
+    const primary = await createComplaint({
+      publicId: `COMPLAINT-IDEMP-PRIMARY-${Date.now()}`,
+      status: "NEW",
+      listingId: listing.id,
+      sellerId: seller.id,
+      reporterId: reporter.id,
+    });
+    const idempotencyKey = `complaint-idemp-${Date.now()}`;
+
+    try {
+      const first = await apiRequest({
+        method: "PATCH",
+        path: `/api/admin/complaints/${primary.public_id}/status`,
+        token: admin.token,
+        idempotencyKey,
+        expected: 200,
+        body: {
+          status: "rejected",
+          actionTaken: "Complaint idempotency replay check",
+        },
+      });
+
+      const second = await apiRequest({
+        method: "PATCH",
+        path: `/api/admin/complaints/${primary.public_id}/status`,
+        token: admin.token,
+        idempotencyKey,
+        expected: 200,
+        body: {
+          status: "rejected",
+          actionTaken: "Complaint idempotency replay check",
+        },
+      });
+
+      assert.deepEqual(second, first);
+      assert.equal(first.status, "rejected");
+
+      const complaintAfter = await prisma.complaint.findUnique({
+        where: { id: primary.id },
+        select: { status: true, action_taken: true },
+      });
+      assert.equal(complaintAfter?.status, "REJECTED");
+      assert.equal(complaintAfter?.action_taken, "Complaint idempotency replay check");
+
+      const events = await prisma.complaintEvent.findMany({
+        where: { complaint_id: primary.id, event_type: "STATUS_CHANGED" },
+        select: { id: true },
+      });
+      assert.equal(events.length, 1);
+
+      const notifications = await prisma.notification.findMany({
+        where: {
+          user_id: { in: [seller.id, reporter.id] },
+        },
+        select: { id: true, user_id: true, target_url: true },
+      });
+      const sellerNotifications = notifications.filter((item) => item.user_id === seller.id);
+      const reporterNotifications = notifications.filter((item) => item.user_id === reporter.id);
+      assert.equal(sellerNotifications.length, 1);
+      assert.equal(reporterNotifications.length, 1);
+      assert.equal(sellerNotifications[0]?.target_url, "/profile?tab=partner");
+      assert.equal(reporterNotifications[0]?.target_url, `/products/${encodeURIComponent(listing.public_id)}`);
+
+      const idempotencyRows = await prisma.adminIdempotencyKey.findMany({
+        where: {
+          actor_user_id: admin.userId,
+          action: "complaint.status.update",
+          idempotency_key: idempotencyKey,
+        },
+        select: { response_status: true },
+      });
+      assert.equal(idempotencyRows.length, 1);
+      assert.equal(idempotencyRows[0]?.response_status, 200);
+    } finally {
+      await prisma.appUser.deleteMany({
+        where: { id: { in: [seller.id, reporter.id] } },
+      });
+    }
+  },
+);
+
+test(
+  "integration: admin complaint status idempotency rejects same key with different payload",
+  { skip: !safeDb },
+  async () => {
+    const admin = await loginAdmin();
+    const seller = await createUser("COMPLAINT-CONFLICT-SELLER", "SELLER");
+    const reporter = await createUser("COMPLAINT-CONFLICT-BUYER", "BUYER");
+    const listing = await createListing(seller.id, "COMPLAINT-CONFLICT-LST");
+    const primary = await createComplaint({
+      publicId: `COMPLAINT-CONFLICT-PRIMARY-${Date.now()}`,
+      status: "NEW",
+      listingId: listing.id,
+      sellerId: seller.id,
+      reporterId: reporter.id,
+    });
+    const idempotencyKey = `complaint-conflict-${Date.now()}`;
+
+    try {
+      await apiRequest({
+        method: "PATCH",
+        path: `/api/admin/complaints/${primary.public_id}/status`,
+        token: admin.token,
+        idempotencyKey,
+        expected: 200,
+        body: {
+          status: "rejected",
+          actionTaken: "Complaint idempotency conflict baseline",
+        },
+      });
+
+      const conflict = await apiRequest({
+        method: "PATCH",
+        path: `/api/admin/complaints/${primary.public_id}/status`,
+        token: admin.token,
+        idempotencyKey,
+        expected: 409,
+        body: {
+          status: "approved",
+          actionTaken: "Complaint idempotency conflict payload",
+        },
+      });
+
+      assert.equal(
+        conflict.error,
+        "Idempotency-Key reuse with different payload is not allowed for this action.",
+      );
+
+      const complaintAfter = await prisma.complaint.findUnique({
+        where: { id: primary.id },
+        select: { status: true, action_taken: true },
+      });
+      assert.equal(complaintAfter?.status, "REJECTED");
+      assert.equal(complaintAfter?.action_taken, "Complaint idempotency conflict baseline");
+
+      const events = await prisma.complaintEvent.findMany({
+        where: { complaint_id: primary.id, event_type: "STATUS_CHANGED" },
+        select: { id: true },
+      });
+      assert.equal(events.length, 1);
     } finally {
       await prisma.appUser.deleteMany({
         where: { id: { in: [seller.id, reporter.id] } },

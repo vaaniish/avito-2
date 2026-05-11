@@ -390,7 +390,12 @@ export function createProfileAddressRouter(
         return;
       }
 
-      const suggestions = await deps.loadLocationSuggestionsByYandex(rawQuery, limit);
+      let suggestions: unknown[] = [];
+      try {
+        suggestions = await deps.loadLocationSuggestionsByYandex(rawQuery, limit);
+      } catch (error) {
+        console.warn("Location suggest degraded to empty result:", error);
+      }
       res.json({
         query: rawQuery,
         suggestions,

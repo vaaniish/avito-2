@@ -2973,6 +2973,18 @@ async function main(): Promise<void> {
       1,
       [["LST-010", 24900, 1]],
     ],
+    [
+      "ORD-1010",
+      "BUY-004",
+      "SLR-001",
+      "COMPLETED",
+      "DELIVERY",
+      "Москва, Проверочная 10",
+      500,
+      0,
+      0,
+      [["LST-002", 165000, 1]],
+    ],
   ] as const;
 
   const orderMap = new Map<string, number>();
@@ -3077,6 +3089,15 @@ async function main(): Promise<void> {
         "SLR-002",
         "Тестовый заказ выдан покупателю",
         1,
+      ],
+      ["ORD-1010", "CREATED", "PAID", "BUY-004", "Покупатель оплатил заказ", 0],
+      [
+        "ORD-1010",
+        "PAID",
+        "COMPLETED",
+        "SLR-001",
+        "Тестовый заказ seller1 завершён без оставленного отзыва",
+        0,
       ],
     ].map((h: any) => ({
       order_id: getRequired(orderMap, h[0], "Order"),
@@ -3206,6 +3227,19 @@ async function main(): Promise<void> {
         "YOOMONEY",
         "pi_1009",
         1,
+      ],
+      [
+        "TXN-1010",
+        "ORD-1010",
+        "BUY-004",
+        "SLR-001",
+        165500,
+        "SUCCESS",
+        3.5,
+        5793,
+        "YOOMONEY",
+        "pi_1010",
+        0,
       ],
     ].map((t: any) => ({
       public_id: t[0],

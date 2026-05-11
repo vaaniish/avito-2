@@ -1,0 +1,37 @@
+import type { CatalogCategory } from "../../widgets/FilterPanel";
+import type { CartItem, FilterState, Product } from "../../shared/types";
+import type { CatalogPagesByOffset } from "../../app/app.catalog.utils";
+
+export type AppCatalogViewProps = {
+  isSearchActive: boolean;
+  hideHero?: boolean;
+  filters: FilterState;
+  viewMode: "products";
+  categories: CatalogCategory[];
+  sortedItems: Product[];
+  hasMoreItems: boolean;
+  hasPreviousItems: boolean;
+  isLoadingMoreItems: boolean;
+  loadedItemCount: number;
+  totalItemCount: number;
+  catalogPageOffsets: number[];
+  catalogPagesByOffset: CatalogPagesByOffset;
+  loadedCatalogOffsets: number[];
+  activeCatalogOffset: number;
+  visibleWindowStartOffset: number;
+  cartItems: CartItem[];
+  sortBy: string;
+  wishlistProductIds: Set<string>;
+  onBannerClick: (category: string) => void;
+  onFilterChange: (newFilters: FilterState) => void;
+  onViewModeChange: (nextMode: "products") => void;
+  onLoadMoreCatalogItems: () => void;
+  onLoadPreviousCatalogItems: () => void;
+  onVisibleCatalogOffsetChange: (offset: number) => void;
+  onEnsureCatalogOffsetLoaded: (offset: number) => void;
+  onProductClick: (product: Product) => void;
+  onAddToCart: (product: Product) => void;
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onSortChange: (sortBy: string) => void;
+  onWishlistToggle: (productId: string, isWishlisted: boolean) => void;
+};

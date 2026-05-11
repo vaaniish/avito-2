@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import "dotenv/config";
+import bcrypt from "bcrypt";
 import pg from "pg";
 
 const { Client } = pg;
@@ -103,6 +104,69 @@ async function login(email, password) {
   return {
     token: response.data.sessionToken,
     user: response.data.user,
+  };
+}
+
+async function createUserFixture(db, params) {
+  const suffix = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  const password = params.password ?? "fixture123";
+  const passwordHash = await bcrypt.hash(password, 4);
+  const email = params.email ?? `${params.prefix.toLowerCase()}-${suffix}@ecomm.local`;
+  const publicId = `${params.publicIdPrefix ?? params.prefix}-${suffix}`;
+  const name = params.name ?? `${params.prefix} Test User`;
+
+  const created = await db.query(
+    `insert into "AppUser" (public_id, role, status, email, password, name, created_at, updated_at)
+     values ($1, $2::"UserRole", 'ACTIVE', $3, $4, $5, NOW(), NOW())
+     returning id, public_id, email`,
+    [publicId, params.role, email, passwordHash, name],
+  );
+
+  return {
+    id: created.rows[0].id,
+    publicId: created.rows[0].public_id,
+    email: created.rows[0].email,
+    password,
+  };
+}
+
+async function createListingFixture(db, params) {
+  const publicId = `${params.prefix}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  const created = await db.query(
+    `insert into "MarketplaceListing"
+      (public_id, seller_id, type, title, description, price, condition, status, moderation_status, created_at, updated_at)
+     values ($1, $2, 'PRODUCT', $3, $4, $5, 'USED', 'ACTIVE', 'APPROVED', NOW(), NOW())
+     returning id, public_id`,
+    [publicId, params.sellerId, params.title, params.description ?? "Phase A complaint fixture", params.price ?? 1000],
+  );
+
+  return {
+    id: created.rows[0].id,
+    publicId: created.rows[0].public_id,
+  };
+}
+
+async function createComplaintSeed(db, params) {
+  const publicId = `${params.prefix}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  const created = await db.query(
+    `insert into "Complaint"
+      (public_id, status, complaint_type, listing_id, seller_id, reporter_id, description, created_at)
+     values ($1, $2::"ComplaintStatus", $3, $4, $5, $6, $7, NOW())
+     returning id, public_id`,
+    [
+      publicId,
+      params.status,
+      params.complaintType ?? "phase_a_complaint_seed",
+      params.listingId,
+      params.sellerId,
+      params.reporterId,
+      params.description ?? "Phase A complaint seed",
+    ],
+  );
+
+  return {
+    id: created.rows[0].id,
+    publicId: created.rows[0].public_id,
   };
 }
 
@@ -378,6 +442,239 @@ async function main() {
       invariant(sellerView.data?.profile?.status === "verified", "seller payout profile must be verified");
 
       return `payout=${payoutProfileId}, status=${sellerView.data.profile.status}`;
+    });
+
+    await runStep("complaint create -> admin approve -> permanent cascade", async () => {
+      const admin = await login("admin@ecomm.local", "admin123");
+      const seller = await createUserFixture(db, {
+        prefix: "PHASEA-CASCADE-SELLER",
+        publicIdPrefix: "PHASEA-CASCADE-SELLER",
+        role: "SELLER",
+        password: "seller123",
+      });
+      const reporterPrimary = await createUserFixture(db, {
+        prefix: "PHASEA-CASCADE-BUYER1",
+        publicIdPrefix: "PHASEA-CASCADE-BUYER1",
+        role: "BUYER",
+        password: "buyer123",
+      });
+      const reporterRelated = await createUserFixture(db, {
+        prefix: "PHASEA-CASCADE-BUYER2",
+        publicIdPrefix: "PHASEA-CASCADE-BUYER2",
+        role: "BUYER",
+        password: "buyer123",
+      });
+
+      const seededReporters = [];
+      for (let index = 0; index < 3; index += 1) {
+        seededReporters.push(
+          await createUserFixture(db, {
+            prefix: `PHASEA-CASCADE-SEED-BUYER${index + 1}`,
+            publicIdPrefix: `PHASEA-CASCADE-SEED-BUYER${index + 1}`,
+            role: "BUYER",
+            password: "buyer123",
+          }),
+        );
+      }
+
+      const listings = [];
+      listings.push(
+        await createListingFixture(db, {
+          sellerId: seller.id,
+          prefix: "PHASEA-CASCADE-LST-PRIMARY",
+          title: "Phase A complaint primary listing",
+        }),
+      );
+      listings.push(
+        await createListingFixture(db, {
+          sellerId: seller.id,
+          prefix: "PHASEA-CASCADE-LST-RELATED",
+          title: "Phase A complaint related listing",
+        }),
+      );
+      for (let index = 0; index < 3; index += 1) {
+        listings.push(
+          await createListingFixture(db, {
+            sellerId: seller.id,
+            prefix: `PHASEA-CASCADE-LST-SEED-${index + 1}`,
+            title: `Phase A complaint seed listing ${index + 1}`,
+          }),
+        );
+      }
+
+      try {
+        for (let index = 0; index < seededReporters.length; index += 1) {
+          await createComplaintSeed(db, {
+            prefix: `PHASEA-CASCADE-APPROVED-${index + 1}`,
+            status: "APPROVED",
+            listingId: listings[index + 2].id,
+            sellerId: seller.id,
+            reporterId: seededReporters[index].id,
+          });
+        }
+
+        const primaryBuyer = await login(reporterPrimary.email, reporterPrimary.password);
+        const relatedBuyer = await login(reporterRelated.email, reporterRelated.password);
+
+        const createdPrimary = await apiRequest(
+          "POST",
+          `/catalog/listings/${encodeURIComponent(listings[0].publicId)}/complaints`,
+          {
+            token: primaryBuyer.token,
+            body: {
+              complaintType: `phase_a_primary_${Date.now()}`,
+              description: "Phase A primary complaint for permanent cascade verification",
+            },
+            expected: [201],
+          },
+        );
+        const primaryComplaintId = createdPrimary.data?.id;
+        invariant(typeof primaryComplaintId === "string", "primary complaint id missing");
+
+        const createdRelated = await apiRequest(
+          "POST",
+          `/catalog/listings/${encodeURIComponent(listings[1].publicId)}/complaints`,
+          {
+            token: relatedBuyer.token,
+            body: {
+              complaintType: `phase_a_related_${Date.now()}`,
+              description: "Phase A related complaint to verify seller-wide cascade behavior",
+            },
+            expected: [201],
+          },
+        );
+        const relatedComplaintId = createdRelated.data?.id;
+        invariant(typeof relatedComplaintId === "string", "related complaint id missing");
+
+        const approval = await apiRequest(
+          "PATCH",
+          `/admin/complaints/${encodeURIComponent(primaryComplaintId)}/status`,
+          {
+            token: admin.token,
+            headers: { "Idempotency-Key": randomUUID() },
+            body: {
+              status: "approved",
+              actionTaken: "Phase A permanent complaint cascade",
+            },
+            expected: [200],
+          },
+        );
+
+        invariant(approval.data?.status === "approved", "primary complaint was not approved");
+        invariant(approval.data?.enforcement?.level === "permanent", "expected permanent sanction");
+        invariant(
+          Array.isArray(approval.data?.cascade?.cascadedComplaintIds) &&
+            approval.data.cascade.cascadedComplaintIds.includes(relatedComplaintId),
+          "related complaint was not cascaded",
+        );
+
+        const complaintStates = await db.query(
+          `select public_id, status
+           from "Complaint"
+           where public_id = any($1::text[])`,
+          [[primaryComplaintId, relatedComplaintId]],
+        );
+        const statusByComplaint = new Map(
+          complaintStates.rows.map((row) => [row.public_id, String(row.status).toLowerCase()]),
+        );
+        invariant(statusByComplaint.get(primaryComplaintId) === "approved", "primary complaint db status mismatch");
+        invariant(statusByComplaint.get(relatedComplaintId) === "approved", "related complaint db status mismatch");
+
+        const sellerState = await db.query(
+          `select status, blocked_until, block_reason
+           from "AppUser"
+           where id = $1`,
+          [seller.id],
+        );
+        invariant(
+          String(sellerState.rows[0]?.status ?? "").toLowerCase() === "blocked",
+          "seller was not blocked after permanent sanction",
+        );
+        invariant(
+          typeof sellerState.rows[0]?.block_reason === "string" &&
+            sellerState.rows[0].block_reason.includes("Phase A permanent complaint cascade"),
+          "seller block reason does not contain moderator note",
+        );
+
+        const listingState = await db.query(
+          `select status, moderation_status
+           from "MarketplaceListing"
+           where public_id = $1`,
+          [listings[0].publicId],
+        );
+        invariant(
+          String(listingState.rows[0]?.status ?? "").toLowerCase() === "inactive",
+          "primary listing should be inactive after approved complaint",
+        );
+        invariant(
+          String(listingState.rows[0]?.moderation_status ?? "").toLowerCase() === "rejected",
+          "primary listing moderation should be rejected after approved complaint",
+        );
+
+        const sellerNotifications = await db.query(
+          `select target_url
+           from "Notification"
+           where user_id = $1
+           order by created_at desc, id desc
+           limit 5`,
+          [seller.id],
+        );
+        invariant(
+          sellerNotifications.rows.some((row) => row.target_url === "/profile?tab=partner"),
+          "seller complaint notification target url is missing",
+        );
+
+        const reporterNotifications = await db.query(
+          `select target_url
+           from "Notification"
+           where user_id = $1
+           order by created_at desc, id desc
+           limit 5`,
+          [reporterPrimary.id],
+        );
+        invariant(
+          reporterNotifications.rows.some(
+            (row) => row.target_url === `/products/${encodeURIComponent(listings[0].publicId)}`,
+          ),
+          "reporter complaint notification target url is missing",
+        );
+
+        const audit = await db.query(
+          `select details
+           from "AuditLog"
+           where action = 'complaint.status_changed'
+             and entity_public_id = $1
+           order by created_at desc, id desc
+           limit 1`,
+          [primaryComplaintId],
+        );
+        invariant(audit.rows.length === 1, "complaint audit row missing");
+        invariant(
+          Array.isArray(audit.rows[0].details?.cascadedComplaintIds) &&
+            audit.rows[0].details.cascadedComplaintIds.includes(relatedComplaintId),
+          "audit row does not contain cascaded complaint ids",
+        );
+
+        return `primary=${primaryComplaintId}, related=${relatedComplaintId}, cascade=${approval.data.cascade.cascadedComplaintIds.length}`;
+      } finally {
+        const fixtureUserIds = [
+          seller.id,
+          reporterPrimary.id,
+          reporterRelated.id,
+          ...seededReporters.map((item) => item.id),
+        ];
+        await db.query(
+          `delete from "AdminIdempotencyKey"
+           where actor_user_id = $1
+             and action = 'complaint.status_changed'`,
+          [admin.user.id],
+        );
+        await db.query(
+          `delete from "AppUser"
+           where id = any($1::int[])`,
+          [fixtureUserIds],
+        );
+      }
     });
   } finally {
     await db.end();

@@ -24,7 +24,8 @@ export function toAdminListingStatus(
 
 export function toProfileOrderStatus(
   status: string,
-): "processing" | "completed" | "cancelled" | "shipped" {
+): "processing" | "prepared" | "completed" | "cancelled" | "shipped" {
+  if (status === "PREPARED") return "prepared";
   if (status === "COMPLETED") return "completed";
   if (status === "CANCELLED") return "cancelled";
   if (status === "SHIPPED") return "shipped";

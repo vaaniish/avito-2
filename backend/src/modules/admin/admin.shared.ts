@@ -22,6 +22,7 @@ export type AuditAction =
   | "seller.payout_profile.status_changed"
   | "listing.moderation_changed"
   | "user.status_changed"
+  | "user.role_changed"
   | "commission_tier.rate_changed"
   | "anti_circumvention.violation_detected"
   | "anti_circumvention.sanction_applied";

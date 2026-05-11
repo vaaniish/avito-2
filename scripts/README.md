@@ -1,25 +1,35 @@
-# Scripts Map
+# Карта сценариев `scripts/`
 
-## Active Test Suites
-- `scripts/tests/unit/*.unit.test.ts`: быстрые модульные проверки доменной логики.
-- `scripts/tests/integration/*.integration.test.ts`: проверки интеграции с БД и инфраструктурными слоями.
-- `scripts/tests/e2e/smoke-regression.e2e.mjs`: широкий smoke-регресс API.
-- `scripts/tests/e2e/critical-regression.e2e.mjs`: критичные регрессы антифрода/заказов.
-- `scripts/tests/e2e/phase-a-critical-flows.e2e.mjs`: 3 MVP-цепочки (checkout policy, partnership approve, payout verify).
-- `scripts/tests/README.md`: обзор структуры тестов и запусков.
-- `scripts/tests/e2e/TUTORIAL.md`: как смотреть e2e через UI и анализировать тайминги.
-- `scripts/tests/unit/TUTORIAL.md`: как читать unit-тесты и разбирать падения.
-- `scripts/tests/integration/TUTORIAL.md`: как запускать/анализировать integration с БД.
+## Основные группы
 
-## Active QA / Quality
-- `scripts/qa/phase-a.qa.mjs`: полный Phase A прогон (db migrate + seed + unit + integration + preflight + build + e2e).
-- `scripts/quality/security-preflight.session.ts`: проверка production-конфига session token.
-- `scripts/quality/encoding-no-bom.mjs`: проверка/исправление BOM в текстовых файлах.
+- `scripts/tests/` — unit, integration, e2e и UI/visual проверки
+- `scripts/qa/` — агрегирующие QA-прогоны
+- `scripts/perf/` — замеры производительности
+- `scripts/quality/` — служебные проверки качества
+- `scripts/catalog/` — сценарии каталога и импорта справочных данных
 
-## Active Performance
-- `scripts/perf/stage9-db.perf.mjs`: DB-производительность и explain-бенчмарки.
-- `scripts/perf/stage10-http.perf.mjs`: HTTP latency gate.
-- `scripts/perf/profile-render-stress.perf.ts`: стресс-тест рендера Profile UI.
+## Тестовые сценарии
 
-## Legacy Utility Scripts
-- `scripts/*.py` (например `fix_section_3_1.py`): утилиты под старые задачи редактирования документации, не входят в QA-цепочку и CI.
+- `scripts/tests/unit/*.test.ts` — быстрые модульные проверки доменной логики
+- `scripts/tests/integration/*.test.ts` — интеграционные проверки API, БД и ключевых связок
+- `scripts/tests/e2e/*.mjs` — API e2e-регрессы
+- `scripts/tests/ui/*.spec.ts` — Playwright UI и visual smoke
+
+## QA и качество
+
+- `scripts/qa/phase-a.qa.mjs` — агрегирующий сценарий Phase A
+- `scripts/quality/security-preflight.session.ts` — проверка production-конфига session token
+- `scripts/quality/encoding-no-bom.mjs` — проверка и исправление BOM
+
+## Производительность
+
+- `scripts/perf/stage9-db.perf.mjs` — DB/perf сценарии
+- `scripts/perf/stage10-http.perf.mjs` — HTTP latency gate
+- `scripts/perf/profile-render-stress.perf.ts` — стресс-рендер Profile UI
+
+## Правило для документации
+
+Если добавляется новый важный сценарий, он должен быть либо:
+
+- встроен в существующую структуру `scripts/tests|qa|perf|quality`, либо
+- отдельно описан здесь короткой строкой с назначением.

@@ -4,14 +4,21 @@ import test from "node:test";
 
 const removedCatalogItem = "Товары для обслуживания ПК";
 
-const appSource = readFileSync("frontend/src/App.tsx", "utf8");
-const filterPanelSource = readFileSync("frontend/src/components/FilterPanel.tsx", "utf8");
+const appSource = readFileSync("frontend/src/app/App.tsx", "utf8");
+const appCatalogHooksSource = readFileSync(
+  "frontend/src/app/app.catalog.hooks.ts",
+  "utf8",
+);
+const filterPanelUtilsSource = readFileSync(
+  "frontend/src/widgets/filter-panel.utils.ts",
+  "utf8",
+);
 const partnerListingsSource = readFileSync(
-  "frontend/src/components/pages/PartnerListingsPage.tsx",
+  "frontend/src/pages/partner-listings/PartnerListingsPage.tsx",
   "utf8",
 );
 const catalogOverlaySource = readFileSync(
-  "frontend/src/components/DnsCatalogOverlay.tsx",
+  "frontend/src/widgets/DnsCatalogOverlay.tsx",
   "utf8",
 );
 const catalogRoutesSource = readFileSync(
@@ -77,12 +84,12 @@ test("catalog source of truth: empty DNS item is removed from seeds and referenc
 });
 
 test("catalog source of truth: frontend catalog surfaces read catalogItems from API data", () => {
-  assert.match(appSource, /apiGet<CatalogCategory\[]>\("\/catalog\/categories\?type=products"\)/);
+  assert.match(appCatalogHooksSource, /apiGet<CatalogCategory\[]>\("\/catalog\/categories\?type=products"\)/);
   assert.match(catalogRoutesSource, /catalogItems: subcategory\.items\.map/);
-  assert.match(filterPanelSource, /subcategory\.catalogItems\?\.length/);
+  assert.match(filterPanelUtilsSource, /subcategory\.catalogItems\?\.length/);
   assert.match(catalogOverlaySource, /subcategory\.catalogItems\?\.length/);
   assert.match(
-    readFileSync("frontend/src/components/pages/partner-listings.api.ts", "utf8"),
+    readFileSync("frontend/src/pages/partner-listings/partner-listings.api.ts", "utf8"),
     /apiGet<CatalogCategoryDto\[]>\(\s*`\/catalog\/categories\?type=\$\{type\}`/,
   );
   assert.doesNotMatch(partnerListingsSource, /makeFallbackSchema|PARTNER_CATALOG/);
@@ -90,10 +97,24 @@ test("catalog source of truth: frontend catalog surfaces read catalogItems from 
 });
 
 test("catalog source of truth: filters prune deleted catalog item ids after catalog refresh", () => {
-  assert.match(appSource, /function catalogItemIdSet\(categories: CatalogCategory\[]\): Set<string>/);
-  assert.match(appSource, /validCatalogItemIds\.has\(category\)/);
-  assert.match(appSource, /setFilters\(\(prev\) => \(\{/);
-  assert.match(appSource, /setSelectedCatalogItemId\(null\)/);
+  assert.match(appCatalogHooksSource, /function catalogItemIdSet\(categories: CatalogCategory\[]\): Set<string>/);
+  assert.match(appCatalogHooksSource, /validCatalogItemIds\.has\(category\)/);
+  assert.match(appSource, /onPruneInvalidFilterCategories:/);
+  assert.match(appSource, /onClearSelectedCatalogItemId:/);
+});
+
+test("catalog source of truth: paginated catalog API is the frontend source of truth", () => {
+  assert.match(appCatalogHooksSource, /sortBy:\s*params\.sortBy/);
+  assert.match(appCatalogHooksSource, /paginated:\s*"1"/);
+  assert.doesNotMatch(appCatalogHooksSource, /matchesSearch/);
+  assert.doesNotMatch(appCatalogHooksSource, /filteredItems = useMemo/);
+  assert.doesNotMatch(appCatalogHooksSource, /sortedItems = useMemo/);
+  assert.match(catalogRoutesSource, /type CatalogPaginatedResponse/);
+  assert.match(catalogRoutesSource, /parseCatalogSortBy/);
+  assert.match(catalogRoutesSource, /showOnlySale/);
+  assert.match(catalogRoutesSource, /includeWords/);
+  assert.match(catalogRoutesSource, /excludeWords/);
+  assert.match(catalogRoutesSource, /pagination:\s*\{/);
 });
 
 test("catalog reference source of truth: runtime reference data is persisted and searchable in dedicated DB tables", () => {

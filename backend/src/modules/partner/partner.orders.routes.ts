@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma";
 import { requireAnyRole } from "../../lib/session";
 import { buildTargetUrl, createNotification } from "../notifications/notification.service";
 import { assertOrderStatusTransitionAllowed } from "../orders/order-status-fsm";
+import { ensureYandexTrackingForOrders } from "../profile/profile.delivery";
 import {
   fetchTrackingStatus,
   type DeliveryExternalStatus,
@@ -348,7 +349,61 @@ export function registerPartnerOrdersRoutes(router: Router): void {
         targetUrl: buildTargetUrl("orders"),
       });
 
-      res.json({ success: true, status: nextStatus, tracking: null, deliveryError: null });
+      let trackingNumber: string | null = null;
+      let trackingUrl: string | null = null;
+      let trackingProvider: DeliveryProviderCode | null = existing.tracking_provider
+        ? normalizeTrackingProvider(existing.tracking_provider)
+        : null;
+      let deliveryExternalStatus: string | null = null;
+      let deliveryError: string | null = null;
+
+      if (
+        existing.delivery_type === "DELIVERY" &&
+        nextStatus === "PREPARED" &&
+        normalizeTrackingProvider(existing.tracking_provider) === "yandex_pvz"
+      ) {
+        try {
+          await ensureYandexTrackingForOrders(prisma, [existing.id]);
+        } catch (error) {
+          deliveryError =
+            error instanceof Error ? error.message : "Не удалось создать данные по доставке.";
+        }
+
+        const refreshedDelivery = await prisma.marketOrder.findUnique({
+          where: { id: existing.id },
+          select: {
+            tracking_provider: true,
+            tracking_number: true,
+            tracking_url: true,
+            delivery_ext_status: true,
+          },
+        });
+
+        trackingProvider = refreshedDelivery?.tracking_provider
+          ? normalizeTrackingProvider(refreshedDelivery.tracking_provider)
+          : trackingProvider;
+        trackingNumber = refreshedDelivery?.tracking_number ?? null;
+        trackingUrl = refreshedDelivery?.tracking_url ?? null;
+        deliveryExternalStatus = refreshedDelivery?.delivery_ext_status ?? null;
+
+        if (!trackingNumber && !deliveryError) {
+          deliveryError = "Заявка доставки пока не создана. Попробуйте обновить страницу чуть позже.";
+        }
+      }
+
+      res.json({
+        success: true,
+        status: nextStatus,
+        tracking: trackingNumber
+          ? {
+              trackingNumber,
+              trackingUrl,
+              trackingProvider,
+              deliveryExternalStatus,
+            }
+          : null,
+        deliveryError,
+      });
     } catch (error) {
       console.error("Error updating order status:", error);
       const message = error instanceof Error ? error.message : "";

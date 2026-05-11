@@ -26,7 +26,7 @@ type ProfileUserRouterDeps = {
   toClientRole: (role: string) => "regular" | "partner" | "admin";
   toProfileOrderStatus: (
     status: string,
-  ) => "processing" | "completed" | "cancelled" | "shipped";
+  ) => "processing" | "prepared" | "completed" | "cancelled" | "shipped";
   toClientCondition: (condition: string) => "new" | "used";
   toLocalizedDeliveryDate: (date: Date) => string;
   stripPickupPointTag: (address: string | null) => string;
@@ -178,6 +178,10 @@ export function createProfileUserRouter(deps: ProfileUserRouterDeps): Router {
             "Адрес не указан",
           deliveryCost: order.delivery_cost,
           discount: order.discount,
+          trackingProvider: order.tracking_provider,
+          trackingNumber: order.tracking_number,
+          trackingUrl: order.tracking_url,
+          deliveryExternalStatus: order.delivery_ext_status,
           seller: {
             name: order.seller.name,
             avatar: order.seller.avatar,

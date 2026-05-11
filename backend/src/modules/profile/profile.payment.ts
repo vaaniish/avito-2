@@ -63,7 +63,35 @@ export async function createYooKassaPayment(params: {
   paymentMethod: "card" | "sbp";
   idempotenceKey?: string;
 }): Promise<YooKassaPayment> {
-  const config = getYooKassaConfig();
+  const isProduction = process.env.NODE_ENV === "production";
+  const shopId = process.env.YOOKASSA_SHOP_ID?.trim();
+  const secretKey = process.env.YOOKASSA_SECRET_KEY?.trim();
+  if (!shopId || !secretKey) {
+    if (!isProduction) {
+      const paymentId = `pay_local_${randomUUID()}`;
+      return {
+        id: paymentId,
+        status: "pending",
+        paid: false,
+        confirmation: {
+          type: "redirect",
+          confirmation_url: `http://localhost:3000/payment-return?payment_id=${encodeURIComponent(paymentId)}`,
+        },
+      };
+    }
+    throw new Error(
+      "YooKassa is not configured. Set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY.",
+    );
+  }
+
+  const config = {
+    shopId,
+    secretKey,
+    returnUrl:
+      process.env.YOOKASSA_RETURN_URL?.trim() ||
+      "http://localhost:3000/payment-return",
+    apiUrl: process.env.YOOKASSA_API_URL?.trim() || "https://api.yookassa.ru/v3",
+  };
   const authToken = Buffer.from(
     `${config.shopId}:${config.secretKey}`,
     "utf8",

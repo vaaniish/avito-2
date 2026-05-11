@@ -24,6 +24,47 @@ type PartnershipStatusValue =
   | "APPROVED"
   | "REJECTED";
 type PayoutStatusValue = "PENDING" | "VERIFIED" | "REJECTED";
+type ReviewActionClient =
+  | "approved_limited"
+  | "approved"
+  | "needs_more_info"
+  | "rejected";
+
+const REVIEWABLE_PARTNERSHIP_STATUSES = new Set<PartnershipStatusValue>([
+  "SUBMITTED",
+  "LEGAL_REVIEW",
+  "REPRESENTATIVE_REVIEW",
+  "PAYOUT_REVIEW",
+  "QUALITY_REVIEW",
+  "PENDING",
+]);
+
+function toClientReviewAction(status: PartnershipStatusValue): ReviewActionClient {
+  if (status === "APPROVED_LIMITED") return "approved_limited";
+  if (status === "APPROVED") return "approved";
+  if (status === "NEEDS_MORE_INFO") return "needs_more_info";
+  return "rejected";
+}
+
+function getAllowedPartnershipActions(status: PartnershipStatusValue): ReviewActionClient[] {
+  if (REVIEWABLE_PARTNERSHIP_STATUSES.has(status)) {
+    return ["approved_limited", "approved", "needs_more_info", "rejected"];
+  }
+
+  if (status === "APPROVED") {
+    return ["rejected"];
+  }
+
+  if (status === "APPROVED_LIMITED") {
+    return ["approved", "needs_more_info", "rejected"];
+  }
+
+  if (status === "NEEDS_MORE_INFO") {
+    return ["approved_limited", "approved", "rejected"];
+  }
+
+  return [];
+}
 
 function parseKycStatus(status: unknown): KycStatusValue | null {
   if (status === "approved") return "APPROVED";
@@ -139,6 +180,7 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
           return {
             id: requestItem.public_id,
             status: toClientPartnershipStatus(requestItem.status),
+            allowedActions: getAllowedPartnershipActions(requestItem.status),
             sellerType: requestItem.seller_type,
             name: requestItem.name,
             email: requestItem.email,
@@ -261,6 +303,7 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
           onboarding_profile: true,
           user: {
             select: {
+              role: true,
               payout_profile: {
                 select: {
                   status: true,
@@ -295,6 +338,15 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
         res.status(400).json({
           error:
             "Verified payout profile or explicit admin override note is required for full approval.",
+        });
+        return;
+      }
+
+      const allowedActions = getAllowedPartnershipActions(existing.status);
+      if (!allowedActions.includes(toClientReviewAction(nextStatus))) {
+        res.status(400).json({
+          error: "This partnership request transition is not allowed anymore.",
+          allowedActions,
         });
         return;
       }
@@ -348,6 +400,15 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
           });
         }
 
+        if (nextStatus === "REJECTED") {
+          await tx.appUser.update({
+            where: { id: existing.user_id },
+            data: {
+              role: "BUYER",
+            },
+          });
+        }
+
         return next;
       });
 
@@ -360,6 +421,13 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
         details: {
           beforeStatus: existing.status,
           afterStatus: updated.status,
+          beforeUserRole: existing.user.role,
+          afterUserRole:
+            updated.status === "APPROVED" || updated.status === "APPROVED_LIMITED"
+              ? "SELLER"
+              : updated.status === "REJECTED"
+                ? "BUYER"
+                : existing.user.role,
           beforeRejectionReason: existing.rejection_reason,
           afterRejectionReason: updated.rejection_reason,
           beforeAdminNote: existing.admin_note,
@@ -382,6 +450,15 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
       res.json({
         success: true,
         status: updated.status.toLowerCase(),
+        userRole:
+          nextStatus === "APPROVED" || nextStatus === "APPROVED_LIMITED"
+            ? "partner"
+            : nextStatus === "REJECTED"
+              ? "regular"
+              : existing.user.role === "SELLER"
+                ? "partner"
+                : "regular",
+        allowedActions: getAllowedPartnershipActions(updated.status),
       });
     } catch (error) {
       console.error("Error updating partnership request:", error);

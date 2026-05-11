@@ -17,7 +17,7 @@ import {
 } from "../notifications/notification.service";
 
 type SessionResult =
-  | { ok: true; user: { id: number } }
+  | { ok: true; user: { id: number; role: string } }
   | { ok: false; status: number; message: string };
 
 type DeliveryProviderCode = "russian_post" | "yandex_pvz";
@@ -496,7 +496,7 @@ type ProfileOrdersRouterDeps = {
   ) => string | null;
   toProfileOrderStatus: (
     status: string,
-  ) => "processing" | "completed" | "cancelled" | "shipped";
+  ) => "processing" | "prepared" | "completed" | "cancelled" | "shipped";
   createYooKassaPayment: (params: {
     amountRub: number;
     description: string;
@@ -685,10 +685,6 @@ export function createProfileOrdersRouter(
           });
         });
 
-        if (isSucceeded && affectedOrderIds.length > 0) {
-          await deps.ensureYandexTrackingForOrders(affectedOrderIds);
-        }
-
         res.status(200).json({ success: true });
       } catch (error) {
         console.error("Error in YooKassa webhook:", error);
@@ -805,9 +801,9 @@ export function createProfileOrdersRouter(
           }
         }
 
-        if (succeededTxIds.length > 0 || failedTxIds.length > 0) {
-          const requestIp = getRequestIp(req);
-          await deps.prisma.$transaction(async (tx) => {
+          if (succeededTxIds.length > 0 || failedTxIds.length > 0) {
+            const requestIp = getRequestIp(req);
+            await deps.prisma.$transaction(async (tx) => {
             if (succeededTxIds.length > 0) {
               await tx.platformTransaction.updateMany({
                 where: {
@@ -910,10 +906,6 @@ export function createProfileOrdersRouter(
             }
           });
 
-          if (succeededOrderIds.length > 0) {
-            await deps.ensureYandexTrackingForOrders(succeededOrderIds);
-          }
-
           orders = await deps.prisma.marketOrder.findMany({
             where: {
               buyer_id: session.user.id,
@@ -968,6 +960,13 @@ export function createProfileOrdersRouter(
       const session = await deps.requireAnyRole(req, profileRoles(deps));
       if (!session.ok) {
         res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      if ("role" in session.user && session.user.role === deps.roleAdmin) {
+        res.status(403).json({
+          error: "Администратор не может оформлять покупки со своего аккаунта.",
+        });
         return;
       }
 
@@ -1162,6 +1161,13 @@ export function createProfileOrdersRouter(
         if (!listing) {
           await respondAndComplete(400, {
             error: `Товар ${item.listingId} не найден`,
+          });
+          return;
+        }
+
+        if (listing.seller_id === session.user.id) {
+          await respondAndComplete(400, {
+            error: "Нельзя оформить покупку собственного объявления.",
           });
           return;
         }
