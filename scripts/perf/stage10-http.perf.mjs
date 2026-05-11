@@ -282,7 +282,7 @@ async function main() {
           if (createdListingId) {
             await apiRequest("DELETE", `/partner/listings/${encodeURIComponent(createdListingId)}`, {
               token: sellerToken,
-              expected: [200],
+              expected: [200, 409],
             });
           }
           return response;
@@ -362,7 +362,7 @@ async function main() {
   for (const listingId of moderationFixtures) {
     await apiRequest("DELETE", `/partner/listings/${encodeURIComponent(listingId)}`, {
       token: sellerToken,
-      expected: [200],
+      expected: [200, 409],
     });
   }
 
