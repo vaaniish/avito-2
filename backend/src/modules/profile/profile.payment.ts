@@ -17,6 +17,20 @@ type YooKassaConfig = {
   apiUrl: string;
 };
 
+function isPlaceholderYooKassaConfig(
+  shopId: string | undefined,
+  secretKey: string | undefined,
+): boolean {
+  const normalizedShopId = shopId?.trim().toLowerCase() ?? "";
+  const normalizedSecretKey = secretKey?.trim().toLowerCase() ?? "";
+  return (
+    normalizedShopId === "ci-shop" ||
+    normalizedSecretKey === "ci-secret" ||
+    normalizedShopId.startsWith("ci-") ||
+    normalizedSecretKey.startsWith("ci-")
+  );
+}
+
 function isRetryableNetworkError(error: unknown): boolean {
   if (!(error instanceof TypeError)) return false;
   const cause = (error as { cause?: unknown }).cause as
@@ -66,6 +80,8 @@ export async function createYooKassaPayment(params: {
   const isProduction = process.env.NODE_ENV === "production";
   const shopId = process.env.YOOKASSA_SHOP_ID?.trim();
   const secretKey = process.env.YOOKASSA_SECRET_KEY?.trim();
+  const shouldUseLocalStub =
+    !isProduction && isPlaceholderYooKassaConfig(shopId, secretKey);
   if (!shopId || !secretKey) {
     if (!isProduction) {
       const paymentId = `pay_local_${randomUUID()}`;
@@ -82,6 +98,19 @@ export async function createYooKassaPayment(params: {
     throw new Error(
       "YooKassa is not configured. Set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY.",
     );
+  }
+
+  if (shouldUseLocalStub) {
+    const paymentId = `pay_ci_${randomUUID()}`;
+    return {
+      id: paymentId,
+      status: "pending",
+      paid: false,
+      confirmation: {
+        type: "redirect",
+        confirmation_url: `http://localhost:3000/payment-return?payment_id=${encodeURIComponent(paymentId)}`,
+      },
+    };
   }
 
   const config = {
@@ -189,6 +218,24 @@ export async function fetchYooKassaPaymentById(
 ): Promise<YooKassaPayment | null> {
   if (!paymentId.trim()) {
     return null;
+  }
+
+  if (
+    isPlaceholderYooKassaConfig(
+      process.env.YOOKASSA_SHOP_ID,
+      process.env.YOOKASSA_SECRET_KEY,
+    ) &&
+    paymentId.trim().startsWith("pay_ci_")
+  ) {
+    return {
+      id: paymentId.trim(),
+      status: "pending",
+      paid: false,
+      confirmation: {
+        type: "redirect",
+        confirmation_url: `http://localhost:3000/payment-return?payment_id=${encodeURIComponent(paymentId.trim())}`,
+      },
+    };
   }
 
   const config = getYooKassaConfig();
