@@ -1,5 +1,3 @@
-import { type UserAddress } from "@prisma/client";
-
 export type LegacyBuildingParts = {
   house: string;
   apartment: string;
@@ -31,6 +29,22 @@ export type ProfileAddressDto = {
   lat: number | null;
   lon: number | null;
   isDefault: boolean;
+};
+
+type ProfileAddressRecord = {
+  id: number;
+  label: string;
+  full_address: string | null;
+  region: string;
+  city: string;
+  street: string;
+  house: string;
+  apartment: string | null;
+  entrance: string | null;
+  postal_code: string;
+  lat: number | null;
+  lon: number | null;
+  is_default: boolean;
 };
 
 export function normalizeTextField(value: unknown): string {
@@ -98,7 +112,9 @@ function buildAddressBuildingLabel(parts: {
     .join(", ");
 }
 
-export function mapUserAddressToDto(address: UserAddress): ProfileAddressDto {
+export function mapUserAddressToDto(
+  address: ProfileAddressRecord,
+): ProfileAddressDto {
   const fullAddress =
     normalizeTextField(address.full_address) ||
     buildAddressFullAddress({

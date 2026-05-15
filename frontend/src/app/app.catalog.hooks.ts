@@ -25,6 +25,18 @@ type PaginatedCatalogResponse = {
     total: number;
     hasMore: boolean;
   };
+  searchMeta?: {
+    recognizedQuery: string | null;
+    emptyStateMessage?: string;
+    branchHints: Array<{
+      itemPublicId: string;
+      itemName: string;
+      subcategoryName: string;
+      categoryName: string;
+      matchedPhrases: string[];
+      suggestions: string[];
+    }>;
+  };
 };
 
 function resolveCatalogItemIds(
@@ -98,6 +110,7 @@ export function useAppCatalogData(params: {
   const [activeCatalogOffset, setActiveCatalogOffset] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [isDeepLinkListingLoading, setIsDeepLinkListingLoading] = useState(false);
+  const [catalogSearchMeta, setCatalogSearchMeta] = useState<PaginatedCatalogResponse["searchMeta"] | null>(null);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [productCategories, setProductCategories] = useState<CatalogCategory[]>([]);
@@ -222,6 +235,7 @@ export function useAppCatalogData(params: {
         totalProductsRef.current = response.pagination.total;
         setTotalProducts(response.pagination.total);
         setHasMoreProducts(response.pagination.hasMore);
+        setCatalogSearchMeta(response.searchMeta ?? null);
 
         setCatalogPagesByOffset((prevPages) => {
           const nextPages: CatalogPagesByOffset = {
@@ -316,6 +330,7 @@ export function useAppCatalogData(params: {
     setLoadedOffsets([]);
     setActiveCatalogOffset(0);
     setTotalProducts(0);
+    setCatalogSearchMeta(null);
     setHasMoreProducts(true);
     setIsLoadingProducts(false);
 
@@ -516,6 +531,7 @@ export function useAppCatalogData(params: {
     isLoadingProducts,
     loadedProductCount: getCatalogLoadedItemCount(catalogPagesByOffset, loadedOffsets),
     totalProducts,
+    catalogSearchMeta,
     catalogPageOffsets,
     catalogPagesByOffset,
     loadedCatalogOffsets: loadedOffsets,

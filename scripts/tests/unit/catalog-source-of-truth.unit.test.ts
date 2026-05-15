@@ -21,8 +21,16 @@ const catalogOverlaySource = readFileSync(
   "frontend/src/widgets/DnsCatalogOverlay.tsx",
   "utf8",
 );
-const catalogRoutesSource = readFileSync(
-  "backend/src/modules/catalog/catalog.routes.ts",
+const catalogServiceSource = readFileSync(
+  "backend/src/modules/catalog/domain/catalog.service.ts",
+  "utf8",
+);
+const catalogCategoriesServiceSource = readFileSync(
+  "backend/src/modules/catalog/application/services/get-categories.service.ts",
+  "utf8",
+);
+const catalogListingsServiceSource = readFileSync(
+  "backend/src/modules/catalog/application/services/get-listings.service.ts",
   "utf8",
 );
 const catalogSeedSource = readFileSync(
@@ -31,8 +39,24 @@ const catalogSeedSource = readFileSync(
 );
 const prismaSchemaSource = readFileSync("backend/prisma/schema.prisma", "utf8");
 const runtimeSeedSource = readFileSync("backend/prisma/seed.ts", "utf8");
-const partnerRoutesSource = readFileSync(
-  "backend/src/modules/partner/partner.listings.routes.ts",
+const partnerListingsDomainHelpersSource = readFileSync(
+  "backend/src/modules/partner/listings/domain/partner-listings.helpers.ts",
+  "utf8",
+);
+const partnerListingsCatalogHelperSource = readFileSync(
+  "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-catalog.repository-helper.ts",
+  "utf8",
+);
+const partnerListingsSearchRepositorySource = readFileSync(
+  "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-search.repository.ts",
+  "utf8",
+);
+const partnerListingsCatalogRepositorySource = readFileSync(
+  "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-catalog.repository.ts",
+  "utf8",
+);
+const partnerListingsRouterSource = readFileSync(
+  "backend/src/modules/partner/listings/http/partner-listings.router.ts",
   "utf8",
 );
 const catalogReferenceServiceSource = readFileSync(
@@ -85,7 +109,7 @@ test("catalog source of truth: empty DNS item is removed from seeds and referenc
 
 test("catalog source of truth: frontend catalog surfaces read catalogItems from API data", () => {
   assert.match(appCatalogHooksSource, /apiGet<CatalogCategory\[]>\("\/catalog\/categories\?type=products"\)/);
-  assert.match(catalogRoutesSource, /catalogItems: subcategory\.items\.map/);
+  assert.match(catalogCategoriesServiceSource, /catalogItems: subcategory\.items\.map/);
   assert.match(filterPanelUtilsSource, /subcategory\.catalogItems\?\.length/);
   assert.match(catalogOverlaySource, /subcategory\.catalogItems\?\.length/);
   assert.match(
@@ -109,12 +133,12 @@ test("catalog source of truth: paginated catalog API is the frontend source of t
   assert.doesNotMatch(appCatalogHooksSource, /matchesSearch/);
   assert.doesNotMatch(appCatalogHooksSource, /filteredItems = useMemo/);
   assert.doesNotMatch(appCatalogHooksSource, /sortedItems = useMemo/);
-  assert.match(catalogRoutesSource, /type CatalogPaginatedResponse/);
-  assert.match(catalogRoutesSource, /parseCatalogSortBy/);
-  assert.match(catalogRoutesSource, /showOnlySale/);
-  assert.match(catalogRoutesSource, /includeWords/);
-  assert.match(catalogRoutesSource, /excludeWords/);
-  assert.match(catalogRoutesSource, /pagination:\s*\{/);
+  assert.match(catalogServiceSource, /type CatalogPaginatedResponse/);
+  assert.match(catalogServiceSource, /parseCatalogSortBy/);
+  assert.match(catalogListingsServiceSource, /showOnlySale/);
+  assert.match(catalogListingsServiceSource, /includeWords/);
+  assert.match(catalogListingsServiceSource, /excludeWords/);
+  assert.match(catalogListingsServiceSource, /pagination:\s*\{/);
 });
 
 test("catalog reference source of truth: runtime reference data is persisted and searchable in dedicated DB tables", () => {
@@ -166,15 +190,25 @@ test("catalog reference source of truth: partner API reads runtime data only fro
   assert.match(catalogReferenceServiceSource, /aggregateCatalogReferenceCharacteristics/);
   assert.match(catalogReferenceServiceSource, /normalizedCharacteristicLabel/);
   assert.match(catalogReferenceServiceSource, /catalogReferenceTitleSuggestions/);
-  assert.match(partnerRoutesSource, /findCatalogReferenceCreateSuggestions\(query, type\)/);
-  assert.match(partnerRoutesSource, /titleSuggestions/);
-  assert.match(partnerRoutesSource, /aggregateCatalogReferenceCharacteristics\(variant\.characteristics\)/);
-  assert.match(partnerRoutesSource, /isReferenceItem \? \[] : item\?\.attribute_definitions \?\? \[]/);
-  assert.match(partnerRoutesSource, /partnerListingsRouter\.get\("\/listings\/catalog-reference"/);
+  assert.match(
+    partnerListingsSearchRepositorySource,
+    /findCatalogReferenceCreateSuggestions\(query, type\)/,
+  );
+  assert.match(partnerListingsSearchRepositorySource, /titleSuggestions/);
+  assert.match(
+    partnerListingsCatalogHelperSource,
+    /aggregateCatalogReferenceCharacteristics\(variant\.characteristics\)/,
+  );
+  assert.match(
+    partnerListingsCatalogHelperSource,
+    /isReferenceItem \? \[] : \(\(item\?\.attribute_definitions \?\? \[]\) as AttributeDefinitionForValidation\[]\)/,
+  );
+  assert.match(partnerListingsDomainHelpersSource, /CUSTOM_VALUE_OPTION/);
+  assert.match(partnerListingsRouterSource, /router\.get\("\/listings\/catalog-reference"/);
   assert.doesNotMatch(catalogReferenceServiceSource, /fs from "node:fs"|path from "node:path"/);
   assert.doesNotMatch(catalogReferenceServiceSource, /catalog-reference\.json/);
   assert.doesNotMatch(catalogReferenceServiceSource, /loadCatalogReferenceFallback|findCatalogReferenceFallback/);
-  assert.doesNotMatch(partnerRoutesSource, /loadCatalogReferenceFallback/);
+  assert.doesNotMatch(partnerListingsCatalogRepositorySource, /loadCatalogReferenceFallback/);
 });
 
 test("catalog reference source of truth: import canonicalizes brand and model duplicates before DB writes", () => {

@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import fs from "node:fs";
 import path from "node:path";
+import { syncListingSearchKeywords } from "../src/modules/catalog/catalog-search.shared";
 import { dnsProductCatalogSeed } from "./dns-product-catalog.seed";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -349,10 +350,15 @@ async function seedCatalogReferenceData(items: SeedCatalogItemRow[]): Promise<vo
 
 async function main(): Promise<void> {
   console.log("Очистка таблиц...");
+  await prisma.adminIdempotencyKey.deleteMany();
+  await prisma.checkoutIdempotencyKey.deleteMany();
   await prisma.auditLog.deleteMany();
+  await prisma.complaintSanction.deleteMany();
+  await prisma.complaintEvent.deleteMany();
   await prisma.orderStatusHistory.deleteMany();
   await prisma.complaint.deleteMany();
   await prisma.kycRequest.deleteMany();
+  await prisma.sellerCommissionPeriodStat.deleteMany();
   await prisma.policyAcceptance.deleteMany();
   await prisma.platformPolicy.deleteMany();
   await prisma.platformTransaction.deleteMany();
@@ -361,9 +367,13 @@ async function main(): Promise<void> {
   await prisma.listingQuestion.deleteMany();
   await prisma.listingReview.deleteMany();
   await prisma.wishlistItem.deleteMany();
+  await prisma.listingModerationEvent.deleteMany();
+  await prisma.listingSearchKeyword.deleteMany();
   await prisma.listingAttribute.deleteMany();
   await prisma.listingImage.deleteMany();
+  await prisma.listingDraft.deleteMany();
   await prisma.marketplaceListing.deleteMany();
+  await prisma.partnerOnboardingProfile.deleteMany();
   await prisma.catalogSuggestion.deleteMany();
   await prisma.catalogAttributeDefinition.deleteMany();
   await prisma.catalogReferenceCharacteristic.deleteMany();
@@ -461,6 +471,45 @@ async function main(): Promise<void> {
       null,
     ],
     [
+      "BUY-005",
+      "BUYER",
+      "BLOCKED",
+      "buyer5@ecomm.local",
+      "buyer123",
+      "Алексей Левин",
+      "alex_levin",
+      "Нижний Новгород",
+      90,
+      "+79001000105",
+      "Агрессивное общение с продавцами и спам-жалобы",
+    ],
+    [
+      "BUY-006",
+      "BUYER",
+      "ACTIVE",
+      "buyer6@ecomm.local",
+      "buyer123",
+      "Мария Крылова",
+      "maria_krylova",
+      "Новосибирск",
+      75,
+      "+79001000106",
+      null,
+    ],
+    [
+      "BUY-007",
+      "BUYER",
+      "ACTIVE",
+      "buyer7@ecomm.local",
+      "buyer123",
+      "Дмитрий Захаров",
+      "dmitry_zakharov",
+      "Москва",
+      55,
+      "+79001000107",
+      null,
+    ],
+    [
       "SLR-001",
       "SELLER",
       "ACTIVE",
@@ -524,6 +573,19 @@ async function main(): Promise<void> {
       70,
       "+79002000105",
       "Просьбы об оплате вне платформы",
+    ],
+    [
+      "SLR-006",
+      "SELLER",
+      "ACTIVE",
+      "seller6@ecomm.local",
+      "seller123",
+      "Сетевой Контур",
+      "network_contour",
+      "Новосибирск",
+      95,
+      "+79002000106",
+      null,
     ],
   ] as const;
 
@@ -675,10 +737,30 @@ async function main(): Promise<void> {
       ],
       ["BUY-003", "дом", "Казань", "Баумана", "9", "420111", true],
       ["BUY-004", "дом", "Сочи", "Навагинская", "15", "354000", true],
+      [
+        "BUY-005",
+        "дом",
+        "Нижний Новгород",
+        "Большая Покровская",
+        "17",
+        "603005",
+        true,
+      ],
+      [
+        "BUY-006",
+        "дом",
+        "Новосибирск",
+        "Красный проспект",
+        "49",
+        "630091",
+        true,
+      ],
+      ["BUY-007", "дом", "Москва", "Щепкина", "31", "129090", true],
       ["SLR-001", "склад", "Москва", "Профсоюзная", "45", "117335", true],
       ["SLR-002", "склад", "Казань", "Пушкина", "22", "420015", true],
       ["SLR-003", "склад", "Екатеринбург", "Малышева", "36", "620014", true],
       ["SLR-004", "склад", "Краснодар", "Красная", "120", "350000", true],
+      ["SLR-006", "склад", "Новосибирск", "Фрунзе", "86", "630005", true],
     ].map((a: any) => ({
       ...(() => {
         const cityName = a[2];
@@ -761,6 +843,7 @@ async function main(): Promise<void> {
       ["SLR-003", true, 35, "TIER-002"],
       ["SLR-004", false, 48, "TIER-001"],
       ["SLR-005", false, 120, "TIER-001"],
+      ["SLR-006", true, 29, "TIER-003"],
     ].map((s: any) => ({
       user_id: getRequired(userMap, s[0], "User"),
       is_verified: s[1],
@@ -836,6 +919,19 @@ async function main(): Promise<void> {
         "ИП КвикФикс Про",
         "REJECTED",
       ],
+      [
+        "PAY-006",
+        "SLR-006",
+        "COMPANY",
+        "ООО Сетевой Контур",
+        "5408123456",
+        "40702810900000000006",
+        "044525225",
+        "30101810400000000225",
+        "ПАО Сбербанк",
+        "ООО Сетевой Контур",
+        "VERIFIED",
+      ],
     ].map((p: any) => ({
       public_id: p[0],
       seller_id: getRequired(userMap, p[1], "User"),
@@ -848,6 +944,8 @@ async function main(): Promise<void> {
       bank_name: p[8],
       recipient_name: p[9],
       status: p[10],
+      verified_by_id:
+        p[10] === "VERIFIED" ? getRequired(userMap, "ADM-001", "User") : null,
       verified_at: p[10] === "VERIFIED" ? daysAgo(2) : null,
       rejection_reason:
         p[10] === "REJECTED" ? "Не прошла проверка реквизитов" : null,
@@ -2366,6 +2464,345 @@ async function main(): Promise<void> {
     })),
   });
 
+  const catalogItemSeedMap = new Map(
+    (
+      await prisma.catalogItem.findMany({
+        select: {
+          public_id: true,
+          name: true,
+          subcategory: {
+            select: {
+              name: true,
+              category: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      })
+    ).map((item) => [item.public_id, item]),
+  );
+
+  const seedImageSets = {
+    smartphones: [
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=1200&q=80",
+    ],
+    laptops: [
+      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?auto=format&fit=crop&w=1200&q=80",
+    ],
+    appliances: [
+      "https://images.unsplash.com/photo-1586208958839-06c17cacdf08?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1571172964276-91faaa704e1c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?auto=format&fit=crop&w=1200&q=80",
+    ],
+    tvAudio: [
+      "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80",
+    ],
+    gaming: [
+      "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1486401899868-0e435ed85128?auto=format&fit=crop&w=1200&q=80",
+    ],
+    network: [
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+    ],
+  } as const;
+
+  const itemIdsWithBattery = new Set(
+    Object.entries(effectiveItemSchemaMatrix)
+      .filter(([, config]) => config.fields.some((field) => field.key === "battery_health"))
+      .map(([itemId]) => itemId),
+  );
+
+  const numericSeedByKey: Record<string, number> = {
+    battery_health: 88,
+    screen_size: 15.6,
+    diagonal: 55,
+    gamepads_count: 2,
+    memory_size: 12,
+    length_mm: 320,
+    warranty_months_left: 10,
+    modules_count: 2,
+    ports_count: 8,
+    load_kg: 7,
+    burnes_count: 4,
+    burners_count: 4,
+    cups_count: 4200,
+    pressure_bar: 15,
+    water_tank_l: 1.8,
+    total_volume: 320,
+    height: 186,
+    width: 60,
+    volume: 72,
+    room_area: 24,
+    power: 1800,
+    load: 7,
+    suction_power_pa: 7000,
+  };
+
+  const textSeedByKey: Record<string, string> = {
+    storage: "256 ГБ",
+    cpu: "Intel Core i5",
+    ram: "16 ГБ",
+    gpu: "Встроенная графика",
+    color: "Черный",
+    resolution: "4K UHD",
+    matrix_type: "IPS",
+    refresh_rate: "144 Гц",
+    power: "1800 Вт",
+    channels: "2.1",
+    headphone_type: "Полноразмерные",
+    microphone_type: "Конденсаторный",
+    platform: "Универсальная",
+    power_source: "Аккумулятор",
+    sensors: "Пульс, шаги, сон",
+    wifi_standard: "Wi-Fi 6",
+    bands: "2.4 / 5 ГГц",
+    ports: "1x WAN, 4x LAN",
+    speed: "до 3000 Мбит/с",
+    network_type: "4G/5G",
+    standards: "LTE / NR",
+    camera_type: "Беззеркальная",
+    mount: "Sony E",
+    shutter_count: "12000 кадров",
+    focal_length: "24-70 мм",
+    aperture: "f/2.8",
+    storage_media: "SDXC",
+    technology: "Звуковая",
+    ac_type: "Сплит-система",
+    install_state: "Демонтаж не требуется",
+    heater_type: "Конвектор",
+    filter_condition: "Новый фильтр",
+    filter_type: "HEPA",
+    humidifier_type: "Ультразвуковой",
+    navigation: "Лидар",
+    base: "Самоочистка",
+    fridge_type: "Двухкамерный",
+    oven_type: "Электрический",
+    connection_type: "220 В",
+    panel_type: "Индукционная",
+    install_type: "Встраиваемая",
+    coffee_machine_type: "Автоматическая",
+    power_pressure: "1450 Вт / 15 бар",
+    water_tank: "1.8 л",
+    device_type: "Погружной блендер",
+    attachments: "Насадка-венчик, измельчитель",
+    programs: "Экспресс, крупы, тушение, выпечка",
+    waterproof: "IP67",
+    os_compatibility: "iOS / Android",
+    active_area: "10 x 6 дюймов",
+    compatibility: "Apple Watch / Wear OS",
+    format_os: "EPUB / MOBI",
+    coverage_area: "до 160 м2",
+    port_speed: "1 Гбит/с",
+    room_area: "до 24 м2",
+  };
+
+  const titleStoragePresets = [
+    { pattern: /1\s?TB/i, value: "1 ТБ" },
+    { pattern: /512/i, value: "512 ГБ" },
+    { pattern: /256/i, value: "256 ГБ" },
+    { pattern: /128/i, value: "128 ГБ" },
+    { pattern: /64/i, value: "64 ГБ" },
+  ];
+
+  function themeForItem(itemPublicId: string): keyof typeof seedImageSets {
+    const item = catalogItemSeedMap.get(itemPublicId);
+    const categoryName = item?.subcategory.category.name ?? "";
+    const subcategoryName = item?.subcategory.name ?? "";
+    if (
+      categoryName.includes("Смартфоны") ||
+      categoryName.includes("ПК") ||
+      subcategoryName.includes("Ноутбуки")
+    ) {
+      if (item?.name.includes("Wi-Fi") || item?.name.includes("Коммутатор")) {
+        return "network";
+      }
+      return categoryName.includes("ПК") ? "laptops" : "smartphones";
+    }
+    if (categoryName.includes("ТВ")) {
+      return item?.subcategory.name.includes("Консоли") ? "gaming" : "tvAudio";
+    }
+    return "appliances";
+  }
+
+  function listingImageUrls(listingPublicId: string, itemPublicId: string): string[] {
+    const theme = seedImageSets[themeForItem(itemPublicId)];
+    const numericPart = Number(listingPublicId.replace(/\D/g, "")) || 1;
+    const offset = numericPart % theme.length;
+    return Array.from({ length: Math.min(4, theme.length) }, (_, index) => theme[(offset + index) % theme.length]);
+  }
+
+  function normalizeNumericSeed(value: number): string {
+    return Number.isInteger(value) ? String(value) : String(value).replace(/\.0$/, "");
+  }
+
+  function pickSeedNumber(field: AttributeDraft, condition: "NEW" | "USED"): string {
+    const min = field.min ?? 1;
+    const max = field.max ?? Math.max(min + 10, min);
+    const preset = numericSeedByKey[field.key];
+    const rawValue =
+      field.key === "battery_health"
+        ? condition === "NEW"
+          ? 100
+          : 86
+        : preset ?? (min + max) / 2;
+    const bounded = Math.min(max, Math.max(min, rawValue));
+    return normalizeNumericSeed(bounded);
+  }
+
+  function pickSeedText(
+    field: AttributeDraft,
+    title: string,
+    itemName: string,
+    condition: "NEW" | "USED",
+  ): string {
+    if (field.key === "model") return title;
+    if (field.key === "storage") {
+      return (
+        titleStoragePresets.find((preset) => preset.pattern.test(title))?.value ??
+        textSeedByKey[field.key] ??
+        "256 ГБ"
+      );
+    }
+    if (field.key === "ram") {
+      const match = title.match(/(\d{1,3})\s*\/\s*(\d{2,4})/);
+      return match ? `${match[1]} ГБ` : "16 ГБ";
+    }
+    if (field.key === "cpu" && /M[1-4]/i.test(title)) {
+      return title.match(/M[1-4]/i)?.[0] ?? "Apple M3";
+    }
+    if (field.key === "included") {
+      return condition === "NEW"
+        ? "Коробка, документы, кабель питания"
+        : "Зарядка, кабель, базовый комплект";
+    }
+    if (field.key === "defects_description") {
+      return condition === "NEW"
+        ? "Визуальных дефектов не обнаружено"
+        : "Есть следы аккуратной эксплуатации, на работу не влияют";
+    }
+    if (field.key === "important_attributes") {
+      return `Подходит для сценария: ${itemName.toLowerCase()}, безопасная сделка через платформу.`;
+    }
+    return textSeedByKey[field.key] ?? `${itemName} в хорошем состоянии`;
+  }
+
+  function pickSeedSelect(field: AttributeDraft, condition: "NEW" | "USED"): string {
+    const options = field.options ?? [];
+    if (field.key === "battery_health") {
+      return condition === "NEW" ? "100" : "86";
+    }
+    if (field.key === "screen_state") {
+      return condition === "NEW" ? "Без дефектов" : "Есть царапины";
+    }
+    if (field.key === "noise_canceling" && options.includes("Есть")) {
+      return "Есть";
+    }
+    return (
+      options.find(
+        (option) =>
+          option !== "Не знаю" && option !== "Другое / предложить значение",
+      ) ??
+      options[0] ??
+      ""
+    );
+  }
+
+  function buildListingAttributes(params: {
+    itemPublicId: string;
+    city: string;
+    condition: "NEW" | "USED";
+    title: string;
+  }): Array<{ key: string; value: string }> {
+    const item = getRequired(catalogItemSeedMap, params.itemPublicId, "Catalog item");
+    const schema = effectiveItemSchemaMatrix[params.itemPublicId];
+    const attributes: Array<{ key: string; value: string }> = [
+      {
+        key: "Состояние",
+        value: params.condition === "NEW" ? "Новое" : "Б/У",
+      },
+      {
+        key: "Город",
+        value: params.city,
+      },
+    ];
+    if (!schema) return attributes;
+
+    for (const field of schema.fields) {
+      let value = "";
+      if (field.inputType === "number") {
+        value = pickSeedNumber(field, params.condition);
+      } else if (field.inputType === "select") {
+        value = pickSeedSelect(field, params.condition);
+      } else {
+        value = pickSeedText(field, params.title, item.name, params.condition);
+      }
+      if (!value) continue;
+      attributes.push({ key: field.label, value });
+    }
+
+    return Array.from(
+      new Map(
+        attributes.map((attribute) => [
+          attribute.key.toLocaleLowerCase("ru-RU"),
+          attribute,
+        ]),
+      ).values(),
+    );
+  }
+
+  function buildListingDescription(params: {
+    title: string;
+    itemPublicId: string;
+    condition: "NEW" | "USED";
+    city: string;
+  }): string {
+    const item = getRequired(catalogItemSeedMap, params.itemPublicId, "Catalog item");
+    const conditionText =
+      params.condition === "NEW"
+        ? "новый товар в полной комплектации"
+        : "аккуратно использовался, полностью исправен и проверен перед публикацией";
+    return [
+      `${params.title} из категории «${item.name}».`,
+      `Продавец находится в городе ${params.city}, формат сделки проходит через платформу.`,
+      `Состояние: ${conditionText}.`,
+      "Фото актуальные, характеристики заполнены по утвержденной схеме каталога, возможна доставка или самовывоз по договоренности.",
+    ].join(" ");
+  }
+
+  function buildTechState(itemPublicId: string, condition: "NEW" | "USED") {
+    if (!itemIdsWithBattery.has(itemPublicId)) return null;
+    return {
+      tech_grade: condition === "NEW" ? "A_PLUS" : "B",
+      tech_battery_health: condition === "NEW" ? 100 : 86,
+      tech_defects:
+        condition === "NEW"
+          ? "Дефекты не обнаружены"
+          : "Легкие следы эксплуатации на корпусе",
+      tech_included:
+        condition === "NEW"
+          ? "Коробка, документы, кабель питания"
+          : "Кабель питания, защитный чехол, чек",
+    };
+  }
+
   const listings = [
     [
       "LST-001",
@@ -2817,6 +3254,36 @@ async function main(): Promise<void> {
       121,
       true,
     ],
+    [
+      "LST-031",
+      "SLR-001",
+      "ITM-047",
+      "Москва",
+      "PRODUCT",
+      "Apple Watch Series 9 45mm",
+      38900,
+      36900,
+      "NEW",
+      "ACTIVE",
+      "APPROVED",
+      164,
+      true,
+    ],
+    [
+      "LST-032",
+      "SLR-002",
+      "ITM-048",
+      "Казань",
+      "PRODUCT",
+      "Детские часы Huawei Watch Kids 4 Pro",
+      14900,
+      13900,
+      "NEW",
+      "ACTIVE",
+      "APPROVED",
+      118,
+      true,
+    ],
   ] as const;
 
   const listingMap = new Map<string, number>();
@@ -2824,6 +3291,14 @@ async function main(): Promise<void> {
   const listingImageMap = new Map<string, string>();
 
   for (const l of listings) {
+    const imageUrls = listingImageUrls(l[0], l[2]);
+    const seededAttributes = buildListingAttributes({
+      itemPublicId: l[2],
+      city: l[3],
+      condition: l[8],
+      title: l[5],
+    });
+    const techState = buildTechState(l[2], l[8]);
     const created = await prisma.marketplaceListing.create({
       data: {
         public_id: l[0],
@@ -2831,7 +3306,12 @@ async function main(): Promise<void> {
         item_id: getRequired(itemMap, l[2], "Item"),
         type: l[4],
         title: l[5],
-        description: `Подробное описание: ${l[5]}`,
+        description: buildListingDescription({
+          title: l[5],
+          itemPublicId: l[2],
+          condition: l[8],
+          city: l[3],
+        }),
         price: l[6],
         sale_price: l[7],
         condition: l[8],
@@ -2840,42 +3320,92 @@ async function main(): Promise<void> {
         views: l[11],
         shipping_by_seller: l[12],
         rating: 4.5,
+        ...techState,
+        photo_count: imageUrls.length,
+        photo_front_present: imageUrls.length > 0,
+        photo_back_present: imageUrls.length > 1,
+        photo_left_present: imageUrls.length > 2,
+        photo_right_present: imageUrls.length > 3,
       },
     });
     listingMap.set(l[0], created.id);
     listingTitleMap.set(l[0], l[5]);
-    listingImageMap.set(
-      l[0],
-      `https://placehold.co/800x600?text=${encodeURIComponent(l[0])}`,
-    );
+    listingImageMap.set(l[0], imageUrls[0] ?? "");
 
     await prisma.listingImage.createMany({
-      data: [
-        {
-          listing_id: created.id,
-          url: `https://placehold.co/1200x800?text=${encodeURIComponent(l[0])}+1`,
-          sort_order: 0,
-        },
-      ],
+      data: imageUrls.map((url, index) => ({
+        listing_id: created.id,
+        url,
+        sort_order: index,
+      })),
     });
 
-    const attributes = [
-      {
+    await prisma.listingAttribute.createMany({
+      data: seededAttributes.map((attribute, index) => ({
         listing_id: created.id,
-        key: "Состояние",
-        value: l[8] === "NEW" ? "Новое" : "Б/У",
-        sort_order: 0,
-      },
-      {
-        listing_id: created.id,
-        key: "Город",
-        value: l[3],
-        sort_order: 1,
-      },
-    ];
-
-    await prisma.listingAttribute.createMany({ data: attributes });
+        key: attribute.key,
+        value: attribute.value,
+        sort_order: index,
+      })),
+    });
   }
+
+  await prisma.listingModerationEvent.createMany({
+    data: listings.map((listing, index) => {
+      const decision =
+        listing[10] === "REJECTED"
+          ? "REJECTED"
+          : listing[10] === "PENDING"
+            ? "AUTO_REVIEW"
+            : index % 4 === 0
+              ? "APPROVED"
+              : "AUTO_APPROVED";
+      const signals =
+        listing[10] === "REJECTED"
+          ? [
+              "contact_details_detected",
+              "offplatform_payment_detected",
+              "seller_many_complaints",
+            ]
+          : listing[10] === "PENDING"
+            ? ["price_outlier", "seller_not_verified", "too_short_description"]
+            : index % 6 === 0
+              ? ["trusted_seller_discount"]
+              : ["image_low_resolution"];
+      return {
+        public_id: `LME-${String(index + 1).padStart(4, "0")}`,
+        listing_id: getRequired(listingMap, listing[0], "Listing"),
+        actor_user_id:
+          decision === "APPROVED" || decision === "REJECTED"
+            ? getRequired(userMap, "ADM-001", "User")
+            : null,
+        actor_type:
+          decision === "APPROVED" || decision === "REJECTED" ? "ADMIN" : "SYSTEM",
+        decision,
+        reason_code:
+          decision === "REJECTED"
+            ? "offplatform_payment_detected"
+            : decision === "AUTO_REVIEW"
+              ? "seller_not_verified"
+              : "auto_checks_passed",
+        reason_note:
+          decision === "REJECTED"
+            ? "Объявление отклонено из-за попытки обойти безопасную сделку."
+            : decision === "AUTO_REVIEW"
+              ? "Объявление отправлено на ручную проверку по совокупности сигналов."
+              : "Карточка прошла автоматические проверки и соответствует требованиям.",
+        risk_score:
+          decision === "REJECTED" ? 86 : decision === "AUTO_REVIEW" ? 47 : 12,
+        signals,
+        metadata: {
+          city: listing[3],
+          listingStatus: listing[9],
+          moderationStatus: listing[10],
+        },
+        created_at: daysAgo(Math.max(0, 18 - index)),
+      };
+    }),
+  });
 
   await prisma.listingReview.createMany({
     data: listings.map((l: any, idx) => ({
@@ -3753,16 +4283,86 @@ async function main(): Promise<void> {
       ],
     ].map((c: any) => ({
       public_id: c[0],
-      status: "NEW",
+      status: c[1],
       complaint_type: c[2],
       listing_id: getRequired(listingMap, c[3], "Listing"),
       seller_id: getRequired(userMap, c[4], "User"),
       reporter_id: getRequired(userMap, c[5], "User"),
       description: c[6],
       evidence: c[7],
-      checked_at: null,
-      checked_by_id: null,
-      action_taken: null,
+      checked_at: c[8] === null ? null : daysAgo(c[8]),
+      checked_by_id:
+        c[9] === null ? null : getRequired(userMap, c[9], "User"),
+      action_taken: c[10],
+    })),
+  });
+
+  const complaintMap = new Map(
+    (
+      await prisma.complaint.findMany({
+        select: { id: true, public_id: true, status: true, seller_id: true },
+      })
+    ).map((complaint) => [complaint.public_id, complaint]),
+  );
+
+  await prisma.complaintEvent.createMany({
+    data: Array.from(complaintMap.values()).flatMap((complaint, index) => {
+      const baseEvent = {
+        public_id: `CME-${String(index * 2 + 1).padStart(4, "0")}`,
+        complaint_id: complaint.id,
+        actor_user_id: null,
+        event_type: "created",
+        from_status: null,
+        to_status: "NEW",
+        note: "Жалоба создана пользователем через карточку объявления.",
+        metadata: { source: "catalog_listing" },
+        created_at: daysAgo(12 + (index % 8)),
+      };
+      if (complaint.status === "NEW") return [baseEvent];
+      return [
+        baseEvent,
+        {
+          public_id: `CME-${String(index * 2 + 2).padStart(4, "0")}`,
+          complaint_id: complaint.id,
+          actor_user_id: getRequired(userMap, "ADM-001", "User"),
+          event_type:
+            complaint.status === "APPROVED"
+              ? "approved"
+              : complaint.status === "REJECTED"
+                ? "rejected"
+                : "triaged",
+          from_status: "NEW",
+          to_status: complaint.status,
+          note:
+            complaint.status === "APPROVED"
+              ? "Нарушение подтверждено после ручной проверки."
+              : complaint.status === "REJECTED"
+                ? "Жалоба закрыта без подтверждения нарушения."
+                : "Жалоба переведена в очередь повторной проверки.",
+          metadata: { actorRole: "admin" },
+          created_at: daysAgo(4 + (index % 6)),
+        },
+      ];
+    }),
+  });
+
+  await prisma.complaintSanction.createMany({
+    data: [
+      ["CSN-001", "CMP-001", "SLR-004", "WARNING", "ACTIVE", "Первое подтвержденное нарушение: обход безопасной сделки", 4, null],
+      ["CSN-002", "CMP-005", "SLR-004", "TEMP_3_DAYS", "COMPLETED", "Грубое общение с покупателем", 2, 0],
+      ["CSN-003", "CMP-013", "SLR-002", "WARNING", "ACTIVE", "Подозрительная карточка с противоречивым описанием", 3, null],
+      ["CSN-004", "CMP-031", "SLR-004", "TEMP_30_DAYS", "ACTIVE", "Повторное использование чужих фото и признаки мошенничества", 2, 28],
+    ].map((sanction: any) => ({
+      public_id: sanction[0],
+      complaint_id: getRequired(complaintMap, sanction[1], "Complaint").id,
+      seller_id: getRequired(userMap, sanction[2], "User"),
+      level: sanction[3],
+      status: sanction[4],
+      reason: sanction[5],
+      starts_at: daysAgo(sanction[6]),
+      ends_at: sanction[7] === null ? null : daysAgo(-sanction[7]),
+      created_by_id: getRequired(userMap, "ADM-001", "User"),
+      created_at: daysAgo(sanction[6]),
     })),
   });
 

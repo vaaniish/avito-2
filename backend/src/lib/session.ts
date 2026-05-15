@@ -1,6 +1,5 @@
 import { type Request } from "express";
-import { prisma } from "./prisma";
-import { verifySessionToken } from "./session-token";
+import { authSessionService } from "../modules/auth/composition";
 
 type SessionUser = {
   id: number;
@@ -12,68 +11,23 @@ type SessionUser = {
   name: string;
 };
 
-function parseBearerToken(authorization: string | undefined): string | null {
-  if (!authorization) return null;
-  const normalized = authorization.trim();
-  if (!normalized) return null;
-  const parts = normalized.split(/\s+/);
-  if (parts.length !== 2) return null;
-  if (parts[0].toLowerCase() !== "bearer") return null;
-  const token = parts[1]?.trim();
-  return token || null;
-}
-
 export async function getSessionUser(req: Request): Promise<SessionUser | null> {
-  const bearerToken = parseBearerToken(req.header("authorization") ?? undefined);
-  const resolvedId = bearerToken ? verifySessionToken(bearerToken) : null;
-
-  if (!resolvedId) {
-    return null;
-  }
-
-  const user = await prisma.appUser.findUnique({
-    where: { id: resolvedId },
-    select: {
-      id: true,
-      public_id: true,
-      role: true,
-      status: true,
-      blocked_until: true,
-      email: true,
-      name: true,
-    },
-  });
-
+  const user = await authSessionService.getSessionUserFromAuthorization(
+    req.header("authorization") ?? undefined,
+  );
   if (!user) {
     return null;
   }
 
-  if (
-    user.status === "BLOCKED" &&
-    user.blocked_until &&
-    user.blocked_until.getTime() <= Date.now()
-  ) {
-    const unblocked = await prisma.appUser.update({
-      where: { id: user.id },
-      data: {
-        status: "ACTIVE",
-        block_reason: null,
-        blocked_until: null,
-      },
-      select: {
-        id: true,
-        public_id: true,
-        role: true,
-        status: true,
-        blocked_until: true,
-        email: true,
-        name: true,
-      },
-    });
-    return unblocked;
-  }
-
-  return user;
+  return {
+    id: user.id,
+    public_id: user.publicId,
+    role: user.role,
+    status: user.status,
+    blocked_until: user.blockedUntil,
+    email: user.email,
+    name: user.name,
+  };
 }
 
 export async function requireRole(

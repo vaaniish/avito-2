@@ -222,6 +222,7 @@ model AppUser {
   payout_profile       SellerPayoutProfile?
   payout_profiles_reviewed SellerPayoutProfile[] @relation("payout_profile_reviewer")
   listing_drafts       ListingDraft[]       @relation("seller_listing_drafts")
+  commission_period_stats SellerCommissionPeriodStat[] @relation("seller_commission_period_stats")
 
   @@index([role, status])
   @@index([created_at])
@@ -293,6 +294,7 @@ model CatalogCategory {
   subcategories CatalogSubcategory[]
   attribute_definitions CatalogAttributeDefinition[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_category")
+  search_rules   CatalogSearchRule[]
 
   @@unique([type, name])
 }
@@ -310,6 +312,7 @@ model CatalogSubcategory {
   items          CatalogItem[]
   attribute_definitions CatalogAttributeDefinition[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_subcategory")
+  search_rules   CatalogSearchRule[]
 
   @@unique([category_id, name])
 }
@@ -328,8 +331,40 @@ model CatalogItem {
   attribute_definitions CatalogAttributeDefinition[]
   reference_brands CatalogReferenceBrand[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_item")
+  search_rules   CatalogSearchRule[]
 
   @@unique([subcategory_id, name])
+}
+
+model CatalogSearchRule {
+  id                 Int                 @id @default(autoincrement())
+  public_id          String              @unique
+  phrase             String
+  normalized_phrase  String
+  category_id        Int?
+  subcategory_id     Int?
+  item_id            Int?
+  brand_name         String?
+  normalized_brand   String?
+  model_name         String?
+  normalized_model   String?
+  characteristic_key String?
+  characteristic_value String?
+  weight             Int                 @default(50)
+  is_generated       Boolean             @default(false)
+  source             String              @default("manual")
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @updatedAt
+
+  category           CatalogCategory?    @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  subcategory        CatalogSubcategory? @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
+  item               CatalogItem?        @relation(fields: [item_id], references: [id], onDelete: Cascade)
+
+  @@index([normalized_phrase])
+  @@index([category_id, subcategory_id, item_id])
+  @@index([normalized_brand, normalized_model])
+  @@index([characteristic_key])
+  @@unique([normalized_phrase, category_id, subcategory_id, item_id, normalized_brand, normalized_model], map: "CatalogSearchRule_scope_phrase_unique")
 }
 
 model CatalogReferenceBrand {
@@ -505,12 +540,30 @@ model MarketplaceListing {
   complaints           Complaint[]
   order_items          MarketOrderItem[]
   wishlist_items       WishlistItem[]
+  search_keywords      ListingSearchKeyword[]
 
   @@index([seller_id])
   @@index([item_id])
   @@index([type, status, moderation_status])
   @@index([status, moderation_status, created_at])
   @@index([type, status, moderation_status, created_at(sort: Desc), id(sort: Desc)], map: "MarketplaceListing_type_status_moderation_created_id_idx")
+}
+
+model ListingSearchKeyword {
+  id                Int                @id @default(autoincrement())
+  listing_id        Int
+  phrase            String
+  normalized_phrase String
+  weight            Int                @default(50)
+  source            String             @default("derived")
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+  listing           MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@index([listing_id, weight(sort: Desc)])
+  @@index([normalized_phrase])
+  @@unique([listing_id, normalized_phrase], map: "ListingSearchKeyword_listing_phrase_unique")
 }
 
 model ListingDraft {
@@ -839,8 +892,46 @@ model CommissionTier {
   updated_at      DateTime       @updatedAt
 
   seller_profiles SellerProfile[]
+  commission_period_stats SellerCommissionPeriodStat[]
+  next_commission_period_stats SellerCommissionPeriodStat[] @relation("next_commission_tier_stats")
 
   @@index([min_sales, max_sales])
+}
+
+model SellerCommissionPeriodStat {
+  id                Int            @id @default(autoincrement())
+  public_id         String         @unique
+  seller_id         Int
+  period_key        String
+  period_start      DateTime
+  period_end        DateTime
+  gross             Int            @default(0)
+  commission_total  Int            @default(0)
+  seller_profit     Int            @default(0)
+  payable           Int            @default(0)
+  held              Int            @default(0)
+  refunded_cancelled Int           @default(0)
+  qualified_gmv     Int            @default(0)
+  completed_orders  Int            @default(0)
+  successful_transactions Int      @default(0)
+  total_transactions Int           @default(0)
+  current_tier_id   Int?
+  next_tier_id      Int?
+  sales_to_next_tier Int           @default(0)
+  percent_to_next_tier Float       @default(0)
+  commission_rate_at_period_end Float @default(0)
+  snapshot_finalized_at DateTime?
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+
+  seller            AppUser        @relation("seller_commission_period_stats", fields: [seller_id], references: [id], onDelete: Cascade)
+  current_tier      CommissionTier? @relation(fields: [current_tier_id], references: [id], onDelete: SetNull)
+  next_tier         CommissionTier? @relation("next_commission_tier_stats", fields: [next_tier_id], references: [id], onDelete: SetNull)
+
+  @@unique([seller_id, period_key], map: "SellerCommissionPeriodStat_seller_period_key_unique")
+  @@index([seller_id, period_start])
+  @@index([current_tier_id])
+  @@index([next_tier_id])
 }
 
 model PartnershipRequest {

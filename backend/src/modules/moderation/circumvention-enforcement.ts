@@ -34,7 +34,8 @@ const AUTO_COMPLAINT_DEDUPE_HOURS = parsePositiveInt(
 type ViolationChannel = "buyer_question" | "seller_answer";
 
 type ViolationParams = {
-  req: Request;
+  req?: Request;
+  requestIp?: string | null;
   actorUserId: number;
   actorRole: string;
   channel: ViolationChannel;
@@ -212,7 +213,10 @@ export async function enforceCircumventionViolation(
   params: ViolationParams,
 ): Promise<CircumventionEnforcementResult> {
   const now = new Date();
-  const ipAddress = getRequestIp(params.req);
+  const ipAddress =
+    params.requestIp !== undefined ? params.requestIp : params.req
+      ? getRequestIp(params.req)
+      : null;
   const windowStart = addDays(now, -STRIKES_WINDOW_DAYS);
 
   const result = await prisma.$transaction(async (tx) => {

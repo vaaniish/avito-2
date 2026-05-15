@@ -1,3 +1,5 @@
+// Legacy reference-data service intentionally excluded from Wave 1 module boundaries.
+// Its Prisma access is acceptable until the reference-data contour gets its own cleanup pass.
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 

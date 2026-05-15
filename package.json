@@ -47,6 +47,8 @@
     "db:migrate": "node node_modules/prisma/build/index.js migrate dev --schema backend/prisma/schema.prisma",
     "db:seed": "node node_modules/tsx/dist/cli.mjs backend/prisma/seed.ts",
     "db:import-catalog-reference": "node node_modules/tsx/dist/cli.mjs scripts/catalog/import-catalog-reference-to-db.ts",
+    "db:import-search-rules": "node node_modules/tsx/dist/cli.mjs scripts/catalog/import-search-rules-to-db.ts",
+    "db:backfill-search-keywords": "node node_modules/tsx/dist/cli.mjs scripts/catalog/backfill-listing-search-keywords.ts",
     "db:push": "node node_modules/prisma/build/index.js db push --schema backend/prisma/schema.prisma",
     "db:migrate:deploy": "node node_modules/prisma/build/index.js migrate deploy --schema backend/prisma/schema.prisma"
   },
@@ -67,7 +69,8 @@
     "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "xlsx-populate": "^1.21.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

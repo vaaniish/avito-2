@@ -140,6 +140,7 @@ export default function App() {
     isLoadingProducts,
     loadedProductCount,
     totalProducts,
+    catalogSearchMeta,
     catalogPageOffsets,
     catalogPagesByOffset,
     loadedCatalogOffsets,
@@ -306,6 +307,7 @@ export default function App() {
         isLoadingMoreItems={isLoadingMoreItems}
         loadedItemCount={loadedProductCount}
         totalItemCount={totalProducts}
+        catalogSearchMeta={catalogSearchMeta}
         catalogPageOffsets={catalogPageOffsets}
         catalogPagesByOffset={catalogPagesByOffset}
         loadedCatalogOffsets={loadedCatalogOffsets}

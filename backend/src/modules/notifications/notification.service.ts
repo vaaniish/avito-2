@@ -1,40 +1,12 @@
 import { NotificationType, Prisma, type PrismaClient } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import {
-  buildTargetUrl,
   type CreateNotificationInput,
-  humanizeReasonCode,
-  listingModerationNotification,
+  type NotificationDto,
+  toNotificationDto,
 } from "./notification.shared";
 
 type NotificationClient = PrismaClient | Prisma.TransactionClient;
-
-export type NotificationDto = {
-  id: number;
-  type: NotificationType;
-  message: string;
-  url: string;
-  isRead: boolean;
-  date: Date;
-};
-
-export function toNotificationDto(notification: {
-  id: number;
-  type: NotificationType;
-  message: string;
-  target_url: string;
-  is_read: boolean;
-  created_at: Date;
-}): NotificationDto {
-  return {
-    id: notification.id,
-    type: notification.type,
-    message: notification.message,
-    url: notification.target_url,
-    isRead: notification.is_read,
-    date: notification.created_at,
-  };
-}
 
 export async function createNotification(
   input: CreateNotificationInput,
@@ -90,5 +62,3 @@ export async function notifyAdmins(
     client,
   );
 }
-
-export { buildTargetUrl, humanizeReasonCode, listingModerationNotification };

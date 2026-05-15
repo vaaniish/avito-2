@@ -1,4 +1,8 @@
-import { type NotificationType } from "@prisma/client";
+export type NotificationType =
+  | "SYSTEM"
+  | "INFO"
+  | "ORDER_STATUS"
+  | "NEW_QUESTION";
 
 export type CreateNotificationInput = {
   userId: number;
@@ -6,6 +10,33 @@ export type CreateNotificationInput = {
   message: string;
   targetUrl: string;
 };
+
+export type NotificationDto = {
+  id: number;
+  type: NotificationType;
+  message: string;
+  url: string;
+  isRead: boolean;
+  date: Date;
+};
+
+export function toNotificationDto(notification: {
+  id: number;
+  type: NotificationType;
+  message: string;
+  target_url: string;
+  is_read: boolean;
+  created_at: Date;
+}): NotificationDto {
+  return {
+    id: notification.id,
+    type: notification.type,
+    message: notification.message,
+    url: notification.target_url,
+    isRead: notification.is_read,
+    date: notification.created_at,
+  };
+}
 
 export function buildTargetUrl(
   kind: "listing" | "partner" | "orders" | "questions" | "admin",

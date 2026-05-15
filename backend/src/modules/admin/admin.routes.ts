@@ -10,15 +10,16 @@ import { registerAdminPartnershipRoutes } from "./admin.partnership.routes";
 import { registerAdminUserRoutes } from "./admin.users.routes";
 
 const adminRouter = Router();
-
-registerAdminFinanceRoutes(adminRouter);
-registerAdminAuditRoutes(adminRouter);
-registerAdminCatalogRoutes(adminRouter);
-registerAdminCatalogSuggestionRoutes(adminRouter);
-registerAdminCommissionRoutes(adminRouter);
-registerAdminListingRoutes(adminRouter);
-registerAdminPartnershipRoutes(adminRouter);
-registerAdminUserRoutes(adminRouter);
+[
+  registerAdminFinanceRoutes,
+  registerAdminAuditRoutes,
+  registerAdminCatalogRoutes,
+  registerAdminCatalogSuggestionRoutes,
+  registerAdminCommissionRoutes,
+  registerAdminListingRoutes,
+  registerAdminPartnershipRoutes,
+  registerAdminUserRoutes,
+].forEach((register) => register(adminRouter));
 
 adminRouter.use("/", complaintsRouter);
 

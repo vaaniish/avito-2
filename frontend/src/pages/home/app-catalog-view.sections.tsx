@@ -252,6 +252,7 @@ export function AppCatalogGridSection(
     | "isLoadingMoreItems"
     | "loadedItemCount"
     | "totalItemCount"
+    | "catalogSearchMeta"
     | "catalogPageOffsets"
     | "catalogPagesByOffset"
     | "loadedCatalogOffsets"
@@ -281,6 +282,7 @@ export function AppCatalogGridSection(
         isLoadingMore={props.isLoadingMoreItems}
         loadedItemCount={props.loadedItemCount}
         totalItemCount={props.totalItemCount}
+        catalogSearchMeta={props.catalogSearchMeta}
         pageOffsets={props.catalogPageOffsets}
         pagesByOffset={props.catalogPagesByOffset}
         loadedOffsets={props.loadedCatalogOffsets}

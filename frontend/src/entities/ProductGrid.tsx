@@ -11,6 +11,18 @@ interface ProductGridProps {
   isLoadingMore: boolean;
   loadedItemCount: number;
   totalItemCount: number;
+  catalogSearchMeta?: {
+    recognizedQuery: string | null;
+    emptyStateMessage?: string;
+    branchHints: Array<{
+      itemPublicId: string;
+      itemName: string;
+      subcategoryName: string;
+      categoryName: string;
+      matchedPhrases: string[];
+      suggestions: string[];
+    }>;
+  } | null;
   pageOffsets: number[];
   pagesByOffset: CatalogPagesByOffset;
   loadedOffsets: number[];
@@ -159,6 +171,27 @@ function CatalogPageBlock(props: {
   );
 }
 
+function CatalogGridSkeleton({ columns }: { columns: number }) {
+  const cardCount = Math.max(columns * 2, 4);
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: cardCount }, (_, index) => (
+        <div
+          key={`catalog-skeleton-${index}`}
+          className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_12px_26px_-22px_rgba(15,23,42,0.35)]"
+        >
+          <div className="aspect-[4/3] animate-pulse bg-slate-200/80" />
+          <div className="space-y-3 p-4">
+            <div className="h-5 w-3/4 animate-pulse rounded-full bg-slate-200/80" />
+            <div className="h-4 w-1/2 animate-pulse rounded-full bg-slate-200/70" />
+            <div className="h-11 animate-pulse rounded-2xl bg-slate-100" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ProductGrid({
   products,
   hasMore,
@@ -166,6 +199,7 @@ export function ProductGrid({
   isLoadingMore,
   loadedItemCount: _loadedItemCount,
   totalItemCount,
+  catalogSearchMeta,
   pageOffsets,
   pagesByOffset,
   loadedOffsets,
@@ -235,13 +269,48 @@ export function ProductGrid({
   };
 
   const loadedOffsetSet = useMemo(() => new Set(loadedOffsets), [loadedOffsets]);
+  const useWindowedRendering = totalItemCount > 24 && pageOffsets.length > 1;
   const hasPendingForwardPages = useMemo(() => {
-    if (isLoadingMore || hasMore) {
+    if (!useWindowedRendering) {
+      return false;
+    }
+
+    if (isLoadingMore && hasMore) {
       return true;
     }
 
     return pageOffsets.some((offset) => offset >= activeOffset && !loadedOffsetSet.has(offset));
-  }, [activeOffset, hasMore, isLoadingMore, loadedOffsetSet, pageOffsets]);
+  }, [activeOffset, hasMore, isLoadingMore, loadedOffsetSet, pageOffsets, useWindowedRendering]);
+
+  const directGrid = (
+    <div
+      data-testid="catalog-grid"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
+      {products.map((product, index) => {
+        const cartItem = cartItemsById.get(product.id);
+        const cartQuantity = cartItem ? cartItem.quantity : 0;
+        const imagePriority = index < columns * 2 ? "high" : "lazy";
+
+        return (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onClick={() => onProductClick(product)}
+            onAddToCart={() => onAddToCart(product)}
+            onUpdateQuantity={(quantity) => onUpdateQuantity(product.id, quantity)}
+            cartQuantity={cartQuantity}
+            viewMode="products"
+            displayMode="grid"
+            isWishlisted={wishlistProductIds.has(product.id)}
+            onWishlistToggle={onWishlistToggle}
+            dataTestId="catalog-card"
+            imagePriority={imagePriority}
+          />
+        );
+      })}
+    </div>
+  );
 
   return (
     <div>
@@ -290,47 +359,102 @@ export function ProductGrid({
         </div>
       </div>
 
-      <div data-testid="catalog-grid" className="space-y-3">
-        {pageOffsets.map((offset) => {
-          const pageProducts = pagesByOffset[offset] ?? [];
-          const expectedCount = Math.max(0, Math.min(24, totalItemCount - offset));
-          return (
-            <CatalogPageBlock
-              key={offset}
-              offset={offset}
-              products={pageProducts}
-              expectedCount={expectedCount}
-              isLoaded={loadedOffsetSet.has(offset)}
-              cartItemsById={cartItemsById}
-              onVisibleOffsetChange={onVisibleOffsetChange}
-              onEnsureOffsetLoaded={onEnsureOffsetLoaded}
-              onProductClick={onProductClick}
-              onAddToCart={onAddToCart}
-              onUpdateQuantity={onUpdateQuantity}
-              wishlistProductIds={wishlistProductIds}
-              onWishlistToggle={onWishlistToggle}
-              columns={columns}
-              measuredHeight={measuredHeights[offset]}
-              onMeasuredHeightChange={handleMeasuredHeightChange}
-            />
-          );
-        })}
-      </div>
+      {isLoadingMore && products.length === 0 ? (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-900">
+            Загружаем товары и готовим результаты поиска...
+          </div>
+          <CatalogGridSkeleton columns={columns} />
+        </div>
+      ) : useWindowedRendering ? (
+        <div data-testid="catalog-grid" className="space-y-3">
+          {pageOffsets.map((offset) => {
+            const pageProducts = pagesByOffset[offset] ?? [];
+            const expectedCount = Math.max(0, Math.min(24, totalItemCount - offset));
+            return (
+              <CatalogPageBlock
+                key={offset}
+                offset={offset}
+                products={pageProducts}
+                expectedCount={expectedCount}
+                isLoaded={loadedOffsetSet.has(offset)}
+                cartItemsById={cartItemsById}
+                onVisibleOffsetChange={onVisibleOffsetChange}
+                onEnsureOffsetLoaded={onEnsureOffsetLoaded}
+                onProductClick={onProductClick}
+                onAddToCart={onAddToCart}
+                onUpdateQuantity={onUpdateQuantity}
+                wishlistProductIds={wishlistProductIds}
+                onWishlistToggle={onWishlistToggle}
+                columns={columns}
+                measuredHeight={measuredHeights[offset]}
+                onMeasuredHeightChange={handleMeasuredHeightChange}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        directGrid
+      )}
 
-      {hasPendingForwardPages && (
+      {products.length > 0 && isLoadingMore ? (
+        <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-900">
+          Подгружаем еще товары, выдача обновится автоматически.
+        </div>
+      ) : null}
+
+      {hasPendingForwardPages && !isLoadingMore && (
         <div className="mt-6">
           <p className="text-center text-sm text-gray-500">
-            {isLoadingMore
-              ? "Подгружаем соседние страницы каталога..."
-              : "Следующие товары подгружаются заранее по мере прокрутки"}
+            Следующие товары подгружаются заранее по мере прокрутки
           </p>
         </div>
       )}
 
       {products.length === 0 && !isLoadingMore && (
         <div className="py-16 text-center">
-          <p className="text-2xl text-gray-500">Товары не найдены</p>
-          <p className="mt-2 text-lg text-gray-400">Попробуйте изменить фильтры</p>
+          <p className="text-2xl font-semibold text-slate-700">Товары не найдены</p>
+          <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-slate-500">
+            {catalogSearchMeta?.emptyStateMessage ?? "Попробуйте изменить поисковый запрос или снять часть фильтров."}
+          </p>
+          {catalogSearchMeta?.branchHints?.length ? (
+            <div className="mx-auto mt-6 max-w-3xl rounded-[28px] border border-slate-200 bg-slate-50/90 p-5 text-left shadow-[0_16px_30px_-26px_rgba(15,23,42,0.4)]">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Запрос распознан как ветка каталога
+              </div>
+              <div className="mt-2 text-lg font-semibold tracking-[-0.02em] text-slate-950">
+                {catalogSearchMeta.recognizedQuery}
+              </div>
+              <div className="mt-2 text-sm leading-6 text-slate-600">
+                Сейчас в этой ветке нет активных объявлений, но поиск понял направление. Можно перейти на близкие категории:
+              </div>
+              <div className="mt-4 space-y-3">
+                {catalogSearchMeta.branchHints.map((hint) => (
+                  <div
+                    key={hint.itemPublicId}
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]"
+                  >
+                    <div className="text-sm font-semibold text-slate-900">{hint.itemName}</div>
+                    <div className="mt-1 text-sm text-slate-500">
+                      {hint.categoryName} · {hint.subcategoryName}
+                    </div>
+                    {hint.suggestions.length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {hint.suggestions.slice(0, 3).map((suggestion) => (
+                          <span
+                            key={`${hint.itemPublicId}-${suggestion}`}
+                            className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                          >
+                            {suggestion}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

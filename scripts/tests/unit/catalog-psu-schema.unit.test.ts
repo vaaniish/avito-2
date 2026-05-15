@@ -143,47 +143,76 @@ test("catalog creation: backend binds existing product items without deferred MV
     "const comprehensiveItemAttributes",
     "const expandedProductAttributes",
   );
-  const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.listings.routes.ts",
+  const partnerListingsCatalogHelper = readFileSync(
+    "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-catalog.repository-helper.ts",
     "utf8",
   );
 
   assert.match(comprehensiveBlock, /mvpItemIds\.has\(item\)/);
   assert.match(backendSeed, /"sub-pc-laptops-accessories::Ноутбуки", "ITM-003"/);
   assert.match(backendSeed, /const mvpItemIds = new Set/);
-  assert.doesNotMatch(partnerRoutes, /isDeferredItem/);
-  assert.doesNotMatch(partnerRoutes, /!MVP_PRODUCT_ITEM_PUBLIC_IDS\.has\(item\.public_id\)/);
-  assert.match(partnerRoutes, /const isCustomItem = Boolean\(customItemName\) \|\| !item;/);
+  assert.doesNotMatch(partnerListingsCatalogHelper, /isDeferredItem/);
+  assert.doesNotMatch(
+    partnerListingsCatalogHelper,
+    /!MVP_PRODUCT_ITEM_PUBLIC_IDS\.has\(item\.public_id\)/,
+  );
+  assert.match(
+    partnerListingsCatalogHelper,
+    /const isCustomItem = Boolean\(customItemName\) \|\| !item;/,
+  );
 });
 
 test("catalog custom flow: category, subcategory, item and attribute values go to suggestions", () => {
-  const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.listings.routes.ts",
+  const partnerListingsDomainHelpers = readFileSync(
+    "backend/src/modules/partner/listings/domain/partner-listings.helpers.ts",
+    "utf8",
+  );
+  const partnerListingsCatalogHelper = readFileSync(
+    "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-catalog.repository-helper.ts",
+    "utf8",
+  );
+  const partnerListingsCatalogRepository = readFileSync(
+    "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-catalog.repository.ts",
+    "utf8",
+  );
+  const partnerListingsRouter = readFileSync(
+    "backend/src/modules/partner/listings/http/partner-listings.router.ts",
     "utf8",
   );
 
-  assert.match(partnerRoutes, /entityType: "CATEGORY"/);
-  assert.match(partnerRoutes, /entityType: "SUBCATEGORY"/);
-  assert.match(partnerRoutes, /entityType: "ITEM"/);
-  assert.match(partnerRoutes, /entityType: definition\.key === "manufacturer" \? "MANUFACTURER" : "ATTRIBUTE_VALUE"/);
-  assert.match(partnerRoutes, /CUSTOM_VALUE_OPTION/);
-  assert.match(partnerRoutes, /LISTING_ATTRIBUTE_COMBINATION_INVALID/);
-  assert.match(partnerRoutes, /\/listings\/catalog-reference/);
-  assert.match(partnerRoutes, /validateCatalogReferenceCombination/);
+  assert.match(partnerListingsCatalogRepository, /entityType = "CATEGORY"/);
+  assert.match(partnerListingsCatalogRepository, /entityType = "SUBCATEGORY"/);
+  assert.match(partnerListingsCatalogRepository, /let entityType: "CATEGORY" \| "SUBCATEGORY" \| "ITEM" = "ITEM"/);
+  assert.match(
+    partnerListingsCatalogHelper,
+    /entityType: definition\.key === "manufacturer" \? "MANUFACTURER" : "ATTRIBUTE_VALUE"/,
+  );
+  assert.match(partnerListingsDomainHelpers, /CUSTOM_VALUE_OPTION/);
+  assert.match(partnerListingsCatalogHelper, /LISTING_ATTRIBUTE_COMBINATION_INVALID/);
+  assert.match(partnerListingsRouter, /\/listings\/catalog-reference/);
+  assert.match(partnerListingsCatalogHelper, /validateCatalogReferenceCombination/);
 });
 
 test("catalog creation suggestions: backend searches generic catalog item names", () => {
-  const partnerRoutes = readFileSync(
-    "backend/src/modules/partner/partner.listings.routes.ts",
+  const partnerListingsSearchRepository = readFileSync(
+    "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-search.repository.ts",
     "utf8",
   );
 
-  assert.match(partnerRoutes, /findGenericCreateSuggestionItems/);
-  assert.match(partnerRoutes, /genericCatalogItemScore/);
-  assert.match(partnerRoutes, /prisma\.catalogItem\.findMany/);
-  assert.match(partnerRoutes, /name:\s*\{\s*contains: token,\s*mode: "insensitive"/);
-  assert.match(partnerRoutes, /findCatalogReferenceCreateSuggestions\(query, type\)/);
-  assert.match(partnerRoutes, /catalogReferenceTitleSuggestions\(query, referenceSuggestions\)/);
-  assert.match(partnerRoutes, /titleSuggestions/);
-  assert.doesNotMatch(partnerRoutes, /videoCardScore|videoCardChips/);
+  assert.match(partnerListingsSearchRepository, /findGenericCreateSuggestionItems/);
+  assert.match(partnerListingsSearchRepository, /prisma\.catalogItem\.findMany/);
+  assert.match(
+    partnerListingsSearchRepository,
+    /name:\s*\{\s*contains: token,\s*mode: "insensitive"/,
+  );
+  assert.match(
+    partnerListingsSearchRepository,
+    /findCatalogReferenceCreateSuggestions\(query, type\)/,
+  );
+  assert.match(
+    partnerListingsSearchRepository,
+    /catalogReferenceTitleSuggestions\(query, referenceSuggestions\)/,
+  );
+  assert.match(partnerListingsSearchRepository, /titleSuggestions/);
+  assert.doesNotMatch(partnerListingsSearchRepository, /videoCardScore|videoCardChips/);
 });
