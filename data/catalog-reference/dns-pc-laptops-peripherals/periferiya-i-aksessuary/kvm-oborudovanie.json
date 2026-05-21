@@ -1,0 +1,66 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "ПК, ноутбуки, периферия",
+  "subcategoryName": "Периферия и аксессуары",
+  "itemName": "KVM оборудование",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/5dc8088208d4b14c/kvm-oborudovanie/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:58:46.433Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 1,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/ac7ed92369a66f9f/snur-monklavmys-usb-sphd15hd-db15usb-a-tip/",
+      "title": "Шнур, мон+клав+мышь USB, SPHD15=\\>HD DB15+USB A-Тип",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "ac7ed92369a66f9f",
+      "cardText": "Шнур, мон+клав+мышь USB, SPHD15=\\>HD DB15+USB A-Тип 5 |2 отзываОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Шнур,",
+      "models": [
+        {
+          "brand": "Шнур,",
+          "model": "мон+клав+мышь USB, SPHD15=\\>HD DB15+USB A-Тип",
+          "name": "Шнур, мон+клав+мышь USB, SPHD15=\\>HD DB15+USB A-Тип",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ac7ed92369a66f9f/snur-monklavmys-usb-sphd15hd-db15usb-a-tip/",
+              "title": "Шнур, мон+клав+мышь USB, SPHD15=\\>HD DB15+USB A-Тип",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [
+    {
+      "text": "KVM аксессуары",
+      "href": "https://www.dns-shop.ru/catalog/17a8ab8f16404e77/kvm-aksessuary/"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/5dc8088208d4b14c/kvm-oborudovanie/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 0,
+      "title": "KVM оборудование купить в интернет-магазине DNS. KVM оборудование цены, большой каталог, новинки."
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a8ab8f16404e77/kvm-aksessuary/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "KVM аксессуары купить в интернет-магазине DNS. KVM аксессуары цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

@@ -9,6 +9,7 @@ type ProfileAddressesTabProps = {
   addressModalOpen: boolean;
   addressForm: AddressFormState;
   addressMapHint: string;
+  addressValidationErrors: string[];
   mapCenterQuery: string | null;
   addressFullInputRef: MutableRefObject<HTMLInputElement | null>;
   onOpenCreateModal: () => void;
@@ -42,6 +43,7 @@ export function ProfileAddressesTab({
   addressModalOpen,
   addressForm,
   addressMapHint,
+  addressValidationErrors,
   mapCenterQuery,
   addressFullInputRef,
   onOpenCreateModal,
@@ -125,6 +127,7 @@ export function ProfileAddressesTab({
         open={addressModalOpen}
         addressForm={addressForm}
         addressMapHint={addressMapHint}
+        addressValidationErrors={addressValidationErrors}
         mapCenterQuery={mapCenterQuery}
         addressFullInputRef={addressFullInputRef}
         onClose={onCloseModal}

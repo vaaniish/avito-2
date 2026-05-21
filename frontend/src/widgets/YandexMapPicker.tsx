@@ -2,7 +2,11 @@ import { MapPin } from "lucide-react";
 import { useYandexMapPicker } from "./yandex-map.hooks";
 import type { YandexMapPickerProps } from "./yandex-map.types";
 
-export type { AddressPayload, YandexMapMarker } from "./yandex-map.types";
+export type {
+  AddressPayload,
+  YandexMapMarker,
+  YandexMapViewportBounds,
+} from "./yandex-map.types";
 
 export function YandexMapPicker(props: YandexMapPickerProps) {
   const { mapRef, mapStatus } = useYandexMapPicker(props);

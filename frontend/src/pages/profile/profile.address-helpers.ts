@@ -7,25 +7,19 @@ export type AddressSuggestStage =
   | "region"
   | "city"
   | "street"
-  | "house"
-  | "apartment"
-  | "entrance";
+  | "house";
 
 export function composeFullAddress(parts: {
   region?: string;
   city?: string;
   street?: string;
   house?: string;
-  apartment?: string;
-  entrance?: string;
 }): string {
   const normalize = (value?: string) => String(value ?? "").trim();
   const region = normalize(parts.region);
   const city = normalize(parts.city);
   const street = normalize(parts.street);
   const house = normalize(parts.house);
-  const apartment = normalize(parts.apartment);
-  const entrance = normalize(parts.entrance);
 
   const cityPart =
     city &&
@@ -36,12 +30,8 @@ export function composeFullAddress(parts: {
       : city;
 
   const housePart = house ? `дом ${house}` : "";
-  const entrancePart = entrance ? `подъезд ${entrance}` : "";
-  const apartmentPart = apartment ? `кв. ${apartment}` : "";
 
-  return [region, cityPart, street, housePart, entrancePart, apartmentPart]
-    .filter(Boolean)
-    .join(", ");
+  return [region, cityPart, street, housePart].filter(Boolean).join(", ");
 }
 
 export function sanitizeRegion(value: string | null | undefined): string {
@@ -204,8 +194,6 @@ export function sanitizeHouseValue(value: string | null | undefined): string {
 
   return raw
     .replace(/^\s*(?:дом|д\.?)\s*/iu, "")
-    .replace(/\s*,?\s*(?:кв\.?|квартира)\s*[0-9a-zа-я/-]+.*$/iu, "")
-    .replace(/\s*,?\s*(?:под[ъь]?езд|под\.?\s*езд)\s*[0-9a-zа-я/-]+.*$/iu, "")
     .trim();
 }
 
@@ -215,8 +203,6 @@ export function sanitizeStreetValue(value: string | null | undefined): string {
 
   return raw
     .replace(/(?:дом|д\.?)\s*[0-9a-zа-я/-].*$/iu, "")
-    .replace(/\s*,?\s*(?:кв\.?|квартира)\s*[0-9a-zа-я/-]+.*$/iu, "")
-    .replace(/\s*,?\s*(?:под[ъь]?езд|под\.?\s*езд)\s*[0-9a-zа-я/-]+.*$/iu, "")
     .replace(/\s+\d+[a-zа-я/-]*$/iu, "")
     .trim();
 }

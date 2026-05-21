@@ -87,7 +87,7 @@ export function buildListingPublicUrl(listingPublicId: string): string {
 }
 
 export function extractPrimaryAddressInfo(
-  addresses: Array<{ city: string; region: string }>,
+  addresses: Array<{ city: string; region: string | null }>,
 ): { city: string; region: string } {
   const first = addresses[0];
   return {

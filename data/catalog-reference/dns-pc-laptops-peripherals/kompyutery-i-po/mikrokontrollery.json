@@ -1,0 +1,59 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "ПК, ноутбуки, периферия",
+  "subcategoryName": "Компьютеры и ПО",
+  "itemName": "Микроконтроллеры",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/709a5c2ad8f1859f/mikrokontrollery/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:51:43.251Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 1,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/8e6d2acf8aa4d760/mikrokontroller-raspberry-pi-pico-elsp-41033/",
+      "title": "Микроконтроллер Raspberry Pi Pico [ELSP-41033] [Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ]",
+      "specsText": "Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ",
+      "bracketGroups": [
+        "ELSP-41033",
+        "Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ"
+      ],
+      "priceText": "",
+      "productId": "8e6d2acf8aa4d760",
+      "cardText": "Микроконтроллер Raspberry Pi Pico [ELSP-41033] [Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ]4.86 |46 отзывов 2"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Микроконтроллер",
+      "models": [
+        {
+          "brand": "Микроконтроллер",
+          "model": "Raspberry Pi Pico",
+          "name": "Микроконтроллер Raspberry Pi Pico",
+          "manufacturerCodes": [
+            "ELSP-41033"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8e6d2acf8aa4d760/mikrokontroller-raspberry-pi-pico-elsp-41033/",
+              "title": "Микроконтроллер Raspberry Pi Pico [ELSP-41033] [Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ]",
+              "specsText": "Raspberry Pi RP2040, 133 МГц, ОЗУ: 264 КБ, ПЗУ: 2048 КБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/709a5c2ad8f1859f/mikrokontrollery/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "Микроконтроллеры купить в интернет-магазине DNS. Микроконтроллеры цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

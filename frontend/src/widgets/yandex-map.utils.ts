@@ -57,10 +57,16 @@ export const sanitizeHouseValue = (value: string | null | undefined) => {
 
 export function markerPreset(provider?: string, selected = false): string {
   if (selected && provider === "yandex_pvz") return "islands#darkBlueShoppingCircleIcon";
+  if (selected && provider === "russian_post") return "islands#darkOrangeIcon";
+  if (selected && provider === "ozon") return "islands#darkVioletIcon";
+  if (selected && provider === "wildberries") return "islands#darkPinkIcon";
+  if (selected && provider === "cdek") return "islands#darkGreenIcon";
   if (selected) return "islands#darkBlueIcon";
   if (provider === "yandex_pvz") return "islands#blueShoppingCircleIcon";
   if (provider === "russian_post") return "islands#orangeIcon";
   if (provider === "ozon") return "islands#violetIcon";
+  if (provider === "wildberries") return "islands#pinkIcon";
+  if (provider === "cdek") return "islands#greenIcon";
   return "islands#blueIcon";
 }
 

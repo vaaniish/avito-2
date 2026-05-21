@@ -1,29 +1,35 @@
 import type { MutableRefObject } from "react";
 import { MapPin, Search, X } from "lucide-react";
-import { YandexMapPicker, type YandexMapMarker } from "../../widgets/YandexMapPicker";
+import {
+  YandexMapPicker,
+  type YandexMapMarker,
+  type YandexMapViewportBounds,
+} from "../../widgets/YandexMapPicker";
 import {
   DELIVERY_PROVIDER_TABS,
   type DeliveryPoint,
+  type DeliveryProviderFilter,
   type DeliveryProvider,
 } from "./checkout.models";
 
 type CheckoutDeliverySectionProps = {
   deliveryType: "delivery" | "pickup";
   deliveryProviders: DeliveryProvider[];
-  activeDeliveryProvider: DeliveryProvider["code"];
+  activeDeliveryProvider: DeliveryProviderFilter;
   deliveryCity: string;
   deliverySearchInputRef: MutableRefObject<HTMLInputElement | null>;
   mapMarkers: YandexMapMarker[];
   mapCenterQuery: string | null;
-  selectedPointId: string | null;
+  selectedPointKey: string | null;
   visibleDeliveryPoints: DeliveryPoint[];
   selectedPoint: DeliveryPoint | null;
   isPointsLoading: boolean;
-  onProviderSelect: (providerCode: DeliveryProvider["code"]) => void;
+  onProviderSelect: (providerCode: DeliveryProviderFilter) => void;
   onDeliveryCityChange: (value: string) => void;
   onSearch: () => void;
   onClearSearch: () => void;
   onMarkerSelect: (markerId: string) => void;
+  onViewportChange: (bounds: YandexMapViewportBounds | null) => void;
 };
 
 export function CheckoutDeliverySection({
@@ -34,7 +40,7 @@ export function CheckoutDeliverySection({
   deliverySearchInputRef,
   mapMarkers,
   mapCenterQuery,
-  selectedPointId,
+  selectedPointKey,
   visibleDeliveryPoints,
   selectedPoint,
   isPointsLoading,
@@ -43,6 +49,7 @@ export function CheckoutDeliverySection({
   onSearch,
   onClearSearch,
   onMarkerSelect,
+  onViewportChange,
 }: CheckoutDeliverySectionProps) {
   if (deliveryType !== "delivery") {
     return (
@@ -66,14 +73,15 @@ export function CheckoutDeliverySection({
     <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
       <h2 className="mb-4 text-xl text-gray-900 md:text-2xl">Выберите ПВЗ</h2>
       <p className="mb-4 text-sm text-gray-600">
-        На карте показаны доступные точки выдачи выбранного провайдера. Введите
-        адрес или название ПВЗ, затем выберите нужную метку на карте.
+        На карте показаны реальные точки выдачи по доступным сетям. Можно
+        оставить режим всех провайдеров сразу или сузить карту до конкретного бренда.
       </p>
       <div className="mb-4 flex flex-wrap gap-2">
         {DELIVERY_PROVIDER_TABS.map((tab) => {
           const tabAvailable =
             tab.enabled &&
-            deliveryProviders.some((provider) => provider.code === tab.code);
+            (tab.code === "all" ||
+              deliveryProviders.some((provider) => provider.code === tab.code));
 
           return (
             <button
@@ -143,9 +151,12 @@ export function CheckoutDeliverySection({
         <YandexMapPicker
           markers={mapMarkers}
           centerQuery={mapCenterQuery}
-          selectedMarkerId={selectedPointId}
+          selectedMarkerId={selectedPointKey}
           onMarkerSelect={(marker) => {
             onMarkerSelect(marker.id);
+          }}
+          onViewportChange={(payload) => {
+            onViewportChange(payload.bounds);
           }}
           allowAddressSelect={false}
           onAddressSelect={() => {}}
@@ -161,7 +172,15 @@ export function CheckoutDeliverySection({
           )}
         {!isPointsLoading &&
           visibleDeliveryPoints.length === 0 &&
-          deliveryCity.trim().length > 0 && <div>По вашему запросу ПВЗ не найдены.</div>}
+          deliveryCity.trim().length > 0 && (
+            <div>
+              {activeDeliveryProvider === "russian_post"
+                ? "По вашему запросу отделения Почты России не найдены или временно недоступны."
+                : activeDeliveryProvider === "all"
+                  ? "По вашему запросу ПВЗ пока не найдены ни у одной из подключённых сетей."
+                  : "По вашему запросу ПВЗ не найдены."}
+            </div>
+          )}
         {!isPointsLoading && visibleDeliveryPoints.length > 0 && !selectedPoint && (
           <div>Нажмите на метку на карте, чтобы выбрать конкретный ПВЗ.</div>
         )}

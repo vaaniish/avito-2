@@ -1,0 +1,56 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Моддинг и обслуживание",
+  "itemName": "Дисплеи для СЖО",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/522a9e66a70c1f6e/displei-dla-szo/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:46.077Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 1,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/95a1e1abe900d582/displej-darkflash-d-vision/",
+      "title": "Дисплей DarkFlash D-VISION [диагональ экрана: 3.5\", разрешение: 480x320, черный]",
+      "specsText": "диагональ экрана: 3.5\", разрешение: 480x320, черный",
+      "bracketGroups": [
+        "диагональ экрана: 3.5\", разрешение: 480x320, черный"
+      ],
+      "priceText": "",
+      "productId": "95a1e1abe900d582",
+      "cardText": "Дисплей DarkFlash D-VISION [диагональ экрана: 3.5\", разрешение: 480x320, черный]5 |7 отзывов"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Дисплей",
+      "models": [
+        {
+          "brand": "Дисплей",
+          "model": "DarkFlash D-VISION",
+          "name": "Дисплей DarkFlash D-VISION",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/95a1e1abe900d582/displej-darkflash-d-vision/",
+              "title": "Дисплей DarkFlash D-VISION [диагональ экрана: 3.5\", разрешение: 480x320, черный]",
+              "specsText": "диагональ экрана: 3.5\", разрешение: 480x320, черный",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/522a9e66a70c1f6e/displei-dla-szo/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "Дисплеи для СЖО купить в интернет-магазине DNS. Дисплеи для СЖО цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

@@ -114,7 +114,7 @@ async function main() {
 
     await client.query(
       `insert into "Complaint"
-        (public_id, created_at, status, complaint_type, listing_id, seller_id, reporter_id, description, evidence)
+        (public_id, created_at, status, complaint_type, listing_id, seller_id, reporter_id, description)
        select
         ('PERF-' || $1::text || '-' || gs::text),
         now() - make_interval(mins => gs),
@@ -128,8 +128,7 @@ async function main() {
         ($3::int[])[1 + ((gs - 1) % cardinality($3::int[]))],
         ($4::int[])[1 + ((gs - 1) % cardinality($4::int[]))],
         $5,
-        'stage9 synthetic complaint',
-        null
+        'stage9 synthetic complaint'
        from generate_series(1, $6) as gs`,
       [
         benchmarkKey,

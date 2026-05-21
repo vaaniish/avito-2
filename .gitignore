@@ -20,5 +20,9 @@ __pycache__/
 tmp-prisma-check.js
 tmp-prisma-check.ts
 data/catalog-reference/generated/
+artifacts/
+docs/
 
 for-future.md
+z_what_to_upgrade.txt
+z_for_the_post_russia.txt

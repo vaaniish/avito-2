@@ -57,6 +57,15 @@ function buildBuyerTrackingLink(order: Order): string | null {
   if (order.trackingProvider === "yandex_pvz") {
     return `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
   }
+  if (order.trackingProvider === "ozon") {
+    return "https://www.ozon.ru/";
+  }
+  if (order.trackingProvider === "wildberries") {
+    return "https://www.wildberries.ru/";
+  }
+  if (order.trackingProvider === "cdek") {
+    return "https://www.cdek.ru/";
+  }
   return null;
 }
 

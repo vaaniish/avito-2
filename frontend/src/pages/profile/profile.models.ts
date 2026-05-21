@@ -46,8 +46,6 @@ export type Address = {
   city: string;
   street: string;
   house: string;
-  apartment: string;
-  entrance: string;
   building: string;
   postalCode: string;
   lat: number | null;
@@ -63,8 +61,6 @@ export type AddressSuggestionOption = {
   city?: string;
   street?: string;
   house?: string;
-  apartment?: string;
-  entrance?: string;
   lat?: number | null;
   lon?: number | null;
   formatted?: string;
@@ -77,11 +73,12 @@ export type AddressFormState = {
   city: string;
   street: string;
   house: string;
-  apartment: string;
-  entrance: string;
+  apartment?: string;
+  entrance?: string;
   postalCode: string;
   lat: number | null;
   lon: number | null;
+  isYandexAddressConfirmed: boolean;
 };
 
 export type ProfileFormState = {
@@ -114,7 +111,13 @@ export type Order = {
   deliveryAddress: string;
   deliveryCost: number;
   discount: number;
-  trackingProvider?: "yandex_pvz" | "russian_post" | null;
+  trackingProvider?:
+    | "yandex_pvz"
+    | "russian_post"
+    | "ozon"
+    | "wildberries"
+    | "cdek"
+    | null;
   trackingNumber?: string | null;
   trackingUrl?: string | null;
   deliveryExternalStatus?: string | null;

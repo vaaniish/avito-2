@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { apiDelete, apiPost } from "../../shared/lib/api";
 import { notifyError, notifyInfo } from "../../shared/ui/notifications";
 import {
+  hasConfirmedYandexHouse,
+  hasReadyPostalCode,
   createEmptyAddressForm,
   mergeAddressFromMap,
   prepareCreateAddressPayload,
@@ -16,7 +18,11 @@ import {
   openAddressCreateModal as openAddressCreateModalHandler,
   resetAddressModalState as resetAddressModalStateHandler,
 } from "./profile.address-modal.handlers";
-import { geocodeAddress as geocodeProfileAddress } from "./profile.geocode";
+import {
+  sanitizeCityValue,
+  sanitizeHouseValue,
+  sanitizeStreetValue,
+} from "./profile.address-helpers";
 import type {
   Address,
   AddressFormState,
@@ -32,6 +38,7 @@ export function useProfileAddresses(params: {
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressForm, setAddressForm] = useState<AddressFormState>(createEmptyAddressForm);
   const [addressMapHint, setAddressMapHint] = useState("");
+  const [addressValidationErrors, setAddressValidationErrors] = useState<string[]>([]);
   const [, setAddressSuggestions] = useState<AddressSuggestionOption[]>([]);
   const [, setIsAddressInputFocused] = useState(false);
   const [, setAddressSuggestionActiveIndex] = useState(-1);
@@ -39,16 +46,13 @@ export function useProfileAddresses(params: {
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
 
   const {
-    geocodeAddressWithTimeout,
-    applyFullAddressValueRef,
     addressInputBlurTimeoutRef,
     isSelectingAddressSuggestionRef,
     addressFullInputRef,
-    nativeAddressSuggestViewRef,
   } = useProfileAddressGeocoding({
     addressModalOpen,
-    fullAddress: addressForm.fullAddress,
     setAddressForm,
+    setAddressValidationErrors,
     setAddressMapHint,
     setAddressSuggestions,
     setIsAddressInputFocused,
@@ -62,6 +66,7 @@ export function useProfileAddresses(params: {
       addressInputBlurTimeoutRef,
       isSelectingAddressSuggestionRef,
       setAddressMapHint,
+      setAddressValidationErrors,
       setAddressSuggestions,
       setAddressSuggestionActiveIndex,
       setIsAddressInputFocused,
@@ -92,6 +97,7 @@ export function useProfileAddresses(params: {
     handleAddressFullAddressChangeHandler({
       value,
       setAddressMapHint,
+      setAddressValidationErrors,
       setIsAddressInputFocused,
       setAddressForm,
     });
@@ -107,7 +113,6 @@ export function useProfileAddresses(params: {
         fullAddress: addressForm.fullAddress,
         addressInputBlurTimeoutRef,
         isSelectingAddressSuggestionRef,
-        applyFullAddressValueRef,
         setAddressMapHint,
         setIsAddressInputFocused,
         setAddressSuggestionActiveIndex,
@@ -120,15 +125,20 @@ export function useProfileAddresses(params: {
     const prepared = await prepareCreateAddressPayload({
       addressForm,
       currentAddressCount: params.addresses.length,
-      geocodeAddress: geocodeProfileAddress,
     });
 
-    if ("error" in prepared) {
-      setAddressMapHint(prepared.error);
+    if ("errors" in prepared) {
+      setAddressValidationErrors(prepared.errors);
+      setAddressMapHint(
+        hasConfirmedYandexHouse(addressForm)
+          ? ""
+          : "Выберите конечный адрес Яндекса с номером дома.",
+      );
       return;
     }
 
     try {
+      setAddressValidationErrors([]);
       await apiPost<Address>("/profile/addresses", prepared.payload);
       resetAddressModalState();
       setAddressModalOpen(false);
@@ -163,8 +173,32 @@ export function useProfileAddresses(params: {
   }, [params]);
 
   const handleAddressSelectFromMap = useCallback((address: AddressMapSelection) => {
-    setAddressForm((prev) => mergeAddressFromMap(prev, address));
-    setAddressMapHint("");
+    const hasExactHouse = Boolean(
+      sanitizeCityValue(address.city) &&
+        sanitizeStreetValue(address.street) &&
+        sanitizeHouseValue(address.building) &&
+        typeof address.lat === "number" &&
+        Number.isFinite(address.lat) &&
+        typeof address.lon === "number" &&
+        Number.isFinite(address.lon),
+    );
+    const nextAddressForm = mergeAddressFromMap(createEmptyAddressForm(), address);
+    setAddressValidationErrors([]);
+    setAddressForm((prev) => ({
+      ...prev,
+      ...nextAddressForm,
+      name: prev.name,
+      fullAddress: nextAddressForm.fullAddress || prev.fullAddress,
+    }));
+    setAddressMapHint(
+      hasExactHouse
+        ? hasReadyPostalCode({
+            postalCode: address.postalCode,
+          })
+          ? ""
+          : "Яндекс не вернул почтовый индекс для этого дома. Это не мешает сохранению адреса."
+        : "Выберите на карте точный дом, а не только улицу или район.",
+    );
     setMapCenterQuery(resolveMapCenterQuery(address));
   }, []);
 
@@ -173,6 +207,7 @@ export function useProfileAddresses(params: {
     addressFullInputHandlers,
     addressFullInputRef,
     addressMapHint,
+    addressValidationErrors,
     addressModalOpen,
     mapCenterQuery,
     closeAddressCreateModal,

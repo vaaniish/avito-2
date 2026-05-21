@@ -39,6 +39,7 @@ const PROFILE_ROUTE_TABS: ProfileTab[] = [
   "wishlist",
   "partnership",
   "partner-listings",
+  "partner-finance",
   "partner-questions",
   "partner-orders",
 ];

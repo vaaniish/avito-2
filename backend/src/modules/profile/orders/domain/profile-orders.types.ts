@@ -1,6 +1,11 @@
 import type { OrderStatus } from "@prisma/client";
 
-export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+export type DeliveryProviderCode =
+  | "russian_post"
+  | "yandex_pvz"
+  | "ozon"
+  | "wildberries"
+  | "cdek";
 
 export type YooKassaPayment = {
   id: string;
@@ -92,13 +97,10 @@ export type ApprovedListingRecord = {
 };
 
 export type UserAddressRecord = {
-  full_address: string | null;
   region: string | null;
   city: string | null;
   street: string | null;
   house: string | null;
-  apartment: string | null;
-  entrance: string | null;
 };
 
 export type PreparedCheckoutOrder = {
@@ -233,8 +235,6 @@ export type ProfileOrdersServiceHelpers = {
     city?: string;
     street?: string;
     house?: string;
-    apartment?: string;
-    entrance?: string;
   }) => string;
   appendPickupPointMetaToAddress: (
     address: string,

@@ -1,0 +1,215 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Бытовая техника",
+  "subcategoryName": "Техника для кухни",
+  "itemName": "Супницы и мармиты",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/995b4ac6d0edacca/supnicy-i-marmity/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T15:56:47.768Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 8,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/6fa05abe28172b46/supnica-podogrevatel-supa-viatto-83010sp/",
+      "title": "Супница (подогреватель супа) Viatto 83010SP",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "6fa05abe28172b46",
+      "cardText": "Супница (подогреватель супа) Viatto 83010SP 5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/652bf45120206d75/supnica-podogrevatel-supa-viatto-va-sb7000p/",
+      "title": "Супница (подогреватель супа) Viatto VA-SB7000P",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "652bf45120206d75",
+      "cardText": "Супница (подогреватель супа) Viatto VA-SB7000P 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/964fbc5459ef9ef7/supnica-podogrevatel-supa-viatto-sb-6000s/",
+      "title": "Супница (подогреватель супа) Viatto SB-6000S",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "964fbc5459ef9ef7",
+      "cardText": "Супница (подогреватель супа) Viatto SB-6000S 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/de9dc434b3718df5/supnica-podogrevatel-supa-viatto-sb-6000l/",
+      "title": "Супница (подогреватель супа) Viatto SB-6000L",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "de9dc434b3718df5",
+      "cardText": "Супница (подогреватель супа) Viatto SB-6000L 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2e55b1340f195ec2/supnica-podogrevatel-supa-viatto-sb-6000/",
+      "title": "Супница подогреватель супа Viatto SB-6000",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "2e55b1340f195ec2",
+      "cardText": "Супница подогреватель супа Viatto SB-6000 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/18ecf9a6725a8a92/supnica-podogrevatel-supa-viatto-sb-5700/",
+      "title": "Супница (подогреватель супа) Viatto SB-5700",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "18ecf9a6725a8a92",
+      "cardText": "Супница (подогреватель супа) Viatto SB-5700 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d67b5df6f8b5bef6/supnica-podogrevatel-supa-viatto-sb-6000sl/",
+      "title": "Супница (подогреватель супа) Viatto SB-6000SL",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "d67b5df6f8b5bef6",
+      "cardText": "Супница (подогреватель супа) Viatto SB-6000SL 5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4f13a6c6f07b4951/supnica-podogrevatel-supa-viatto-sb-5700s/",
+      "title": "Супница (подогреватель супа) Viatto SB-5700S",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "4f13a6c6f07b4951",
+      "cardText": "Супница (подогреватель супа) Viatto SB-5700S 5|рейтинг брендаОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Супница",
+      "models": [
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto 83010SP",
+          "name": "Супница (подогреватель супа) Viatto 83010SP",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6fa05abe28172b46/supnica-podogrevatel-supa-viatto-83010sp/",
+              "title": "Супница (подогреватель супа) Viatto 83010SP",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto SB-5700",
+          "name": "Супница (подогреватель супа) Viatto SB-5700",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/18ecf9a6725a8a92/supnica-podogrevatel-supa-viatto-sb-5700/",
+              "title": "Супница (подогреватель супа) Viatto SB-5700",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto SB-5700S",
+          "name": "Супница (подогреватель супа) Viatto SB-5700S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4f13a6c6f07b4951/supnica-podogrevatel-supa-viatto-sb-5700s/",
+              "title": "Супница (подогреватель супа) Viatto SB-5700S",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto SB-6000L",
+          "name": "Супница (подогреватель супа) Viatto SB-6000L",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/de9dc434b3718df5/supnica-podogrevatel-supa-viatto-sb-6000l/",
+              "title": "Супница (подогреватель супа) Viatto SB-6000L",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto SB-6000S",
+          "name": "Супница (подогреватель супа) Viatto SB-6000S",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/964fbc5459ef9ef7/supnica-podogrevatel-supa-viatto-sb-6000s/",
+              "title": "Супница (подогреватель супа) Viatto SB-6000S",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto SB-6000SL",
+          "name": "Супница (подогреватель супа) Viatto SB-6000SL",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d67b5df6f8b5bef6/supnica-podogrevatel-supa-viatto-sb-6000sl/",
+              "title": "Супница (подогреватель супа) Viatto SB-6000SL",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "(подогреватель супа) Viatto VA-SB7000P",
+          "name": "Супница (подогреватель супа) Viatto VA-SB7000P",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/652bf45120206d75/supnica-podogrevatel-supa-viatto-va-sb7000p/",
+              "title": "Супница (подогреватель супа) Viatto VA-SB7000P",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Супница",
+          "model": "подогреватель супа Viatto SB-6000",
+          "name": "Супница подогреватель супа Viatto SB-6000",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2e55b1340f195ec2/supnica-podogrevatel-supa-viatto-sb-6000/",
+              "title": "Супница подогреватель супа Viatto SB-6000",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/995b4ac6d0edacca/supnicy-i-marmity/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 8,
+      "title": "Супницы и мармиты купить в интернет-магазине DNS. Супницы и мармиты цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

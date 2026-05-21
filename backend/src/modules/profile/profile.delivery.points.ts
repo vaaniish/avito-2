@@ -23,6 +23,9 @@ type DeliveryPoint = {
   workHours: string;
   etaDays: number;
   cost: number;
+  source?: string;
+  sourceExternalId?: string;
+  verificationLevel?: "provider_feed" | "indexed_by_yandex";
 };
 
 const YANDEX_GEOCODER_BASE_URL =
@@ -45,6 +48,19 @@ const YANDEX_SUGGEST_API_KEY =
   "";
 const YANDEX_SUGGEST_TIMEOUT_MS = Number(
   process.env.YANDEX_SUGGEST_TIMEOUT_MS ?? "5000",
+);
+const YANDEX_ORG_SEARCH_BASE_URL =
+  process.env.YANDEX_ORG_SEARCH_BASE_URL?.trim() ||
+  "https://search-maps.yandex.ru/v1/";
+const YANDEX_ORG_SEARCH_API_KEY =
+  process.env.YANDEX_ORG_SEARCH_API_KEY?.trim() ||
+  process.env.VITE_YANDEX_ORG_SEARCH_API_KEY?.trim() ||
+  "";
+const YANDEX_ORG_SEARCH_TIMEOUT_MS = Number(
+  process.env.YANDEX_ORG_SEARCH_TIMEOUT_MS ?? "7000",
+);
+const YANDEX_ORG_SEARCH_RESULTS_PER_QUERY = Number(
+  process.env.YANDEX_ORG_SEARCH_RESULTS_PER_QUERY ?? "18",
 );
 const RUSSIAN_POST_DBF_PATH =
   process.env.RUSSIAN_POST_DBF_PATH?.trim() || "backend/data/PIndx05.dbf";
@@ -82,6 +98,7 @@ type GeocodedLocation = {
   query: string;
   label: string;
   city: string;
+  region: string;
   lat: number;
   lng: number;
   bounds?: GeoBounds;
@@ -112,10 +129,99 @@ type LocationSuggestion = {
   title?: { text?: string } | string;
   subtitle?: { text?: string } | string;
   address?: { formatted_address?: string };
+  tags?: unknown[];
   uri?: string;
   value?: string;
   displayName?: string;
 };
+
+const russianPostFallbackPointCache = new Map<string, DeliveryPoint | null>();
+let yandexOrgSearchKeyRejected = false;
+
+type DemoProviderCode = Extract<
+  DeliveryProviderCode,
+  "ozon" | "wildberries" | "cdek"
+>;
+
+type DemoProviderSearchConfig = {
+  provider: DemoProviderCode;
+  queryPhrases: string[];
+  positivePatterns: RegExp[];
+  negativePatterns: RegExp[];
+};
+
+type YandexOrganizationFeature = {
+  properties?: {
+    name?: unknown;
+    description?: unknown;
+    uri?: unknown;
+    CompanyMetaData?: {
+      id?: unknown;
+      name?: unknown;
+      address?: unknown;
+      Address?: {
+        formatted?: unknown;
+        postal_code?: unknown;
+        Components?: unknown;
+      };
+      Categories?: Array<{ class?: unknown; name?: unknown }>;
+      Hours?: { text?: unknown };
+    };
+  };
+  geometry?: {
+    coordinates?: unknown;
+  };
+};
+
+const DEMO_PROVIDER_SEARCH_CONFIGS: Record<
+  DemoProviderCode,
+  DemoProviderSearchConfig
+> = {
+  ozon: {
+    provider: "ozon",
+    queryPhrases: ["Ozon пункт выдачи", "Озон пункт выдачи"],
+    positivePatterns: [/\bozon\b/iu, /озон/iu],
+    negativePatterns: [
+      /склад/iu,
+      /сортиров/iu,
+      /даркстор/iu,
+      /офис/iu,
+      /фулфилл/iu,
+      /логист/iu,
+    ],
+  },
+  wildberries: {
+    provider: "wildberries",
+    queryPhrases: ["Wildberries пункт выдачи", "Вайлдберриз пункт выдачи"],
+    positivePatterns: [/\bwildberries\b/iu, /вайлдбер/iu, /\bwb\b/iu],
+    negativePatterns: [
+      /склад/iu,
+      /сортиров/iu,
+      /логист/iu,
+      /офис/iu,
+      /фулфилл/iu,
+    ],
+  },
+  cdek: {
+    provider: "cdek",
+    queryPhrases: ["СДЭК пункт выдачи", "CDEK пункт выдачи"],
+    positivePatterns: [/\bcdek\b/iu, /сдэк/iu],
+    negativePatterns: [
+      /склад/iu,
+      /сортиров/iu,
+      /логист/iu,
+      /фулфилл/iu,
+      /офис(?!\s+выдачи)/iu,
+    ],
+  },
+};
+
+function isAdministrativeNoiseName(value: string): boolean {
+  return (
+    /федеральн\p{L}*\s+округ/iu.test(value) ||
+    /муниципальн\p{L}*\s+образован\p{L}*/iu.test(value)
+  );
+}
 
 function parseYandexPos(pos: string): { lat: number; lng: number } | null {
   const [lngRaw, latRaw] = String(pos).trim().split(/\s+/);
@@ -157,6 +263,20 @@ function parseYandexBounds(rawBounds: {
   return { minLat, maxLat, minLng, maxLng };
 }
 
+function isPointWithinBounds(
+  lat: number,
+  lng: number,
+  bounds: GeoBounds | null | undefined,
+): boolean {
+  if (!bounds) return true;
+  return (
+    lat >= bounds.minLat &&
+    lat <= bounds.maxLat &&
+    lng >= bounds.minLng &&
+    lng <= bounds.maxLng
+  );
+}
+
 function extractYandexCity(components: unknown): string {
   if (!Array.isArray(components)) return "";
 
@@ -165,20 +285,91 @@ function extractYandexCity(components: unknown): string {
       Boolean(item) && typeof item === "object",
   );
 
-  const byKinds = ["locality", "province", "area"];
-  for (const kind of byKinds) {
-    const found = entries.find(
-      (entry) =>
-        typeof entry.kind === "string" &&
-        entry.kind === kind &&
-        typeof entry.name === "string" &&
-        entry.name.trim(),
-    );
-    if (found && typeof found.name === "string") {
-      return found.name.trim();
-    }
+  const locality = entries.find(
+    (entry) =>
+      typeof entry.kind === "string" &&
+      entry.kind === "locality" &&
+      typeof entry.name === "string" &&
+      entry.name.trim(),
+  );
+  if (locality && typeof locality.name === "string") {
+    return locality.name.trim();
   }
 
+  const provinces = entries
+    .filter(
+      (entry) =>
+        typeof entry.kind === "string" &&
+        entry.kind === "province" &&
+        typeof entry.name === "string" &&
+        entry.name.trim(),
+    )
+    .map((entry) => String(entry.name).trim())
+    .filter((name) => !isAdministrativeNoiseName(name));
+  if (provinces.length > 0) {
+    return provinces[provinces.length - 1];
+  }
+
+  const area = entries.find(
+    (entry) =>
+      typeof entry.kind === "string" &&
+      entry.kind === "area" &&
+      typeof entry.name === "string" &&
+      entry.name.trim() &&
+      !isAdministrativeNoiseName(entry.name),
+  );
+  if (area && typeof area.name === "string") {
+    return area.name.trim();
+  }
+
+  return "";
+}
+
+function extractYandexRegion(components: unknown): string {
+  if (!Array.isArray(components)) return "";
+
+  const entries = components.filter(
+    (item): item is { kind?: unknown; name?: unknown } =>
+      Boolean(item) && typeof item === "object",
+  );
+  const provinces = entries
+    .filter(
+      (entry) =>
+        typeof entry.kind === "string" &&
+        entry.kind === "province" &&
+        typeof entry.name === "string" &&
+        entry.name.trim(),
+    )
+    .map((entry) => String(entry.name).trim())
+    .filter((name) => !isAdministrativeNoiseName(name));
+
+  if (provinces.length > 0) {
+    return provinces[0];
+  }
+
+  const area = entries.find(
+    (entry) =>
+      typeof entry.kind === "string" &&
+      entry.kind === "area" &&
+      typeof entry.name === "string" &&
+      entry.name.trim(),
+  );
+  return area && typeof area.name === "string" ? area.name.trim() : "";
+}
+
+function extractLocationSuggestionText(
+  value: LocationSuggestion["title"] | LocationSuggestion["subtitle"] | unknown,
+): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    typeof (value as { text?: unknown }).text === "string"
+  ) {
+    return ((value as { text: string }).text || "").trim();
+  }
   return "";
 }
 
@@ -348,6 +539,7 @@ async function geocodeLocationByYandex(
       const components =
         geoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
       const parsedCity = extractYandexCity(components);
+      const parsedRegion = extractYandexRegion(components);
 
       const label =
         geoObject?.metaDataProperty?.GeocoderMetaData?.text?.trim() ||
@@ -362,6 +554,7 @@ async function geocodeLocationByYandex(
         query: normalizedQuery,
         label,
         city: parsedCity || normalizedQuery,
+        region: parsedRegion || parsedCity || normalizedQuery,
         lat: coords.lat,
         lng: coords.lng,
         bounds: bounds ?? undefined,
@@ -372,6 +565,330 @@ async function geocodeLocationByYandex(
   } catch {
     return null;
   }
+}
+
+function normalizeProviderMatchText(value: unknown): string {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/ё/giu, "е")
+    .replace(/[^\p{L}\p{N}\s]+/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function buildEffectiveBounds(
+  viewportBounds: GeoBounds | null | undefined,
+  locationBounds: GeoBounds | null | undefined,
+): GeoBounds | null {
+  return viewportBounds ?? locationBounds ?? null;
+}
+
+function buildDemoQueryCandidates(
+  provider: DemoProviderCode,
+  query: string,
+  location: GeocodedLocation,
+): string[] {
+  const config = DEMO_PROVIDER_SEARCH_CONFIGS[provider];
+  const queryText = String(query ?? "").trim();
+  const locationHints = Array.from(
+    new Set(
+      [
+        queryText,
+        location.label,
+        location.city,
+        location.region && location.city && location.region !== location.city
+          ? `${location.city}, ${location.region}`
+          : "",
+      ]
+        .map((value) => String(value ?? "").trim())
+        .filter(Boolean),
+    ),
+  );
+
+  const queryAlreadyMentionsProvider = config.positivePatterns.some((pattern) =>
+    pattern.test(queryText),
+  );
+  const queries = new Set<string>();
+  if (queryAlreadyMentionsProvider) {
+    queries.add(queryText);
+  }
+  for (const phrase of config.queryPhrases) {
+    for (const hint of locationHints.slice(0, 2)) {
+      queries.add(`${phrase} ${hint}`.trim());
+    }
+  }
+  return Array.from(queries).slice(0, 4);
+}
+
+function extractCoordinatesFromOrgFeature(feature: YandexOrganizationFeature): {
+  lat: number;
+  lng: number;
+} | null {
+  const raw = feature.geometry?.coordinates;
+  if (!Array.isArray(raw) || raw.length < 2) return null;
+  const lng = Number(raw[0]);
+  const lat = Number(raw[1]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
+}
+
+function computeStablePointId(seed: string): string {
+  let hash = 0;
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  }
+  return `demo_${Math.abs(hash)}`;
+}
+
+function matchesDemoProviderFeature(
+  provider: DemoProviderCode,
+  feature: YandexOrganizationFeature | LocationSuggestion,
+): boolean {
+  const config = DEMO_PROVIDER_SEARCH_CONFIGS[provider];
+  const orgFeature = "properties" in feature ? feature : null;
+  const suggestion = orgFeature ? null : (feature as LocationSuggestion);
+  const title = normalizeProviderMatchText(
+    orgFeature
+      ? orgFeature.properties?.name
+      : extractLocationSuggestionText(suggestion?.title),
+  );
+  const description = normalizeProviderMatchText(
+    orgFeature
+      ? orgFeature.properties?.description
+      : extractLocationSuggestionText(suggestion?.subtitle),
+  );
+  const companyMeta = orgFeature?.properties?.CompanyMetaData;
+  const address = normalizeProviderMatchText(
+    orgFeature
+      ? companyMeta?.Address?.formatted || companyMeta?.address
+      : suggestion?.address?.formatted_address,
+  );
+  const categories = normalizeProviderMatchText(
+    Array.isArray(companyMeta?.Categories)
+      ? companyMeta?.Categories.map((category) => category?.name).join(" ")
+      : "",
+  );
+  const combined = [title, description, address, categories].filter(Boolean).join(" ");
+  if (!combined) return false;
+  if (!config.positivePatterns.some((pattern) => pattern.test(combined))) {
+    return false;
+  }
+  return !config.negativePatterns.some((pattern) => pattern.test(combined));
+}
+
+async function searchOrganizationsByYandex(params: {
+  text: string;
+  bounds?: GeoBounds | null;
+  skip?: number;
+  results?: number;
+}): Promise<YandexOrganizationFeature[]> {
+  if (!YANDEX_ORG_SEARCH_API_KEY || yandexOrgSearchKeyRejected) {
+    return [];
+  }
+
+  try {
+    const url = new URL(YANDEX_ORG_SEARCH_BASE_URL);
+    url.searchParams.set("apikey", YANDEX_ORG_SEARCH_API_KEY);
+    url.searchParams.set("text", params.text);
+    url.searchParams.set("type", "biz");
+    url.searchParams.set("lang", "ru_RU");
+    const results =
+      Number.isFinite(params.results) && Number(params.results) > 0
+        ? Math.min(Math.floor(Number(params.results)), 50)
+        : Math.min(Math.max(YANDEX_ORG_SEARCH_RESULTS_PER_QUERY, 1), 50);
+    url.searchParams.set("results", String(results));
+    const skip =
+      Number.isFinite(params.skip) && Number(params.skip) > 0
+        ? Math.floor(Number(params.skip))
+        : 0;
+    if (skip > 0) {
+      url.searchParams.set("skip", String(skip));
+    }
+
+    if (params.bounds) {
+      url.searchParams.set(
+        "bbox",
+        `${params.bounds.minLng},${params.bounds.minLat}~${params.bounds.maxLng},${params.bounds.maxLat}`,
+      );
+      url.searchParams.set("rspn", "1");
+    }
+
+    const response = await fetchWithTimeout(
+      url.toString(),
+      { method: "GET" },
+      YANDEX_ORG_SEARCH_TIMEOUT_MS,
+    );
+    if (response.status === 403) {
+      yandexOrgSearchKeyRejected = true;
+      console.warn(
+        "Yandex Organization Search key was rejected. Demo provider points will use fallback sources only.",
+      );
+      return [];
+    }
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = (await response.json()) as { features?: unknown[] };
+    if (!Array.isArray(payload.features)) {
+      return [];
+    }
+
+    return payload.features.filter(
+      (item): item is YandexOrganizationFeature =>
+        Boolean(item) && typeof item === "object",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function mapOrgFeatureToDeliveryPoint(
+  provider: DemoProviderCode,
+  feature: YandexOrganizationFeature,
+): DeliveryPoint | null {
+  const coords = extractCoordinatesFromOrgFeature(feature);
+  if (!coords) return null;
+
+  const companyMeta = feature.properties?.CompanyMetaData;
+  const address = normalizeTextField(
+    companyMeta?.Address?.formatted || companyMeta?.address,
+  );
+  if (!address) return null;
+
+  const name =
+    normalizeTextField(companyMeta?.name) ||
+    normalizeTextField(feature.properties?.name);
+  if (!name) return null;
+
+  const addressComponents = companyMeta?.Address?.Components;
+  const city = extractYandexCity(addressComponents) || normalizeTextField(feature.properties?.description);
+  const externalId =
+    normalizeTextField(companyMeta?.id) ||
+    normalizeTextField(feature.properties?.uri) ||
+    computeStablePointId(`${provider}|${name}|${coords.lat}|${coords.lng}`);
+
+  return {
+    id: externalId,
+    provider,
+    providerLabel: DELIVERY_PROVIDER_LABELS[provider],
+    name,
+    address,
+    city: city || address,
+    lat: coords.lat,
+    lng: coords.lng,
+    workHours: normalizeTextField(companyMeta?.Hours?.text) || "По расписанию",
+    etaDays: 2,
+    cost: 0,
+    source: "yandex_org_search",
+    sourceExternalId: externalId,
+    verificationLevel: "indexed_by_yandex",
+  };
+}
+
+async function loadDemoProviderPointsViaSuggestFallback(params: {
+  provider: DemoProviderCode;
+  query: string;
+  location: GeocodedLocation;
+  bounds?: GeoBounds | null;
+}): Promise<DeliveryPoint[]> {
+  const pointsByKey = new Map<string, DeliveryPoint>();
+  for (const searchQuery of buildDemoQueryCandidates(
+    params.provider,
+    params.query,
+    params.location,
+  )) {
+    const suggestions = await loadLocationSuggestionsByYandex(searchQuery, 10);
+    for (const suggestion of suggestions) {
+      if (!matchesDemoProviderFeature(params.provider, suggestion)) {
+        continue;
+      }
+      const geocodeTarget =
+        normalizeTextField(suggestion.uri) ||
+        normalizeTextField(suggestion.address?.formatted_address) ||
+        normalizeTextField(suggestion.value) ||
+        [
+          extractLocationSuggestionText(suggestion.title),
+          extractLocationSuggestionText(suggestion.subtitle),
+        ]
+          .filter(Boolean)
+          .join(", ");
+      if (!geocodeTarget) continue;
+      const geocoded = await geocodeLocationByYandex(geocodeTarget);
+      if (!geocoded) continue;
+      if (!isPointWithinBounds(geocoded.lat, geocoded.lng, params.bounds)) {
+        continue;
+      }
+
+      const title = extractLocationSuggestionText(suggestion.title);
+      const key =
+        normalizeTextField(suggestion.uri) ||
+        computeStablePointId(
+          `${params.provider}|${title}|${geocoded.lat}|${geocoded.lng}`,
+        );
+      if (pointsByKey.has(key)) continue;
+
+      pointsByKey.set(key, {
+        id: key,
+        provider: params.provider,
+        providerLabel: DELIVERY_PROVIDER_LABELS[params.provider],
+        name: title || DELIVERY_PROVIDER_LABELS[params.provider],
+        address:
+          normalizeTextField(suggestion.address?.formatted_address) ||
+          geocoded.label ||
+          params.location.label,
+        city: geocoded.city || params.location.city || params.query,
+        lat: geocoded.lat,
+        lng: geocoded.lng,
+        workHours: "По расписанию",
+        etaDays: 2,
+        cost: 0,
+        source: "yandex_suggest_fallback",
+        sourceExternalId: key,
+        verificationLevel: "indexed_by_yandex",
+      });
+    }
+  }
+
+  return Array.from(pointsByKey.values());
+}
+
+async function loadDemoProviderPoints(params: {
+  provider: DemoProviderCode;
+  query: string;
+  location: GeocodedLocation;
+  bounds?: GeoBounds | null;
+}): Promise<DeliveryPoint[]> {
+  const pointsByKey = new Map<string, DeliveryPoint>();
+
+  for (const searchQuery of buildDemoQueryCandidates(
+    params.provider,
+    params.query,
+    params.location,
+  )) {
+    const features = await searchOrganizationsByYandex({
+      text: searchQuery,
+      bounds: params.bounds,
+      results: YANDEX_ORG_SEARCH_RESULTS_PER_QUERY,
+    });
+    for (const feature of features) {
+      if (!matchesDemoProviderFeature(params.provider, feature)) {
+        continue;
+      }
+      const point = mapOrgFeatureToDeliveryPoint(params.provider, feature);
+      if (!point) continue;
+      if (!isPointWithinBounds(point.lat, point.lng, params.bounds)) {
+        continue;
+      }
+      pointsByKey.set(`${params.provider}:${point.sourceExternalId || point.id}`, point);
+    }
+  }
+
+  if (pointsByKey.size > 0) {
+    return Array.from(pointsByKey.values());
+  }
+
+  return loadDemoProviderPointsViaSuggestFallback(params);
 }
 
 function toFiniteCoordinate(value: unknown): number | null {
@@ -406,6 +923,10 @@ const RUSSIAN_MATCH_STOP_WORDS = new Set([
   "выдачи",
   "индекс",
   "пвз",
+  "федеральный",
+  "округ",
+  "муниципальное",
+  "образование",
 ]);
 
 const RUSSIAN_MATCH_STOP_WORDS_NORMALIZED = new Set([
@@ -429,6 +950,10 @@ const RUSSIAN_MATCH_STOP_WORDS_NORMALIZED = new Set([
   "\u0432\u044b\u0434\u0430\u0447\u0438",
   "\u0438\u043d\u0434\u0435\u043a\u0441",
   "\u043f\u0432\u0437",
+  "\u0444\u0435\u0434\u0435\u0440\u0430\u043b\u044c\u043d\u044b\u0439",
+  "\u043e\u043a\u0440\u0443\u0433",
+  "\u043c\u0443\u043d\u0438\u0446\u0438\u043f\u0430\u043b\u044c\u043d\u043e\u0435",
+  "\u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435",
 ]);
 
 function normalizeSearchToken(value: string): string {
@@ -542,6 +1067,7 @@ function selectRussianPostDbfRowsByLocation(
   rows: RussianPostDbfRow[],
   locationQuery: string,
   cityHint = "",
+  regionHint = "",
 ): RussianPostDbfRow[] {
   const tokenize = (value: string): string[] =>
     normalizeSearchToken(value)
@@ -567,13 +1093,20 @@ function selectRussianPostDbfRowsByLocation(
 
   const queryTokens = tokenize(normalizedQuery);
   const hintTokens = tokenize(cityHint);
-  const tokens = Array.from(new Set([...hintTokens, ...queryTokens]));
-  if (tokens.length === 0) {
+  const regionHintTokens = tokenize(regionHint);
+  const primaryTokens = Array.from(
+    new Set(queryTokens.length > 0 ? queryTokens : hintTokens),
+  );
+  const regionTokens = Array.from(
+    new Set([...regionHintTokens, ...queryTokens, ...hintTokens]),
+  );
+  if (primaryTokens.length === 0 && regionTokens.length === 0) {
     return [];
   }
 
   const exactCityMatches: RussianPostDbfRow[] = [];
   const cityContainsMatches: RussianPostDbfRow[] = [];
+  const regionMatches: RussianPostDbfRow[] = [];
   const areaMatches: RussianPostDbfRow[] = [];
   const allowAreaFallback =
     /(?:\u043e\u0431\u043b|(?:\u043a\u0440\u0430\u0439)|(?:\u0440\u0435\u0441\u043f)|(?:\u0440\u0430\u0439\u043e\u043d)|(?:\u043e\u043a\u0440\u0443\u0433))/iu.test(
@@ -590,13 +1123,15 @@ function selectRussianPostDbfRowsByLocation(
     const area = normalizeSearchToken(row.area);
     const region = normalizeSearchToken(row.region);
 
-    const hasExactCity = tokens.some((token) => city === token || city1 === token);
+    const hasExactCity = primaryTokens.some(
+      (token) => city === token || city1 === token,
+    );
     if (hasExactCity) {
       exactCityMatches.push(row);
       continue;
     }
 
-    const hasCityContains = tokens.some(
+    const hasCityContains = primaryTokens.some(
       (token) =>
         city.startsWith(`${token} `) ||
         city1.startsWith(`${token} `) ||
@@ -612,7 +1147,20 @@ function selectRussianPostDbfRowsByLocation(
       continue;
     }
 
-    const hasAreaMatch = tokens.some(
+    const hasRegionMatch = regionTokens.some(
+      (token) =>
+        region === token ||
+        region.startsWith(`${token} `) ||
+        region.includes(` ${token} `) ||
+        region.endsWith(` ${token}`) ||
+        region.includes(token),
+    );
+    if (hasRegionMatch) {
+      regionMatches.push(row);
+      continue;
+    }
+
+    const hasAreaMatch = primaryTokens.some(
       (token) =>
         area === token ||
         area.startsWith(`${token} `) ||
@@ -629,6 +1177,8 @@ function selectRussianPostDbfRowsByLocation(
       ? exactCityMatches
       : cityContainsMatches.length > 0
         ? cityContainsMatches
+        : regionMatches.length > 0
+          ? regionMatches
         : allowAreaFallback
           ? areaMatches
           : [];
@@ -640,9 +1190,65 @@ function selectRussianPostDbfRowsByLocation(
     }
   }
 
-  const deduped = Array.from(uniqueByIndex.values()).sort((a, b) =>
-    a.index.localeCompare(b.index, "ru"),
-  );
+  const normalizedCityHint = normalizeSearchToken(cityHint);
+  const normalizedRegionHint = normalizeSearchToken(regionHint);
+  const normalizedQueryTokenSet = new Set(primaryTokens);
+  const normalizedRegionTokenSet = new Set(regionTokens);
+  const deduped = Array.from(uniqueByIndex.values())
+    .map((row) => {
+      const city = normalizeSearchToken(row.city);
+      const city1 = normalizeSearchToken(row.city1);
+      const region = normalizeSearchToken(row.region);
+      const opsName = normalizeSearchToken(row.opsName);
+      let score = 0;
+
+      if ([...normalizedQueryTokenSet].some((token) => city === token || city1 === token)) {
+        score += 1000;
+      } else if (
+        [...normalizedQueryTokenSet].some(
+          (token) => city.includes(token) || city1.includes(token),
+        )
+      ) {
+        score += 500;
+      }
+
+      if ([...normalizedRegionTokenSet].some((token) => region === token)) {
+        score += 300;
+      } else if ([...normalizedRegionTokenSet].some((token) => region.includes(token))) {
+        score += 150;
+      }
+
+      if (normalizedCityHint) {
+        if (city === normalizedCityHint || city1 === normalizedCityHint) {
+          score += 120;
+        } else if (city.includes(normalizedCityHint) || city1.includes(normalizedCityHint)) {
+          score += 60;
+        }
+      }
+
+      if (normalizedRegionHint) {
+        if (region === normalizedRegionHint) {
+          score += 80;
+        } else if (region.includes(normalizedRegionHint)) {
+          score += 40;
+        }
+      }
+
+      if (opsName === normalizedCityHint) {
+        score += 40;
+      }
+      if (normalizedQuery && opsName.includes(normalizeSearchToken(normalizedQuery))) {
+        score += 30;
+      }
+
+      return { row, score };
+    })
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.row.index.localeCompare(right.row.index, "ru"),
+    )
+    .map((entry) => entry.row);
   const limit =
     Number.isFinite(RUSSIAN_POST_DBF_CITY_MATCH_LIMIT) &&
     RUSSIAN_POST_DBF_CITY_MATCH_LIMIT > 0
@@ -746,9 +1352,7 @@ async function loadRussianPostOfficeDetailsByIndex(
       RUSSIAN_POST_OFFICE_TIMEOUT_MS,
     );
     if (!response.ok) {
-      if (response.status === 404) {
-        russianPostOfficeDetailsCache.set(index, null);
-      }
+      russianPostOfficeDetailsCache.set(index, null);
       return null;
     }
 
@@ -778,12 +1382,14 @@ async function loadRussianPostOfficeDetailsByIndex(
       | null;
     const office = payload?.props?.pageProps?.office;
     if (!office || typeof office !== "object") {
+      russianPostOfficeDetailsCache.set(index, null);
       return null;
     }
 
     const lat = toFiniteCoordinate(office.latitude);
     const lng = toFiniteCoordinate(office.longitude);
     if (lat === null || lng === null || !isLikelyRussianCoordinate(lat, lng)) {
+      russianPostOfficeDetailsCache.set(index, null);
       return null;
     }
 
@@ -813,6 +1419,129 @@ async function loadRussianPostOfficeDetailsByIndex(
   } catch {
     return null;
   }
+}
+
+function buildRussianPostSuggestQueries(
+  row: RussianPostDbfRow,
+  cityHint: string,
+  regionHint: string,
+): string[] {
+  const localityCandidates = [
+    cleanRussianPostText(cityHint),
+    cleanRussianPostText(row.city),
+    cleanRussianPostText(row.city1),
+    cleanRussianPostText(row.region),
+  ].filter(Boolean);
+
+  const locality = localityCandidates[0] || cleanRussianPostText(row.region);
+  const region = cleanRussianPostText(regionHint) || cleanRussianPostText(row.region);
+  return Array.from(
+    new Set(
+      [
+        locality && region
+          ? `Почта России ${row.index} ${locality} ${region}`
+          : "",
+        locality ? `Почта России ${row.index} ${locality}` : "",
+        locality && region
+          ? `Отделение почтовой связи № ${row.index} ${locality} ${region}`
+          : "",
+        locality ? `Отделение почтовой связи № ${row.index} ${locality}` : "",
+        `Почта России ${row.index}`,
+        `Отделение почтовой связи № ${row.index}`,
+      ]
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function isMatchingRussianPostSuggestion(
+  row: RussianPostDbfRow,
+  suggestion: LocationSuggestion,
+): boolean {
+  const title = extractLocationSuggestionText(suggestion.title).toLowerCase();
+  const subtitle = extractLocationSuggestionText(suggestion.subtitle).toLowerCase();
+  const formattedAddress = normalizeTextField(suggestion.address?.formatted_address).toLowerCase();
+  const tags = Array.isArray(suggestion.tags)
+    ? suggestion.tags
+        .map((tag) => normalizeTextField(tag).toLowerCase())
+        .filter(Boolean)
+    : [];
+  const hasIndex =
+    title.includes(row.index) ||
+    subtitle.includes(row.index) ||
+    formattedAddress.includes(row.index);
+  const hasPostOfficeTag =
+    tags.includes("post office") ||
+    tags.includes("office service") ||
+    title.includes("почтов") ||
+    subtitle.includes("почтов");
+
+  return hasIndex && hasPostOfficeTag;
+}
+
+async function loadRussianPostFallbackPoint(
+  row: RussianPostDbfRow,
+  cityHint: string,
+  regionHint: string,
+): Promise<DeliveryPoint | null> {
+  if (russianPostFallbackPointCache.has(row.index)) {
+    return russianPostFallbackPointCache.get(row.index) ?? null;
+  }
+
+  const geocodeQueries = new Set<string>();
+  for (const query of buildRussianPostSuggestQueries(row, cityHint, regionHint)) {
+    const suggestions = await loadLocationSuggestionsByYandex(query, 5);
+    for (const suggestion of suggestions) {
+      if (!isMatchingRussianPostSuggestion(row, suggestion)) {
+        continue;
+      }
+      const formattedAddress = normalizeTextField(
+        suggestion.address?.formatted_address,
+      );
+      if (!formattedAddress) {
+        continue;
+      }
+      geocodeQueries.add(formattedAddress);
+    }
+  }
+
+  const fallbackAddress = buildRussianPostDbfAddress(
+    row,
+    cityHint || row.city || row.city1 || "",
+  );
+  if (fallbackAddress) {
+    geocodeQueries.add(fallbackAddress);
+  }
+
+  for (const query of geocodeQueries) {
+    const geocoded = await geocodeLocationByYandex(query);
+    if (!geocoded || !isLikelyRussianCoordinate(geocoded.lat, geocoded.lng)) {
+      continue;
+    }
+
+    const point: DeliveryPoint = {
+      id: row.index,
+      provider: "russian_post",
+      providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+      name: buildRussianPostDbfName(row),
+      address: query,
+      city: geocoded.city || row.city || row.city1 || cityHint || "",
+      lat: geocoded.lat,
+      lng: geocoded.lng,
+      workHours: "По расписанию",
+      etaDays: 2,
+      cost: 0,
+      source: "russian_post_existing",
+      sourceExternalId: row.index,
+      verificationLevel: "provider_feed",
+    };
+    russianPostFallbackPointCache.set(row.index, point);
+    return point;
+  }
+
+  russianPostFallbackPointCache.set(row.index, null);
+  return null;
 }
 
 async function mapWithConcurrency<T>(
@@ -875,6 +1604,8 @@ function mapRussianPostWorkHoursSafe(value: unknown): string {
 async function loadRussianPostDeliveryPointsDbf(params: {
   query: string;
   cityHint?: string;
+  regionHint?: string;
+  locationBounds?: GeoBounds;
   cursor?: number;
   limit?: number;
 }): Promise<{
@@ -891,6 +1622,7 @@ async function loadRussianPostDeliveryPointsDbf(params: {
     dbfRows,
     params.query,
     params.cityHint ?? "",
+    params.regionHint ?? "",
   );
   if (matchedDbfRows.length === 0) {
     return { points: [], total: 0, nextCursor: null };
@@ -916,14 +1648,21 @@ async function loadRussianPostDeliveryPointsDbf(params: {
       : defaultPageSize;
 
   const start = Math.min(safeCursor, matchedDbfRows.length);
-  const end = Math.min(start + safeLimit, matchedDbfRows.length);
-  const rowsChunk = matchedDbfRows.slice(start, end);
   const officeFetchLimit =
     Number.isFinite(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT) &&
     RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT > 0
       ? Math.floor(RUSSIAN_POST_DBF_OFFICE_FETCH_LIMIT)
       : 1500;
-  const rowsForOfficeFetch = rowsChunk.slice(0, officeFetchLimit);
+  const scanWindow = Math.min(
+    matchedDbfRows.length - start,
+    officeFetchLimit,
+    Math.max(safeLimit * 20, safeLimit),
+  );
+  const end = Math.min(start + scanWindow, matchedDbfRows.length);
+  const rowsForOfficeFetch = matchedDbfRows.slice(start, end);
+  const rowOrderByIndex = new Map(
+    rowsForOfficeFetch.map((row, index) => [row.index, index]),
+  );
 
   const pointsByIndex = new Map<string, DeliveryPoint>();
   await mapWithConcurrency(
@@ -931,29 +1670,65 @@ async function loadRussianPostDeliveryPointsDbf(params: {
     RUSSIAN_POST_OFFICE_CONCURRENCY,
     async (row) => {
       const office = await loadRussianPostOfficeDetailsByIndex(row.index);
-      if (!office) return;
-      if (!isRussianPostOfficeType(office.typeCode || row.opsType)) return;
+      if (office) {
+        if (!isRussianPostOfficeType(office.typeCode || row.opsType)) return;
 
-      pointsByIndex.set(row.index, {
-        id: row.index,
-        provider: "russian_post",
-        providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
-        name: office.name || buildRussianPostDbfName(row),
-        address:
-          office.address || buildRussianPostDbfAddress(row, office.city || params.cityHint || ""),
-        city: office.city || row.city || row.city1 || params.cityHint || "",
-        lat: office.lat,
-        lng: office.lng,
-        workHours: office.workHours || "По расписанию",
-        etaDays: 2,
-        cost: 0,
-      });
+        pointsByIndex.set(row.index, {
+          id: row.index,
+          provider: "russian_post",
+          providerLabel: DELIVERY_PROVIDER_LABELS.russian_post,
+          name: office.name || buildRussianPostDbfName(row),
+          address:
+            office.address ||
+            buildRussianPostDbfAddress(row, office.city || params.cityHint || ""),
+          city: office.city || row.city || row.city1 || params.cityHint || "",
+          lat: office.lat,
+          lng: office.lng,
+          workHours: office.workHours || "По расписанию",
+          etaDays: 2,
+          cost: 0,
+          source: "russian_post_existing",
+          sourceExternalId: row.index,
+          verificationLevel: "provider_feed",
+        });
+        if (
+          !isPointWithinBounds(
+            office.lat,
+            office.lng,
+            params.locationBounds,
+          )
+        ) {
+          pointsByIndex.delete(row.index);
+        }
+        return;
+      }
+
+      const fallbackPoint = await loadRussianPostFallbackPoint(
+        row,
+        params.cityHint ?? "",
+        params.regionHint ?? "",
+      );
+      if (
+        fallbackPoint &&
+        isPointWithinBounds(
+          fallbackPoint.lat,
+          fallbackPoint.lng,
+          params.locationBounds,
+        )
+      ) {
+        pointsByIndex.set(row.index, fallbackPoint);
+      }
     },
   );
 
-  const points = Array.from(pointsByIndex.values()).sort((a, b) =>
-    a.id.localeCompare(b.id, "ru"),
-  );
+  const points = Array.from(pointsByIndex.values())
+    .sort((a, b) => {
+      const orderDiff =
+        (rowOrderByIndex.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (rowOrderByIndex.get(b.id) ?? Number.MAX_SAFE_INTEGER);
+      return orderDiff || a.id.localeCompare(b.id, "ru");
+    })
+    .slice(0, safeLimit);
   const nextCursor = end < matchedDbfRows.length ? end : null;
   return {
     points,
@@ -1068,6 +1843,9 @@ function mapYandexPickupPoints(
       workHours,
       etaDays: 1,
       cost: 500,
+      source: "yandex_delivery_existing",
+      sourceExternalId: id,
+      verificationLevel: "provider_feed",
     });
   }
 
@@ -1257,7 +2035,7 @@ async function loadYandexPickupPoints(
 export async function getDeliveryPoints(
   query: string,
   providerFilter: DeliveryProviderFilter = "all",
-  options?: { cursor?: number; limit?: number },
+  options?: { cursor?: number; limit?: number; bounds?: GeoBounds },
 ): Promise<{
   location: GeocodedLocation;
   points: DeliveryPoint[];
@@ -1270,27 +2048,54 @@ export async function getDeliveryPoints(
 }> {
   const normalizedQuery = query.trim();
   if (providerFilter === "russian_post") {
+    const resolvedLocation = await geocodeLocationByYandex(normalizedQuery);
+    const effectiveBounds = buildEffectiveBounds(
+      options?.bounds,
+      resolvedLocation?.bounds,
+    );
     const cursorRaw = Number(options?.cursor ?? 0);
     const safeCursor =
       Number.isFinite(cursorRaw) && cursorRaw > 0 ? Math.floor(cursorRaw) : 0;
     const russianPost = await loadRussianPostDeliveryPointsDbf({
       query: normalizedQuery,
-      cityHint: normalizedQuery,
+      cityHint: resolvedLocation?.city || normalizedQuery,
+      regionHint: resolvedLocation?.region || "",
+      locationBounds: effectiveBounds ?? undefined,
       cursor: safeCursor,
       limit: options?.limit,
     });
 
     if (russianPost.total === 0) {
-      throw new Error("Delivery points not available");
+      return {
+        location: {
+          query: normalizedQuery,
+          label: resolvedLocation?.label || normalizedQuery,
+          city: resolvedLocation?.city || normalizedQuery,
+          region: resolvedLocation?.region || resolvedLocation?.city || normalizedQuery,
+          lat: resolvedLocation?.lat ?? 55.751574,
+          lng: resolvedLocation?.lng ?? 37.573856,
+        },
+        points: [],
+        pagination: {
+          total: 0,
+          cursor: safeCursor,
+          nextCursor: null,
+          hasMore: false,
+        },
+      };
     }
 
     return {
       location: {
         query: normalizedQuery,
-        label: normalizedQuery,
-        city: russianPost.points[0]?.city || normalizedQuery,
-        lat: russianPost.points[0]?.lat ?? 55.751574,
-        lng: russianPost.points[0]?.lng ?? 37.573856,
+        label: resolvedLocation?.label || normalizedQuery,
+        city:
+          resolvedLocation?.city ||
+          russianPost.points[0]?.city ||
+          normalizedQuery,
+        region: resolvedLocation?.region || resolvedLocation?.city || normalizedQuery,
+        lat: resolvedLocation?.lat ?? russianPost.points[0]?.lat ?? 55.751574,
+        lng: resolvedLocation?.lng ?? russianPost.points[0]?.lng ?? 37.573856,
       },
       points: russianPost.points,
       pagination: {
@@ -1308,6 +2113,7 @@ export async function getDeliveryPoints(
   if (!location) {
     throw new Error("Location not found");
   }
+  const effectiveBounds = buildEffectiveBounds(options?.bounds, location.bounds);
 
   const loaders: Array<{
     provider: DeliveryProviderCode;
@@ -1317,7 +2123,10 @@ export async function getDeliveryPoints(
   if (providerFilter === "all" || providerFilter === "yandex_pvz") {
     loaders.push({
       provider: "yandex_pvz",
-      run: () => loadYandexPickupPoints(location),
+      run: async () =>
+        (await loadYandexPickupPoints(location)).filter((point) =>
+          isPointWithinBounds(point.lat, point.lng, effectiveBounds),
+        ),
     });
   }
 
@@ -1329,6 +2138,8 @@ export async function getDeliveryPoints(
           await loadRussianPostDeliveryPointsDbf({
             query: normalizedQuery,
             cityHint: location.city,
+            regionHint: location.region,
+            locationBounds: effectiveBounds ?? undefined,
             cursor: 0,
             limit: Math.min(
               Number.isFinite(RUSSIAN_POST_PAGE_SIZE_DEFAULT)
@@ -1338,6 +2149,28 @@ export async function getDeliveryPoints(
             ),
           })
         ).points,
+    });
+  }
+
+  const demoProviders: DemoProviderCode[] =
+    providerFilter === "all"
+      ? ["ozon", "wildberries", "cdek"]
+      : providerFilter === "ozon" ||
+          providerFilter === "wildberries" ||
+          providerFilter === "cdek"
+        ? [providerFilter]
+        : [];
+
+  for (const provider of demoProviders) {
+    loaders.push({
+      provider,
+      run: () =>
+        loadDemoProviderPoints({
+          provider,
+          query: normalizedQuery,
+          location,
+          bounds: effectiveBounds,
+        }),
     });
   }
 
@@ -1353,17 +2186,33 @@ export async function getDeliveryPoints(
     }
     if (loader.provider === "yandex_pvz") {
       console.warn("Failed to load Yandex pickup points:", result.reason);
-    } else {
+    } else if (loader.provider === "russian_post") {
       console.warn("Failed to load Russian Post pickup points:", result.reason);
+    } else {
+      console.warn(
+        `Failed to load demo pickup points for ${loader.provider}:`,
+        result.reason,
+      );
     }
-  }
-
-  if (points.length === 0) {
-    throw new Error("Delivery points not available");
   }
 
   return {
     location,
-    points,
+    points: points.sort((left, right) => {
+      const providerOrder = [
+        "yandex_pvz",
+        "russian_post",
+        "ozon",
+        "wildberries",
+        "cdek",
+      ] as const;
+      const providerDiff =
+        providerOrder.indexOf(left.provider) - providerOrder.indexOf(right.provider);
+      if (providerDiff !== 0) return providerDiff;
+      return `${left.name} ${left.address}`.localeCompare(
+        `${right.name} ${right.address}`,
+        "ru",
+      );
+    }),
   };
 }

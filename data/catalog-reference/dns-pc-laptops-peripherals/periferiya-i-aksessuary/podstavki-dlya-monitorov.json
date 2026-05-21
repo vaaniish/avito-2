@@ -1,0 +1,106 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "ПК, ноутбуки, периферия",
+  "subcategoryName": "Периферия и аксессуары",
+  "itemName": "Подставки для мониторов",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/61f58ed7c71a31dd/podstavki-dla-monitorov/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:00:16.675Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 3,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/538886d650531b80/podstavka-dla-monitora-dexp-mr-5621-belyj/",
+      "title": "Подставка для монитора DEXP MR-5621 белый [алюминий, сталь, стекло, 20 кг]",
+      "specsText": "алюминий, сталь, стекло, 20 кг",
+      "bracketGroups": [
+        "алюминий, сталь, стекло, 20 кг"
+      ],
+      "priceText": "",
+      "productId": "538886d650531b80",
+      "cardText": "Подставка для монитора DEXP MR-5621 белый [алюминий, сталь, стекло, 20 кг]4.85 |327 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1fd095ad92eded20/podstavka-dla-monitora-dexp-mr-5621-cernyj/",
+      "title": "Подставка для монитора DEXP MR-5621 черный [алюминий, сталь, стекло, 20 кг]",
+      "specsText": "алюминий, сталь, стекло, 20 кг",
+      "bracketGroups": [
+        "алюминий, сталь, стекло, 20 кг"
+      ],
+      "priceText": "",
+      "productId": "1fd095ad92eded20",
+      "cardText": "Подставка для монитора DEXP MR-5621 черный [алюминий, сталь, стекло, 20 кг]4.85 |327 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/432db15c6d98cc3b/podstavka-dla-monitora-vmmgame-base-120-dark-purple-seryj/",
+      "title": "Подставка для монитора VMMGAME BASE 120 DARK PURPLE серый [ЛДСП]",
+      "specsText": "ЛДСП",
+      "bracketGroups": [
+        "ЛДСП"
+      ],
+      "priceText": "",
+      "productId": "432db15c6d98cc3b",
+      "cardText": "Подставка для монитора VMMGAME BASE 120 DARK PURPLE серый [ЛДСП]5 |3 отзыва"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Подставка",
+      "models": [
+        {
+          "brand": "Подставка",
+          "model": "для монитора DEXP MR-5621 белый",
+          "name": "Подставка для монитора DEXP MR-5621 белый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/538886d650531b80/podstavka-dla-monitora-dexp-mr-5621-belyj/",
+              "title": "Подставка для монитора DEXP MR-5621 белый [алюминий, сталь, стекло, 20 кг]",
+              "specsText": "алюминий, сталь, стекло, 20 кг",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Подставка",
+          "model": "для монитора DEXP MR-5621 черный",
+          "name": "Подставка для монитора DEXP MR-5621 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1fd095ad92eded20/podstavka-dla-monitora-dexp-mr-5621-cernyj/",
+              "title": "Подставка для монитора DEXP MR-5621 черный [алюминий, сталь, стекло, 20 кг]",
+              "specsText": "алюминий, сталь, стекло, 20 кг",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Подставка",
+          "model": "для монитора VMMGAME BASE 120 DARK PURPLE серый",
+          "name": "Подставка для монитора VMMGAME BASE 120 DARK PURPLE серый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/432db15c6d98cc3b/podstavka-dla-monitora-vmmgame-base-120-dark-purple-seryj/",
+              "title": "Подставка для монитора VMMGAME BASE 120 DARK PURPLE серый [ЛДСП]",
+              "specsText": "ЛДСП",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/61f58ed7c71a31dd/podstavki-dla-monitorov/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 3,
+      "title": "Подставки для мониторов купить в интернет-магазине DNS. Подставки для мониторов цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

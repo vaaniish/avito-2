@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import path from "path";
 import { prisma } from "./lib/prisma";
 import {
   getHttpMetricsSnapshot,
@@ -37,6 +38,10 @@ app.use(
   }),
 );
 app.use(httpObservabilityMiddleware);
+app.use(
+  "/media/seed",
+  express.static(path.resolve(process.cwd(), "backend/data/seed-media")),
+);
 
 app.get("/health", (_req, res) => {
   res.json({

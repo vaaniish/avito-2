@@ -261,13 +261,10 @@ model UserAddress {
   id          Int      @id @default(autoincrement())
   user_id     Int
   label       String
-  full_address String
-  region      String
+  region      String?
   city        String
   street      String
   house       String
-  apartment   String?  @default("")
-  entrance    String?  @default("")
   postal_code String
   lat         Float?
   lon         Float?
@@ -344,14 +341,11 @@ model CatalogSearchRule {
   category_id        Int?
   subcategory_id     Int?
   item_id            Int?
-  brand_name         String?
   normalized_brand   String?
-  model_name         String?
   normalized_model   String?
   characteristic_key String?
   characteristic_value String?
   weight             Int                 @default(50)
-  is_generated       Boolean             @default(false)
   source             String              @default("manual")
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt
@@ -522,11 +516,6 @@ model MarketplaceListing {
   tech_battery_health  Int?
   tech_defects         String?
   tech_included        String?
-  photo_count          Int               @default(0)
-  photo_front_present  Boolean           @default(false)
-  photo_back_present   Boolean           @default(false)
-  photo_left_present   Boolean           @default(false)
-  photo_right_present  Boolean           @default(false)
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
 
@@ -762,7 +751,6 @@ model Complaint {
   seller_id             Int
   reporter_id           Int
   description           String
-  evidence              String?
   checked_at            DateTime?
   checked_by_id         Int?
   action_taken          String?

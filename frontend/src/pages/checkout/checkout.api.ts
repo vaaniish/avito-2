@@ -2,8 +2,8 @@ import type { Product } from "../../shared/types";
 import { apiGet, apiPost } from "../../shared/lib/api";
 import type {
   CreateOrdersResponse,
+  DeliveryProviderFilter,
   DeliveryPointsResponse,
-  DeliveryProvider,
   PaymentMethod,
   PaymentStatusResponse,
 } from "./checkout.models";
@@ -21,12 +21,16 @@ export function fetchCheckoutPolicy(): Promise<CheckoutPolicy> {
 
 export function fetchDeliveryPoints(params: {
   city: string;
-  provider: DeliveryProvider["code"] | "all";
+  provider: DeliveryProviderFilter;
   cursor?: number;
+  bbox?: string | null;
 }): Promise<DeliveryPointsResponse> {
   const search = new URLSearchParams({ city: params.city });
   if (params.provider && params.provider !== "all") {
     search.set("provider", params.provider);
+  }
+  if (params.bbox) {
+    search.set("bbox", params.bbox);
   }
   if (params.provider === "russian_post") {
     search.set("cursor", String(Math.max(0, Number(params.cursor ?? 0))));

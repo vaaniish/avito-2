@@ -1,9 +1,17 @@
-export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+export type DeliveryProviderCode =
+  | "russian_post"
+  | "yandex_pvz"
+  | "ozon"
+  | "wildberries"
+  | "cdek";
 export type DeliveryProviderFilter = DeliveryProviderCode | "all";
 
 export const DELIVERY_PROVIDER_LABELS: Record<DeliveryProviderCode, string> = {
   russian_post: "Почта России",
   yandex_pvz: "Яндекс ПВЗ",
+  ozon: "Ozon",
+  wildberries: "Wildberries",
+  cdek: "СДЭК",
 };
 
 export const DELIVERY_PROVIDERS: Array<{
@@ -18,6 +26,18 @@ export const DELIVERY_PROVIDERS: Array<{
     code: "russian_post",
     label: DELIVERY_PROVIDER_LABELS.russian_post,
   },
+  {
+    code: "ozon",
+    label: DELIVERY_PROVIDER_LABELS.ozon,
+  },
+  {
+    code: "wildberries",
+    label: DELIVERY_PROVIDER_LABELS.wildberries,
+  },
+  {
+    code: "cdek",
+    label: DELIVERY_PROVIDER_LABELS.cdek,
+  },
 ];
 
 export function parseDeliveryProviderFilter(
@@ -28,7 +48,10 @@ export function parseDeliveryProviderFilter(
   if (
     normalized === "all" ||
     normalized === "yandex_pvz" ||
-    normalized === "russian_post"
+    normalized === "russian_post" ||
+    normalized === "ozon" ||
+    normalized === "wildberries" ||
+    normalized === "cdek"
   ) {
     return normalized;
   }
@@ -37,6 +60,9 @@ export function parseDeliveryProviderFilter(
 
 export function normalizePickupProvider(value: unknown): DeliveryProviderCode {
   if (value === "russian_post") return "russian_post";
+  if (value === "ozon") return "ozon";
+  if (value === "wildberries") return "wildberries";
+  if (value === "cdek") return "cdek";
   return "yandex_pvz";
 }
 

@@ -26,7 +26,6 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const clustererRef = useRef<any>(null);
-  const markerLayerRef = useRef<any>(null);
   const selectedPlacemarkRef = useRef<any>(null);
   const markerPlacemarksRef = useRef<any[]>([]);
   const autoGeolocationRequestedRef = useRef(false);
@@ -35,7 +34,40 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
   const [viewportTick, setViewportTick] = useState(0);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
+  const readMapBounds = useCallback((map: any) => {
+    const rawBounds = map?.getBounds?.();
+    if (!Array.isArray(rawBounds) || rawBounds.length !== 2) {
+      return null;
+    }
+
+    const lower = Array.isArray(rawBounds[0]) ? rawBounds[0] : [];
+    const upper = Array.isArray(rawBounds[1]) ? rawBounds[1] : [];
+    const minLat = Math.min(Number(lower[0] ?? 0), Number(upper[0] ?? 0));
+    const maxLat = Math.max(Number(lower[0] ?? 0), Number(upper[0] ?? 0));
+    const minLng = Math.min(Number(lower[1] ?? 0), Number(upper[1] ?? 0));
+    const maxLng = Math.max(Number(lower[1] ?? 0), Number(upper[1] ?? 0));
+
+    if (
+      !Number.isFinite(minLat) ||
+      !Number.isFinite(maxLat) ||
+      !Number.isFinite(minLng) ||
+      !Number.isFinite(maxLng)
+    ) {
+      return null;
+    }
+
+    return { minLat, maxLat, minLng, maxLng };
+  }, []);
+
   const parseGeoObjectAddress = useCallback((geoObject: { properties: { get: (key: string) => unknown } }) => {
+    const addressMeta = geoObject.properties.get(
+      "metaDataProperty.GeocoderMetaData.Address",
+    ) as
+      | {
+          postal_code?: unknown;
+          formatted?: unknown;
+        }
+      | undefined;
     const addressComponents = geoObject.properties.get(
       "metaDataProperty.GeocoderMetaData.Address.Components",
     ) as Array<{ kind: string; name: string }> | undefined;
@@ -58,8 +90,14 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       if (component.kind === "country" && !country) country = component.name;
     }
 
+    if (!postalCode) {
+      const metadataPostalCode = String(addressMeta?.postal_code ?? "").trim();
+      if (metadataPostalCode) {
+        postalCode = metadataPostalCode;
+      }
+    }
+
     const region = regionFromCandidates(province, area);
-    if (!city && region) city = region;
 
     return {
       region,
@@ -67,7 +105,9 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       street,
       building: sanitizeHouseValue(building),
       postalCode,
-      fullText: String(geoObject.properties.get("text") ?? ""),
+      fullText: String(
+        geoObject.properties.get("text") ?? addressMeta?.formatted ?? "",
+      ),
       country: country.trim(),
     };
   }, []);
@@ -89,25 +129,27 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
     if (!firstGeoObject) return;
 
     let parsed = parseGeoObjectAddress(firstGeoObject);
-    if (!parsed.postalCode) {
-      try {
-        const reverseGeocode = await window.ymaps.geocode(coords, { kind: "house", results: 1 });
-        const reverseFirst = reverseGeocode?.geoObjects?.get?.(0);
-        if (reverseFirst) {
-          const reverseParsed = parseGeoObjectAddress(reverseFirst);
-          parsed = {
-            ...parsed,
-            region: parsed.region || reverseParsed.region,
-            city: parsed.city || reverseParsed.city,
-            street: parsed.street || reverseParsed.street,
-            building: parsed.building || reverseParsed.building,
-            postalCode: parsed.postalCode || reverseParsed.postalCode,
-            fullText: parsed.fullText || reverseParsed.fullText,
-          };
-        }
-      } catch {
-        // noop
+    try {
+      const reverseGeocode = await window.ymaps.geocode(coords, {
+        kind: "house",
+        results: 1,
+      });
+      const reverseFirst = reverseGeocode?.geoObjects?.get?.(0);
+      if (reverseFirst) {
+        const reverseParsed = parseGeoObjectAddress(reverseFirst);
+        parsed = {
+          ...parsed,
+          region: parsed.region || reverseParsed.region,
+          city: parsed.city || reverseParsed.city,
+          street: parsed.street || reverseParsed.street,
+          building: parsed.building || reverseParsed.building,
+          postalCode: parsed.postalCode || reverseParsed.postalCode,
+          fullText: reverseParsed.fullText || parsed.fullText,
+          country: parsed.country || reverseParsed.country,
+        };
       }
+    } catch {
+      // keep primary result
     }
 
     if (options?.auto && (!parsed.city || !parsed.street)) return;
@@ -148,29 +190,38 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
           map.controls?.remove?.("fullscreenControl");
           map.controls?.remove?.("rulerControl");
           map.behaviors?.enable?.("scrollZoom");
-          if (allowAddressSelect) {
-            const clusterer = new window.ymaps.Clusterer({
-              groupByCoordinates: false,
-              clusterDisableClickZoom: true,
-              clusterOpenBalloonOnClick: false,
-              preset: "islands#invertedBlueClusterIcons",
-            });
-            map.geoObjects.add(clusterer);
-            clustererRef.current = clusterer;
-            markerLayerRef.current = null;
-          } else {
-            clustererRef.current = null;
-            const markerLayer = new window.ymaps.GeoObjectCollection();
-            map.geoObjects.add(markerLayer);
-            markerLayerRef.current = markerLayer;
-          }
+          const clusterer = new window.ymaps.Clusterer({
+            groupByCoordinates: false,
+            clusterDisableClickZoom: true,
+            clusterOpenBalloonOnClick: false,
+            preset: "islands#invertedBlueClusterIcons",
+          });
+          map.geoObjects.add(clusterer);
+          clustererRef.current = clusterer;
           map.events.add("click", (event: { get: (key: string) => number[] }) => {
             if (!allowAddressSelect) return;
             void getAddressByCoords(event.get("coords"));
           });
           map.events.add("boundschange", () => {
             const zoom = Number(map.getZoom?.() ?? 0);
-            if (zoom > 0) onViewportChange?.({ zoom });
+            if (zoom > 0) {
+              const centerRaw = map.getCenter?.();
+              const center =
+                Array.isArray(centerRaw) &&
+                centerRaw.length >= 2 &&
+                Number.isFinite(Number(centerRaw[0])) &&
+                Number.isFinite(Number(centerRaw[1]))
+                  ? {
+                      lat: Number(centerRaw[0]),
+                      lng: Number(centerRaw[1]),
+                    }
+                  : null;
+              onViewportChange?.({
+                zoom,
+                bounds: readMapBounds(map),
+                center,
+              });
+            }
             if (viewportUpdateTimerRef.current) window.clearTimeout(viewportUpdateTimerRef.current);
             viewportUpdateTimerRef.current = window.setTimeout(() => setViewportTick((prev) => prev + 1), 120);
           });
@@ -205,10 +256,9 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
     return () => {
       if (viewportUpdateTimerRef.current) window.clearTimeout(viewportUpdateTimerRef.current);
       clustererRef.current = null;
-      markerLayerRef.current = null;
       mapInstanceRef.current?.destroy?.();
     };
-  }, [allowAddressSelect, getAddressByCoords, onViewportChange]);
+  }, [allowAddressSelect, getAddressByCoords, onViewportChange, readMapBounds]);
 
   useEffect(() => {
     if (!window.ymaps || mapStatus !== "ready" || !mapInstanceRef.current) return;
@@ -248,7 +298,6 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
     }
 
     clustererRef.current?.removeAll?.();
-    markerLayerRef.current?.removeAll?.();
     markerPlacemarksRef.current = [];
     for (const marker of markersForRender) {
       const isSelected = marker.id === selectedMarkerId;
@@ -277,12 +326,8 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       markerPlacemarksRef.current.push(placemark);
     }
     if (markerPlacemarksRef.current.length > 0) {
-      if (allowAddressSelect && clustererRef.current) {
+      if (clustererRef.current) {
         clustererRef.current.add(markerPlacemarksRef.current);
-      } else if (markerLayerRef.current) {
-        markerPlacemarksRef.current.forEach((placemark) => {
-          markerLayerRef.current.add(placemark);
-        });
       }
     }
   }, [allowAddressSelect, mapStatus, markers, onMarkerSelect, selectedMarkerId, viewportTick]);

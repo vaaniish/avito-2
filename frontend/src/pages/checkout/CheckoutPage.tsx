@@ -1,12 +1,8 @@
 import { useMemo } from "react";
 import type { CartItem } from "../../shared/types";
-import { type YandexMapMarker } from "../../widgets/YandexMapPicker";
 import { useCheckoutDelivery, useCheckoutPayment, useCheckoutPolicy } from "./checkout.hooks";
 import { CheckoutDeliverySection } from "./checkout.delivery-section";
-import {
-  DELIVERY_PICKUP_PROVIDER,
-  getPaymentStatusMeta,
-} from "./checkout.models";
+import { getPaymentStatusMeta } from "./checkout.models";
 import { CheckoutOrderSummary } from "./checkout.order-summary";
 import { CheckoutPaymentMethodSection } from "./checkout.payment-method-section";
 
@@ -52,17 +48,19 @@ export function CheckoutPage({
     deliveryProviders,
     activeDeliveryProvider,
     deliveryPoints,
-    selectedPointId,
+    selectedPointKey,
     isPointsLoading,
     selectedPoint,
     visibleDeliveryPoints,
     mapMarkers,
+    viewportBounds,
     deliverySearchInputRef,
     setDeliveryCity,
     setMapCenterQuery,
     setActiveDeliveryProvider,
     setDeliveryPoints,
-    setSelectedPointId,
+    setSelectedPointKey,
+    setViewportBounds,
     loadDeliveryPoints,
     applyLocationSearch,
   } = useCheckoutDelivery({ deliveryType });
@@ -120,13 +118,13 @@ export function CheckoutPage({
               deliverySearchInputRef={deliverySearchInputRef}
               mapMarkers={mapMarkers}
               mapCenterQuery={mapCenterQuery}
-              selectedPointId={selectedPointId}
+              selectedPointKey={selectedPointKey}
               visibleDeliveryPoints={visibleDeliveryPoints}
               selectedPoint={selectedPoint}
               isPointsLoading={isPointsLoading}
               onProviderSelect={(providerCode) => {
                 setActiveDeliveryProvider(providerCode);
-                setSelectedPointId(null);
+                setSelectedPointKey(null);
                 const query = deliveryCity.trim();
                 if (query) {
                   void loadDeliveryPoints(query, false, providerCode);
@@ -143,14 +141,23 @@ export function CheckoutPage({
                 setDeliveryCity("");
                 setMapCenterQuery(null);
                 setDeliveryPoints([]);
-                setSelectedPointId(null);
+                setSelectedPointKey(null);
               }}
               onMarkerSelect={(markerId) => {
-                const point = visibleDeliveryPoints.find(
-                  (item) => item.id === markerId,
+                const point = deliveryPoints.find(
+                  (item) => `${item.provider}:${item.id}` === markerId,
                 );
                 if (!point) return;
-                setSelectedPointId(point.id);
+                setSelectedPointKey(`${point.provider}:${point.id}`);
+              }}
+              onViewportChange={(bounds) => {
+                const unchanged =
+                  bounds?.minLat === viewportBounds?.minLat &&
+                  bounds?.minLng === viewportBounds?.minLng &&
+                  bounds?.maxLat === viewportBounds?.maxLat &&
+                  bounds?.maxLng === viewportBounds?.maxLng;
+                if (unchanged) return;
+                setViewportBounds(bounds);
               }}
             />
 

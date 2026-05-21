@@ -47,13 +47,10 @@ export class ProfileAddressRepository implements ProfileAddressRepositoryPort {
         data: {
           user_id: params.userId,
           label: params.data.label,
-          full_address: params.data.fullAddress,
           region: params.data.region,
           city: params.data.city,
           street: params.data.street,
           house: params.data.house,
-          apartment: params.data.apartment,
-          entrance: params.data.entrance,
           postal_code: params.data.postalCode,
           lat: params.data.lat,
           lon: params.data.lon,
@@ -68,13 +65,10 @@ export class ProfileAddressRepository implements ProfileAddressRepositoryPort {
     userId: number;
     data: Partial<SaveProfileAddressInput> & {
       label?: string;
-      fullAddress?: string;
-      region?: string;
+      region?: string | null;
       city?: string;
       street?: string;
       house?: string;
-      apartment?: string;
-      entrance?: string;
       postalCode?: string;
       lat?: number;
       lon?: number;
@@ -93,13 +87,10 @@ export class ProfileAddressRepository implements ProfileAddressRepositoryPort {
         where: { id: params.id },
         data: {
           label: params.data.label,
-          full_address: params.data.fullAddress,
           region: params.data.region,
           city: params.data.city,
           street: params.data.street,
           house: params.data.house,
-          apartment: params.data.apartment,
-          entrance: params.data.entrance,
           postal_code: params.data.postalCode,
           lat: params.data.lat,
           lon: params.data.lon,

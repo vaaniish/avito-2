@@ -15,6 +15,7 @@ declare global {
         options: Record<string, unknown>,
       ) => any;
       Clusterer: new (options?: Record<string, unknown>) => any;
+      GeoObjectCollection: new () => any;
       geocode: (query: string | number[], options?: Record<string, unknown>) => Promise<any>;
       suggest?: (
         query: string,
@@ -45,6 +46,13 @@ export type YandexMapMarker = {
   lng: number;
 };
 
+export type YandexMapViewportBounds = {
+  minLat: number;
+  minLng: number;
+  maxLat: number;
+  maxLng: number;
+};
+
 export interface YandexMapPickerProps {
   onAddressSelect: (address: AddressPayload) => void;
   markers?: YandexMapMarker[];
@@ -53,7 +61,11 @@ export interface YandexMapPickerProps {
   height?: number | string;
   centerQuery?: string | null;
   allowAddressSelect?: boolean;
-  onViewportChange?: (payload: { zoom: number }) => void;
+  onViewportChange?: (payload: {
+    zoom: number;
+    bounds: YandexMapViewportBounds | null;
+    center: { lat: number; lng: number } | null;
+  }) => void;
 }
 
 export type MapStatus = "loading" | "ready" | "unavailable";

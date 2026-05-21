@@ -34,6 +34,7 @@
     "test:critical": "npm run test:e2e:critical",
     "test:phasea:e2e": "npm run test:e2e:phasea",
     "test:fast": "npm run test:unit && npm run test:integration",
+    "prototype:wireframes": "node node_modules/tsx/dist/cli.mjs scripts/prototype/generate-wireframe-collages.ts",
     "qa:phasea": "node scripts/qa/phase-a.qa.mjs",
     "encoding:check": "node scripts/quality/encoding-no-bom.mjs --check",
     "encoding:fix": "node scripts/quality/encoding-no-bom.mjs --fix",

@@ -1,0 +1,281 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Wi-Fi роутеры и оборудование для малых сетей",
+  "itemName": "Роутеры xDSL",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9dca316404e77/routery-xdsl/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:03:21.159Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 10,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/98eb4b16b24f3361/router-adsl2-tp-link-td-w8961n/",
+      "title": "Роутер ADSL2+ TP-LINK TD-W8961N [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с]",
+      "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с",
+      "bracketGroups": [
+        "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "98eb4b16b24f3361",
+      "cardText": "Роутер ADSL2+ TP-LINK TD-W8961N [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с]4.61 |723 отзыва 5Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/13bafd379750d582/router-vdsl2adsl2-netcraze-speedster-dsl-nc-2113/",
+      "title": "Роутер VDSL2/ADSL2+ Netcraze Speedster DSL NC-2113 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]",
+      "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6",
+      "bracketGroups": [
+        "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "13bafd379750d582",
+      "cardText": "Роутер VDSL2/ADSL2+ Netcraze Speedster DSL NC-2113 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]5 |11 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e1afc0baedb6d582/router-vdsl2adsl2-keenetic-hopper-dsl-kn-3610/",
+      "title": "Роутер VDSL2/ADSL2+ Keenetic Hopper DSL KN-3610 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6]",
+      "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6",
+      "bracketGroups": [
+        "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "e1afc0baedb6d582",
+      "cardText": "Роутер VDSL2/ADSL2+ Keenetic Hopper DSL KN-3610 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6]4.88 |64 отзыва 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/da0507952a5f3330/router-vdsladsl-tp-link-td-w9970/",
+      "title": "Роутер VDSL/ADSL TP-LINK TD-W9970 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6]",
+      "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6",
+      "bracketGroups": [
+        "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "da0507952a5f3330",
+      "cardText": "Роутер VDSL/ADSL TP-LINK TD-W9970 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6]4.72 |95 отзывов 3Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/864e4b0f3b2d1b80/router-adsl2-mercusys-mw300d/",
+      "title": "Роутер ADSL2+ Mercusys MW300D [3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]",
+      "specsText": "3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6",
+      "bracketGroups": [
+        "3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "864e4b0f3b2d1b80",
+      "cardText": "Роутер ADSL2+ Mercusys MW300D [3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]4.5 |195 отзывов 1Хорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/57209b8e9750d582/router-vdsl2adsl2-netcraze-hopper-dsl-nc-3611/",
+      "title": "Роутер VDSL2/ADSL2+ Netcraze Hopper DSL NC-3611 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6]",
+      "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6",
+      "bracketGroups": [
+        "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "57209b8e9750d582",
+      "cardText": "Роутер VDSL2/ADSL2+ Netcraze Hopper DSL NC-3611 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6]4.55 |6 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7ea59a5046151b80/router-vdsladsl-tp-link-td-w9960/",
+      "title": "Роутер VDSL/ADSL TP-LINK TD-W9960 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]",
+      "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6",
+      "bracketGroups": [
+        "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "7ea59a5046151b80",
+      "cardText": "Роутер VDSL/ADSL TP-LINK TD-W9960 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]4.57 |30 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8f847abc2dd13332/router-vdsladsl-tp-link-archer-vr300/",
+      "title": "Роутер VDSL/ADSL TP-LINK Archer VR300 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6]",
+      "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6",
+      "bracketGroups": [
+        "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6"
+      ],
+      "priceText": "",
+      "productId": "8f847abc2dd13332",
+      "cardText": "Роутер VDSL/ADSL TP-LINK Archer VR300 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6]4.6 |128 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bd43913b2a603330/router-vdsladsl-tp-link-archer-vr400/",
+      "title": "Роутер VDSL/ADSL TP-LINK Archer VR400 [4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6]",
+      "specsText": "4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6",
+      "bracketGroups": [
+        "4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "bd43913b2a603330",
+      "cardText": "Роутер VDSL/ADSL TP-LINK Archer VR400 [4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6]4.6 |48 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/34f053a7a231d9cb/router-vdsl2adsl2-tenda-v12/",
+      "title": "Роутер VDSL2/ADSL2+ Tenda V12 [3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]",
+      "specsText": "3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6",
+      "bracketGroups": [
+        "3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6"
+      ],
+      "priceText": "",
+      "productId": "34f053a7a231d9cb",
+      "cardText": "Роутер VDSL2/ADSL2+ Tenda V12 [3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]4.37 |10 отзывов 1Отличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Роутер",
+      "models": [
+        {
+          "brand": "Роутер",
+          "model": "ADSL2+ Mercusys MW300D",
+          "name": "Роутер ADSL2+ Mercusys MW300D",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/864e4b0f3b2d1b80/router-adsl2-mercusys-mw300d/",
+              "title": "Роутер ADSL2+ Mercusys MW300D [3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]",
+              "specsText": "3x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "ADSL2+ TP-LINK TD-W8961N",
+          "name": "Роутер ADSL2+ TP-LINK TD-W8961N",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/98eb4b16b24f3361/router-adsl2-tp-link-td-w8961n/",
+              "title": "Роутер ADSL2+ TP-LINK TD-W8961N [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с]",
+              "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, Annex A, Annex M, 24 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL/ADSL TP-LINK Archer VR300",
+          "name": "Роутер VDSL/ADSL TP-LINK Archer VR300",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8f847abc2dd13332/router-vdsladsl-tp-link-archer-vr300/",
+              "title": "Роутер VDSL/ADSL TP-LINK Archer VR300 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6]",
+              "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL/ADSL TP-LINK Archer VR400",
+          "name": "Роутер VDSL/ADSL TP-LINK Archer VR400",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bd43913b2a603330/router-vdsladsl-tp-link-archer-vr400/",
+              "title": "Роутер VDSL/ADSL TP-LINK Archer VR400 [4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6]",
+              "specsText": "4x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 867 Мбит/с, 1x USB 2.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL/ADSL TP-LINK TD-W9960",
+          "name": "Роутер VDSL/ADSL TP-LINK TD-W9960",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7ea59a5046151b80/router-vdsladsl-tp-link-td-w9960/",
+              "title": "Роутер VDSL/ADSL TP-LINK TD-W9960 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6]",
+              "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, 100 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL/ADSL TP-LINK TD-W9970",
+          "name": "Роутер VDSL/ADSL TP-LINK TD-W9970",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/da0507952a5f3330/router-vdsladsl-tp-link-td-w9970/",
+              "title": "Роутер VDSL/ADSL TP-LINK TD-W9970 [4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6]",
+              "specsText": "4x10/100 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Wi-Fi 802.11 2.4 ГГц, 300 Мбит/с, 1x USB 2.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL2/ADSL2+ Keenetic Hopper DSL KN-3610",
+          "name": "Роутер VDSL2/ADSL2+ Keenetic Hopper DSL KN-3610",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e1afc0baedb6d582/router-vdsl2adsl2-keenetic-hopper-dsl-kn-3610/",
+              "title": "Роутер VDSL2/ADSL2+ Keenetic Hopper DSL KN-3610 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6]",
+              "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1775 Мбит/с, 1x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL2/ADSL2+ Netcraze Hopper DSL NC-3611",
+          "name": "Роутер VDSL2/ADSL2+ Netcraze Hopper DSL NC-3611",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/57209b8e9750d582/router-vdsl2adsl2-netcraze-hopper-dsl-nc-3611/",
+              "title": "Роутер VDSL2/ADSL2+ Netcraze Hopper DSL NC-3611 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6]",
+              "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 2976 Мбит/с, 1x USB 3.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL2/ADSL2+ Netcraze Speedster DSL NC-2113",
+          "name": "Роутер VDSL2/ADSL2+ Netcraze Speedster DSL NC-2113",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/13bafd379750d582/router-vdsl2adsl2-netcraze-speedster-dsl-nc-2113/",
+              "title": "Роутер VDSL2/ADSL2+ Netcraze Speedster DSL NC-2113 [3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]",
+              "specsText": "3x10/100/1000 Мбит/сек, ADSL2+, VDSL2, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Роутер",
+          "model": "VDSL2/ADSL2+ Tenda V12",
+          "name": "Роутер VDSL2/ADSL2+ Tenda V12",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/34f053a7a231d9cb/router-vdsl2adsl2-tenda-v12/",
+              "title": "Роутер VDSL2/ADSL2+ Tenda V12 [3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6]",
+              "specsText": "3x10/100/1000 Мбит/сек, ADSL, ADSL2, ADSL2+, VDSL2, Annex A, Annex B, 300 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 5 ГГц, 1167 Мбит/с, 1x USB 2.0, IPv6",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9dca316404e77/routery-xdsl/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 10,
+      "title": "Роутеры xDSL купить в интернет-магазине DNS. Роутеры xDSL цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

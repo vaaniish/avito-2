@@ -1,0 +1,2250 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Комплектующие для сервера",
+  "itemName": "Серверные накопители",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/e7b8dd636db510c5/servernye-nakopiteli/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:49.919Z",
+  "status": "done",
+  "totalPages": 7,
+  "totalProducts": 84,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/1a1616861a41ed20/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+      "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.2 ТБ, 10000 об/мин, 128 МБ]",
+      "specsText": "SAS, 1.2 ТБ, 10000 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 1.2 ТБ, 10000 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "1a1616861a41ed20",
+      "cardText": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.2 ТБ, 10000 об/мин, 128 МБ]4.79 |14 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6c17c87370e4d21a/lff-35-servernyj-hdd-toshiba-mg09/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba MG09 [SAS, 16 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 16 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 16 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "6c17c87370e4d21a",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba MG09 [SAS, 16 ТБ, 7200 об/мин, 512 МБ]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bca80f77a69bed20/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+      "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 2.4 ТБ, 10000 об/мин, 256 МБ]",
+      "specsText": "SAS, 2.4 ТБ, 10000 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 2.4 ТБ, 10000 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "bca80f77a69bed20",
+      "cardText": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 2.4 ТБ, 10000 об/мин, 256 МБ]5 |6 отзывов 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4e16ad897c8fd582/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+      "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]",
+      "specsText": "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "4e16ad897c8fd582",
+      "cardText": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/20bf97ec275bed20/lff-35-servernyj-hdd-seagate-exos-x18/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 18 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 18 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 18 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "20bf97ec275bed20",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 18 ТБ, 7200 об/мин, 256 МБ]4.6 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/05c1ca2ef3bbed20/lff-35-servernyj-hdd-seagate-exos-7e10/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos 7E10 [SAS, 8 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 8 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 8 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "05c1ca2ef3bbed20",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos 7E10 [SAS, 8 ТБ, 7200 об/мин, 256 МБ]4.75 |12 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6f2b0a9a1c68ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.2 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 1.2 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 1.2 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "6f2b0a9a1c68ed20",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.2 ТБ, 10500 об/мин, 128 МБ]4.67 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9091efe79a64d582/lff-35-servernyj-hdd-seagate-exos-x24/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 24 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 24 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 24 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "9091efe79a64d582",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 24 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/dd5fa6dfcf81ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 10 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 10 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 10 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "dd5fa6dfcf81ed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 10 ТБ, 7200 об/мин, 256 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/323f6c5fa69bed20/lff-35-servernyj-hdd-seagate-exos-x18/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 14 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 14 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 14 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "323f6c5fa69bed20",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 14 ТБ, 7200 об/мин, 256 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c1310513d3c1d582/lff-35-servernyj-hdd-seagate-exos-x18/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 16 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 16 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 16 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "c1310513d3c1d582",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 16 ТБ, 7200 об/мин, 256 МБ]5 |1 отзывХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0562af39bb76d9cb/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 8 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 8 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "0562af39bb76d9cb",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 512 МБ]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/053caca2ce7ad582/lff-35-servernyj-hdd-synology-plus/",
+      "title": "LFF (3.5\") Серверный HDD Synology Plus [SATA III, 8 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 8 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 8 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "053caca2ce7ad582",
+      "cardText": "LFF (3.5\") Серверный HDD Synology Plus [SATA III, 8 ТБ, 7200 об/мин, 512 МБ] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0f03a03ad4afd582/lff-35-servernyj-hdd-wd-ultrastar-hc580/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar HC580 [SATA III, 22 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 22 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 22 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "0f03a03ad4afd582",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar HC580 [SATA III, 22 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9e0e3090d52c3332/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "9e0e3090d52c3332",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance 5 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d96b9d10c936ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc520/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC520 [SAS, 12 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 12 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 12 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "d96b9d10c936ed20",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC520 [SAS, 12 ТБ, 7200 об/мин, 256 МБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/a9bfd6b739313330/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+      "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]",
+      "specsText": "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "a9bfd6b739313330",
+      "cardText": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/46ee29e26f28ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc560-wuh722020bl5204/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC560 WUH722020BL5204 [SAS, 20 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 20 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 20 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "46ee29e26f28ed20",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC560 WUH722020BL5204 [SAS, 20 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7f49054b1c65ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "7f49054b1c65ed20",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]4.33 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/21c2b3f6cf81ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 12 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 12 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 12 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "21c2b3f6cf81ed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 12 ТБ, 7200 об/мин, 256 МБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5254fe5709fad582/lff-35-zestkij-disk-wd-ultrastar-dc-hc550/",
+      "title": "LFF (3.5\") Жесткий диск WD Ultrastar DC HC550 [SATA III, 18 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 18 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 18 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "5254fe5709fad582",
+      "cardText": "LFF (3.5\") Жесткий диск WD Ultrastar DC HC550 [SATA III, 18 ТБ, 7200 об/мин, 512 МБ]4.5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1e1351efcf82ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 14 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 14 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 14 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "1e1351efcf82ed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 14 ТБ, 7200 об/мин, 256 МБ]5|рейтинг брендаХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/4449d3889da3d0a4/lff-35-servernyj-hdd-toshiba-mg11/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba MG11 [SAS, 24 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 24 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 24 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "4449d3889da3d0a4",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba MG11 [SAS, 24 ТБ, 7200 об/мин, 512 МБ]4.5 |2 отзываХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c4a0a050d4aed582/lff-35-servernyj-hdd-wd-ultrastar-dc-hc555/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC555 [SATA, 18 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA, 18 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA, 18 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "c4a0a050d4aed582",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC555 [SATA, 18 ТБ, 7200 об/мин, 512 МБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d955074b7c53ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc550/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC550 [SAS, 18 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 18 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 18 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "d955074b7c53ed20",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC550 [SAS, 18 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7107af0f275aed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 16 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SAS, 16 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SAS, 16 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "7107af0f275aed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 16 ТБ, 7200 об/мин, 512 МБ]4 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/853c0985a5fbed20/lff-35-servernyj-hdd-toshiba-mg08/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba MG08 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 4 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 4 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "853c0985a5fbed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba MG08 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]4 |8 отзывовХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0410be58cf85ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc310-hus726t4tal5204/",
+      "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC310 HUS726T4TAL5204 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 4 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 4 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "0410be58cf85ed20",
+      "cardText": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC310 HUS726T4TAL5204 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]5 |2 отзыва 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b25449de411ed9cb/lff-35-servernyj-hdd-seagate-exos/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 28 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 28 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "b25449de411ed9cb",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3c4071809699d9cb/sff-25-servernyj-hdd-toshiba-al15se-series/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "3c4071809699d9cb",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]3.67 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3b0f9323969bd9cb/sff-25-servernyj-hdd-toshiba-al15se-series/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 0.9 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 0.9 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 0.9 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "3b0f9323969bd9cb",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 0.9 ТБ, 10500 об/мин, 128 МБ]3.67 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f0e241f7a856ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 0.6 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 0.6 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 0.6 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "f0e241f7a856ed20",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 0.6 ТБ, 10500 об/мин, 128 МБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ed5a3009e4c9ed20/sff-25-servernyj-hdd-toshiba-al13sx/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba AL13SX [SAS, 0.3 ТБ, 15000 об/мин, 64 МБ]",
+      "specsText": "SAS, 0.3 ТБ, 15000 об/мин, 64 МБ",
+      "bracketGroups": [
+        "SAS, 0.3 ТБ, 15000 об/мин, 64 МБ"
+      ],
+      "priceText": "",
+      "productId": "ed5a3009e4c9ed20",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba AL13SX [SAS, 0.3 ТБ, 15000 об/мин, 64 МБ]3.67 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5caf9f63cf80ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 256 МБ]",
+      "specsText": "SAS, 8 ТБ, 7200 об/мин, 256 МБ",
+      "bracketGroups": [
+        "SAS, 8 ТБ, 7200 об/мин, 256 МБ"
+      ],
+      "priceText": "",
+      "productId": "5caf9f63cf80ed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 256 МБ]2.33 |3 отзыва"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7275a7009a63d582/lff-35-servernyj-hdd-seagate-exos-x24/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 12 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 12 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 12 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "7275a7009a63d582",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 12 ТБ, 7200 об/мин, 512 МБ]5 |1 отзывХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8339866bd53b3332/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+      "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 2.4 ТБ, 10500 об/мин, 128 МБ]",
+      "specsText": "SAS, 2.4 ТБ, 10500 об/мин, 128 МБ",
+      "bracketGroups": [
+        "SAS, 2.4 ТБ, 10500 об/мин, 128 МБ"
+      ],
+      "priceText": "",
+      "productId": "8339866bd53b3332",
+      "cardText": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 2.4 ТБ, 10500 об/мин, 128 МБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/cc8b82fa6f21ed20/lff-35-servernyj-hdd-toshiba-mg10/",
+      "title": "LFF (3.5\") Серверный HDD Toshiba MG10",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "cc8b82fa6f21ed20",
+      "cardText": "LFF (3.5\") Серверный HDD Toshiba MG10 5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ee461076d4add582/lff-35-servernyj-hdd-seagate-exos-m/",
+      "title": "LFF (3.5\") Серверный HDD Seagate Exos M [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]",
+      "specsText": "SATA III, 28 ТБ, 7200 об/мин, 512 МБ",
+      "bracketGroups": [
+        "SATA III, 28 ТБ, 7200 об/мин, 512 МБ"
+      ],
+      "priceText": "",
+      "productId": "ee461076d4add582",
+      "cardText": "LFF (3.5\") Серверный HDD Seagate Exos M [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]5|рейтинг бренда"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/89c667b46c7fed20/1600-gb-servernyj-ssd-samsung-pm1725b-mzpll1t6hajq-00005/",
+      "title": "1600 ГБ Серверный SSD Samsung PM1725B [MZPLL1T6HAJQ-00005] [PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]",
+      "specsText": "PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ",
+      "bracketGroups": [
+        "MZPLL1T6HAJQ-00005",
+        "PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ"
+      ],
+      "priceText": "",
+      "productId": "89c667b46c7fed20",
+      "cardText": "1600 ГБ Серверный SSD Samsung PM1725B [MZPLL1T6HAJQ-00005] [PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]4.88 |95 отзывов 6Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1035f1eaa31dd582/960-gb-servernyj-ssd-samsung-pm893-mz7l3960hcjr-00a07/",
+      "title": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+      "bracketGroups": [
+        "MZ7L3960HCJR-00A07",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ"
+      ],
+      "priceText": "",
+      "productId": "1035f1eaa31dd582",
+      "cardText": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]4.74 |52 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/30686b833028ed20/480-gb-servernyj-ssd-samsung-pm883-mz7lh480hahq-00005/",
+      "title": "480 ГБ Серверный SSD Samsung PM883 [MZ7LH480HAHQ-00005] [SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ",
+      "bracketGroups": [
+        "MZ7LH480HAHQ-00005",
+        "SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ"
+      ],
+      "priceText": "",
+      "productId": "30686b833028ed20",
+      "cardText": "480 ГБ Серверный SSD Samsung PM883 [MZ7LH480HAHQ-00005] [SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ]4.75 |119 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d0174cbd31e1ed20/240-gb-servernyj-ssd-samsung-pm893-mz7l3240hchq-00a07/",
+      "title": "240 ГБ Серверный SSD Samsung PM893 [MZ7L3240HCHQ-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ",
+      "bracketGroups": [
+        "MZ7L3240HCHQ-00A07",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ"
+      ],
+      "priceText": "",
+      "productId": "d0174cbd31e1ed20",
+      "cardText": "240 ГБ Серверный SSD Samsung PM893 [MZ7L3240HCHQ-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ]4.74 |52 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b2ceb19818fbd9cb/960-gb-servernyj-ssd-samsung-pm883-mz7lh960hajr-00005/",
+      "title": "960 ГБ Серверный SSD Samsung PM883 [MZ7LH960HAJR-00005] [SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ",
+      "bracketGroups": [
+        "MZ7LH960HAJR-00005",
+        "SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ"
+      ],
+      "priceText": "",
+      "productId": "b2ceb19818fbd9cb",
+      "cardText": "960 ГБ Серверный SSD Samsung PM883 [MZ7LH960HAJR-00005] [SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ]4.94 |17 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2b7e717c4ebeed20/1920-gb-servernyj-ssd-samsung-pm893-mz7l31t9hblt-00a07/",
+      "title": "1920 ГБ Серверный SSD Samsung PM893 [MZ7L31T9HBLT-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ",
+      "bracketGroups": [
+        "MZ7L31T9HBLT-00A07",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ"
+      ],
+      "priceText": "",
+      "productId": "2b7e717c4ebeed20",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM893 [MZ7L31T9HBLT-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]5 |4 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9258538c69a5ed20/960-gb-servernyj-ssd-samsung-pm1653-mzilg960hchq/",
+      "title": "960 ГБ Серверный SSD Samsung PM1653 [MZILG960HCHQ] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZILG960HCHQ",
+        "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "9258538c69a5ed20",
+      "cardText": "960 ГБ Серверный SSD Samsung PM1653 [MZILG960HCHQ] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/81532657e47b2ff2/1920-gb-servernyj-ssd-samsung-pm9a3-mzql21t9hcjr-00a07/",
+      "title": "1920 ГБ Серверный SSD Samsung PM9A3 [MZQL21T9HCJR-00A07] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]",
+      "specsText": "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ",
+      "bracketGroups": [
+        "MZQL21T9HCJR-00A07",
+        "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ"
+      ],
+      "priceText": "",
+      "productId": "81532657e47b2ff2",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM9A3 [MZQL21T9HCJR-00A07] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]5 |16 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9b1c10f94ebbed20/3840-gb-servernyj-ssd-samsung-pm1643a-mzilt3t8hbls-00007/",
+      "title": "3840 ГБ Серверный SSD Samsung PM1643a [MZILT3T8HBLS-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]",
+      "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ",
+      "bracketGroups": [
+        "MZILT3T8HBLS-00007",
+        "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ"
+      ],
+      "priceText": "",
+      "productId": "9b1c10f94ebbed20",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM1643a [MZILT3T8HBLS-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]4.78 |33 отзываХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/7515cdfdc19ad582/1600-gb-servernyj-ssd-samsung-pm1735-mzplj1t6hbjr-0007c/",
+      "title": "1600 ГБ Серверный SSD Samsung PM1735 [MZPLJ1T6HBJR-0007C] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]",
+      "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ",
+      "bracketGroups": [
+        "MZPLJ1T6HBJR-0007C",
+        "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ"
+      ],
+      "priceText": "",
+      "productId": "7515cdfdc19ad582",
+      "cardText": "1600 ГБ Серверный SSD Samsung PM1735 [MZPLJ1T6HBJR-0007C] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]5 |11 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/534fb2db6bcaed20/960-gb-servernyj-ssd-samsung-pm893-mz7l3960hcjr-00b7c/",
+      "title": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+      "bracketGroups": [
+        "MZ7L3960HCJR-00B7C",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ"
+      ],
+      "priceText": "",
+      "productId": "534fb2db6bcaed20",
+      "cardText": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]5 |4 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/47adfcbb69a5ed20/7680-gb-servernyj-ssd-samsung-pm1653-mzilg7t6hbla/",
+      "title": "7680 ГБ Серверный SSD Samsung PM1653 [MZILG7T6HBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZILG7T6HBLA",
+        "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "47adfcbb69a5ed20",
+      "cardText": "7680 ГБ Серверный SSD Samsung PM1653 [MZILG7T6HBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d93a0ea14eb4ed20/3840-gb-servernyj-ssd-samsung-pm9a3-mzql23t8hcls-00a07/",
+      "title": "3840 ГБ Серверный SSD Samsung PM9A3 [MZQL23T8HCLS-00A07] [PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]",
+      "specsText": "PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ",
+      "bracketGroups": [
+        "MZQL23T8HCLS-00A07",
+        "PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ"
+      ],
+      "priceText": "",
+      "productId": "d93a0ea14eb4ed20",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM9A3 [MZQL23T8HCLS-00A07] [PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]5 |16 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2880bb2a4ebbed20/960-gb-servernyj-ssd-samsung-pm9a3-mzql2960hcjr-00a07/",
+      "title": "960 ГБ Серверный SSD Samsung PM9A3 [MZQL2960HCJR-00A07] [PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+      "specsText": "PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+      "bracketGroups": [
+        "MZQL2960HCJR-00A07",
+        "PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ"
+      ],
+      "priceText": "",
+      "productId": "2880bb2a4ebbed20",
+      "cardText": "960 ГБ Серверный SSD Samsung PM9A3 [MZQL2960HCJR-00A07] [PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]5 |16 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b4db8bc89f842ff4/3840-gb-servernyj-ssd-intel-d3-s4520-ssdsc2kb038tz01-99a0d6/",
+      "title": "3840 ГБ Серверный SSD Intel D3-S4520 [SSDSC2KB038TZ01 99A0D6] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ",
+      "bracketGroups": [
+        "SSDSC2KB038TZ01 99A0D6",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ"
+      ],
+      "priceText": "",
+      "productId": "b4db8bc89f842ff4",
+      "cardText": "3840 ГБ Серверный SSD Intel D3-S4520 [SSDSC2KB038TZ01 99A0D6] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f37e03be6bc9ed20/480-gb-servernyj-ssd-samsung-pm893-mz7l3480hchq-00b7c/",
+      "title": "480 ГБ Серверный SSD Samsung PM893 [MZ7L3480HCHQ-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ",
+      "bracketGroups": [
+        "MZ7L3480HCHQ-00B7C",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ"
+      ],
+      "priceText": "",
+      "productId": "f37e03be6bc9ed20",
+      "cardText": "480 ГБ Серверный SSD Samsung PM893 [MZ7L3480HCHQ-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ]4.2 |5 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9b722ee169a4ed20/3840-gb-servernyj-ssd-samsung-pm1653-mzilg3t8hcls/",
+      "title": "3840 ГБ Серверный SSD Samsung PM1653 [MZILG3T8HCLS] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZILG3T8HCLS",
+        "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "9b722ee169a4ed20",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM1653 [MZILG3T8HCLS] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/729c1e6bf840ed20/7680-gb-servernyj-ssd-samsung-pm893-mz7l37t6hbla-00a07/",
+      "title": "7680 ГБ Серверный SSD Samsung PM893 [MZ7L37T6HBLA-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]",
+      "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ",
+      "bracketGroups": [
+        "MZ7L37T6HBLA-00A07",
+        "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ"
+      ],
+      "priceText": "",
+      "productId": "729c1e6bf840ed20",
+      "cardText": "7680 ГБ Серверный SSD Samsung PM893 [MZ7L37T6HBLA-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]4.74 |52 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9f02d9c8a300d21a/960-gb-servernyj-ssd-intel-d5-p5530-series-ssdpf2kx960hzn1/",
+      "title": "960 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX960HZN1] [PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC]",
+      "specsText": "PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC",
+      "bracketGroups": [
+        "SSDPF2KX960HZN1",
+        "PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "9f02d9c8a300d21a",
+      "cardText": "960 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX960HZN1] [PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC]5 |7 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/387cf2c269a3ed20/1920-gb-servernyj-ssd-samsung-pm1653-mzilg1t9hcjr/",
+      "title": "1920 ГБ Серверный SSD Samsung PM1653 [MZILG1T9HCJR] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZILG1T9HCJR",
+        "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "387cf2c269a3ed20",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM1653 [MZILG1T9HCJR] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/39ed7d4ca2f6d21a/1920-gb-servernyj-ssd-intel-d7-p5520-series-ssdpf2kx019t1m1/",
+      "title": "1920 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX019T1M1] [PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ]",
+      "specsText": "PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ",
+      "bracketGroups": [
+        "SSDPF2KX019T1M1",
+        "PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ"
+      ],
+      "priceText": "",
+      "productId": "39ed7d4ca2f6d21a",
+      "cardText": "1920 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX019T1M1] [PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/45470bc6b9863330/1920-gb-servernyj-ssd-intel-d3-s4610-series-ssdsc2kg019t801/",
+      "title": "1920 ГБ Серверный SSD Intel D3-S4610 Series [SSDSC2KG019T801] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ]",
+      "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ",
+      "bracketGroups": [
+        "SSDSC2KG019T801",
+        "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ"
+      ],
+      "priceText": "",
+      "productId": "45470bc6b9863330",
+      "cardText": "1920 ГБ Серверный SSD Intel D3-S4610 Series [SSDSC2KG019T801] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ]4.67 |64 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6ff02e59dac5ed20/7680-gb-servernyj-ssd-intel-d7-p5520-series-ssdpf2kx076t1n1/",
+      "title": "7680 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX076T1N1] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ]",
+      "specsText": "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ",
+      "bracketGroups": [
+        "SSDPF2KX076T1N1",
+        "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ"
+      ],
+      "priceText": "",
+      "productId": "6ff02e59dac5ed20",
+      "cardText": "7680 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX076T1N1] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/26d2cf0269a4ed20/30720-gb-servernyj-ssd-samsung-pm1653-mzilg30thbla/",
+      "title": "30720 ГБ Серверный SSD Samsung PM1653 [MZILG30THBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZILG30THBLA",
+        "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "26d2cf0269a4ed20",
+      "cardText": "30720 ГБ Серверный SSD Samsung PM1653 [MZILG30THBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5 |6 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2211afe532d83332/7680-gb-servernyj-ssd-crucial-micron-5300-pro-mtfddak7t6tds-1aw1zabyy/",
+      "title": "7680 ГБ Серверный SSD Crucial Micron 5300 PRO [MTFDDAK7T6TDS-1AW1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ]",
+      "specsText": "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ",
+      "bracketGroups": [
+        "MTFDDAK7T6TDS-1AW1ZABYY",
+        "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ"
+      ],
+      "priceText": "",
+      "productId": "2211afe532d83332",
+      "cardText": "7680 ГБ Серверный SSD Crucial Micron 5300 PRO [MTFDDAK7T6TDS-1AW1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/216604c7dacbed20/1920-gb-servernyj-ssd-intel-d5-p5530-series-ssdpf2kx019xzn1/",
+      "title": "1920 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX019XZN1] [PCI-E, 3D NAND 3 бит TLC]",
+      "specsText": "PCI-E, 3D NAND 3 бит TLC",
+      "bracketGroups": [
+        "SSDPF2KX019XZN1",
+        "PCI-E, 3D NAND 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "216604c7dacbed20",
+      "cardText": "1920 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX019XZN1] [PCI-E, 3D NAND 3 бит TLC]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/ebc4837bdb7fed20/3840-gb-servernyj-ssd-samsung-pm1733a-mzwlr3t8hcls-00007/",
+      "title": "3840 ГБ Серверный SSD Samsung PM1733a [MZWLR3T8HCLS-00007] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ]",
+      "specsText": "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ",
+      "bracketGroups": [
+        "MZWLR3T8HCLS-00007",
+        "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ"
+      ],
+      "priceText": "",
+      "productId": "ebc4837bdb7fed20",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM1733a [MZWLR3T8HCLS-00007] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/76303e08a31ed582/3840-gb-servernyj-ssd-samsung-pm897-mz7l33t8hbna-00a07/",
+      "title": "3840 ГБ Серверный SSD Samsung PM897 [MZ7L33T8HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]",
+      "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC",
+      "bracketGroups": [
+        "MZ7L33T8HBNA-00A07",
+        "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "76303e08a31ed582",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM897 [MZ7L33T8HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c9d0286b1a751b80/3840-gb-servernyj-ssd-samsung-pm1733-mzwlj3t8hbls-00007/",
+      "title": "3840 ГБ Серверный SSD Samsung PM1733 [MZWLJ3T8HBLS-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ]",
+      "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ",
+      "bracketGroups": [
+        "MZWLJ3T8HBLS-00007",
+        "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ"
+      ],
+      "priceText": "",
+      "productId": "c9d0286b1a751b80",
+      "cardText": "3840 ГБ Серверный SSD Samsung PM1733 [MZWLJ3T8HBLS-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d13cd4ffdb7ced20/1920-gb-servernyj-ssd-samsung-pm1733-mzwlr1t9hbjr-00007/",
+      "title": "1920 ГБ Серверный SSD Samsung PM1733 [MZWLR1T9HBJR-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ]",
+      "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ",
+      "bracketGroups": [
+        "MZWLR1T9HBJR-00007",
+        "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ"
+      ],
+      "priceText": "",
+      "productId": "d13cd4ffdb7ced20",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM1733 [MZWLR1T9HBJR-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ]5 |1 отзыв 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d5dcb165a31dd582/1920-gb-servernyj-ssd-samsung-pm897-mz7l31t9hbna-00a07/",
+      "title": "1920 ГБ Серверный SSD Samsung PM897 [MZ7L31T9HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]",
+      "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC",
+      "bracketGroups": [
+        "MZ7L31T9HBNA-00A07",
+        "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "d5dcb165a31dd582",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM897 [MZ7L31T9HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e4e0d315c34bd9cb/12800-gb-servernyj-ssd-solidigm-d7-p5620-series-ssdpf2ke128t11z/",
+      "title": "12800 ГБ Серверный SSD Solidigm D7-P5620 Series [SSDPF2KE128T11Z] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ]",
+      "specsText": "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ",
+      "bracketGroups": [
+        "SSDPF2KE128T11Z",
+        "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ"
+      ],
+      "priceText": "",
+      "productId": "e4e0d315c34bd9cb",
+      "cardText": "12800 ГБ Серверный SSD Solidigm D7-P5620 Series [SSDPF2KE128T11Z] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/038a1461a325d582/1920-gb-servernyj-ssd-samsung-pm1733a-mzwlr1t9hcjr-00a07/",
+      "title": "1920 ГБ Серверный SSD Samsung PM1733a [MZWLR1T9HCJR-00A07] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+      "specsText": "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+      "bracketGroups": [
+        "MZWLR1T9HCJR-00A07",
+        "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)"
+      ],
+      "priceText": "",
+      "productId": "038a1461a325d582",
+      "cardText": "1920 ГБ Серверный SSD Samsung PM1733a [MZWLR1T9HCJR-00A07] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/97393ef7db76ed20/1600-gb-servernyj-ssd-micron-7450-max-mtfdkcb1t6tfc-1az1zabyy/",
+      "title": "1600 ГБ Серверный SSD Micron 7450 MAX [MTFDKCB1T6TFC-1AZ1ZABYY] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ]",
+      "specsText": "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ",
+      "bracketGroups": [
+        "MTFDKCB1T6TFC-1AZ1ZABYY",
+        "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ"
+      ],
+      "priceText": "",
+      "productId": "97393ef7db76ed20",
+      "cardText": "1600 ГБ Серверный SSD Micron 7450 MAX [MTFDKCB1T6TFC-1AZ1ZABYY] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ]5|рейтинг бренда 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9da84ae3f3c01b80/7680-gb-servernyj-ssd-samsung-pm1643a-mzilt7t6hala-00007/",
+      "title": "7680 ГБ Серверный SSD Samsung PM1643a [MZILT7T6HALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]",
+      "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ",
+      "bracketGroups": [
+        "MZILT7T6HALA-00007",
+        "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ"
+      ],
+      "priceText": "",
+      "productId": "9da84ae3f3c01b80",
+      "cardText": "7680 ГБ Серверный SSD Samsung PM1643a [MZILT7T6HALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]4.78 |33 отзыва 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9ef1c9514876ed20/15360-gb-servernyj-ssd-samsung-pm1643a-mzilt15thala-00007/",
+      "title": "15360 ГБ Серверный SSD Samsung PM1643a [MZILT15THALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ]",
+      "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ",
+      "bracketGroups": [
+        "MZILT15THALA-00007",
+        "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ"
+      ],
+      "priceText": "",
+      "productId": "9ef1c9514876ed20",
+      "cardText": "15360 ГБ Серверный SSD Samsung PM1643a [MZILT15THALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ]4.78 |33 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/83899577a585d9cb/960-gb-servernyj-ssd-micron-5400-pro-mtfddak960tga-1bc1zabyy/",
+      "title": "960 ГБ Серверный SSD Micron 5400 PRO [MTFDDAK960TGA-1BC1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ]",
+      "specsText": "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ",
+      "bracketGroups": [
+        "MTFDDAK960TGA-1BC1ZABYY",
+        "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ"
+      ],
+      "priceText": "",
+      "productId": "83899577a585d9cb",
+      "cardText": "960 ГБ Серверный SSD Micron 5400 PRO [MTFDDAK960TGA-1BC1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b4db8bd89f842ff4/3200-gb-servernyj-ssd-wd-ultrastar-dc-sn840-wus4c6432dsp3x1/",
+      "title": "3200 ГБ Серверный SSD WD Ultrastar DC SN840 [WUS4C6432DSP3X1] [PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC]",
+      "specsText": "PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC",
+      "bracketGroups": [
+        "WUS4C6432DSP3X1",
+        "PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "b4db8bd89f842ff4",
+      "cardText": "3200 ГБ Серверный SSD WD Ultrastar DC SN840 [WUS4C6432DSP3X1] [PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6e348157a324d582/3840-gb-servernyj-ssd-m2-samsung-pm9a3mz1l23t8hbla-00a07/",
+      "title": "3840 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L23T8HBLA-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ]",
+      "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ",
+      "bracketGroups": [
+        "MZ1L23T8HBLA-00A07",
+        "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ"
+      ],
+      "priceText": "",
+      "productId": "6e348157a324d582",
+      "cardText": "3840 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L23T8HBLA-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ]4.65 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/8b264e574eafed20/960-gb-servernyj-ssd-m2-samsung-pm9a3mz1l2960hcjr-00a07/",
+      "title": "960 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L2960HCJR-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ]",
+      "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ",
+      "bracketGroups": [
+        "MZ1L2960HCJR-00A07",
+        "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ"
+      ],
+      "priceText": "",
+      "productId": "8b264e574eafed20",
+      "cardText": "960 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L2960HCJR-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ]4.65 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0acb3474a640d9cb/960-gb-servernyj-ssd-m2-micron-7450-promtfdkbg960tfr-1bc1zabyy/",
+      "title": "960 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBG960TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC]",
+      "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC",
+      "bracketGroups": [
+        "MTFDKBG960TFR-1BC1ZABYY",
+        "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "0acb3474a640d9cb",
+      "cardText": "960 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBG960TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC]4.44 |22 отзываХорошая надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/5e7f6db5e23f7c18/480-gb-servernyj-ssd-m2-intel-d3-s4510-seriesssdsckkb480g801/",
+      "title": "480 ГБ Серверный SSD M.2 Intel D3-S4510 Series[SSDSCKKB480G801] [SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]",
+      "specsText": "SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ",
+      "bracketGroups": [
+        "SSDSCKKB480G801",
+        "SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ"
+      ],
+      "priceText": "",
+      "productId": "5e7f6db5e23f7c18",
+      "cardText": "480 ГБ Серверный SSD M.2 Intel D3-S4510 Series[SSDSCKKB480G801] [SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]5 |6 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6e937d05ea45ed20/1920-gb-servernyj-ssd-m2-samsung-pm9a3mz1l21t9hcls-00a07/",
+      "title": "1920 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L21T9HCLS-00A07] [PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ]",
+      "specsText": "PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ",
+      "bracketGroups": [
+        "MZ1L21T9HCLS-00A07",
+        "PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ"
+      ],
+      "priceText": "",
+      "productId": "6e937d05ea45ed20",
+      "cardText": "1920 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L21T9HCLS-00A07] [PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ]4.65 |9 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/3cb091f0a63fd9cb/480-gb-servernyj-ssd-m2-micron-7450-promtfdkba480tfr-1bc1zabyy/",
+      "title": "480 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBA480TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC]",
+      "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC",
+      "bracketGroups": [
+        "MTFDKBA480TFR-1BC1ZABYY",
+        "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC"
+      ],
+      "priceText": "",
+      "productId": "3cb091f0a63fd9cb",
+      "cardText": "480 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBA480TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC]4.44 |22 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d56e3083a7e5d582/960-gb-servernyj-ssd-m2-kingston-dc2000bsedc2000bm8960g/",
+      "title": "960 ГБ Серверный SSD M.2 Kingston DC2000B[SEDC2000BM8/960G] [PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ]",
+      "specsText": "PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ",
+      "bracketGroups": [
+        "SEDC2000BM8/960G",
+        "PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ"
+      ],
+      "priceText": "",
+      "productId": "d56e3083a7e5d582",
+      "cardText": "960 ГБ Серверный SSD M.2 Kingston DC2000B[SEDC2000BM8/960G] [PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ]4.43 |4 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/0bb3368103c3d9cb/480-gb-servernyj-ssd-m2-intel-d3-s4520ssdsckkb480gz/",
+      "title": "480 ГБ Серверный SSD M.2 Intel D3-S4520[SSDSCKKB480GZ] [PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]",
+      "specsText": "PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ",
+      "bracketGroups": [
+        "SSDSCKKB480GZ",
+        "PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ"
+      ],
+      "priceText": "",
+      "productId": "0bb3368103c3d9cb",
+      "cardText": "480 ГБ Серверный SSD M.2 Intel D3-S4520[SSDSCKKB480GZ] [PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]1 |1 отзыв 1"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "12800",
+      "models": [
+        {
+          "brand": "12800",
+          "model": "ГБ Серверный SSD Solidigm D7-P5620 Series",
+          "name": "12800 ГБ Серверный SSD Solidigm D7-P5620 Series",
+          "manufacturerCodes": [
+            "SSDPF2KE128T11Z"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e4e0d315c34bd9cb/12800-gb-servernyj-ssd-solidigm-d7-p5620-series-ssdpf2ke128t11z/",
+              "title": "12800 ГБ Серверный SSD Solidigm D7-P5620 Series [SSDPF2KE128T11Z] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ]",
+              "specsText": "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 65400 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "15360",
+      "models": [
+        {
+          "brand": "15360",
+          "model": "ГБ Серверный SSD Samsung PM1643a",
+          "name": "15360 ГБ Серверный SSD Samsung PM1643a",
+          "manufacturerCodes": [
+            "MZILT15THALA-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9ef1c9514876ed20/15360-gb-servernyj-ssd-samsung-pm1643a-mzilt15thala-00007/",
+              "title": "15360 ГБ Серверный SSD Samsung PM1643a [MZILT15THALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ]",
+              "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 28032 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "1600",
+      "models": [
+        {
+          "brand": "1600",
+          "model": "ГБ Серверный SSD Micron 7450 MAX",
+          "name": "1600 ГБ Серверный SSD Micron 7450 MAX",
+          "manufacturerCodes": [
+            "MTFDKCB1T6TFC-1AZ1ZABYY"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/97393ef7db76ed20/1600-gb-servernyj-ssd-micron-7450-max-mtfdkcb1t6tfc-1az1zabyy/",
+              "title": "1600 ГБ Серверный SSD Micron 7450 MAX [MTFDKCB1T6TFC-1AZ1ZABYY] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ]",
+              "specsText": "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 8700 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1600",
+          "model": "ГБ Серверный SSD Samsung PM1725B",
+          "name": "1600 ГБ Серверный SSD Samsung PM1725B",
+          "manufacturerCodes": [
+            "MZPLL1T6HAJQ-00005"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/89c667b46c7fed20/1600-gb-servernyj-ssd-samsung-pm1725b-mzpll1t6hajq-00005/",
+              "title": "1600 ГБ Серверный SSD Samsung PM1725B [MZPLL1T6HAJQ-00005] [PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]",
+              "specsText": "PCI-E, чтение - 5400 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1600",
+          "model": "ГБ Серверный SSD Samsung PM1735",
+          "name": "1600 ГБ Серверный SSD Samsung PM1735",
+          "manufacturerCodes": [
+            "MZPLJ1T6HBJR-0007C"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/7515cdfdc19ad582/1600-gb-servernyj-ssd-samsung-pm1735-mzplj1t6hbjr-0007c/",
+              "title": "1600 ГБ Серверный SSD Samsung PM1735 [MZPLJ1T6HBJR-0007C] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ]",
+              "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 8760 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "1920",
+      "models": [
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Intel D3-S4610 Series",
+          "name": "1920 ГБ Серверный SSD Intel D3-S4610 Series",
+          "manufacturerCodes": [
+            "SSDSC2KG019T801"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/45470bc6b9863330/1920-gb-servernyj-ssd-intel-d3-s4610-series-ssdsc2kg019t801/",
+              "title": "1920 ГБ Серверный SSD Intel D3-S4610 Series [SSDSC2KG019T801] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ]",
+              "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9400 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Intel D5-P5530 Series",
+          "name": "1920 ГБ Серверный SSD Intel D5-P5530 Series",
+          "manufacturerCodes": [
+            "SSDPF2KX019XZN1"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/216604c7dacbed20/1920-gb-servernyj-ssd-intel-d5-p5530-series-ssdpf2kx019xzn1/",
+              "title": "1920 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX019XZN1] [PCI-E, 3D NAND 3 бит TLC]",
+              "specsText": "PCI-E, 3D NAND 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Intel D7-P5520 Series",
+          "name": "1920 ГБ Серверный SSD Intel D7-P5520 Series",
+          "manufacturerCodes": [
+            "SSDPF2KX019T1M1"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/39ed7d4ca2f6d21a/1920-gb-servernyj-ssd-intel-d7-p5520-series-ssdpf2kx019t1m1/",
+              "title": "1920 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX019T1M1] [PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ]",
+              "specsText": "PCI-E, чтение - 5300 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 3500 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD M.2 Samsung PM9A3",
+          "name": "1920 ГБ Серверный SSD M.2 Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZ1L21T9HCLS-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6e937d05ea45ed20/1920-gb-servernyj-ssd-m2-samsung-pm9a3mz1l21t9hcls-00a07/",
+              "title": "1920 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L21T9HCLS-00A07] [PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ]",
+              "specsText": "PCI-E 4.0 x4, чтение - 5500 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 2733 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM1653",
+          "name": "1920 ГБ Серверный SSD Samsung PM1653",
+          "manufacturerCodes": [
+            "MZILG1T9HCJR"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/387cf2c269a3ed20/1920-gb-servernyj-ssd-samsung-pm1653-mzilg1t9hcjr/",
+              "title": "1920 ГБ Серверный SSD Samsung PM1653 [MZILG1T9HCJR] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM1733",
+          "name": "1920 ГБ Серверный SSD Samsung PM1733",
+          "manufacturerCodes": [
+            "MZWLR1T9HBJR-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d13cd4ffdb7ced20/1920-gb-servernyj-ssd-samsung-pm1733-mzwlr1t9hbjr-00007/",
+              "title": "1920 ГБ Серверный SSD Samsung PM1733 [MZWLR1T9HBJR-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ]",
+              "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3500 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM1733a",
+          "name": "1920 ГБ Серверный SSD Samsung PM1733a",
+          "manufacturerCodes": [
+            "MZWLR1T9HCJR-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/038a1461a325d582/1920-gb-servernyj-ssd-samsung-pm1733a-mzwlr1t9hcjr-00a07/",
+              "title": "1920 ГБ Серверный SSD Samsung PM1733a [MZWLR1T9HCJR-00A07] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM893",
+          "name": "1920 ГБ Серверный SSD Samsung PM893",
+          "manufacturerCodes": [
+            "MZ7L31T9HBLT-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2b7e717c4ebeed20/1920-gb-servernyj-ssd-samsung-pm893-mz7l31t9hblt-00a07/",
+              "title": "1920 ГБ Серверный SSD Samsung PM893 [MZ7L31T9HBLT-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM897",
+          "name": "1920 ГБ Серверный SSD Samsung PM897",
+          "manufacturerCodes": [
+            "MZ7L31T9HBNA-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d5dcb165a31dd582/1920-gb-servernyj-ssd-samsung-pm897-mz7l31t9hbna-00a07/",
+              "title": "1920 ГБ Серверный SSD Samsung PM897 [MZ7L31T9HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]",
+              "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "1920",
+          "model": "ГБ Серверный SSD Samsung PM9A3",
+          "name": "1920 ГБ Серверный SSD Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZQL21T9HCJR-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/81532657e47b2ff2/1920-gb-servernyj-ssd-samsung-pm9a3-mzql21t9hcjr-00a07/",
+              "title": "1920 ГБ Серверный SSD Samsung PM9A3 [MZQL21T9HCJR-00A07] [PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ]",
+              "specsText": "PCI-E, чтение - 6800 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 3504 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "240",
+      "models": [
+        {
+          "brand": "240",
+          "model": "ГБ Серверный SSD Samsung PM893",
+          "name": "240 ГБ Серверный SSD Samsung PM893",
+          "manufacturerCodes": [
+            "MZ7L3240HCHQ-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d0174cbd31e1ed20/240-gb-servernyj-ssd-samsung-pm893-mz7l3240hchq-00a07/",
+              "title": "240 ГБ Серверный SSD Samsung PM893 [MZ7L3240HCHQ-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 438 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "30720",
+      "models": [
+        {
+          "brand": "30720",
+          "model": "ГБ Серверный SSD Samsung PM1653",
+          "name": "30720 ГБ Серверный SSD Samsung PM1653",
+          "manufacturerCodes": [
+            "MZILG30THBLA"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/26d2cf0269a4ed20/30720-gb-servernyj-ssd-samsung-pm1653-mzilg30thbla/",
+              "title": "30720 ГБ Серверный SSD Samsung PM1653 [MZILG30THBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "3200",
+      "models": [
+        {
+          "brand": "3200",
+          "model": "ГБ Серверный SSD WD Ultrastar DC SN840",
+          "name": "3200 ГБ Серверный SSD WD Ultrastar DC SN840",
+          "manufacturerCodes": [
+            "WUS4C6432DSP3X1"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b4db8bd89f842ff4/3200-gb-servernyj-ssd-wd-ultrastar-dc-sn840-wus4c6432dsp3x1/",
+              "title": "3200 ГБ Серверный SSD WD Ultrastar DC SN840 [WUS4C6432DSP3X1] [PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC]",
+              "specsText": "PCI-E, чтение - 3470 Мбайт/сек, 3D NAND 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "3840",
+      "models": [
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Intel D3-S4520",
+          "name": "3840 ГБ Серверный SSD Intel D3-S4520",
+          "manufacturerCodes": [
+            "SSDSC2KB038TZ01 99A0D6"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b4db8bc89f842ff4/3840-gb-servernyj-ssd-intel-d3-s4520-ssdsc2kb038tz01-99a0d6/",
+              "title": "3840 ГБ Серверный SSD Intel D3-S4520 [SSDSC2KB038TZ01 99A0D6] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 15667 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD M.2 Samsung PM9A3",
+          "name": "3840 ГБ Серверный SSD M.2 Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZ1L23T8HBLA-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6e348157a324d582/3840-gb-servernyj-ssd-m2-samsung-pm9a3mz1l23t8hbla-00a07/",
+              "title": "3840 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L23T8HBLA-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ]",
+              "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 2000 Мбайт/сек, 3 бит TLC, TBW - 7000 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM1643a",
+          "name": "3840 ГБ Серверный SSD Samsung PM1643a",
+          "manufacturerCodes": [
+            "MZILT3T8HBLS-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9b1c10f94ebbed20/3840-gb-servernyj-ssd-samsung-pm1643a-mzilt3t8hbls-00007/",
+              "title": "3840 ГБ Серверный SSD Samsung PM1643a [MZILT3T8HBLS-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]",
+              "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM1653",
+          "name": "3840 ГБ Серверный SSD Samsung PM1653",
+          "manufacturerCodes": [
+            "MZILG3T8HCLS"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9b722ee169a4ed20/3840-gb-servernyj-ssd-samsung-pm1653-mzilg3t8hcls/",
+              "title": "3840 ГБ Серверный SSD Samsung PM1653 [MZILG3T8HCLS] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM1733",
+          "name": "3840 ГБ Серверный SSD Samsung PM1733",
+          "manufacturerCodes": [
+            "MZWLJ3T8HBLS-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c9d0286b1a751b80/3840-gb-servernyj-ssd-samsung-pm1733-mzwlj3t8hbls-00007/",
+              "title": "3840 ГБ Серверный SSD Samsung PM1733 [MZWLJ3T8HBLS-00007] [PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ]",
+              "specsText": "PCI-E, чтение - 7000 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 5840 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM1733a",
+          "name": "3840 ГБ Серверный SSD Samsung PM1733a",
+          "manufacturerCodes": [
+            "MZWLR3T8HCLS-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ebc4837bdb7fed20/3840-gb-servernyj-ssd-samsung-pm1733a-mzwlr3t8hcls-00007/",
+              "title": "3840 ГБ Серверный SSD Samsung PM1733a [MZWLR3T8HCLS-00007] [PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ]",
+              "specsText": "PCI-E, чтение - 7500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7000 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM897",
+          "name": "3840 ГБ Серверный SSD Samsung PM897",
+          "manufacturerCodes": [
+            "MZ7L33T8HBNA-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/76303e08a31ed582/3840-gb-servernyj-ssd-samsung-pm897-mz7l33t8hbna-00a07/",
+              "title": "3840 ГБ Серверный SSD Samsung PM897 [MZ7L33T8HBNA-00A07] [SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC]",
+              "specsText": "SATA III, чтение - 560 Мбайт/сек, 3D NAND 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "3840",
+          "model": "ГБ Серверный SSD Samsung PM9A3",
+          "name": "3840 ГБ Серверный SSD Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZQL23T8HCLS-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d93a0ea14eb4ed20/3840-gb-servernyj-ssd-samsung-pm9a3-mzql23t8hcls-00a07/",
+              "title": "3840 ГБ Серверный SSD Samsung PM9A3 [MZQL23T8HCLS-00A07] [PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ]",
+              "specsText": "PCI-E, чтение - 6900 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 7008 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "480",
+      "models": [
+        {
+          "brand": "480",
+          "model": "ГБ Серверный SSD M.2 Intel D3-S4510 Series",
+          "name": "480 ГБ Серверный SSD M.2 Intel D3-S4510 Series",
+          "manufacturerCodes": [
+            "SSDSCKKB480G801"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5e7f6db5e23f7c18/480-gb-servernyj-ssd-m2-intel-d3-s4510-seriesssdsckkb480g801/",
+              "title": "480 ГБ Серверный SSD M.2 Intel D3-S4510 Series[SSDSCKKB480G801] [SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]",
+              "specsText": "SATA 3, чтение - 555 Мбайт/сек, запись - 480 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "480",
+          "model": "ГБ Серверный SSD M.2 Intel D3-S4520",
+          "name": "480 ГБ Серверный SSD M.2 Intel D3-S4520",
+          "manufacturerCodes": [
+            "SSDSCKKB480GZ"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0bb3368103c3d9cb/480-gb-servernyj-ssd-m2-intel-d3-s4520ssdsckkb480gz/",
+              "title": "480 ГБ Серверный SSD M.2 Intel D3-S4520[SSDSCKKB480GZ] [PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ]",
+              "specsText": "PCI-E 4.0 x4, чтение - 550 Мбайт/сек, запись - 500 Мбайт/сек, 3 бит TLC, TBW - 1200 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "480",
+          "model": "ГБ Серверный SSD M.2 Micron 7450 PRO",
+          "name": "480 ГБ Серверный SSD M.2 Micron 7450 PRO",
+          "manufacturerCodes": [
+            "MTFDKBA480TFR-1BC1ZABYY"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3cb091f0a63fd9cb/480-gb-servernyj-ssd-m2-micron-7450-promtfdkba480tfr-1bc1zabyy/",
+              "title": "480 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBA480TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC]",
+              "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 700 Мбайт/сек, 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "480",
+          "model": "ГБ Серверный SSD Samsung PM883",
+          "name": "480 ГБ Серверный SSD Samsung PM883",
+          "manufacturerCodes": [
+            "MZ7LH480HAHQ-00005"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/30686b833028ed20/480-gb-servernyj-ssd-samsung-pm883-mz7lh480hahq-00005/",
+              "title": "480 ГБ Серверный SSD Samsung PM883 [MZ7LH480HAHQ-00005] [SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, Samsung MJX, 3D NAND 3 бит MLC (TLC), TBW - 683 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "480",
+          "model": "ГБ Серверный SSD Samsung PM893",
+          "name": "480 ГБ Серверный SSD Samsung PM893",
+          "manufacturerCodes": [
+            "MZ7L3480HCHQ-00B7C"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f37e03be6bc9ed20/480-gb-servernyj-ssd-samsung-pm893-mz7l3480hchq-00b7c/",
+              "title": "480 ГБ Серверный SSD Samsung PM893 [MZ7L3480HCHQ-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 876 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "7680",
+      "models": [
+        {
+          "brand": "7680",
+          "model": "ГБ Серверный SSD Crucial Micron 5300 PRO",
+          "name": "7680 ГБ Серверный SSD Crucial Micron 5300 PRO",
+          "manufacturerCodes": [
+            "MTFDDAK7T6TDS-1AW1ZABYY"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2211afe532d83332/7680-gb-servernyj-ssd-crucial-micron-5300-pro-mtfddak7t6tds-1aw1zabyy/",
+              "title": "7680 ГБ Серверный SSD Crucial Micron 5300 PRO [MTFDDAK7T6TDS-1AW1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ]",
+              "specsText": "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 9110 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "7680",
+          "model": "ГБ Серверный SSD Intel D7-P5520 Series",
+          "name": "7680 ГБ Серверный SSD Intel D7-P5520 Series",
+          "manufacturerCodes": [
+            "SSDPF2KX076T1N1"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6ff02e59dac5ed20/7680-gb-servernyj-ssd-intel-d7-p5520-series-ssdpf2kx076t1n1/",
+              "title": "7680 ГБ Серверный SSD Intel D7-P5520 Series [SSDPF2KX076T1N1] [PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ]",
+              "specsText": "PCI-E, чтение - 7100 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 14000 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "7680",
+          "model": "ГБ Серверный SSD Samsung PM1643a",
+          "name": "7680 ГБ Серверный SSD Samsung PM1643a",
+          "manufacturerCodes": [
+            "MZILT7T6HALA-00007"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9da84ae3f3c01b80/7680-gb-servernyj-ssd-samsung-pm1643a-mzilt7t6hala-00007/",
+              "title": "7680 ГБ Серверный SSD Samsung PM1643a [MZILT7T6HALA-00007] [SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]",
+              "specsText": "SAS, чтение - 2100 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "7680",
+          "model": "ГБ Серверный SSD Samsung PM1653",
+          "name": "7680 ГБ Серверный SSD Samsung PM1653",
+          "manufacturerCodes": [
+            "MZILG7T6HBLA"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/47adfcbb69a5ed20/7680-gb-servernyj-ssd-samsung-pm1653-mzilg7t6hbla/",
+              "title": "7680 ГБ Серверный SSD Samsung PM1653 [MZILG7T6HBLA] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "7680",
+          "model": "ГБ Серверный SSD Samsung PM893",
+          "name": "7680 ГБ Серверный SSD Samsung PM893",
+          "manufacturerCodes": [
+            "MZ7L37T6HBLA-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/729c1e6bf840ed20/7680-gb-servernyj-ssd-samsung-pm893-mz7l37t6hbla-00a07/",
+              "title": "7680 ГБ Серверный SSD Samsung PM893 [MZ7L37T6HBLA-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 14016 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "960",
+      "models": [
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Intel D5-P5530 Series",
+          "name": "960 ГБ Серверный SSD Intel D5-P5530 Series",
+          "manufacturerCodes": [
+            "SSDPF2KX960HZN1"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9f02d9c8a300d21a/960-gb-servernyj-ssd-intel-d5-p5530-series-ssdpf2kx960hzn1/",
+              "title": "960 ГБ Серверный SSD Intel D5-P5530 Series [SSDPF2KX960HZN1] [PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC]",
+              "specsText": "PCI-E, чтение - 5500 Мбайт/сек, 3D NAND 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD M.2 Kingston DC2000B",
+          "name": "960 ГБ Серверный SSD M.2 Kingston DC2000B",
+          "manufacturerCodes": [
+            "SEDC2000BM8/960G"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d56e3083a7e5d582/960-gb-servernyj-ssd-m2-kingston-dc2000bsedc2000bm8960g/",
+              "title": "960 ГБ Серверный SSD M.2 Kingston DC2000B[SEDC2000BM8/960G] [PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ]",
+              "specsText": "PCI-E 4.0 x4, чтение - 7000 Мбайт/сек, запись - 1300 Мбайт/сек, 3 бит TLC, TBW - 700 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD M.2 Micron 7450 PRO",
+          "name": "960 ГБ Серверный SSD M.2 Micron 7450 PRO",
+          "manufacturerCodes": [
+            "MTFDKBG960TFR-1BC1ZABYY"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0acb3474a640d9cb/960-gb-servernyj-ssd-m2-micron-7450-promtfdkbg960tfr-1bc1zabyy/",
+              "title": "960 ГБ Серверный SSD M.2 Micron 7450 PRO[MTFDKBG960TFR-1BC1ZABYY] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC]",
+              "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD M.2 Samsung PM9A3",
+          "name": "960 ГБ Серверный SSD M.2 Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZ1L2960HCJR-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/8b264e574eafed20/960-gb-servernyj-ssd-m2-samsung-pm9a3mz1l2960hcjr-00a07/",
+              "title": "960 ГБ Серверный SSD M.2 Samsung PM9A3[MZ1L2960HCJR-00A07] [PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ]",
+              "specsText": "PCI-E 4.0 x4, чтение - 5000 Мбайт/сек, запись - 1400 Мбайт/сек, 3 бит TLC, TBW - 1750 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Micron 5400 PRO",
+          "name": "960 ГБ Серверный SSD Micron 5400 PRO",
+          "manufacturerCodes": [
+            "MTFDDAK960TGA-1BC1ZABYY"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/83899577a585d9cb/960-gb-servernyj-ssd-micron-5400-pro-mtfddak960tga-1bc1zabyy/",
+              "title": "960 ГБ Серверный SSD Micron 5400 PRO [MTFDDAK960TGA-1BC1ZABYY] [SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ]",
+              "specsText": "SATA III, чтение - 540 Мбайт/сек, 3D NAND 3 бит TLC, TBW - 2628 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Samsung PM1653",
+          "name": "960 ГБ Серверный SSD Samsung PM1653",
+          "manufacturerCodes": [
+            "MZILG960HCHQ"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9258538c69a5ed20/960-gb-servernyj-ssd-samsung-pm1653-mzilg960hchq/",
+              "title": "960 ГБ Серверный SSD Samsung PM1653 [MZILG960HCHQ] [SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)]",
+              "specsText": "SAS-4 (SAS 24G), чтение - 4200 Мбайт/сек, 3D NAND 3 бит MLC (TLC)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Samsung PM883",
+          "name": "960 ГБ Серверный SSD Samsung PM883",
+          "manufacturerCodes": [
+            "MZ7LH960HAJR-00005"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b2ceb19818fbd9cb/960-gb-servernyj-ssd-samsung-pm883-mz7lh960hajr-00005/",
+              "title": "960 ГБ Серверный SSD Samsung PM883 [MZ7LH960HAJR-00005] [SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 2D NAND 3 бит MLC (TLC), TBW - 1366 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Samsung PM893",
+          "name": "960 ГБ Серверный SSD Samsung PM893",
+          "manufacturerCodes": [
+            "MZ7L3960HCJR-00A07",
+            "MZ7L3960HCJR-00B7C"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1035f1eaa31dd582/960-gb-servernyj-ssd-samsung-pm893-mz7l3960hcjr-00a07/",
+              "title": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00A07] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/534fb2db6bcaed20/960-gb-servernyj-ssd-samsung-pm893-mz7l3960hcjr-00b7c/",
+              "title": "960 ГБ Серверный SSD Samsung PM893 [MZ7L3960HCJR-00B7C] [SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+              "specsText": "SATA III, чтение - 550 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "960",
+          "model": "ГБ Серверный SSD Samsung PM9A3",
+          "name": "960 ГБ Серверный SSD Samsung PM9A3",
+          "manufacturerCodes": [
+            "MZQL2960HCJR-00A07"
+          ],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2880bb2a4ebbed20/960-gb-servernyj-ssd-samsung-pm9a3-mzql2960hcjr-00a07/",
+              "title": "960 ГБ Серверный SSD Samsung PM9A3 [MZQL2960HCJR-00A07] [PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ]",
+              "specsText": "PCI-E, чтение - 6500 Мбайт/сек, 3D NAND 3 бит MLC (TLC), TBW - 1752 ТБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "LFF",
+      "models": [
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Жесткий диск WD Ultrastar DC HC550",
+          "name": "LFF (3.5\") Жесткий диск WD Ultrastar DC HC550",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/5254fe5709fad582/lff-35-zestkij-disk-wd-ultrastar-dc-hc550/",
+              "title": "LFF (3.5\") Жесткий диск WD Ultrastar DC HC550 [SATA III, 18 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 18 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Seagate Exos",
+          "name": "LFF (3.5\") Серверный HDD Seagate Exos",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b25449de411ed9cb/lff-35-servernyj-hdd-seagate-exos/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 28 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Seagate Exos 7E10",
+          "name": "LFF (3.5\") Серверный HDD Seagate Exos 7E10",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/05c1ca2ef3bbed20/lff-35-servernyj-hdd-seagate-exos-7e10/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos 7E10 [SAS, 8 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 8 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Seagate Exos M",
+          "name": "LFF (3.5\") Серверный HDD Seagate Exos M",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ee461076d4add582/lff-35-servernyj-hdd-seagate-exos-m/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos M [SATA III, 28 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 28 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Seagate Exos X18",
+          "name": "LFF (3.5\") Серверный HDD Seagate Exos X18",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/20bf97ec275bed20/lff-35-servernyj-hdd-seagate-exos-x18/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 18 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 18 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/323f6c5fa69bed20/lff-35-servernyj-hdd-seagate-exos-x18/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 14 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 14 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/c1310513d3c1d582/lff-35-servernyj-hdd-seagate-exos-x18/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos X18 [SAS, 16 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 16 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Seagate Exos X24",
+          "name": "LFF (3.5\") Серверный HDD Seagate Exos X24",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9091efe79a64d582/lff-35-servernyj-hdd-seagate-exos-x24/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 24 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 24 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/7275a7009a63d582/lff-35-servernyj-hdd-seagate-exos-x24/",
+              "title": "LFF (3.5\") Серверный HDD Seagate Exos X24 [SATA III, 12 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 12 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Synology Plus",
+          "name": "LFF (3.5\") Серверный HDD Synology Plus",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/053caca2ce7ad582/lff-35-servernyj-hdd-synology-plus/",
+              "title": "LFF (3.5\") Серверный HDD Synology Plus [SATA III, 8 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 8 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Toshiba Enterprise Capacity",
+          "name": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/dd5fa6dfcf81ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 10 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 10 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/0562af39bb76d9cb/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 8 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/21c2b3f6cf81ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 12 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 12 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/1e1351efcf82ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 14 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 14 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/7107af0f275aed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 16 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 16 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/5caf9f63cf80ed20/lff-35-servernyj-hdd-toshiba-enterprise-capacity/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba Enterprise Capacity [SAS, 8 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 8 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Toshiba MG08",
+          "name": "LFF (3.5\") Серверный HDD Toshiba MG08",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/853c0985a5fbed20/lff-35-servernyj-hdd-toshiba-mg08/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba MG08 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 4 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Toshiba MG09",
+          "name": "LFF (3.5\") Серверный HDD Toshiba MG09",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6c17c87370e4d21a/lff-35-servernyj-hdd-toshiba-mg09/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba MG09 [SAS, 16 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 16 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Toshiba MG10",
+          "name": "LFF (3.5\") Серверный HDD Toshiba MG10",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/cc8b82fa6f21ed20/lff-35-servernyj-hdd-toshiba-mg10/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba MG10",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD Toshiba MG11",
+          "name": "LFF (3.5\") Серверный HDD Toshiba MG11",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/4449d3889da3d0a4/lff-35-servernyj-hdd-toshiba-mg11/",
+              "title": "LFF (3.5\") Серверный HDD Toshiba MG11 [SAS, 24 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 24 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar DC HC310 HUS726T4TAL5204",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC310 HUS726T4TAL5204",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0410be58cf85ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc310-hus726t4tal5204/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC310 HUS726T4TAL5204 [SAS, 4 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 4 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar DC HC520",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC520",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d96b9d10c936ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc520/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC520 [SAS, 12 ТБ, 7200 об/мин, 256 МБ]",
+              "specsText": "SAS, 12 ТБ, 7200 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar DC HC550",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC550",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d955074b7c53ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc550/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC550 [SAS, 18 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 18 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar DC HC555",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC555",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c4a0a050d4aed582/lff-35-servernyj-hdd-wd-ultrastar-dc-hc555/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC555 [SATA, 18 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA, 18 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar DC HC560 WUH722020BL5204",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC560 WUH722020BL5204",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/46ee29e26f28ed20/lff-35-servernyj-hdd-wd-ultrastar-dc-hc560-wuh722020bl5204/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar DC HC560 WUH722020BL5204 [SAS, 20 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SAS, 20 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "LFF",
+          "model": "(3.5\") Серверный HDD WD Ultrastar HC580",
+          "name": "LFF (3.5\") Серверный HDD WD Ultrastar HC580",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/0f03a03ad4afd582/lff-35-servernyj-hdd-wd-ultrastar-hc580/",
+              "title": "LFF (3.5\") Серверный HDD WD Ultrastar HC580 [SATA III, 22 ТБ, 7200 об/мин, 512 МБ]",
+              "specsText": "SATA III, 22 ТБ, 7200 об/мин, 512 МБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "SFF",
+      "models": [
+        {
+          "brand": "SFF",
+          "model": "(2.5\") Серверный HDD Seagate Exos 10E2400",
+          "name": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a1616861a41ed20/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+              "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.2 ТБ, 10000 об/мин, 128 МБ]",
+              "specsText": "SAS, 1.2 ТБ, 10000 об/мин, 128 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/bca80f77a69bed20/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+              "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 2.4 ТБ, 10000 об/мин, 256 МБ]",
+              "specsText": "SAS, 2.4 ТБ, 10000 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/4e16ad897c8fd582/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+              "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]",
+              "specsText": "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/a9bfd6b739313330/sff-25-servernyj-hdd-seagate-exos-10e2400/",
+              "title": "SFF (2.5\") Серверный HDD Seagate Exos 10E2400 [SAS, 1.8 ТБ, 10000 об/мин, 256 МБ]",
+              "specsText": "SAS, 1.8 ТБ, 10000 об/мин, 256 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "SFF",
+          "model": "(2.5\") Серверный HDD Toshiba AL13SX",
+          "name": "SFF (2.5\") Серверный HDD Toshiba AL13SX",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/ed5a3009e4c9ed20/sff-25-servernyj-hdd-toshiba-al13sx/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba AL13SX [SAS, 0.3 ТБ, 15000 об/мин, 64 МБ]",
+              "specsText": "SAS, 0.3 ТБ, 15000 об/мин, 64 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "SFF",
+          "model": "(2.5\") Серверный HDD Toshiba AL15SE Series",
+          "name": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3c4071809699d9cb/sff-25-servernyj-hdd-toshiba-al15se-series/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/3b0f9323969bd9cb/sff-25-servernyj-hdd-toshiba-al15se-series/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba AL15SE Series [SAS, 0.9 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 0.9 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "SFF",
+          "model": "(2.5\") Серверный HDD Toshiba Enterprise Performance",
+          "name": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6f2b0a9a1c68ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.2 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 1.2 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/9e0e3090d52c3332/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance",
+              "specsText": "",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/7f49054b1c65ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 1.8 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 1.8 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/f0e241f7a856ed20/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 0.6 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 0.6 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            },
+            {
+              "href": "https://www.dns-shop.ru/product/8339866bd53b3332/sff-25-servernyj-hdd-toshiba-enterprise-performance/",
+              "title": "SFF (2.5\") Серверный HDD Toshiba Enterprise Performance [SAS, 2.4 ТБ, 10500 об/мин, 128 МБ]",
+              "specsText": "SAS, 2.4 ТБ, 10500 об/мин, 128 МБ",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [
+    {
+      "text": "Серверные HDD",
+      "href": "https://www.dns-shop.ru/catalog/17aa4e3216404e77/servernye-hdd/"
+    },
+    {
+      "text": "Серверные SSD",
+      "href": "https://www.dns-shop.ru/catalog/1023687c7ba7a69d/servernye-ssd/"
+    },
+    {
+      "text": "Серверные SSD M.2",
+      "href": "https://www.dns-shop.ru/catalog/2b911f3c621a36eb/servernye-ssd-m2/"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/e7b8dd636db510c5/servernye-nakopiteli/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 0,
+      "title": "Серверные накопители купить в интернет-магазине DNS. Серверные накопители цены, большой каталог, новинки."
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17aa4e3216404e77/servernye-hdd/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Серверные HDD купить в интернет-магазине DNS. Серверные HDD цены, большой каталог, новинки. - страница 1 из 3"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17aa4e3216404e77/servernye-hdd/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "Серверные HDD купить в интернет-магазине DNS. Серверные HDD цены, большой каталог, новинки. - страница 2 из 3"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/17aa4e3216404e77/servernye-hdd/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 2,
+      "title": "Серверные HDD купить в интернет-магазине DNS. Серверные HDD цены, большой каталог, новинки. - страница 3 из 3"
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/1023687c7ba7a69d/servernye-ssd/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Серверные SSD купить в интернет-магазине DNS. Серверные SSD цены, большой каталог, новинки. - страница 1 из 3"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/1023687c7ba7a69d/servernye-ssd/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 18,
+      "title": "Серверные SSD купить в интернет-магазине DNS. Серверные SSD цены, большой каталог, новинки. - страница 2 из 3"
+    },
+    {
+      "page": 3,
+      "url": "https://www.dns-shop.ru/catalog/1023687c7ba7a69d/servernye-ssd/?stock=now-today-tomorrow-later&p=3",
+      "status": 200,
+      "count": 2,
+      "title": "Серверные SSD купить в интернет-магазине DNS. Серверные SSD цены, большой каталог, новинки. - страница 3 из 3"
+    },
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/2b911f3c621a36eb/servernye-ssd-m2/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 8,
+      "title": "Серверные SSD M.2 купить в интернет-магазине DNS. Серверные SSD M.2 цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

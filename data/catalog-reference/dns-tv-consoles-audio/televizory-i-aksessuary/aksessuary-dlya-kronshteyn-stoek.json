@@ -1,0 +1,111 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "ТВ, консоли и аудио",
+  "subcategoryName": "Телевизоры и аксессуары",
+  "itemName": "Аксессуары для кронштейн-стоек",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/c5f923331f98e246/aksessuary-dla-kronstejn-stoek/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:41:46.148Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 3,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/79e446c6cfe72ff2/adapter-naklona-onkron-atl-1551-cernyj/",
+      "title": "Адаптер наклона ONKRON ATL-1551 черный [ONKRON TS1551, ONKRON TS1552, 0°/10°]",
+      "specsText": "ONKRON TS1551, ONKRON TS1552, 0°/10°",
+      "bracketGroups": [
+        "ONKRON TS1551, ONKRON TS1552, 0°/10°"
+      ],
+      "priceText": "",
+      "productId": "79e446c6cfe72ff2",
+      "cardText": "Адаптер наклона ONKRON ATL-1551 черный [ONKRON TS1551, ONKRON TS1552, 0°/10°]5 |6 отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/bfd5fc171f8d95c7/napravlausie-dla-videosteny-onkron-aav-1-cernyj/",
+      "title": "Направляющие для видеостены ONKRON AAV-1 черный [5°/5°]",
+      "specsText": "5°/5°",
+      "bracketGroups": [
+        "5°/5°"
+      ],
+      "priceText": "",
+      "productId": "bfd5fc171f8d95c7",
+      "cardText": "Направляющие для видеостены ONKRON AAV-1 черный [5°/5°]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/399ee67360c573ee/napravlausie-dla-videosteny-onkron-fav-1-cernyj/",
+      "title": "Направляющие для видеостены ONKRON FAV-1 черный [0°]",
+      "specsText": "0°",
+      "bracketGroups": [
+        "0°"
+      ],
+      "priceText": "",
+      "productId": "399ee67360c573ee",
+      "cardText": "Направляющие для видеостены ONKRON FAV-1 черный [0°]5|рейтинг брендаОтличная надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Адаптер",
+      "models": [
+        {
+          "brand": "Адаптер",
+          "model": "наклона ONKRON ATL-1551 черный",
+          "name": "Адаптер наклона ONKRON ATL-1551 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/79e446c6cfe72ff2/adapter-naklona-onkron-atl-1551-cernyj/",
+              "title": "Адаптер наклона ONKRON ATL-1551 черный [ONKRON TS1551, ONKRON TS1552, 0°/10°]",
+              "specsText": "ONKRON TS1551, ONKRON TS1552, 0°/10°",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Направляющие",
+      "models": [
+        {
+          "brand": "Направляющие",
+          "model": "для видеостены ONKRON AAV-1 черный",
+          "name": "Направляющие для видеостены ONKRON AAV-1 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/bfd5fc171f8d95c7/napravlausie-dla-videosteny-onkron-aav-1-cernyj/",
+              "title": "Направляющие для видеостены ONKRON AAV-1 черный [5°/5°]",
+              "specsText": "5°/5°",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Направляющие",
+          "model": "для видеостены ONKRON FAV-1 черный",
+          "name": "Направляющие для видеостены ONKRON FAV-1 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/399ee67360c573ee/napravlausie-dla-videosteny-onkron-fav-1-cernyj/",
+              "title": "Направляющие для видеостены ONKRON FAV-1 черный [0°]",
+              "specsText": "0°",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/c5f923331f98e246/aksessuary-dla-kronstejn-stoek/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 3,
+      "title": "Аксессуары для кронштейн-стоек купить в интернет-магазине DNS. Аксессуары для кронштейн-стоек цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

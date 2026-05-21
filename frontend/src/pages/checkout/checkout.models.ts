@@ -61,9 +61,11 @@ export type ActivePayment = {
 };
 
 export type DeliveryProvider = {
-  code: "yandex_pvz" | "russian_post";
+  code: "yandex_pvz" | "russian_post" | "ozon" | "wildberries" | "cdek";
   label: string;
 };
+
+export type DeliveryProviderFilter = DeliveryProvider["code"] | "all";
 
 export type DeliveryPoint = {
   id: string;
@@ -77,6 +79,9 @@ export type DeliveryPoint = {
   workHours: string;
   etaDays: number;
   cost: number;
+  source?: string;
+  sourceExternalId?: string;
+  verificationLevel?: "provider_feed" | "indexed_by_yandex";
 };
 
 export type DeliveryPointsResponse = {
@@ -87,7 +92,7 @@ export type DeliveryPointsResponse = {
     lng: number;
   };
   providers: DeliveryProvider[];
-  activeProvider: DeliveryProvider["code"];
+  activeProvider: DeliveryProviderFilter;
   points: DeliveryPoint[];
   pagination: {
     total: number;
@@ -97,7 +102,7 @@ export type DeliveryPointsResponse = {
   } | null;
 };
 
-export const DELIVERY_PICKUP_PROVIDER: DeliveryProvider["code"] = "yandex_pvz";
+export const DELIVERY_PICKUP_PROVIDER: DeliveryProviderFilter = "all";
 export const DEFAULT_DELIVERY_CITY = "Россия, Москва";
 export const YANDEX_GEOSUGGEST_API_KEY =
   import.meta.env.VITE_YANDEX_GEOSUGGEST_API_KEY?.toString().trim() ?? "";
@@ -110,12 +115,16 @@ export const SBP_UI_ENABLED = false;
 export const PAYMENT_RETURN_EVENT_KEY = "ecomm_payment_returned";
 export const PAYMENT_RETURN_CHANNEL = "ecomm-payment-channel";
 export const DELIVERY_PROVIDER_TABS: Array<{
-  code: DeliveryProvider["code"];
+  code: DeliveryProviderFilter;
   label: string;
   enabled: boolean;
 }> = [
+  { code: "all", label: "Все ПВЗ", enabled: true },
   { code: "yandex_pvz", label: "Яндекс ПВЗ", enabled: true },
   { code: "russian_post", label: "Почта России", enabled: true },
+  { code: "ozon", label: "Ozon", enabled: true },
+  { code: "wildberries", label: "Wildberries", enabled: true },
+  { code: "cdek", label: "СДЭК", enabled: true },
 ];
 
 export type PaymentStatusMeta = {

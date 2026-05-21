@@ -1,0 +1,131 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Комплектующие для ПК",
+  "subcategoryName": "Комплектующие для сервера",
+  "itemName": "Серверные материнские платы",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17aa955316404e77/servernye-materinskie-platy/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:07:46.887Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 4,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/75691fb709b1ed20/servernaa-materinskaa-plata-asus-pro-ws-w790-ace/",
+      "title": "Серверная материнская плата ASUS Pro WS W790-ACE [LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB]",
+      "specsText": "LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB",
+      "bracketGroups": [
+        "LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB"
+      ],
+      "priceText": "",
+      "productId": "75691fb709b1ed20",
+      "cardText": "Серверная материнская плата ASUS Pro WS W790-ACE [LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB]5 |7 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/713b2cd42c852c72/servernaa-materinskaa-plata-supermicro-mbd-c9x299-pgf/",
+      "title": "Серверная материнская плата Supermicro MBD-C9X299-PGF [LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX]",
+      "specsText": "LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX",
+      "bracketGroups": [
+        "LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX"
+      ],
+      "priceText": "",
+      "productId": "713b2cd42c852c72",
+      "cardText": "Серверная материнская плата Supermicro MBD-C9X299-PGF [LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX]5 |5 отзывов 1"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/76f20c9a5228b84c/servernaa-materinskaa-plata-gigabyte-mf51-es2/",
+      "title": "Серверная материнская плата GIGABYTE MF51-ES2 [LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB]",
+      "specsText": "LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB",
+      "bracketGroups": [
+        "LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB"
+      ],
+      "priceText": "",
+      "productId": "76f20c9a5228b84c",
+      "cardText": "Серверная материнская плата GIGABYTE MF51-ES2 [LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/054b59af09b4ed20/servernaa-materinskaa-plata-asus-pro-ws-w790e-sage-se/",
+      "title": "Серверная материнская плата ASUS Pro WS W790E-SAGE SE [LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB]",
+      "specsText": "LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB",
+      "bracketGroups": [
+        "LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB"
+      ],
+      "priceText": "",
+      "productId": "054b59af09b4ed20",
+      "cardText": "Серверная материнская плата ASUS Pro WS W790E-SAGE SE [LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB]3.67 |2 отзыва 1"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Серверная",
+      "models": [
+        {
+          "brand": "Серверная",
+          "model": "материнская плата ASUS Pro WS W790-ACE",
+          "name": "Серверная материнская плата ASUS Pro WS W790-ACE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/75691fb709b1ed20/servernaa-materinskaa-plata-asus-pro-ws-w790-ace/",
+              "title": "Серверная материнская плата ASUS Pro WS W790-ACE [LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB]",
+              "specsText": "LGA 4677, 8xDDR5-6800 МГц, 5xPCI-Ex16, 4xSATA, SSI-CEB",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Серверная",
+          "model": "материнская плата ASUS Pro WS W790E-SAGE SE",
+          "name": "Серверная материнская плата ASUS Pro WS W790E-SAGE SE",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/054b59af09b4ed20/servernaa-materinskaa-plata-asus-pro-ws-w790e-sage-se/",
+              "title": "Серверная материнская плата ASUS Pro WS W790E-SAGE SE [LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB]",
+              "specsText": "LGA 4677, 8xDDR5-6800 МГц, 7xPCI-Ex16, 8xSATA, SSI-EEB",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Серверная",
+          "model": "материнская плата GIGABYTE MF51-ES2",
+          "name": "Серверная материнская плата GIGABYTE MF51-ES2",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/76f20c9a5228b84c/servernaa-materinskaa-plata-gigabyte-mf51-es2/",
+              "title": "Серверная материнская плата GIGABYTE MF51-ES2 [LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB]",
+              "specsText": "LGA 2066, 8xDDR4-2666 МГц, 3xPCI-Ex16, 8xSATA, SSI-CEB",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Серверная",
+          "model": "материнская плата Supermicro MBD-C9X299-PGF",
+          "name": "Серверная материнская плата Supermicro MBD-C9X299-PGF",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/713b2cd42c852c72/servernaa-materinskaa-plata-supermicro-mbd-c9x299-pgf/",
+              "title": "Серверная материнская плата Supermicro MBD-C9X299-PGF [LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX]",
+              "specsText": "LGA 2066, 8xDDR4-2666 МГц, 4xPCI-Ex16, 6xSATA, Standard-ATX",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17aa955316404e77/servernye-materinskie-platy/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 4,
+      "title": "Серверные материнские платы купить в интернет-магазине DNS. Серверные материнские платы цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

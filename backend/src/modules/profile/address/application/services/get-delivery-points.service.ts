@@ -1,5 +1,6 @@
 import { validationError } from "../../../../../common/application-error";
 import type {
+  DeliveryBoundsPayload,
   DeliveryProviderFilter,
   ProfileAddressDeliveryGatewayPort,
 } from "../../domain/profile-address.types";
@@ -15,6 +16,7 @@ export class GetDeliveryPointsService {
     providerFilter: DeliveryProviderFilter;
     cursor: number;
     limit?: number;
+    bounds?: DeliveryBoundsPayload;
   }) {
     if (!input.city) {
       throw validationError("City query is required");
@@ -27,13 +29,9 @@ export class GetDeliveryPointsService {
         {
           cursor: input.cursor,
           limit: input.limit,
+          bounds: input.bounds,
         },
       );
-
-    const activeProvider =
-      input.providerFilter === "all"
-        ? ((points[0]?.provider as string | undefined) ?? "yandex_pvz")
-        : input.providerFilter;
 
     return {
       city: location.city,
@@ -43,7 +41,7 @@ export class GetDeliveryPointsService {
         lng: location.lng,
       },
       providers: this.deliveryProviders,
-      activeProvider,
+      activeProvider: input.providerFilter,
       points,
       pagination: pagination ?? null,
     };

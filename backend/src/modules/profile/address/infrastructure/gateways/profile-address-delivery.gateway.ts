@@ -1,4 +1,5 @@
 import type {
+  DeliveryBoundsPayload,
   DeliveryProviderFilter,
   ProfileAddressDeliveryGatewayPort,
 } from "../../domain/profile-address.types";
@@ -10,7 +11,11 @@ export class ProfileAddressDeliveryGateway
     private readonly getDeliveryPointsImpl: (
       query: string,
       providerFilter: DeliveryProviderFilter,
-      options?: { cursor?: number; limit?: number },
+      options?: {
+        cursor?: number;
+        limit?: number;
+        bounds?: DeliveryBoundsPayload;
+      },
     ) => Promise<{
       location: { city: string; label: string; lat: number; lng: number };
       points: Record<string, unknown>[];
@@ -26,7 +31,11 @@ export class ProfileAddressDeliveryGateway
   getDeliveryPoints(
     query: string,
     providerFilter: DeliveryProviderFilter,
-    options?: { cursor?: number; limit?: number },
+    options?: {
+      cursor?: number;
+      limit?: number;
+      bounds?: DeliveryBoundsPayload;
+    },
   ) {
     return this.getDeliveryPointsImpl(query, providerFilter, options);
   }

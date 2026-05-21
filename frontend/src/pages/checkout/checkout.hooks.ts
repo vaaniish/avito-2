@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CartItem, Product } from "../../shared/types";
-import type { YandexMapMarker } from "../../widgets/YandexMapPicker";
+import type {
+  YandexMapMarker,
+  YandexMapViewportBounds,
+} from "../../widgets/YandexMapPicker";
 import {
   createCheckoutOrders,
   fetchCheckoutPolicy,
@@ -18,13 +21,24 @@ import {
   PAYMENT_TIMEOUT_MS,
   RUSSIA_BOUNDS,
   SBP_UI_ENABLED,
-  YANDEX_GEOSUGGEST_API_KEY,
   type ActivePayment,
   type DeliveryPoint,
+  type DeliveryProviderFilter,
   type DeliveryProvider,
   type PaymentMethod,
 } from "./checkout.models";
 import { notifyError, notifyInfo } from "../../shared/ui/notifications";
+
+function buildDeliveryPointSelectionKey(point: Pick<DeliveryPoint, "id" | "provider">): string {
+  return `${point.provider}:${point.id}`;
+}
+
+function formatViewportBbox(bounds: YandexMapViewportBounds | null): string | null {
+  if (!bounds) return null;
+  const values = [bounds.minLng, bounds.minLat, bounds.maxLng, bounds.maxLat];
+  if (!values.every((value) => Number.isFinite(value))) return null;
+  return `${bounds.minLng},${bounds.minLat}~${bounds.maxLng},${bounds.maxLat}`;
+}
 
 function makeCheckoutIdempotencyFingerprint(params: {
   items: Array<{ id: string; quantity: number }>;
@@ -98,27 +112,38 @@ export function useCheckoutDelivery(params: {
   const [deliveryCity, setDeliveryCity] = useState("");
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
   const [deliveryProviders, setDeliveryProviders] = useState<DeliveryProvider[]>(
-    DELIVERY_PROVIDER_TABS.filter((tab) => tab.enabled).map((tab) => ({
+    DELIVERY_PROVIDER_TABS.filter(
+      (tab): tab is { code: DeliveryProvider["code"]; label: string; enabled: boolean } =>
+        tab.enabled && tab.code !== "all",
+    ).map((tab) => ({
       code: tab.code,
       label: tab.label,
     })),
   );
   const [activeDeliveryProvider, setActiveDeliveryProvider] =
-    useState<DeliveryProvider["code"]>(DELIVERY_PICKUP_PROVIDER);
+    useState<DeliveryProviderFilter>(DELIVERY_PICKUP_PROVIDER);
   const [deliveryPoints, setDeliveryPoints] = useState<DeliveryPoint[]>([]);
-  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+  const [selectedPointKey, setSelectedPointKey] = useState<string | null>(null);
   const [isPointsLoading, setIsPointsLoading] = useState(false);
+  const [viewportBounds, setViewportBounds] = useState<YandexMapViewportBounds | null>(null);
   const deliverySearchInputRef = useRef<HTMLInputElement | null>(null);
   const nativeAddressSuggestViewRef = useRef<any>(null);
-  const activeDeliveryProviderRef = useRef<DeliveryProvider["code"]>(DELIVERY_PICKUP_PROVIDER);
+  const activeDeliveryProviderRef = useRef<DeliveryProviderFilter>(DELIVERY_PICKUP_PROVIDER);
+  const viewportReloadTimerRef = useRef<number | null>(null);
 
   const selectedPoint = useMemo(
-    () => deliveryPoints.find((point) => point.id === selectedPointId) ?? null,
-    [deliveryPoints, selectedPointId],
+    () =>
+      deliveryPoints.find(
+        (point) => buildDeliveryPointSelectionKey(point) === selectedPointKey,
+      ) ?? null,
+    [deliveryPoints, selectedPointKey],
   );
 
   const visibleDeliveryPoints = useMemo(
-    () => deliveryPoints.filter((point) => point.provider === activeDeliveryProvider),
+    () =>
+      activeDeliveryProvider === "all"
+        ? deliveryPoints
+        : deliveryPoints.filter((point) => point.provider === activeDeliveryProvider),
     [deliveryPoints, activeDeliveryProvider],
   );
 
@@ -134,8 +159,8 @@ export function useCheckoutDelivery(params: {
         continue;
       }
 
-      byId.set(point.id, {
-        id: point.id,
+      byId.set(buildDeliveryPointSelectionKey(point), {
+        id: buildDeliveryPointSelectionKey(point),
         title: point.name,
         subtitle: `${point.providerLabel} - ${point.address}`,
         provider: point.provider,
@@ -153,7 +178,7 @@ export function useCheckoutDelivery(params: {
   const loadDeliveryPoints = async (
     city: string,
     recenter = true,
-    provider: DeliveryProvider["code"] | "all",
+    provider: DeliveryProviderFilter,
     options?: { cursor?: number; append?: boolean; silent?: boolean },
   ) => {
     if (params.deliveryType !== "delivery") return;
@@ -166,11 +191,20 @@ export function useCheckoutDelivery(params: {
     if (!append && !silent) setIsPointsLoading(true);
 
     try {
-      const response = await fetchDeliveryPoints({ city: query, provider, cursor });
+      const response = await fetchDeliveryPoints({
+        city: query,
+        provider,
+        cursor,
+        bbox: formatViewportBbox(viewportBounds),
+      });
       if (append && provider === "russian_post") {
         setDeliveryPoints((prev) => {
-          const byId = new Map(prev.map((point) => [point.id, point]));
-          for (const point of response.points) byId.set(point.id, point);
+          const byId = new Map(
+            prev.map((point) => [buildDeliveryPointSelectionKey(point), point]),
+          );
+          for (const point of response.points) {
+            byId.set(buildDeliveryPointSelectionKey(point), point);
+          }
           return Array.from(byId.values());
         });
       } else {
@@ -178,7 +212,7 @@ export function useCheckoutDelivery(params: {
       }
       setDeliveryProviders(response.providers);
       setActiveDeliveryProvider(provider === "all" ? response.activeProvider : provider);
-      if (!append) setSelectedPointId(null);
+      if (!append) setSelectedPointKey(null);
       setDeliveryCity(query);
       if (recenter) setMapCenterQuery(query);
     } catch (error) {
@@ -197,6 +231,9 @@ export function useCheckoutDelivery(params: {
 
   useEffect(() => {
     if (params.deliveryType !== "delivery") return;
+    if (viewportReloadTimerRef.current) {
+      window.clearTimeout(viewportReloadTimerRef.current);
+    }
     void loadDeliveryPoints(
       deliveryCity.trim() || DEFAULT_DELIVERY_CITY,
       true,
@@ -204,6 +241,27 @@ export function useCheckoutDelivery(params: {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.deliveryType]);
+
+  useEffect(() => {
+    if (params.deliveryType !== "delivery") return;
+    if (!deliveryCity.trim()) return;
+    if (!viewportBounds) return;
+
+    if (viewportReloadTimerRef.current) {
+      window.clearTimeout(viewportReloadTimerRef.current);
+    }
+    viewportReloadTimerRef.current = window.setTimeout(() => {
+      void loadDeliveryPoints(deliveryCity, false, activeDeliveryProviderRef.current, {
+        silent: true,
+      });
+    }, 220);
+
+    return () => {
+      if (viewportReloadTimerRef.current) {
+        window.clearTimeout(viewportReloadTimerRef.current);
+      }
+    };
+  }, [deliveryCity, params.deliveryType, viewportBounds]);
 
   useEffect(() => {
     if (params.deliveryType !== "delivery") return;
@@ -233,72 +291,8 @@ export function useCheckoutDelivery(params: {
       }
 
       try {
-        const suggestProvider = YANDEX_GEOSUGGEST_API_KEY
-          ? {
-              suggest: (request: unknown, options?: { results?: number }) => {
-                const query = String(request ?? "").trim();
-                if (!query) return ymaps.vow.resolve([]);
-
-                const limitRaw = Number(options?.results ?? 8);
-                const limit =
-                  Number.isFinite(limitRaw) && limitRaw > 0
-                    ? Math.min(Math.floor(limitRaw), 10)
-                    : 8;
-
-                const url = new URL("https://suggest-maps.yandex.ru/v1/suggest");
-                url.searchParams.set("apikey", YANDEX_GEOSUGGEST_API_KEY);
-                url.searchParams.set("text", query);
-                url.searchParams.set("lang", "ru_RU");
-                url.searchParams.set("results", String(limit));
-                url.searchParams.set("types", "biz,geo");
-                url.searchParams.set("attrs", "uri");
-                url.searchParams.set("print_address", "1");
-                url.searchParams.set("org_address_kind", "house");
-
-                return ymaps.vow.resolve(
-                  fetch(url.toString(), { method: "GET" })
-                    .then((response) =>
-                      response.ok ? response.json() : Promise.resolve({ results: [] }),
-                    )
-                    .then((payload: unknown) => {
-                      const rawResults =
-                        payload &&
-                        typeof payload === "object" &&
-                        Array.isArray((payload as { results?: unknown[] }).results)
-                          ? (payload as { results: unknown[] }).results
-                          : [];
-
-                      return rawResults
-                        .map((entry) => {
-                          if (!entry || typeof entry !== "object") return null;
-                          const item = entry as {
-                            title?: { text?: string };
-                            subtitle?: { text?: string };
-                            address?: { formatted_address?: string };
-                            value?: string;
-                            displayName?: string;
-                          };
-                          const title = String(item.title?.text ?? "").trim();
-                          const subtitle = String(
-                            item.subtitle?.text ?? item.address?.formatted_address ?? "",
-                          ).trim();
-                          const singleLine = [title, subtitle].filter(Boolean).join(", ").trim();
-                          const value = singleLine || String(item.value ?? item.displayName ?? "").trim();
-                          if (!value) return null;
-                          return { value, displayName: value };
-                        })
-                        .filter(
-                          (item): item is { value: string; displayName: string } => Boolean(item),
-                        );
-                    })
-                    .catch(() => []),
-                );
-              },
-            }
-          : "yandex#map";
-
         const suggestView = new ymaps.SuggestView(inputEl, {
-          provider: suggestProvider,
+          provider: "yandex#map",
           results: 8,
           boundedBy: RUSSIA_BOUNDS,
           strictBounds: true,
@@ -335,17 +329,19 @@ export function useCheckoutDelivery(params: {
     deliveryProviders,
     activeDeliveryProvider,
     deliveryPoints,
-    selectedPointId,
+    selectedPointKey,
     isPointsLoading,
     selectedPoint,
     visibleDeliveryPoints,
     mapMarkers,
+    viewportBounds,
     deliverySearchInputRef,
     setDeliveryCity,
     setMapCenterQuery,
     setActiveDeliveryProvider,
     setDeliveryPoints,
-    setSelectedPointId,
+    setSelectedPointKey,
+    setViewportBounds,
     loadDeliveryPoints,
     applyLocationSearch,
   };

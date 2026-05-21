@@ -7,8 +7,6 @@ export type ProfileAddressDto = {
   city: string;
   street: string;
   house: string;
-  apartment: string;
-  entrance: string;
   building: string;
   postalCode: string;
   lat: number | null;
@@ -16,13 +14,13 @@ export type ProfileAddressDto = {
   isDefault: boolean;
 };
 
-export type LegacyBuildingParts = {
-  house: string;
-  apartment: string;
-  entrance: string;
-};
-
-export type DeliveryProviderFilter = "all" | "russian_post" | "yandex_pvz";
+export type DeliveryProviderFilter =
+  | "all"
+  | "russian_post"
+  | "yandex_pvz"
+  | "ozon"
+  | "wildberries"
+  | "cdek";
 
 export type LocationSuggestion = unknown;
 
@@ -42,16 +40,20 @@ export type DeliveryLocationPayload = {
   lng: number;
 };
 
+export type DeliveryBoundsPayload = {
+  minLat: number;
+  minLng: number;
+  maxLat: number;
+  maxLng: number;
+};
+
 export type ProfileAddressRecord = {
   id: number;
   label: string;
-  full_address: string;
-  region: string;
+  region: string | null;
   city: string;
   street: string;
   house: string;
-  apartment: string | null;
-  entrance: string | null;
   postal_code: string;
   lat: number | null;
   lon: number | null;
@@ -60,13 +62,10 @@ export type ProfileAddressRecord = {
 
 export type SaveProfileAddressInput = {
   label: string;
-  fullAddress: string;
-  region: string;
+  region: string | null;
   city: string;
   street: string;
   house: string;
-  apartment: string;
-  entrance: string;
   postalCode: string;
   lat: number;
   lon: number;
@@ -89,13 +88,10 @@ export interface ProfileAddressRepositoryPort {
     userId: number;
     data: Partial<SaveProfileAddressInput> & {
       label?: string;
-      fullAddress?: string;
-      region?: string;
+      region?: string | null;
       city?: string;
       street?: string;
       house?: string;
-      apartment?: string;
-      entrance?: string;
       postalCode?: string;
       lat?: number;
       lon?: number;
@@ -117,7 +113,11 @@ export interface ProfileAddressDeliveryGatewayPort {
   getDeliveryPoints(
     query: string,
     providerFilter: DeliveryProviderFilter,
-    options?: { cursor?: number; limit?: number },
+    options?: {
+      cursor?: number;
+      limit?: number;
+      bounds?: DeliveryBoundsPayload;
+    },
   ): Promise<{
     location: DeliveryLocationPayload;
     points: DeliveryPointPayload[];

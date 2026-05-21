@@ -1,15 +1,36 @@
 import type { MutableRefObject } from "react";
 
+export type NativeAddressSuggestOption = {
+  value: string;
+  displayName: string;
+  tags: string[];
+  formattedAddress?: string;
+  isHouseResult: boolean;
+  isEntranceResult: boolean;
+};
+
 type MountNativeAddressSuggestParams = {
   addressInputRef: MutableRefObject<HTMLInputElement | null>;
   suggestViewRef: MutableRefObject<any>;
   geosuggestApiKey: string;
   bounds: number[][];
-  onSelectValue: (value: string) => void | Promise<void>;
+  suggestTypes?: string;
+  onlyHouseGeoResults?: boolean;
+  onSelectValue: (
+    value: string,
+    option?: NativeAddressSuggestOption,
+  ) => void | Promise<void>;
   onSuggestEnabled?: (enabled: boolean) => void;
 };
 
-function createSuggestProvider(ymaps: any, geosuggestApiKey: string) {
+function createSuggestProvider(
+  ymaps: any,
+  geosuggestApiKey: string,
+  params?: {
+    suggestTypes?: string;
+    onlyHouseGeoResults?: boolean;
+  },
+) {
   if (!geosuggestApiKey) {
     return "yandex#map";
   }
@@ -32,7 +53,7 @@ function createSuggestProvider(ymaps: any, geosuggestApiKey: string) {
       url.searchParams.set("text", query);
       url.searchParams.set("lang", "ru_RU");
       url.searchParams.set("results", String(limit));
-      url.searchParams.set("types", "biz,geo");
+      url.searchParams.set("types", params?.suggestTypes?.trim() || "biz,geo");
       url.searchParams.set("attrs", "uri");
       url.searchParams.set("print_address", "1");
       url.searchParams.set("org_address_kind", "house");
@@ -57,6 +78,7 @@ function createSuggestProvider(ymaps: any, geosuggestApiKey: string) {
                   title?: { text?: string };
                   subtitle?: { text?: string };
                   address?: { formatted_address?: string };
+                  tags?: unknown[];
                   value?: string;
                   displayName?: string;
                 };
@@ -73,15 +95,35 @@ function createSuggestProvider(ymaps: any, geosuggestApiKey: string) {
                   singleLine || String(item.value ?? item.displayName ?? "").trim();
                 if (!value) return null;
 
+                const tags = Array.isArray(item.tags)
+                  ? item.tags
+                      .map((tag) => String(tag ?? "").trim().toLowerCase())
+                      .filter(Boolean)
+                  : [];
+                const formattedAddress = String(
+                  item.address?.formatted_address ?? "",
+                ).trim();
+                const normalizedValue = value.toLowerCase();
+                const isEntranceResult =
+                  tags.includes("entrance") ||
+                  normalizedValue.includes("подъезд");
+                const isHouseResult =
+                  tags.includes("house") && !isEntranceResult;
+
+                if (params?.onlyHouseGeoResults && !isHouseResult) {
+                  return null;
+                }
+
                 return {
                   value,
                   displayName: value,
+                  tags,
+                  formattedAddress: formattedAddress || undefined,
+                  isHouseResult,
+                  isEntranceResult,
                 };
               })
-              .filter(
-                (item): item is { value: string; displayName: string } =>
-                  Boolean(item),
-              );
+              .filter(Boolean) as NativeAddressSuggestOption[];
           })
           .catch(() => []),
       );
@@ -94,6 +136,8 @@ export function mountNativeAddressSuggest({
   suggestViewRef,
   geosuggestApiKey,
   bounds,
+  suggestTypes,
+  onlyHouseGeoResults = false,
   onSelectValue,
   onSuggestEnabled,
 }: MountNativeAddressSuggestParams): () => void {
@@ -123,7 +167,10 @@ export function mountNativeAddressSuggest({
 
     try {
       const suggestView = new ymaps.SuggestView(inputEl, {
-        provider: createSuggestProvider(ymaps, geosuggestApiKey),
+        provider: createSuggestProvider(ymaps, geosuggestApiKey, {
+          suggestTypes,
+          onlyHouseGeoResults,
+        }),
         results: 8,
         boundedBy: bounds,
         strictBounds: true,
@@ -133,7 +180,7 @@ export function mountNativeAddressSuggest({
         const item = event?.get?.("item");
         const selectedValue = String(item?.value ?? "").trim();
         if (!selectedValue) return;
-        void onSelectValue(selectedValue);
+        void onSelectValue(selectedValue, item as NativeAddressSuggestOption);
       });
 
       suggestViewRef.current = suggestView;

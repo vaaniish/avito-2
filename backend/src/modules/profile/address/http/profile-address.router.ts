@@ -173,12 +173,29 @@ export function createProfileAddressHttpRouter(deps: {
           ? Math.floor(limitRaw)
           : undefined;
 
+      const rawBbox = typeof req.query.bbox === "string" ? req.query.bbox.trim() : "";
+      const bboxMatch = rawBbox.match(
+        /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*~\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/u,
+      );
+      const bounds =
+        bboxMatch &&
+        bboxMatch.length === 5 &&
+        [1, 2, 3, 4].every((index) => Number.isFinite(Number(bboxMatch[index])))
+          ? {
+              minLng: Math.min(Number(bboxMatch[1]), Number(bboxMatch[3])),
+              maxLng: Math.max(Number(bboxMatch[1]), Number(bboxMatch[3])),
+              minLat: Math.min(Number(bboxMatch[2]), Number(bboxMatch[4])),
+              maxLat: Math.max(Number(bboxMatch[2]), Number(bboxMatch[4])),
+            }
+          : undefined;
+
       res.json(
         await deps.services.getDeliveryPoints.execute({
           city: locationQuery,
           providerFilter,
           cursor,
           limit,
+          bounds,
         }),
       );
     } catch (error) {

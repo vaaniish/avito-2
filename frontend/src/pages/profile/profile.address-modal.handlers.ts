@@ -22,20 +22,45 @@ import type {
 export function handleAddressFullAddressChange(params: {
   value: string;
   setAddressMapHint: (value: string) => void;
+  setAddressValidationErrors?: (value: string[]) => void;
   setIsAddressInputFocused: (value: boolean) => void;
   setAddressForm: Dispatch<SetStateAction<AddressFormState>>;
 }) {
-  const { value, setAddressMapHint, setIsAddressInputFocused, setAddressForm } =
-    params;
-  setAddressMapHint("");
+  const {
+    value,
+    setAddressMapHint,
+    setAddressValidationErrors,
+    setIsAddressInputFocused,
+    setAddressForm,
+  } = params;
+  setAddressMapHint(
+    value.trim()
+      ? "Выберите адрес из подсказок Яндекса или нажмите на дом на карте."
+      : "",
+  );
+  params.setAddressValidationErrors?.([]);
   setIsAddressInputFocused(true);
-  setAddressForm((prev) => ({ ...prev, fullAddress: value }));
+  setAddressForm((prev) => ({
+    ...prev,
+    fullAddress: value,
+    region: "",
+    city: "",
+    street: "",
+    house: "",
+    apartment: "",
+    entrance: "",
+    postalCode: "",
+    lat: null,
+    lon: null,
+    isYandexAddressConfirmed: false,
+  }));
 }
 
 export function resetAddressModalState(params: {
   addressInputBlurTimeoutRef: MutableRefObject<number | null>;
   isSelectingAddressSuggestionRef: MutableRefObject<boolean>;
   setAddressMapHint: (value: string) => void;
+  setAddressValidationErrors?: (value: string[]) => void;
   setAddressSuggestions: (value: AddressSuggestionOption[]) => void;
   setAddressSuggestionActiveIndex: (value: number) => void;
   setIsAddressInputFocused: (value: boolean) => void;
@@ -46,6 +71,7 @@ export function resetAddressModalState(params: {
     addressInputBlurTimeoutRef,
     isSelectingAddressSuggestionRef,
     setAddressMapHint,
+    setAddressValidationErrors,
     setAddressSuggestions,
     setAddressSuggestionActiveIndex,
     setIsAddressInputFocused,
@@ -59,6 +85,7 @@ export function resetAddressModalState(params: {
   }
   isSelectingAddressSuggestionRef.current = false;
   setAddressMapHint("");
+  params.setAddressValidationErrors?.([]);
   setAddressSuggestions([]);
   setAddressSuggestionActiveIndex(-1);
   setIsAddressInputFocused(false);

@@ -1,4 +1,9 @@
-export type DeliveryProviderCode = "russian_post" | "yandex_pvz";
+export type DeliveryProviderCode =
+  | "russian_post"
+  | "yandex_pvz"
+  | "ozon"
+  | "wildberries"
+  | "cdek";
 
 export type DeliveryValidationResult = {
   valid: boolean;
@@ -21,18 +26,27 @@ export type DeliveryStatusResult = {
 };
 
 const DEFAULT_PROVIDER: DeliveryProviderCode = "yandex_pvz";
-const DELIVERY_API_BASE_URL = process.env.DELIVERY_TRACKING_API_URL?.trim() ?? "";
+const DELIVERY_API_BASE_URL =
+  process.env.DELIVERY_TRACKING_API_URL?.trim() ?? "";
 const DELIVERY_API_KEY = process.env.DELIVERY_TRACKING_API_KEY?.trim() ?? "";
-const DELIVERY_API_TIMEOUT_MS = Number(process.env.DELIVERY_TRACKING_API_TIMEOUT_MS ?? "8000");
+const DELIVERY_API_TIMEOUT_MS = Number(
+  process.env.DELIVERY_TRACKING_API_TIMEOUT_MS ?? "8000",
+);
 const RUSSIAN_POST_API_BASE_URL =
   process.env.RUSSIAN_POST_API_BASE_URL?.trim() ?? "https://www.pochta.ru";
 const RUSSIAN_POST_API_PATH =
-  process.env.RUSSIAN_POST_API_PATH?.trim() ?? "/tracking-api/v1/trackings/by-barcodes";
-const RUSSIAN_POST_API_TIMEOUT_MS = Number(process.env.RUSSIAN_POST_API_TIMEOUT_MS ?? "8000");
-const RUSSIAN_POST_ACCESS_TOKEN = process.env.RUSSIAN_POST_ACCESS_TOKEN?.trim() ?? "";
-const RUSSIAN_POST_USER_AUTH = process.env.RUSSIAN_POST_USER_AUTH?.trim() ?? "";
+  process.env.RUSSIAN_POST_API_PATH?.trim() ??
+  "/tracking-api/v1/trackings/by-barcodes";
+const RUSSIAN_POST_API_TIMEOUT_MS = Number(
+  process.env.RUSSIAN_POST_API_TIMEOUT_MS ?? "8000",
+);
+const RUSSIAN_POST_ACCESS_TOKEN =
+  process.env.RUSSIAN_POST_ACCESS_TOKEN?.trim() ?? "";
+const RUSSIAN_POST_USER_AUTH =
+  process.env.RUSSIAN_POST_USER_AUTH?.trim() ?? "";
 const RUSSIAN_POST_SOAP_URL =
-  process.env.RUSSIAN_POST_SOAP_URL?.trim() ?? "https://tracking.russianpost.ru/rtm34";
+  process.env.RUSSIAN_POST_SOAP_URL?.trim() ??
+  "https://tracking.russianpost.ru/rtm34";
 const RUSSIAN_POST_LOGIN = process.env.RUSSIAN_POST_LOGIN?.trim() ?? "";
 const RUSSIAN_POST_PASSWORD = process.env.RUSSIAN_POST_PASSWORD?.trim() ?? "";
 const YANDEX_DELIVERY_BASE_URL =
@@ -60,12 +74,24 @@ function normalizeTrackingNumber(value: string): string {
   return value.replace(/\s+/g, "").toUpperCase();
 }
 
-function buildTrackingUrl(provider: DeliveryProviderCode, trackingNumber: string): string {
+function buildTrackingUrl(
+  provider: DeliveryProviderCode,
+  trackingNumber: string,
+): string {
   if (provider === "yandex_pvz") {
     return `https://dostavka.yandex.ru/route/${encodeURIComponent(trackingNumber)}`;
   }
   if (provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
+  }
+  if (provider === "ozon") {
+    return "https://www.ozon.ru/";
+  }
+  if (provider === "wildberries") {
+    return "https://www.wildberries.ru/";
+  }
+  if (provider === "cdek") {
+    return "https://www.cdek.ru/";
   }
   return "";
 }
@@ -73,16 +99,28 @@ function buildTrackingUrl(provider: DeliveryProviderCode, trackingNumber: string
 function normalizeProvider(value: unknown): DeliveryProviderCode {
   if (value === "russian_post") return "russian_post";
   if (value === "yandex_pvz") return "yandex_pvz";
+  if (value === "ozon") return "ozon";
+  if (value === "wildberries") return "wildberries";
+  if (value === "cdek") return "cdek";
   return DEFAULT_PROVIDER;
 }
 
 function normalizeExternalStatus(value: unknown): DeliveryExternalStatus {
   const raw = typeof value === "string" ? value.trim().toLowerCase() : "";
   if (!raw) return "UNKNOWN";
-  if (raw === "in_transit" || raw === "transit" || raw === "shipped" || raw === "moving") {
+  if (
+    raw === "in_transit" ||
+    raw === "transit" ||
+    raw === "shipped" ||
+    raw === "moving"
+  ) {
     return "IN_TRANSIT";
   }
-  if (raw === "delivered" || raw === "arrived" || raw === "ready_for_pickup") {
+  if (
+    raw === "delivered" ||
+    raw === "arrived" ||
+    raw === "ready_for_pickup"
+  ) {
     return "DELIVERED";
   }
   if (
@@ -173,15 +211,18 @@ function getLastValue(values: string[]): string | null {
   return typeof candidate === "string" && candidate.trim() ? candidate : null;
 }
 
-function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExternalStatus {
+function detectRussianPostStatus(
+  payload: Record<string, unknown>,
+): DeliveryExternalStatus {
   const snapshot = JSON.stringify(payload).toLowerCase();
-  const includesAny = (hints: string[]) => hints.some((hint) => snapshot.includes(hint));
+  const includesAny = (hints: string[]) =>
+    hints.some((hint) => snapshot.includes(hint));
 
   if (
     includesAny([
-      "\u0432\u0440\u0443\u0447\u0435\u043d",
-      "\u0432\u044b\u0434\u0430\u043d",
-      "\u043f\u043e\u043b\u0443\u0447\u0435\u043d",
+      "вручен",
+      "выдан",
+      "получен",
       "delivered_to_recipient",
       "issued",
       "picked_up",
@@ -193,9 +234,9 @@ function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExte
   }
   if (
     includesAny([
-      "\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d",
-      "\u043f\u0440\u0438\u0431\u044b\u043b",
-      "\u0433\u043e\u0442\u043e\u0432 \u043a \u0432\u044b\u0434\u0430\u0447\u0435",
+      "доставлен",
+      "прибыл",
+      "готов к выдаче",
       "ready_for_pickup",
       "arrived",
       "available_for_pickup",
@@ -205,11 +246,11 @@ function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExte
   }
   if (
     includesAny([
-      "\u0432 \u043f\u0443\u0442\u0438",
-      "\u0442\u0440\u0430\u043d\u0437\u0438\u0442",
-      "\u0441\u043e\u0440\u0442\u0438\u0440",
-      "\u043f\u043e\u043a\u0438\u043d\u0443\u043b",
-      "\u043f\u0440\u0438\u043d\u044f\u0442",
+      "в пути",
+      "транзит",
+      "сортиров",
+      "покинул",
+      "принят",
       "in_transit",
       "transit",
       "moving",
@@ -248,7 +289,9 @@ function detectRussianPostStatus(payload: Record<string, unknown>): DeliveryExte
   return "UNKNOWN";
 }
 
-function extractRussianPostRawStatus(payload: Record<string, unknown>): string | undefined {
+function extractRussianPostRawStatus(
+  payload: Record<string, unknown>,
+): string | undefined {
   const directCandidates = [
     ["soapLatestOperation"],
     ["soapLatestEvent"],
@@ -289,9 +332,9 @@ function extractRussianPostRawStatus(payload: Record<string, unknown>): string |
 function isRussianPostNotFound(payload: Record<string, unknown>): boolean {
   const snapshot = JSON.stringify(payload).toLowerCase();
   return (
-    snapshot.includes("\u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d") ||
-    snapshot.includes("\u043d\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442") ||
-    snapshot.includes("\u043d\u0435\u0432\u0435\u0440\u043d") ||
+    snapshot.includes("не найден") ||
+    snapshot.includes("не существует") ||
+    snapshot.includes("неверн") ||
     snapshot.includes("not found") ||
     snapshot.includes("invalid") ||
     snapshot.includes("authorizationfaultreason")
@@ -362,9 +405,7 @@ function mapYandexStatusToExternal(status: string): DeliveryExternalStatus {
   return "UNKNOWN";
 }
 
-async function requestYandexDeliveryRequestInfo(
-  requestId: string,
-): Promise<{
+async function requestYandexDeliveryRequestInfo(requestId: string): Promise<{
   status: DeliveryExternalStatus;
   rawStatus?: string;
   trackingUrl?: string;
@@ -457,7 +498,7 @@ async function requestTrackingApi(
       return payload as Record<string, unknown>;
     }
     return null;
-  } catch (_error) {
+  } catch {
     return null;
   }
 }
@@ -506,7 +547,7 @@ async function requestRussianPostTrackingJson(
       return payload as Record<string, unknown>;
     }
     return null;
-  } catch (_error) {
+  } catch {
     return null;
   }
 }
@@ -517,7 +558,7 @@ function buildRussianPostSoapRequest(
   password: string,
 ): string {
   return [
-    `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:oper="http://russianpost.org/operationhistory" xmlns:data="http://russianpost.org/operationhistory/data" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">`,
+    '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:oper="http://russianpost.org/operationhistory" xmlns:data="http://russianpost.org/operationhistory/data" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">',
     "<soap:Header/>",
     "<soap:Body>",
     "<oper:getOperationHistory>",
@@ -578,10 +619,15 @@ async function requestRussianPostTrackingSoap(
     const combinedOperation = [latestOperationType, latestOperationAttr]
       .filter((value): value is string => Boolean(value))
       .join(", ");
-    const explicitOperation = getLastValue(collectXmlTagValues(responseText, "OperName"));
+    const explicitOperation =
+      getLastValue(collectXmlTagValues(responseText, "OperName"));
     const latestOperation = explicitOperation ?? (combinedOperation || null);
-    const latestEvent = getLastValue(collectXmlTagValues(responseText, "PlaceName"));
-    const latestDate = getLastValue(collectXmlTagValues(responseText, "OperDate"));
+    const latestEvent = getLastValue(
+      collectXmlTagValues(responseText, "PlaceName"),
+    );
+    const latestDate = getLastValue(
+      collectXmlTagValues(responseText, "OperDate"),
+    );
     const faultReason =
       collectXmlTagValues(responseText, "AuthorizationFaultReason")[0] ??
       collectXmlTagValues(responseText, "Text")[0] ??
@@ -607,7 +653,7 @@ async function requestRussianPostTrackingSoap(
       soapFaultReason: faultReason,
       soapPayload: normalizedXml.slice(0, 10_000),
     };
-  } catch (_error) {
+  } catch {
     return null;
   }
 }
@@ -625,7 +671,9 @@ export async function validateTrackingNumber(params: {
   trackingNumber: string;
 }): Promise<DeliveryValidationResult> {
   const provider = normalizeProvider(params.provider);
-  const normalizedTrackingNumber = normalizeTrackingNumber(params.trackingNumber);
+  const normalizedTrackingNumber = normalizeTrackingNumber(
+    params.trackingNumber,
+  );
 
   if (!normalizedTrackingNumber) {
     return {
@@ -651,12 +699,16 @@ export async function validateTrackingNumber(params: {
   }
 
   if (provider === "yandex_pvz") {
-    const yandexInfo = await requestYandexDeliveryRequestInfo(normalizedTrackingNumber);
+    const yandexInfo = await requestYandexDeliveryRequestInfo(
+      normalizedTrackingNumber,
+    );
     if (yandexInfo) {
       return {
         valid: true,
         normalizedTrackingNumber,
-        trackingUrl: yandexInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
+        trackingUrl:
+          yandexInfo.trackingUrl ||
+          buildTrackingUrl(provider, normalizedTrackingNumber),
         source: "api",
       };
     }
@@ -703,7 +755,9 @@ export async function fetchTrackingStatus(params: {
   trackingNumber: string;
 }): Promise<DeliveryStatusResult | null> {
   const provider = normalizeProvider(params.provider);
-  const normalizedTrackingNumber = normalizeTrackingNumber(params.trackingNumber);
+  const normalizedTrackingNumber = normalizeTrackingNumber(
+    params.trackingNumber,
+  );
   if (!normalizedTrackingNumber) {
     return null;
   }
@@ -722,11 +776,15 @@ export async function fetchTrackingStatus(params: {
   }
 
   if (provider === "yandex_pvz") {
-    const yandexInfo = await requestYandexDeliveryRequestInfo(normalizedTrackingNumber);
+    const yandexInfo = await requestYandexDeliveryRequestInfo(
+      normalizedTrackingNumber,
+    );
     if (yandexInfo) {
       return {
         status: yandexInfo.status,
-        trackingUrl: yandexInfo.trackingUrl || buildTrackingUrl(provider, normalizedTrackingNumber),
+        trackingUrl:
+          yandexInfo.trackingUrl ||
+          buildTrackingUrl(provider, normalizedTrackingNumber),
         rawStatus: yandexInfo.rawStatus,
       };
     }

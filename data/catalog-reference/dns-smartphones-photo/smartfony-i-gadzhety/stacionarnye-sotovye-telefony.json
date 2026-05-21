@@ -1,0 +1,106 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Смартфоны и фототехника",
+  "subcategoryName": "Смартфоны и гаджеты",
+  "itemName": "Стационарные сотовые телефоны",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17aa84ec16404e77/stacionarnye-sotovye-telefony/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T16:29:27.034Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 3,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/e59e129bce72d582/stacionarnyj-sotovyj-telefon-dadzet-l100-cernyj/",
+      "title": "Стационарный сотовый телефон Даджет L100 черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)]",
+      "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)",
+      "bracketGroups": [
+        "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)"
+      ],
+      "priceText": "",
+      "productId": "e59e129bce72d582",
+      "cardText": "Стационарный сотовый телефон Даджет L100 черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)]4.76 |13 отзывов 1Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/1a465bca8d07ed20/stacionarnyj-sotovyj-telefon-bq-2839-point-cernyj/",
+      "title": "Стационарный сотовый телефон BQ 2839 Point черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]",
+      "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч",
+      "bracketGroups": [
+        "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч"
+      ],
+      "priceText": "",
+      "productId": "1a465bca8d07ed20",
+      "cardText": "Стационарный сотовый телефон BQ 2839 Point черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]4.03 |101 отзыв 2Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/61cd08d88d07ed20/stacionarnyj-sotovyj-telefon-bq-2839-point-belyj/",
+      "title": "Стационарный сотовый телефон BQ 2839 Point белый [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]",
+      "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч",
+      "bracketGroups": [
+        "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч"
+      ],
+      "priceText": "",
+      "productId": "61cd08d88d07ed20",
+      "cardText": "Стационарный сотовый телефон BQ 2839 Point белый [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]4.03 |101 отзывХорошая надежность"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Стационарный",
+      "models": [
+        {
+          "brand": "Стационарный",
+          "model": "сотовый телефон Даджет L100 черный",
+          "name": "Стационарный сотовый телефон Даджет L100 черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e59e129bce72d582/stacionarnyj-sotovyj-telefon-dadzet-l100-cernyj/",
+              "title": "Стационарный сотовый телефон Даджет L100 черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)]",
+              "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8)",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Стационарный",
+          "model": "сотовый телефон BQ 2839 Point белый",
+          "name": "Стационарный сотовый телефон BQ 2839 Point белый",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/61cd08d88d07ed20/stacionarnyj-sotovyj-telefon-bq-2839-point-belyj/",
+              "title": "Стационарный сотовый телефон BQ 2839 Point белый [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]",
+              "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Стационарный",
+          "model": "сотовый телефон BQ 2839 Point черный",
+          "name": "Стационарный сотовый телефон BQ 2839 Point черный",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/1a465bca8d07ed20/stacionarnyj-sotovyj-telefon-bq-2839-point-cernyj/",
+              "title": "Стационарный сотовый телефон BQ 2839 Point черный [2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч]",
+              "specsText": "2SIM, GSM 1800 (B3), GSM 1900 (B2), GSM 850 (B5), GSM 900 (B8), дисплей 2.8\", аккумулятор 1700 мА*ч",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17aa84ec16404e77/stacionarnye-sotovye-telefony/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 3,
+      "title": "Стационарные сотовые телефоны купить в интернет-магазине DNS. Стационарные сотовые телефоны цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

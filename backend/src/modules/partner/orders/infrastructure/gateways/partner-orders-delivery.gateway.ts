@@ -14,14 +14,14 @@ export class PartnerOrdersDeliveryGateway
   }
 
   fetchTrackingStatus(params: {
-    provider: "russian_post" | "yandex_pvz";
+    provider: "russian_post" | "yandex_pvz" | "ozon" | "wildberries" | "cdek";
     trackingNumber: string;
   }) {
     return fetchTrackingStatus(params);
   }
 
   validateTrackingNumber(params: {
-    provider: "russian_post" | "yandex_pvz";
+    provider: "russian_post" | "yandex_pvz" | "ozon" | "wildberries" | "cdek";
     trackingNumber: string;
   }) {
     return validateTrackingNumber(params);

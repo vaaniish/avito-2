@@ -24,7 +24,7 @@ export type AdminUserListRecord = {
   phone: string | null;
   block_reason: string | null;
   blocked_until: Date | null;
-  addresses: Array<{ city: string; region: string }>;
+  addresses: Array<{ city: string; region: string | null }>;
   seller_profile: {
     is_verified: boolean;
     average_response_minutes: number | null;

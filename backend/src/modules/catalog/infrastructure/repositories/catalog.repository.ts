@@ -560,7 +560,6 @@ export class CatalogRepository {
           seller_id: params.sellerId,
           reporter_id: params.reporterId,
           description: params.description,
-          evidence: null,
         },
       });
 

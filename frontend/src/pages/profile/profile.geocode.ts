@@ -23,6 +23,15 @@ export type ProfileGeocodeResult = {
 };
 
 function parseGeoObjectAddress(geoObject: any): ProfileGeocodeResult {
+  const addressMeta =
+    (geoObject?.properties?.get?.(
+      "metaDataProperty.GeocoderMetaData.Address",
+    ) as
+      | {
+          postal_code?: unknown;
+          formatted?: unknown;
+        }
+      | undefined) ?? undefined;
   const components = geoObject?.properties?.get?.(
     "metaDataProperty.GeocoderMetaData.Address.Components",
   ) as Array<{ kind: string; name: string }> | undefined;
@@ -47,11 +56,19 @@ function parseGeoObjectAddress(geoObject: any): ProfileGeocodeResult {
     if (component.kind === "country" && !country) country = component.name;
   }
 
-  const region = sanitizeRegion(resolvePreferredRegion(province, area));
-  const safeCity = sanitizeCityValue(city);
-  city = !safeCity && region ? region : safeCity;
+  if (!postalCode) {
+    const metadataPostalCode = String(addressMeta?.postal_code ?? "").trim();
+    if (metadataPostalCode) {
+      postalCode = metadataPostalCode;
+    }
+  }
 
-  const formatted = String(geoObject?.properties?.get?.("text") ?? "").trim();
+  const region = sanitizeRegion(resolvePreferredRegion(province, area));
+  city = sanitizeCityValue(city);
+
+  const formatted = String(
+    geoObject?.properties?.get?.("text") ?? addressMeta?.formatted ?? "",
+  ).trim();
   const coords = geoObject?.geometry?.getCoordinates?.();
   const lat = Array.isArray(coords) && coords.length >= 2 ? Number(coords[0]) : NaN;
   const lon = Array.isArray(coords) && coords.length >= 2 ? Number(coords[1]) : NaN;
@@ -109,97 +126,46 @@ export async function geocodeAddress(
     let parsed = parseGeoObjectAddress(firstGeoObject);
     if (!isRussianCountry(parsed.country)) return null;
 
-    if (!parsed.house || !parsed.postalCode || !sanitizeRegion(parsed.region)) {
-      try {
-        const houseGeocode = await ymaps.geocode(rawQuery, {
-          kind: "house",
-          results: 1,
-          boundedBy: RUSSIA_BOUNDS,
-          strictBounds: true,
-        });
-        const houseGeoObject = houseGeocode?.geoObjects?.get?.(0);
-        if (houseGeoObject) {
-          parsed = mergeParsed(parsed, parseGeoObjectAddress(houseGeoObject));
-          if (!isRussianCountry(parsed.country)) return null;
-        }
-      } catch {
-        // keep primary result
+    const coords = firstGeoObject?.geometry?.getCoordinates?.();
+
+    try {
+      const houseGeocode = await ymaps.geocode(rawQuery, {
+        kind: "house",
+        results: 1,
+        boundedBy: RUSSIA_BOUNDS,
+        strictBounds: true,
+      });
+      const houseGeoObject = houseGeocode?.geoObjects?.get?.(0);
+      if (houseGeoObject) {
+        parsed = mergeParsed(parsed, parseGeoObjectAddress(houseGeoObject));
+        if (!isRussianCountry(parsed.country)) return null;
       }
+    } catch {
+      // keep primary result
     }
 
-    if (!parsed.postalCode && parsed.house) {
+    if (Array.isArray(coords) && coords.length >= 2) {
       try {
-        const houseQuery = [
-          parsed.region,
-          parsed.city,
-          parsed.street,
-          parsed.house ? `дом ${parsed.house}` : "",
-        ]
-          .map((item) => String(item ?? "").trim())
-          .filter(Boolean)
-          .join(", ");
-
-        if (houseQuery) {
-          const exactHouseGeocode = await ymaps.geocode(houseQuery, {
-            kind: "house",
-            results: 1,
-            boundedBy: RUSSIA_BOUNDS,
-            strictBounds: true,
-          });
-          const exactHouseGeoObject = exactHouseGeocode?.geoObjects?.get?.(0);
-          if (exactHouseGeoObject) {
-            parsed = mergeParsed(parsed, parseGeoObjectAddress(exactHouseGeoObject));
-            if (!isRussianCountry(parsed.country)) return null;
-          }
+        const reverseGeocode = await ymaps.geocode(coords, {
+          kind: "house",
+          results: 1,
+        });
+        const reverseFirst = reverseGeocode?.geoObjects?.get?.(0);
+        if (reverseFirst) {
+          parsed = mergeParsed(parsed, parseGeoObjectAddress(reverseFirst));
+          if (!isRussianCountry(parsed.country)) return null;
         }
       } catch {
         // keep previous result
       }
     }
 
-    if (!isRussianCountry(parsed.country)) return null;
-
-    if (parsed.postalCode) {
-      return {
-        ...parsed,
-        region: sanitizeRegion(parsed.region),
-        city: sanitizeCityValue(parsed.city),
-        house: sanitizeHouseValue(parsed.house),
-      };
-    }
-
-    const coords = firstGeoObject?.geometry?.getCoordinates?.();
-    if (!Array.isArray(coords) || coords.length < 2) {
-      return {
-        ...parsed,
-        region: sanitizeRegion(parsed.region),
-        city: sanitizeCityValue(parsed.city),
-        house: sanitizeHouseValue(parsed.house),
-      };
-    }
-
-    try {
-      const reverseGeocode = await ymaps.geocode(coords, { kind: "house", results: 1 });
-      const reverseFirst = reverseGeocode?.geoObjects?.get?.(0);
-      if (!reverseFirst) {
-        return {
-          ...parsed,
-          region: sanitizeRegion(parsed.region),
-          city: sanitizeCityValue(parsed.city),
-          house: sanitizeHouseValue(parsed.house),
-        };
-      }
-      const reverseParsed = parseGeoObjectAddress(reverseFirst);
-      const merged = mergeParsed(parsed, reverseParsed);
-      return isRussianCountry(merged.country) ? merged : null;
-    } catch {
-      return {
-        ...parsed,
-        region: sanitizeRegion(parsed.region),
-        city: sanitizeCityValue(parsed.city),
-        house: sanitizeHouseValue(parsed.house),
-      };
-    }
+    return {
+      ...parsed,
+      region: sanitizeRegion(parsed.region),
+      city: sanitizeCityValue(parsed.city),
+      house: sanitizeHouseValue(parsed.house),
+    };
   } catch {
     return null;
   }

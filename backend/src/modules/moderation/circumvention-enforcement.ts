@@ -183,7 +183,6 @@ async function createAutoComplaintIfNeeded(
       seller_id: params.autoComplaint.sellerId,
       reporter_id: params.autoComplaint.reporterId,
       description,
-      evidence: clipText(params.text, 500),
     },
     select: {
       id: true,

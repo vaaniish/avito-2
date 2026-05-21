@@ -2,26 +2,25 @@ import { useCallback, useEffect, useRef } from "react";
 import { RUSSIA_BOUNDS, YANDEX_GEOSUGGEST_API_KEY } from "./profile.address-utils";
 import {
   composeFullAddress,
-  extractApartmentNumber,
-  extractEntranceNumber,
   normalizeAddressDisplay,
   normalizeFreeformAddressForGeocode,
-  sanitizeApartmentValue,
   sanitizeCityValue,
-  sanitizeEntranceValue,
   sanitizeHouseValue,
   sanitizeRegion,
   sanitizeStreetValue,
 } from "./profile.address-helpers";
-import { mountNativeAddressSuggest } from "./profile.address-suggest";
-import { scheduleAddressAutofill } from "./profile.address-autofill";
+import { hasReadyPostalCode } from "./profile.address-flow";
+import {
+  mountNativeAddressSuggest,
+  type NativeAddressSuggestOption,
+} from "./profile.address-suggest";
 import { geocodeAddress as geocodeProfileAddress, type ProfileGeocodeResult } from "./profile.geocode";
 import type { AddressFormState, AddressSuggestionOption } from "./profile.models";
 
 export function useProfileAddressGeocoding(params: {
   addressModalOpen: boolean;
-  fullAddress: string;
   setAddressForm: React.Dispatch<React.SetStateAction<AddressFormState>>;
+  setAddressValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   setAddressMapHint: React.Dispatch<React.SetStateAction<string>>;
   setAddressSuggestions: React.Dispatch<React.SetStateAction<AddressSuggestionOption[]>>;
   setIsAddressInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,14 +52,35 @@ export function useProfileAddressGeocoding(params: {
       (await geocodeAddressWithTimeout(rawInput, 900)) ||
       (geocodeSeed !== rawInput ? await geocodeAddressWithTimeout(geocodeSeed, 900) : null);
 
-    if (!parsed) {
-      params.setAddressForm((prev) => ({ ...prev, fullAddress: normalizeAddressDisplay(rawInput) }));
-      params.setAddressMapHint("Не удалось определить координаты. Выберите подсказку или точку на карте.");
+    if (
+      !parsed ||
+      !sanitizeCityValue(parsed.city) ||
+      !sanitizeStreetValue(parsed.street) ||
+      !sanitizeHouseValue(parsed.house) ||
+      typeof parsed.lat !== "number" ||
+      !Number.isFinite(parsed.lat) ||
+      typeof parsed.lon !== "number" ||
+      !Number.isFinite(parsed.lon)
+    ) {
+      params.setAddressValidationErrors([]);
+      params.setAddressForm((prev) => ({
+        ...prev,
+        fullAddress: normalizeAddressDisplay(rawInput),
+        region: "",
+        city: "",
+        street: "",
+        house: "",
+        postalCode: "",
+        lat: null,
+        lon: null,
+        isYandexAddressConfirmed: false,
+      }));
+      params.setAddressMapHint(
+        "Выберите конечный адрес Яндекса с номером дома.",
+      );
       return;
     }
 
-    const apartmentFromInput = sanitizeApartmentValue(extractApartmentNumber(rawInput));
-    const entranceFromInput = sanitizeEntranceValue(extractEntranceNumber(rawInput));
     let nextCenterQuery: string | null = null;
 
     params.setAddressForm((prev) => {
@@ -74,22 +94,29 @@ export function useProfileAddressGeocoding(params: {
           rawInput,
       );
       nextCenterQuery = canonicalBase || null;
-      return {
+      const nextState: AddressFormState = {
         ...prev,
         fullAddress: canonicalBase || rawInput,
         region,
         city,
         street,
         house,
-        apartment: apartmentFromInput,
-        entrance: entranceFromInput,
         postalCode: parsed.postalCode || "",
         lat: typeof parsed.lat === "number" ? parsed.lat : prev.lat,
         lon: typeof parsed.lon === "number" ? parsed.lon : prev.lon,
+        isYandexAddressConfirmed: true,
       };
+      return nextState;
     });
 
-    params.setAddressMapHint("");
+    params.setAddressMapHint(
+      hasReadyPostalCode({
+        postalCode: parsed.postalCode || "",
+      })
+        ? ""
+        : "Яндекс не вернул почтовый индекс для этого дома. Это не мешает сохранению адреса.",
+    );
+    params.setAddressValidationErrors([]);
     params.setMapCenterQuery(nextCenterQuery);
   }, [geocodeAddressWithTimeout, params]);
 
@@ -104,13 +131,25 @@ export function useProfileAddressGeocoding(params: {
       suggestViewRef: nativeAddressSuggestViewRef,
       geosuggestApiKey: YANDEX_GEOSUGGEST_API_KEY,
       bounds: RUSSIA_BOUNDS,
+      suggestTypes: "geo",
+      onlyHouseGeoResults: true,
       onSuggestEnabled: params.setIsNativeAddressSuggestEnabled,
-      onSelectValue: async (selectedValue) => {
+      onSelectValue: async (
+        selectedValue,
+        option?: NativeAddressSuggestOption,
+      ) => {
         if (addressInputBlurTimeoutRef.current) {
           window.clearTimeout(addressInputBlurTimeoutRef.current);
           addressInputBlurTimeoutRef.current = null;
         }
         isSelectingAddressSuggestionRef.current = false;
+        if (option && !option.isHouseResult) {
+          params.setAddressMapHint(
+            "Выберите конечный адрес Яндекса с номером дома.",
+          );
+          params.setIsAddressInputFocused(true);
+          return;
+        }
         params.setAddressForm((prev) => ({ ...prev, fullAddress: selectedValue }));
         params.setAddressSuggestions([]);
         params.setAddressSuggestionActiveIndex(-1);
@@ -120,21 +159,10 @@ export function useProfileAddressGeocoding(params: {
     });
   }, [params, applyFullAddressValueRef]);
 
-  useEffect(() => {
-    if (!params.addressModalOpen) return;
-    return scheduleAddressAutofill({
-      fullAddress: params.fullAddress,
-      geocodeAddressWithTimeout,
-      setAddressForm: params.setAddressForm,
-    });
-  }, [geocodeAddressWithTimeout, params]);
-
   return {
-    geocodeAddressWithTimeout,
     applyFullAddressValueRef,
     addressInputBlurTimeoutRef,
     isSelectingAddressSuggestionRef,
     addressFullInputRef,
-    nativeAddressSuggestViewRef,
   };
 }

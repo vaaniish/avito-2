@@ -126,27 +126,19 @@ export type ProfileOrdersServicesDeps = {
 
 export function normalizeDeliveryAddressFromRecord(params: {
   address: {
-    full_address: string | null;
     region: string | null;
     city: string | null;
     street: string | null;
     house: string | null;
-    apartment: string | null;
-    entrance: string | null;
   };
   helpers: ProfileOrdersServiceHelpers;
 }): string {
-  return (
-    params.helpers.normalizeTextField(params.address.full_address) ||
-    params.helpers.buildAddressFullAddress({
-      region: params.address.region ?? "",
-      city: params.address.city ?? "",
-      street: params.address.street ?? "",
-      house: params.address.house ?? "",
-      apartment: params.address.apartment ?? "",
-      entrance: params.address.entrance ?? "",
-    })
-  );
+  return params.helpers.buildAddressFullAddress({
+    region: params.address.region ?? "",
+    city: params.address.city ?? "",
+    street: params.address.street ?? "",
+    house: params.address.house ?? "",
+  });
 }
 
 export type ProfileOrderStatusOutput = BuyerProfileOrderStatus;

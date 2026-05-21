@@ -60,6 +60,7 @@ export function ProfilePage({
     addressFullInputHandlers,
     addressFullInputRef,
     addressMapHint,
+    addressValidationErrors,
     addressModalOpen,
     mapCenterQuery,
     closeAddressCreateModal,
@@ -188,6 +189,7 @@ export function ProfilePage({
       addressModalOpen={addressModalOpen}
       addressForm={addressForm}
       addressMapHint={addressMapHint}
+      addressValidationErrors={addressValidationErrors}
       mapCenterQuery={mapCenterQuery}
       addressFullInputRef={addressFullInputRef}
       onOpenCreateModal={openAddressCreateModal}

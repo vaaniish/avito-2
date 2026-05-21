@@ -5,7 +5,7 @@ type CreateAddressInputHandlersParams = {
   fullAddress: string;
   addressInputBlurTimeoutRef: MutableRefObject<number | null>;
   isSelectingAddressSuggestionRef: MutableRefObject<boolean>;
-  applyFullAddressValueRef: MutableRefObject<(value: string) => Promise<void>>;
+  applyFullAddressValueRef?: MutableRefObject<(value: string) => Promise<void>>;
   setAddressMapHint: (value: string) => void;
   setIsAddressInputFocused: (value: boolean) => void;
   setAddressSuggestionActiveIndex: (value: number) => void;
@@ -53,17 +53,18 @@ export function createAddressInputHandlers({
     const currentValue = fullAddress.trim();
     if (!currentValue) return;
 
-    void (async () => {
-      try {
-        await applyFullAddressValueRef.current(currentValue);
+    if (applyFullAddressValueRef) {
+      void applyFullAddressValueRef.current(currentValue).then(() => {
         setAddressMapHint("");
         setIsAddressInputFocused(true);
-      } catch {
-        setAddressMapHint(
-          "Не удалось применить адрес. Попробуйте выбрать вариант из подсказок.",
-        );
-      }
-    })();
+      });
+      return;
+    }
+
+    setAddressMapHint(
+      "Нажмите на подсказку Яндекса или выберите дом на карте, чтобы подтвердить адрес.",
+    );
+    setIsAddressInputFocused(true);
   };
 
   const onEscape = () => {

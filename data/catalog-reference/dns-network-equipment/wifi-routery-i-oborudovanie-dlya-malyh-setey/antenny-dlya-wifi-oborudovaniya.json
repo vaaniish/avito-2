@@ -1,0 +1,568 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Wi-Fi роутеры и оборудование для малых сетей",
+  "itemName": "Антенны для Wi-Fi оборудования",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9eafb16404e77/antenny-dla-wi-fi-oborudovania/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:03:37.083Z",
+  "status": "done",
+  "totalPages": 2,
+  "totalProducts": 21,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/886cafc8fbd13332/antenna-espada-ant-3500gh/",
+      "title": "Антенна Espada ANT-3500GH [внешняя, всенаправленная, 5 dBi, RP-SMA Male]",
+      "specsText": "внешняя, всенаправленная, 5 dBi, RP-SMA Male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 5 dBi, RP-SMA Male"
+      ],
+      "priceText": "",
+      "productId": "886cafc8fbd13332",
+      "cardText": "Антенна Espada ANT-3500GH [внешняя, всенаправленная, 5 dBi, RP-SMA Male]4.76 |385 отзывов 6Отличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/9053a08593512ff0/antenna-espada-esp-ant3/",
+      "title": "Антенна Espada ESP-ANT3 [внешняя, всенаправленная, 3 dBi, RP-SMA Male]",
+      "specsText": "внешняя, всенаправленная, 3 dBi, RP-SMA Male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 3 dBi, RP-SMA Male"
+      ],
+      "priceText": "",
+      "productId": "9053a08593512ff0",
+      "cardText": "Антенна Espada ESP-ANT3 [внешняя, всенаправленная, 3 dBi, RP-SMA Male]4.82 |31 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/db77e87193512ff0/antenna-espada-esp-ant3b/",
+      "title": "Антенна Espada ESP-ANT3B [внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м]",
+      "specsText": "внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м"
+      ],
+      "priceText": "",
+      "productId": "db77e87193512ff0",
+      "cardText": "Антенна Espada ESP-ANT3B [внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м]4.41 |140 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/93406826c177f007/antenna-espada-ant-3500ghw/",
+      "title": "Антенна Espada ANT-3500GHW [внешняя, всенаправленная, 5 dBi, RP-SMA Male]",
+      "specsText": "внешняя, всенаправленная, 5 dBi, RP-SMA Male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 5 dBi, RP-SMA Male"
+      ],
+      "priceText": "",
+      "productId": "93406826c177f007",
+      "cardText": "Антенна Espada ANT-3500GHW [внешняя, всенаправленная, 5 dBi, RP-SMA Male]5 |5 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/f302fa6ac3003361/antenna-remo-bas-2301/",
+      "title": "Антенна РЭМО BAS-2301 [внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м]",
+      "specsText": "внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м",
+      "bracketGroups": [
+        "внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м"
+      ],
+      "priceText": "",
+      "productId": "f302fa6ac3003361",
+      "cardText": "Антенна РЭМО BAS-2301 [внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м]4.39 |62 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2dd11ee693522ff0/antenna-espada-esp-ant9/",
+      "title": "Антенна Espada ESP-ANT9 [внешняя, всенаправленная, 9 dBi, RP-SMA Male]",
+      "specsText": "внешняя, всенаправленная, 9 dBi, RP-SMA Male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 9 dBi, RP-SMA Male"
+      ],
+      "priceText": "",
+      "productId": "2dd11ee693522ff0",
+      "cardText": "Антенна Espada ESP-ANT9 [внешняя, всенаправленная, 9 dBi, RP-SMA Male]4.26 |78 отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/c00c13ad6b173330/antenna-ubiquiti-uma-d/",
+      "title": "Антенна Ubiquiti UMA-D [внешняя, направленная, 15 dBi, RP-SMA Female x2]",
+      "specsText": "внешняя, направленная, 15 dBi, RP-SMA Female x2",
+      "bracketGroups": [
+        "внешняя, направленная, 15 dBi, RP-SMA Female x2"
+      ],
+      "priceText": "",
+      "productId": "c00c13ad6b173330",
+      "cardText": "Антенна Ubiquiti UMA-D [внешняя, направленная, 15 dBi, RP-SMA Female x2]5 |3 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/6278c37de07e3330/antenna-ubiquiti-airmax-omni-amo-5g13/",
+      "title": "Антенна Ubiquiti AirMax Omni AMO-5G13 [внешняя, всенаправленная, 13 dBi, RP-SMA x2]",
+      "specsText": "внешняя, всенаправленная, 13 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 13 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "6278c37de07e3330",
+      "cardText": "Антенна Ubiquiti AirMax Omni AMO-5G13 [внешняя, всенаправленная, 13 dBi, RP-SMA x2]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/82e5bb1591ce2ff0/antenna-zyxel-ant2105/",
+      "title": "Антенна Zyxel ANT2105 [внешняя, всенаправленная, 7 dBi, N male]",
+      "specsText": "внешняя, всенаправленная, 7 dBi, N male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 7 dBi, N male"
+      ],
+      "priceText": "",
+      "productId": "82e5bb1591ce2ff0",
+      "cardText": "Антенна Zyxel ANT2105 [внешняя, всенаправленная, 7 dBi, N male] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/fc526394e07e3330/antenna-ubiquiti-airmax-sector-am-5ac21-60/",
+      "title": "Антенна Ubiquiti AirMax Sector AM-5AC21-60 [внешняя, секторная, 21 dBi, RP-SMA x2]",
+      "specsText": "внешняя, секторная, 21 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, секторная, 21 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "fc526394e07e3330",
+      "cardText": "Антенна Ubiquiti AirMax Sector AM-5AC21-60 [внешняя, секторная, 21 dBi, RP-SMA x2]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/84d0a756c3b43330/antenna-ubiquiti-rocketdish-5g-30-lw/",
+      "title": "Антенна Ubiquiti RocketDish 5G-30 LW [внешняя, направленная, 30 dBi, RP-SMA]",
+      "specsText": "внешняя, направленная, 30 dBi, RP-SMA",
+      "bracketGroups": [
+        "внешняя, направленная, 30 dBi, RP-SMA"
+      ],
+      "priceText": "",
+      "productId": "84d0a756c3b43330",
+      "cardText": "Антенна Ubiquiti RocketDish 5G-30 LW [внешняя, направленная, 30 dBi, RP-SMA]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/831927ace07f3330/antenna-ubiquiti-airmax-sector-am-v2g-ti/",
+      "title": "Антенна Ubiquiti AirMax Sector AM-V2G-TI [внешняя, секторная, 17 dBi, RP-SMA x2]",
+      "specsText": "внешняя, секторная, 17 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, секторная, 17 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "831927ace07f3330",
+      "cardText": "Антенна Ubiquiti AirMax Sector AM-V2G-TI [внешняя, секторная, 17 dBi, RP-SMA x2]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/e922cf20e07e3330/antenna-ubiquiti-airmax-sector-am-2g16-90/",
+      "title": "Антенна Ubiquiti AirMax Sector AM-2G16-90 [внешняя, секторная, 16 dBi, RP-SMA x2]",
+      "specsText": "внешняя, секторная, 16 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, секторная, 16 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "e922cf20e07e3330",
+      "cardText": "Антенна Ubiquiti AirMax Sector AM-2G16-90 [внешняя, секторная, 16 dBi, RP-SMA x2]5 |1 отзывОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/44e6335947021b80/antenna-ubiquiti-airmax-rd-5g34/",
+      "title": "Антенна Ubiquiti AirMax RD-5G34 [внешняя, направленная, 34 dBi, RP-SMA x2]",
+      "specsText": "внешняя, направленная, 34 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, направленная, 34 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "44e6335947021b80",
+      "cardText": "Антенна Ubiquiti AirMax RD-5G34 [внешняя, направленная, 34 dBi, RP-SMA x2]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/b8727c5f29503330/antenna-ubiquiti-airmax-omni-amo-5g10/",
+      "title": "Антенна Ubiquiti AirMax Omni AMO-5G10 [внешняя, всенаправленная, 10 dBi, RP-SMA Male]",
+      "specsText": "внешняя, всенаправленная, 10 dBi, RP-SMA Male",
+      "bracketGroups": [
+        "внешняя, всенаправленная, 10 dBi, RP-SMA Male"
+      ],
+      "priceText": "",
+      "productId": "b8727c5f29503330",
+      "cardText": "Антенна Ubiquiti AirMax Omni AMO-5G10 [внешняя, всенаправленная, 10 dBi, RP-SMA Male]5 |2 отзываОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/35d0d6527b11d21a/antenna-ubiquiti-airmax-rocketdish-5g-31-ac/",
+      "title": "Антенна Ubiquiti airMAX RocketDish 5G-31 AC [внешняя, направленная, 31 dBi, RP-SMA x2]",
+      "specsText": "внешняя, направленная, 31 dBi, RP-SMA x2",
+      "bracketGroups": [
+        "внешняя, направленная, 31 dBi, RP-SMA x2"
+      ],
+      "priceText": "",
+      "productId": "35d0d6527b11d21a",
+      "cardText": "Антенна Ubiquiti airMAX RocketDish 5G-31 AC [внешняя, направленная, 31 dBi, RP-SMA x2]5|рейтинг брендаОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/2b3b38101db29345/tocka-dostupa-eltex-wb-3p-ptp5d50/",
+      "title": "Точка доступа Eltex WB-3P-PTP5(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с]",
+      "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с",
+      "bracketGroups": [
+        "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "2b3b38101db29345",
+      "cardText": "Точка доступа Eltex WB-3P-PTP5(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/60d49aa9be2f82a1/tocka-dostupa-eltex-wb-3p-ptp6d50/",
+      "title": "Точка доступа Eltex WB-3P-PTP6(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с]",
+      "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с",
+      "bracketGroups": [
+        "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "60d49aa9be2f82a1",
+      "cardText": "Точка доступа Eltex WB-3P-PTP6(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с] нет отзывов"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d20bd26b5cd63332/antenna-zyxel-ant1315/",
+      "title": "Антенна Zyxel ANT1315 [внешняя, направленная, 15 dBi, N female x3]",
+      "specsText": "внешняя, направленная, 15 dBi, N female x3",
+      "bracketGroups": [
+        "внешняя, направленная, 15 dBi, N female x3"
+      ],
+      "priceText": "",
+      "productId": "d20bd26b5cd63332",
+      "cardText": "Антенна Zyxel ANT1315 [внешняя, направленная, 15 dBi, N female x3] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d20bd26c5cd63332/antenna-zyxel-ant3320/",
+      "title": "Антенна Zyxel ANT3320 [внешняя, направленная, 20 dBi, N female x3]",
+      "specsText": "внешняя, направленная, 20 dBi, N female x3",
+      "bracketGroups": [
+        "внешняя, направленная, 20 dBi, N female x3"
+      ],
+      "priceText": "",
+      "productId": "d20bd26c5cd63332",
+      "cardText": "Антенна Zyxel ANT3320 [внешняя, направленная, 20 dBi, N female x3] нет отзывовОтличная надежность"
+    },
+    {
+      "href": "https://www.dns-shop.ru/product/d60d203bbe85e8cf/tocka-dostupa-eltex-wb-3p-ptp2d50/",
+      "title": "Точка доступа Eltex WB-3P-PTP2(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с]",
+      "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с",
+      "bracketGroups": [
+        "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с"
+      ],
+      "priceText": "",
+      "productId": "d60d203bbe85e8cf",
+      "cardText": "Точка доступа Eltex WB-3P-PTP2(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с] нет отзывов"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Антенна",
+      "models": [
+        {
+          "brand": "Антенна",
+          "model": "РЭМО BAS-2301",
+          "name": "Антенна РЭМО BAS-2301",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/f302fa6ac3003361/antenna-remo-bas-2301/",
+              "title": "Антенна РЭМО BAS-2301 [внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м]",
+              "specsText": "внешняя, направленная, 15 dBi, RP-SMA Female, кабель - 5 м",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Espada ANT-3500GH",
+          "name": "Антенна Espada ANT-3500GH",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/886cafc8fbd13332/antenna-espada-ant-3500gh/",
+              "title": "Антенна Espada ANT-3500GH [внешняя, всенаправленная, 5 dBi, RP-SMA Male]",
+              "specsText": "внешняя, всенаправленная, 5 dBi, RP-SMA Male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Espada ANT-3500GHW",
+          "name": "Антенна Espada ANT-3500GHW",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/93406826c177f007/antenna-espada-ant-3500ghw/",
+              "title": "Антенна Espada ANT-3500GHW [внешняя, всенаправленная, 5 dBi, RP-SMA Male]",
+              "specsText": "внешняя, всенаправленная, 5 dBi, RP-SMA Male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Espada ESP-ANT3",
+          "name": "Антенна Espada ESP-ANT3",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/9053a08593512ff0/antenna-espada-esp-ant3/",
+              "title": "Антенна Espada ESP-ANT3 [внешняя, всенаправленная, 3 dBi, RP-SMA Male]",
+              "specsText": "внешняя, всенаправленная, 3 dBi, RP-SMA Male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Espada ESP-ANT3B",
+          "name": "Антенна Espada ESP-ANT3B",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/db77e87193512ff0/antenna-espada-esp-ant3b/",
+              "title": "Антенна Espada ESP-ANT3B [внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м]",
+              "specsText": "внешняя, всенаправленная, 3 dBi, RP-SMA Male, кабель - 3 м",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Espada ESP-ANT9",
+          "name": "Антенна Espada ESP-ANT9",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2dd11ee693522ff0/antenna-espada-esp-ant9/",
+              "title": "Антенна Espada ESP-ANT9 [внешняя, всенаправленная, 9 dBi, RP-SMA Male]",
+              "specsText": "внешняя, всенаправленная, 9 dBi, RP-SMA Male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax Omni AMO-5G10",
+          "name": "Антенна Ubiquiti AirMax Omni AMO-5G10",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/b8727c5f29503330/antenna-ubiquiti-airmax-omni-amo-5g10/",
+              "title": "Антенна Ubiquiti AirMax Omni AMO-5G10 [внешняя, всенаправленная, 10 dBi, RP-SMA Male]",
+              "specsText": "внешняя, всенаправленная, 10 dBi, RP-SMA Male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax Omni AMO-5G13",
+          "name": "Антенна Ubiquiti AirMax Omni AMO-5G13",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/6278c37de07e3330/antenna-ubiquiti-airmax-omni-amo-5g13/",
+              "title": "Антенна Ubiquiti AirMax Omni AMO-5G13 [внешняя, всенаправленная, 13 dBi, RP-SMA x2]",
+              "specsText": "внешняя, всенаправленная, 13 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax RD-5G34",
+          "name": "Антенна Ubiquiti AirMax RD-5G34",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/44e6335947021b80/antenna-ubiquiti-airmax-rd-5g34/",
+              "title": "Антенна Ubiquiti AirMax RD-5G34 [внешняя, направленная, 34 dBi, RP-SMA x2]",
+              "specsText": "внешняя, направленная, 34 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti airMAX RocketDish 5G-31 AC",
+          "name": "Антенна Ubiquiti airMAX RocketDish 5G-31 AC",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/35d0d6527b11d21a/antenna-ubiquiti-airmax-rocketdish-5g-31-ac/",
+              "title": "Антенна Ubiquiti airMAX RocketDish 5G-31 AC [внешняя, направленная, 31 dBi, RP-SMA x2]",
+              "specsText": "внешняя, направленная, 31 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax Sector AM-2G16-90",
+          "name": "Антенна Ubiquiti AirMax Sector AM-2G16-90",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/e922cf20e07e3330/antenna-ubiquiti-airmax-sector-am-2g16-90/",
+              "title": "Антенна Ubiquiti AirMax Sector AM-2G16-90 [внешняя, секторная, 16 dBi, RP-SMA x2]",
+              "specsText": "внешняя, секторная, 16 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax Sector AM-5AC21-60",
+          "name": "Антенна Ubiquiti AirMax Sector AM-5AC21-60",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/fc526394e07e3330/antenna-ubiquiti-airmax-sector-am-5ac21-60/",
+              "title": "Антенна Ubiquiti AirMax Sector AM-5AC21-60 [внешняя, секторная, 21 dBi, RP-SMA x2]",
+              "specsText": "внешняя, секторная, 21 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti AirMax Sector AM-V2G-TI",
+          "name": "Антенна Ubiquiti AirMax Sector AM-V2G-TI",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/831927ace07f3330/antenna-ubiquiti-airmax-sector-am-v2g-ti/",
+              "title": "Антенна Ubiquiti AirMax Sector AM-V2G-TI [внешняя, секторная, 17 dBi, RP-SMA x2]",
+              "specsText": "внешняя, секторная, 17 dBi, RP-SMA x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti RocketDish 5G-30 LW",
+          "name": "Антенна Ubiquiti RocketDish 5G-30 LW",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/84d0a756c3b43330/antenna-ubiquiti-rocketdish-5g-30-lw/",
+              "title": "Антенна Ubiquiti RocketDish 5G-30 LW [внешняя, направленная, 30 dBi, RP-SMA]",
+              "specsText": "внешняя, направленная, 30 dBi, RP-SMA",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Ubiquiti UMA-D",
+          "name": "Антенна Ubiquiti UMA-D",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/c00c13ad6b173330/antenna-ubiquiti-uma-d/",
+              "title": "Антенна Ubiquiti UMA-D [внешняя, направленная, 15 dBi, RP-SMA Female x2]",
+              "specsText": "внешняя, направленная, 15 dBi, RP-SMA Female x2",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Zyxel ANT1315",
+          "name": "Антенна Zyxel ANT1315",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d20bd26b5cd63332/antenna-zyxel-ant1315/",
+              "title": "Антенна Zyxel ANT1315 [внешняя, направленная, 15 dBi, N female x3]",
+              "specsText": "внешняя, направленная, 15 dBi, N female x3",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Zyxel ANT2105",
+          "name": "Антенна Zyxel ANT2105",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/82e5bb1591ce2ff0/antenna-zyxel-ant2105/",
+              "title": "Антенна Zyxel ANT2105 [внешняя, всенаправленная, 7 dBi, N male]",
+              "specsText": "внешняя, всенаправленная, 7 dBi, N male",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Антенна",
+          "model": "Zyxel ANT3320",
+          "name": "Антенна Zyxel ANT3320",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d20bd26c5cd63332/antenna-zyxel-ant3320/",
+              "title": "Антенна Zyxel ANT3320 [внешняя, направленная, 20 dBi, N female x3]",
+              "specsText": "внешняя, направленная, 20 dBi, N female x3",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Точка",
+      "models": [
+        {
+          "brand": "Точка",
+          "model": "доступа Eltex WB-3P-PTP2(D50)",
+          "name": "Точка доступа Eltex WB-3P-PTP2(D50)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/d60d203bbe85e8cf/tocka-dostupa-eltex-wb-3p-ptp2d50/",
+              "title": "Точка доступа Eltex WB-3P-PTP2(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с]",
+              "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 2.4 ГГц, 574 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Точка",
+          "model": "доступа Eltex WB-3P-PTP5(D50)",
+          "name": "Точка доступа Eltex WB-3P-PTP5(D50)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/2b3b38101db29345/tocka-dostupa-eltex-wb-3p-ptp5d50/",
+              "title": "Точка доступа Eltex WB-3P-PTP5(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с]",
+              "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 5 ГГц, 2402 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        },
+        {
+          "brand": "Точка",
+          "model": "доступа Eltex WB-3P-PTP6(D50)",
+          "name": "Точка доступа Eltex WB-3P-PTP6(D50)",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/60d49aa9be2f82a1/tocka-dostupa-eltex-wb-3p-ptp6d50/",
+              "title": "Точка доступа Eltex WB-3P-PTP6(D50) [порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с]",
+              "specsText": "порты: 1 шт, 100 Мбит/с, 1000 Мбит/с, 10 Мбит/с, Wi-Fi 802.11 6 ГГц, 2402 Мбит/с",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9eafb16404e77/antenny-dla-wi-fi-oborudovania/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 18,
+      "title": "Антенны для Wi-Fi оборудования купить в интернет-магазине DNS. Антенны для Wi-Fi оборудования цены, большой каталог, новинки. - страница 1 из 2"
+    },
+    {
+      "page": 2,
+      "url": "https://www.dns-shop.ru/catalog/17a9eafb16404e77/antenny-dla-wi-fi-oborudovania/?stock=now-today-tomorrow-later&p=2",
+      "status": 200,
+      "count": 3,
+      "title": "Антенны для Wi-Fi оборудования купить в интернет-магазине DNS. Антенны для Wi-Fi оборудования цены, большой каталог, новинки. - страница 2 из 2"
+    }
+  ],
+  "errors": []
+}

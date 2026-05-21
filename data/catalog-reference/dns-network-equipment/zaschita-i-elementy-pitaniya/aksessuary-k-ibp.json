@@ -1,0 +1,54 @@
+{
+  "source": "DNS catalog via Safari same-origin XHR",
+  "categoryName": "Сетевое оборудование",
+  "subcategoryName": "Защита и элементы питания",
+  "itemName": "Аксессуары к ИБП",
+  "dnsUrl": "https://www.dns-shop.ru/catalog/17a9a30516404e77/aksessuary-k-ibp/?stock=now-today-tomorrow-later",
+  "collectedAt": "2026-05-07T17:04:59.208Z",
+  "status": "done",
+  "totalPages": 1,
+  "totalProducts": 1,
+  "products": [
+    {
+      "href": "https://www.dns-shop.ru/product/3da57ed503ba2ff2/kabel-huawei-d15m-d15f/",
+      "title": "Кабель HUAWEI D15M-D15F",
+      "specsText": "",
+      "bracketGroups": [],
+      "priceText": "",
+      "productId": "3da57ed503ba2ff2",
+      "cardText": "Кабель HUAWEI D15M-D15F нет отзывов"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Кабель",
+      "models": [
+        {
+          "brand": "Кабель",
+          "model": "HUAWEI D15M-D15F",
+          "name": "Кабель HUAWEI D15M-D15F",
+          "manufacturerCodes": [],
+          "products": [
+            {
+              "href": "https://www.dns-shop.ru/product/3da57ed503ba2ff2/kabel-huawei-d15m-d15f/",
+              "title": "Кабель HUAWEI D15M-D15F",
+              "specsText": "",
+              "priceText": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "childCategories": [],
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://www.dns-shop.ru/catalog/17a9a30516404e77/aksessuary-k-ibp/?stock=now-today-tomorrow-later&p=1",
+      "status": 200,
+      "count": 1,
+      "title": "Аксессуары к ИБП купить в интернет-магазине DNS. Аксессуары к ИБП цены, большой каталог, новинки. - страница 1 из 1"
+    }
+  ],
+  "errors": []
+}

@@ -16,7 +16,12 @@ import { ConfirmDialog, ToastViewport, type AppNotice } from "../../shared/ui/fe
 import type { OrderStatusValue } from "../checkout.models";
 
 type OrderStatus = OrderStatusValue;
-type TrackingProvider = "yandex_pvz" | "russian_post";
+type TrackingProvider =
+  | "yandex_pvz"
+  | "russian_post"
+  | "ozon"
+  | "wildberries"
+  | "cdek";
 
 type PartnerOrder = {
   id: string;
@@ -140,6 +145,9 @@ function formatPickupPointLabel(order: PartnerOrder): string {
   if (cleanAddress) return cleanAddress;
   if (order.tracking_provider === "russian_post") return "Отделение Почты России";
   if (order.tracking_provider === "yandex_pvz") return "ПВЗ Яндекса";
+  if (order.tracking_provider === "ozon") return "ПВЗ Ozon";
+  if (order.tracking_provider === "wildberries") return "ПВЗ Wildberries";
+  if (order.tracking_provider === "cdek") return "ПВЗ СДЭК";
   return "Пункт выдачи уточняется";
 }
 
@@ -163,6 +171,15 @@ function buildTrackingLink(order: PartnerOrder): string | null {
   }
   if (trackingNumber && order.tracking_provider === "russian_post") {
     return `https://www.pochta.ru/tracking#${encodeURIComponent(trackingNumber)}`;
+  }
+  if (order.tracking_provider === "ozon") {
+    return "https://www.ozon.ru/";
+  }
+  if (order.tracking_provider === "wildberries") {
+    return "https://www.wildberries.ru/";
+  }
+  if (order.tracking_provider === "cdek") {
+    return "https://www.cdek.ru/";
   }
   return null;
 }

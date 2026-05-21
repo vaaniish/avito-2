@@ -1,8 +1,8 @@
 import { notFound, validationError } from "../../../../../common/application-error";
 import {
   mapUserAddressToDto,
+  normalizeNullableTextField,
   normalizeTextField,
-  parseLegacyBuilding,
 } from "../../domain/profile-address.helpers";
 import type { ProfileAddressRepositoryPort } from "../../domain/profile-address.types";
 
@@ -27,8 +27,6 @@ export class UpdateProfileAddressService {
     }
 
     const hasIsDefault = typeof input.body.isDefault === "boolean";
-    const legacyBuilding = normalizeTextField(input.body.building);
-    const parsedLegacyBuilding = parseLegacyBuilding(legacyBuilding);
 
     const updated = await this.repository.updateForUser({
       id: existing.id,
@@ -39,14 +37,12 @@ export class UpdateProfileAddressService {
           input.body.name === undefined && input.body.label === undefined
             ? undefined
             : normalizeTextField(input.body.name ?? input.body.label) || "",
-        fullAddress:
-          input.body.fullAddress === undefined
-            ? undefined
-            : normalizeTextField(input.body.fullAddress) || "",
         region:
-          input.body.region === undefined
+          input.body.region === undefined && input.body.regionName === undefined
             ? undefined
-            : normalizeTextField(input.body.region) || "",
+            : normalizeNullableTextField(
+                input.body.region ?? input.body.regionName,
+              ),
         city:
           input.body.city === undefined
             ? undefined
@@ -56,19 +52,9 @@ export class UpdateProfileAddressService {
             ? undefined
             : normalizeTextField(input.body.street) || "",
         house:
-          input.body.house === undefined && !parsedLegacyBuilding.house
+          input.body.house === undefined
             ? undefined
-            : normalizeTextField(input.body.house) || parsedLegacyBuilding.house,
-        apartment:
-          input.body.apartment === undefined && !parsedLegacyBuilding.apartment
-            ? undefined
-            : normalizeTextField(input.body.apartment) ||
-              parsedLegacyBuilding.apartment,
-        entrance:
-          input.body.entrance === undefined && !parsedLegacyBuilding.entrance
-            ? undefined
-            : normalizeTextField(input.body.entrance) ||
-              parsedLegacyBuilding.entrance,
+            : normalizeTextField(input.body.house) || "",
         postalCode:
           input.body.postalCode === undefined
             ? undefined

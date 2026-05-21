@@ -69,7 +69,7 @@ export class PartnerOrdersRepository implements PartnerOrdersRepositoryPort {
 
   async updateTrackingAssignment(params: {
     orderId: number;
-    provider: "russian_post" | "yandex_pvz";
+    provider: "russian_post" | "yandex_pvz" | "ozon" | "wildberries" | "cdek";
     trackingNumber: string;
     trackingUrl: string | null;
   }): Promise<void> {
