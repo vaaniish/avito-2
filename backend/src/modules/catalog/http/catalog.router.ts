@@ -45,7 +45,13 @@ export function createCatalogRouter(deps: {
 
   router.get("/listings", async (req: Request, res: Response) => {
     try {
-      res.json(await deps.services.getListings.execute(req.query as Record<string, unknown>));
+      const sessionUser = await getSessionUser(req);
+      res.json(
+        await deps.services.getListings.execute({
+          query: req.query as Record<string, unknown>,
+          sessionUser,
+        }),
+      );
     } catch (error) {
       console.error("Error fetching listings:", error);
       sendApplicationError(res, error);
@@ -69,9 +75,14 @@ export function createCatalogRouter(deps: {
 
   router.post("/listings/:publicId/view", async (req: Request, res: Response) => {
     try {
+      const sessionUser = await getSessionUser(req);
       res.json(
         await deps.services.recordListingView.execute({
           publicId: String(req.params.publicId ?? ""),
+          actorUserId: sessionUser?.id ?? null,
+          sessionId: sessionUser?.public_id ?? null,
+          sourcePage:
+            typeof req.body?.sourcePage === "string" ? req.body.sourcePage : "product-detail",
         }),
       );
     } catch (error) {

@@ -5,11 +5,19 @@ import { CheckoutDeliverySection } from "./checkout.delivery-section";
 import { getPaymentStatusMeta } from "./checkout.models";
 import { CheckoutOrderSummary } from "./checkout.order-summary";
 import { CheckoutPaymentMethodSection } from "./checkout.payment-method-section";
+import type { AppliedPromo } from "../../shared/types/promo";
 
 interface CheckoutPageProps {
   items: CartItem[];
   deliveryType: "delivery" | "pickup";
   userType: "regular" | "partner" | "admin";
+  couponCode: string;
+  appliedPromo: AppliedPromo | null;
+  couponError: string | null;
+  isApplyingCoupon: boolean;
+  onCouponCodeChange: (value: string) => void;
+  onApplyCoupon: () => Promise<boolean>;
+  onEditAppliedCoupon: () => void;
   onBack: () => void;
   onRemoveUnavailableItems?: (itemIds: string[]) => void;
   onOrderCreated?: (result: {
@@ -30,6 +38,13 @@ export function CheckoutPage({
   items,
   deliveryType,
   userType,
+  couponCode,
+  appliedPromo,
+  couponError,
+  isApplyingCoupon,
+  onCouponCodeChange,
+  onApplyCoupon,
+  onEditAppliedCoupon,
   onBack,
   onRemoveUnavailableItems,
   onOrderCreated,
@@ -39,8 +54,9 @@ export function CheckoutPage({
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items],
   );
+  const discount = appliedPromo?.discountAmount ?? 0;
   const shipping = deliveryType === "delivery" ? 500 : 0;
-  const total = subtotal + shipping;
+  const total = Math.max(0, subtotal - discount + shipping);
   const { checkoutPolicy } = useCheckoutPolicy();
   const {
     deliveryCity,
@@ -80,8 +96,10 @@ export function CheckoutPage({
     deliveryType,
     selectedPoint,
     subtotal,
+    discount,
     shipping,
     total,
+    appliedPromo,
     onBack,
     onRemoveUnavailableItems,
     onOrderCreated,
@@ -93,6 +111,7 @@ export function CheckoutPage({
   const canSubmitOrder = userType !== "admin";
   const summaryItems = lockedSummary?.items ?? items;
   const summarySubtotal = lockedSummary?.subtotal ?? subtotal;
+  const summaryDiscount = lockedSummary?.discount ?? discount;
   const summaryShipping = lockedSummary?.shipping ?? shipping;
   const summaryTotal = lockedSummary?.total ?? total;
 
@@ -108,7 +127,7 @@ export function CheckoutPage({
           Оформление заказа
         </h1>
 
-        <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[1fr_400px]">
+        <div className="grid grid-cols-1 gap-6 md:gap-8 lg:items-start lg:grid-cols-[1fr_400px]">
           <div className="space-y-6 md:space-y-8">
             <CheckoutDeliverySection
               deliveryType={deliveryType}
@@ -171,9 +190,14 @@ export function CheckoutPage({
           <CheckoutOrderSummary
             summaryItems={summaryItems}
             summarySubtotal={summarySubtotal}
+            summaryDiscount={summaryDiscount}
             summaryShipping={summaryShipping}
             summaryTotal={summaryTotal}
             deliveryType={deliveryType}
+            couponCode={couponCode}
+            appliedPromo={appliedPromo}
+            couponError={couponError}
+            isApplyingCoupon={isApplyingCoupon}
             canSubmitOrder={canSubmitOrder}
             hasActivePayment={hasActivePayment}
             isSubmitting={isSubmitting}
@@ -188,6 +212,9 @@ export function CheckoutPage({
             paymentStatusMeta={paymentStatusMeta}
             paymentStatusError={paymentStatusError}
             secondsLeft={secondsLeft}
+            onCouponCodeChange={onCouponCodeChange}
+            onApplyCoupon={onApplyCoupon}
+            onEditAppliedCoupon={onEditAppliedCoupon}
             onPrimaryAction={() => {
               if (!canSubmitOrder) {
                 return;

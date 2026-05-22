@@ -5,6 +5,7 @@ import {
 } from "@prisma/client";
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
 import { recomputeSellerCommissionSnapshot } from "../../../../finance/infrastructure/repositories/commission-program.repository";
+import { recommendationServices } from "../../../../recommendations";
 import type {
   BuyerOrderPaymentStatusRow,
   BuyerOrderWithRelations,
@@ -366,6 +367,7 @@ export class ProfileOrdersRepository {
     requestIp: string | null;
     reason: string;
   }): Promise<void> {
+    const paidSignals: Array<{ buyerId: number; listingIds: number[] }> = [];
     await this.prisma.$transaction(async (tx) => {
       await tx.platformTransaction.updateMany({
         where: {
@@ -386,6 +388,12 @@ export class ProfileOrdersRepository {
           id: true,
           public_id: true,
           status: true,
+          buyer_id: true,
+          items: {
+            select: {
+              listing_id: true,
+            },
+          },
         },
       });
 
@@ -415,7 +423,27 @@ export class ProfileOrdersRepository {
           ipAddress: params.requestIp,
         })),
       });
+
+      for (const order of payableOrders) {
+        paidSignals.push({
+          buyerId: order.buyer_id,
+          listingIds: order.items
+            .map((item) => item.listing_id)
+            .filter((item): item is number => Number.isInteger(item)),
+        });
+      }
     });
+
+    for (const signal of paidSignals) {
+      for (const listingId of signal.listingIds) {
+        await recommendationServices.recordEvent.execute({
+          userId: signal.buyerId,
+          listingId,
+          eventType: "PURCHASE_PAID",
+          sourcePage: "checkout-payment",
+        });
+      }
+    }
   }
 
   async applyFailedPayment(params: {
@@ -494,6 +522,45 @@ export class ProfileOrdersRepository {
         },
       },
     });
+  }
+
+  async getLaunchPromoSnapshot(userId: number): Promise<{
+    hasSuccessfulOrders: boolean;
+    hasActiveDiscountedOrder: boolean;
+    activeDiscountedBuyerCount: number;
+  }> {
+    const [successfulOrdersCount, activeDiscountedOrderCount, discountedBuyers] =
+      await this.prisma.$transaction([
+        this.prisma.marketOrder.count({
+          where: {
+            buyer_id: userId,
+            status: {
+              in: ["PAID", "PROCESSING", "PREPARED", "SHIPPED", "DELIVERED", "COMPLETED"],
+            },
+          },
+        }),
+        this.prisma.marketOrder.count({
+          where: {
+            buyer_id: userId,
+            discount: { gt: 0 },
+            status: { not: "CANCELLED" },
+          },
+        }),
+        this.prisma.marketOrder.findMany({
+          where: {
+            discount: { gt: 0 },
+            status: { not: "CANCELLED" },
+          },
+          distinct: ["buyer_id"],
+          select: { buyer_id: true },
+        }),
+      ]);
+
+    return {
+      hasSuccessfulOrders: successfulOrdersCount > 0,
+      hasActiveDiscountedOrder: activeDiscountedOrderCount > 0,
+      activeDiscountedBuyerCount: discountedBuyers.length,
+    };
   }
 
   async findUserAddressByIdForUser(params: {

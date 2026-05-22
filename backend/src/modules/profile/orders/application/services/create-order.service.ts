@@ -7,6 +7,9 @@ import {
 } from "../../../../../common/application-error";
 import {
   buildCheckoutPolicyDto,
+  calculateLaunchPromoDiscount,
+  LAUNCH_PROMO_CODE,
+  LAUNCH_PROMO_MAX_BUYERS,
   LISTING_RESERVATION_CONFLICT,
   makeCheckoutIdempotencyHash,
   normalizeDeliveryAddressFromRecord,
@@ -69,6 +72,7 @@ export class CreateOrderService {
       customAddress: input.customAddress,
       pickupPointId: input.pickupPointId,
       pickupPointProvider: input.pickupPointProvider,
+      promoCode: input.promoCode,
       items: parsedItems
         .map((item) => ({
           listingId: item.listingId,
@@ -138,6 +142,11 @@ export class CreateOrderService {
       const listingByPublicId = new Map(
         listings.map((listing) => [listing.public_id, listing]),
       );
+      const subtotal = parsedItems.reduce((sum, item) => {
+        const listing = listingByPublicId.get(item.listingId);
+        if (!listing) return sum;
+        return sum + listing.price * item.quantity;
+      }, 0);
       const groupedBySeller = new Map<
         number,
         Array<{
@@ -170,6 +179,33 @@ export class CreateOrderService {
           quantity: 1,
         });
         groupedBySeller.set(listing.seller_id, current);
+      }
+
+      const promoCode = input.promoCode.trim().toUpperCase();
+      let globalDiscount = 0;
+      let appliedPromoCode: string | null = null;
+
+      if (promoCode) {
+        if (promoCode !== LAUNCH_PROMO_CODE) {
+          throw validationError("Промокод не найден или больше не действует");
+        }
+
+        const snapshot = await this.repository.getLaunchPromoSnapshot(input.actorUserId);
+        if (snapshot.hasActiveDiscountedOrder) {
+          throw validationError("Промокод уже используется в вашем активном заказе");
+        }
+        if (snapshot.hasSuccessfulOrders) {
+          throw validationError("Промокод START15 действует только на первый оплачиваемый заказ");
+        }
+        if (snapshot.activeDiscountedBuyerCount >= LAUNCH_PROMO_MAX_BUYERS) {
+          throw validationError("Лимит промокода для первых 100 покупателей уже исчерпан");
+        }
+
+        globalDiscount = calculateLaunchPromoDiscount(subtotal);
+        if (globalDiscount <= 0) {
+          throw validationError("Для этой корзины скидка не применяется");
+        }
+        appliedPromoCode = LAUNCH_PROMO_CODE;
       }
 
       if (input.paymentMethod !== "card" && input.paymentMethod !== "sbp") {
@@ -216,26 +252,42 @@ export class CreateOrderService {
 
       const hasCheckoutDelivery = input.deliveryType === "DELIVERY";
       const checkoutDeliveryCost = hasCheckoutDelivery ? 500 : 0;
-      const preparedOrders = Array.from(groupedBySeller.entries()).map(
+      const sellerOrderDrafts = Array.from(groupedBySeller.entries()).map(
         ([sellerId, items], index) => {
-          const subtotal = items.reduce(
+          const sellerSubtotal = items.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0,
           );
-          const deliveryCost =
-            hasCheckoutDelivery && index === 0 ? checkoutDeliveryCost : 0;
-          const totalPrice = subtotal + deliveryCost;
           const publicId = `ORD-${Date.now()}-${index + 1}`;
           return {
             sellerId,
             items,
-            deliveryCost,
-            discount: 0,
-            totalPrice,
             publicId,
+            subtotal: sellerSubtotal,
           };
         },
       );
+
+      let remainingDiscount = globalDiscount;
+      const preparedOrders = sellerOrderDrafts.map((draft, index) => {
+        const deliveryCost = hasCheckoutDelivery && index === 0 ? checkoutDeliveryCost : 0;
+        const proportionalDiscount =
+          index === sellerOrderDrafts.length - 1
+            ? remainingDiscount
+            : Math.min(
+                draft.subtotal,
+                Math.floor((globalDiscount * draft.subtotal) / Math.max(1, subtotal)),
+              );
+        remainingDiscount = Math.max(0, remainingDiscount - proportionalDiscount);
+        return {
+          sellerId: draft.sellerId,
+          items: draft.items,
+          deliveryCost,
+          discount: proportionalDiscount,
+          totalPrice: draft.subtotal - proportionalDiscount + deliveryCost,
+          publicId: draft.publicId,
+        };
+      });
 
       const totalAmount = preparedOrders.reduce(
         (sum, order) => sum + order.totalPrice,
@@ -290,6 +342,8 @@ export class CreateOrderService {
           total_price: order.total_price,
         })),
         total: createdOrders.reduce((sum, order) => sum + order.total_price, 0),
+        discount: globalDiscount,
+        promoCode: appliedPromoCode,
         payment: {
           provider: "yoomoney",
           paymentId: yookassaPayment?.id ?? null,

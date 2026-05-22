@@ -31,12 +31,24 @@ export type CreateOrdersResponse = {
     total_price: number;
   }>;
   total: number;
+  discount: number;
+  promoCode: string | null;
   payment: {
     provider: "yoomoney";
     paymentId: string | null;
     status: YooKassaPaymentStatus | null;
     confirmationUrl: string | null;
   };
+};
+
+export type CheckoutPromoPreviewResponse = {
+  success: true;
+  code: string;
+  discountPercent: number;
+  discountAmount: number;
+  subtotal: number;
+  remainingActivations: number;
+  message: string;
 };
 
 export type PaymentStatusResponse = {

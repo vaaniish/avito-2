@@ -13,6 +13,9 @@ export function uniqueStrings(values: string[]): string[] {
 }
 
 export const LISTING_RESERVATION_CONFLICT = "LISTING_RESERVATION_CONFLICT";
+export const LAUNCH_PROMO_CODE = "START15";
+export const LAUNCH_PROMO_PERCENT = 15;
+export const LAUNCH_PROMO_MAX_BUYERS = 100;
 
 export function makeCheckoutIdempotencyHash(payload: unknown): string {
   return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
@@ -20,6 +23,10 @@ export function makeCheckoutIdempotencyHash(payload: unknown): string {
 
 export function uniqueNumbers(values: number[]): number[] {
   return [...new Set(values)];
+}
+
+export function calculateLaunchPromoDiscount(subtotal: number): number {
+  return Math.max(0, Math.floor((Math.max(0, subtotal) * LAUNCH_PROMO_PERCENT) / 100));
 }
 
 export function mapDeliveryStatusToOrderStatus(

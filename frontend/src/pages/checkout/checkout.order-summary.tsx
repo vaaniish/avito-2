@@ -4,13 +4,20 @@ import {
   type ActivePayment,
   type PaymentStatusMeta,
 } from "./checkout.models";
+import type { AppliedPromo } from "../../shared/types/promo";
+import { PromoCodePanel } from "../../shared/ui/PromoCodePanel";
 
 type CheckoutOrderSummaryProps = {
   summaryItems: CartItem[];
   summarySubtotal: number;
+  summaryDiscount: number;
   summaryShipping: number;
   summaryTotal: number;
   deliveryType: "delivery" | "pickup";
+  couponCode: string;
+  appliedPromo: AppliedPromo | null;
+  couponError: string | null;
+  isApplyingCoupon: boolean;
   canSubmitOrder: boolean;
   hasActivePayment: boolean;
   isSubmitting: boolean;
@@ -21,6 +28,9 @@ type CheckoutOrderSummaryProps = {
   paymentStatusMeta: PaymentStatusMeta | null;
   paymentStatusError: string | null;
   secondsLeft: number;
+  onCouponCodeChange: (value: string) => void;
+  onApplyCoupon: () => void | Promise<unknown>;
+  onEditAppliedCoupon: () => void;
   onPrimaryAction: () => void;
   onBack: () => void;
 };
@@ -28,9 +38,14 @@ type CheckoutOrderSummaryProps = {
 export function CheckoutOrderSummary({
   summaryItems,
   summarySubtotal,
+  summaryDiscount,
   summaryShipping,
   summaryTotal,
   deliveryType,
+  couponCode,
+  appliedPromo,
+  couponError,
+  isApplyingCoupon,
   canSubmitOrder,
   hasActivePayment,
   isSubmitting,
@@ -41,11 +56,14 @@ export function CheckoutOrderSummary({
   paymentStatusMeta,
   paymentStatusError,
   secondsLeft,
+  onCouponCodeChange,
+  onApplyCoupon,
+  onEditAppliedCoupon,
   onPrimaryAction,
   onBack,
 }: CheckoutOrderSummaryProps) {
   return (
-    <div className="h-fit lg:sticky lg:top-32">
+    <div className="h-fit lg:sticky lg:top-28 lg:self-start">
       <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
         <h2 className="mb-6 text-xl text-gray-900 md:text-2xl">Ваш заказ</h2>
 
@@ -66,10 +84,28 @@ export function CheckoutOrderSummary({
           ))}
         </div>
 
+        <div className="mb-6 border-b border-gray-200 pb-6">
+          <PromoCodePanel
+            couponCode={couponCode}
+            appliedPromo={appliedPromo}
+            couponError={couponError}
+            isApplyingCoupon={isApplyingCoupon}
+            onCouponCodeChange={onCouponCodeChange}
+            onApplyCoupon={onApplyCoupon}
+            onEditAppliedCoupon={onEditAppliedCoupon}
+          />
+        </div>
+
         <div className="mb-6 space-y-3 border-b border-gray-200 pb-6">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Подытог</span>
             <span className="text-gray-900">{summarySubtotal.toLocaleString("ru-RU")} ₽</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Скидка</span>
+            <span className={summaryDiscount > 0 ? "text-emerald-700" : "text-gray-400"}>
+              {summaryDiscount > 0 ? `-${summaryDiscount.toLocaleString("ru-RU")} ₽` : "—"}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">

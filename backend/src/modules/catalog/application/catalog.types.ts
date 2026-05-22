@@ -54,6 +54,13 @@ export interface CatalogRepositoryPort {
   loadEffectiveSearchRules(): Promise<any[]>;
 }
 
+export interface CatalogRecommendationScoresPort {
+  getScores(input: {
+    userId: number | null;
+    listingIds: number[];
+  }): Promise<Map<number, number>>;
+}
+
 export interface CatalogNotificationPort {
   notifySellerAboutQuestion(params: {
     sellerId: number;

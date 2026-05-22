@@ -224,6 +224,11 @@ export function ProductGrid({
   const [measuredHeights, setMeasuredHeights] = useState<Record<number, number>>({});
 
   const sortOptions = [
+    {
+      value: "recommended",
+      label: "Для вас",
+      description: "Учитывает просмотры, избранное и покупки",
+    },
     { value: "popular", label: "Популярные" },
     { value: "price-asc", label: "Цена: по возрастанию" },
     { value: "price-desc", label: "Цена: по убыванию" },
@@ -231,7 +236,8 @@ export function ProductGrid({
     { value: "newest", label: "Новинки" },
   ];
 
-  const currentSort = sortOptions.find((opt) => opt.value === sortBy);
+  const currentSort = sortOptions.find((opt) => opt.value === sortBy) ?? sortOptions[0];
+  const isRecommendedSort = sortBy === "recommended";
   const cartItemsById = useMemo(
     () => new Map(cartItems.map((item) => [item.id, item])),
     [cartItems],
@@ -314,31 +320,45 @@ export function ProductGrid({
 
   return (
     <div>
-      <div className="mb-[20px] mt-[0px] mr-[0px] ml-[0px] flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl text-gray-900">Товары</h2>
-          <p data-testid="catalog-stats" className="mt-2 text-lg text-gray-600">
-            Найдено: {totalItemCount}
-          </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-[30px] font-semibold tracking-[-0.03em] text-slate-950">
+            Товары
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p
+              data-testid="catalog-stats"
+              className="text-sm font-medium text-slate-600 sm:text-base"
+            >
+              Найдено: {totalItemCount}
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:justify-end">
           <div className="relative flex-1 sm:flex-none">
             <button
               onClick={() => setSortOpen(!sortOpen)}
               onBlur={() => setTimeout(() => setSortOpen(false), 200)}
-              className="flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm transition-all duration-300 hover:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 sm:w-auto sm:gap-3 sm:px-6 sm:py-4 sm:text-base"
+              className="flex w-full min-w-[220px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-[0_14px_34px_-26px_rgba(15,23,42,0.45)] transition-all duration-300 hover:border-slate-300 hover:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.5)] focus:outline-none focus:ring-2 focus:ring-slate-900/10 sm:w-auto sm:px-5"
             >
-              <span className="truncate text-gray-700">{currentSort?.label}</span>
+              <div className="min-w-0 text-left">
+                <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                  Сортировка
+                </div>
+                <div className="truncate text-sm font-medium text-slate-900">
+                  {currentSort.label}
+                </div>
+              </div>
               <ChevronDown
-                className={`h-5 w-5 flex-shrink-0 text-gray-500 transition-transform duration-300 sm:h-6 sm:w-6 ${
+                className={`h-5 w-5 flex-shrink-0 text-slate-500 transition-transform duration-300 ${
                   sortOpen ? "rotate-180" : ""
                 }`}
               />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg sm:w-72">
+              <div className="absolute right-0 z-10 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-32px_rgba(15,23,42,0.5)] sm:w-80">
                 {sortOptions.map((option) => (
                   <button
                     key={option.value}
@@ -346,11 +366,20 @@ export function ProductGrid({
                       onSortChange(option.value);
                       setSortOpen(false);
                     }}
-                    className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 hover:bg-gray-50 sm:px-6 sm:py-4 sm:text-base ${
-                      sortBy === option.value ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                    className={`w-full px-4 py-3 text-left transition-colors duration-200 hover:bg-slate-50 sm:px-5 sm:py-4 ${
+                      sortBy === option.value
+                        ? "bg-slate-100 text-slate-950"
+                        : "text-slate-700"
                     }`}
                   >
-                    {option.label}
+                    <div className="text-sm font-medium sm:text-[15px]">
+                      {option.label}
+                    </div>
+                    {"description" in option && option.description ? (
+                      <div className="mt-1 text-xs leading-5 text-slate-500">
+                        {option.description}
+                      </div>
+                    ) : null}
                   </button>
                 ))}
               </div>

@@ -18,6 +18,7 @@ export function AppCatalogView({
   isLoadingMoreItems,
   loadedItemCount,
   totalItemCount,
+  catalogSearchMeta,
   catalogPageOffsets,
   catalogPagesByOffset,
   loadedCatalogOffsets,
@@ -65,32 +66,35 @@ export function AppCatalogView({
             onViewModeChange={onViewModeChange}
           />
 
-          <AppCatalogGridSection
-            sortedItems={sortedItems}
-            hasMoreItems={hasMoreItems}
-            hasPreviousItems={hasPreviousItems}
-            isLoadingMoreItems={isLoadingMoreItems}
-            loadedItemCount={loadedItemCount}
-            totalItemCount={totalItemCount}
-            catalogPageOffsets={catalogPageOffsets}
-            catalogPagesByOffset={catalogPagesByOffset}
-            loadedCatalogOffsets={loadedCatalogOffsets}
-            activeCatalogOffset={activeCatalogOffset}
-            visibleWindowStartOffset={visibleWindowStartOffset}
-            onLoadMoreCatalogItems={onLoadMoreCatalogItems}
-            onLoadPreviousCatalogItems={onLoadPreviousCatalogItems}
-            onVisibleCatalogOffsetChange={onVisibleCatalogOffsetChange}
-            onEnsureCatalogOffsetLoaded={onEnsureCatalogOffsetLoaded}
-            onProductClick={onProductClick}
-            onAddToCart={onAddToCart}
-            onUpdateQuantity={onUpdateQuantity}
-            cartItems={cartItems}
-            sortBy={sortBy}
-            onSortChange={onSortChange}
-            viewMode={viewMode}
-            wishlistProductIds={wishlistProductIds}
-            onWishlistToggle={onWishlistToggle}
-          />
+          <div className="min-w-0 flex-1">
+            <AppCatalogGridSection
+              sortedItems={sortedItems}
+              hasMoreItems={hasMoreItems}
+              hasPreviousItems={hasPreviousItems}
+              isLoadingMoreItems={isLoadingMoreItems}
+              loadedItemCount={loadedItemCount}
+              totalItemCount={totalItemCount}
+              catalogSearchMeta={catalogSearchMeta}
+              catalogPageOffsets={catalogPageOffsets}
+              catalogPagesByOffset={catalogPagesByOffset}
+              loadedCatalogOffsets={loadedCatalogOffsets}
+              activeCatalogOffset={activeCatalogOffset}
+              visibleWindowStartOffset={visibleWindowStartOffset}
+              onLoadMoreCatalogItems={onLoadMoreCatalogItems}
+              onLoadPreviousCatalogItems={onLoadPreviousCatalogItems}
+              onVisibleCatalogOffsetChange={onVisibleCatalogOffsetChange}
+              onEnsureCatalogOffsetLoaded={onEnsureCatalogOffsetLoaded}
+              onProductClick={onProductClick}
+              onAddToCart={onAddToCart}
+              onUpdateQuantity={onUpdateQuantity}
+              cartItems={cartItems}
+              sortBy={sortBy}
+              onSortChange={onSortChange}
+              viewMode={viewMode}
+              wishlistProductIds={wishlistProductIds}
+              onWishlistToggle={onWishlistToggle}
+            />
+          </div>
         </div>
       </div>
     </>

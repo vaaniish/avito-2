@@ -123,6 +123,15 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
         blocked_until: true,
         email: true,
         name: true,
+        wishlist_items: {
+          select: {
+            listing: {
+              select: {
+                public_id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -138,6 +147,9 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
       blockedUntil: user.blocked_until,
       email: user.email,
       name: user.name,
+      wishlistListingPublicIds: user.wishlist_items.map(
+        (item) => item.listing.public_id,
+      ),
     };
   }
 
@@ -157,6 +169,15 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
         blocked_until: true,
         email: true,
         name: true,
+        wishlist_items: {
+          select: {
+            listing: {
+              select: {
+                public_id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -168,6 +189,9 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
       blockedUntil: user.blocked_until,
       email: user.email,
       name: user.name,
+      wishlistListingPublicIds: user.wishlist_items.map(
+        (item) => item.listing.public_id,
+      ),
     };
   }
 }

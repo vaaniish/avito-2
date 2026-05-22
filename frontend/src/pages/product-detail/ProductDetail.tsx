@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
 } from "lucide-react";
+import { fetchSimilarRecommendations } from "../../shared/lib/recommendations.api";
+import type { RecommendationItem } from "../../shared/types/recommendations";
+import { RecommendationShelf } from "../../widgets/recommendations/RecommendationShelf";
 import { COMPLAINT_CATEGORIES } from "./product-detail.constants";
 import {
   useProductComplaint,
@@ -39,17 +42,48 @@ export function ProductDetail({
   onBuyNow,
   onUpdateQuantity,
   cartQuantity = 0,
-  relatedProducts: _relatedProducts,
+  relatedProducts,
+  relatedCartItems = [],
+  wishlistProductIds = new Set<string>(),
+  onOpenRecommendation,
   isWishlisted: isWishlistedProp = false,
   onWishlistToggle,
 }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showLocationMap, setShowLocationMap] = useState(false);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
 
   useEffect(() => {
     setSelectedImage(0);
     setShowLocationMap(false);
   }, [product.id]);
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const next = await fetchSimilarRecommendations(product.id);
+        if (!ignore) {
+          setRecommendations(next);
+        }
+      } catch {
+        if (!ignore) {
+          setRecommendations(
+            relatedProducts.slice(0, 4).map((item) => ({
+              listing: item,
+              score: 0,
+              reason: "Похожие товары",
+              source: "fallback",
+            })),
+          );
+        }
+      }
+    };
+    void load();
+    return () => {
+      ignore = true;
+    };
+  }, [product.id, relatedProducts]);
 
   const images = useMemo(() => {
     const raw = (product.images ?? []).filter(Boolean);
@@ -250,6 +284,26 @@ export function ProductDetail({
             yandexMapWidgetUrl={yandexMapWidgetUrl}
             onToggleMap={() => setShowLocationMap((prev) => !prev)}
           />
+
+          <div className="mb-8">
+            <h2 className="mb-3 text-xl text-gray-900 md:text-2xl">Вам может понравится:</h2>
+            <RecommendationShelf
+              title="Вам может понравится:"
+              showHeader={false}
+              items={recommendations}
+              cartItems={relatedCartItems}
+              wishlistProductIds={wishlistProductIds}
+              onProductClick={(nextProduct) =>
+                onOpenRecommendation ? onOpenRecommendation(nextProduct) : onBuyNow(nextProduct)
+              }
+              onAddToCart={onAddToCart}
+              onUpdateQuantity={(productId, quantity) => onUpdateQuantity?.(productId, quantity)}
+              onWishlistToggle={(productId, shouldAddToWishlist) =>
+                onWishlistToggle?.(productId, shouldAddToWishlist)
+              }
+              emptyMessage="Когда накопится больше взаимодействий, здесь появятся точные персональные рекомендации."
+            />
+          </div>
 
           <ProductQuestionsSection
             questionsTotal={questionsTotal}

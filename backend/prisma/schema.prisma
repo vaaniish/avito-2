@@ -140,6 +140,28 @@ enum PayoutProfileStatus {
   REJECTED
 }
 
+enum RecommendationEventType {
+  VIEW
+  WISHLIST
+  ADD_TO_CART
+  PURCHASE_PAID
+  PURCHASE_COMPLETED
+  REVIEW
+}
+
+enum ItemSimilaritySource {
+  CO_VIEW
+  CO_PURCHASE
+  CONTENT
+  HYBRID
+}
+
+enum RecommendationEntityType {
+  USER
+  LISTING
+  GLOBAL
+}
+
 enum ListingModerationActorType {
   SYSTEM
   ADMIN
@@ -223,6 +245,8 @@ model AppUser {
   payout_profiles_reviewed SellerPayoutProfile[] @relation("payout_profile_reviewer")
   listing_drafts       ListingDraft[]       @relation("seller_listing_drafts")
   commission_period_stats SellerCommissionPeriodStat[] @relation("seller_commission_period_stats")
+  recommendation_events RecommendationEvent[]
+  interest_profile     UserInterestProfile?
 
   @@index([role, status])
   @@index([created_at])
@@ -530,6 +554,10 @@ model MarketplaceListing {
   order_items          MarketOrderItem[]
   wishlist_items       WishlistItem[]
   search_keywords      ListingSearchKeyword[]
+  recommendation_events RecommendationEvent[]
+  similarities_from    ItemSimilarity[]     @relation("item_similarity_from")
+  similarities_to      ItemSimilarity[]     @relation("item_similarity_to")
+  segment_popularity   SegmentPopularity[]
 
   @@index([seller_id])
   @@index([item_id])
@@ -665,6 +693,117 @@ model WishlistItem {
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, listing_id])
+}
+
+model RecommendationEvent {
+  id            Int                     @id @default(autoincrement())
+  user_id       Int
+  session_id    String?
+  listing_id    Int
+  event_type    RecommendationEventType
+  event_weight  Int
+  source_page   String?
+  occurred_at   DateTime                @default(now())
+  dedupe_key    String?
+
+  user          AppUser                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  listing       MarketplaceListing      @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, occurred_at(sort: Desc)])
+  @@index([listing_id, occurred_at(sort: Desc)])
+  @@index([event_type, occurred_at(sort: Desc)])
+  @@index([user_id, listing_id, event_type, occurred_at(sort: Desc)])
+  @@unique([dedupe_key], map: "RecommendationEvent_dedupe_key_unique")
+}
+
+model UserInterestProfile {
+  id                      Int       @id @default(autoincrement())
+  user_id                 Int       @unique
+  top_categories_json     Json      @default("[]")
+  top_brands_json         Json      @default("[]")
+  top_price_buckets_json  Json      @default("[]")
+  recent_listing_ids_json Json      @default("[]")
+  short_term_listing_ids_json Json  @default("[]")
+  updated_at              DateTime  @updatedAt
+
+  user                    AppUser   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([updated_at(sort: Desc)])
+}
+
+model ItemSimilarity {
+  id                 Int                  @id @default(autoincrement())
+  listing_id         Int
+  related_listing_id Int
+  source             ItemSimilaritySource
+  score              Float
+  updated_at         DateTime             @updatedAt
+
+  listing            MarketplaceListing   @relation("item_similarity_from", fields: [listing_id], references: [id], onDelete: Cascade)
+  related_listing    MarketplaceListing   @relation("item_similarity_to", fields: [related_listing_id], references: [id], onDelete: Cascade)
+
+  @@unique([listing_id, related_listing_id, source], map: "ItemSimilarity_listing_related_source_unique")
+  @@index([listing_id, score(sort: Desc)])
+  @@index([related_listing_id, score(sort: Desc)])
+}
+
+model SegmentPopularity {
+  id                Int       @id @default(autoincrement())
+  category_public_id String?
+  category_name     String?
+  brand             String?
+  price_bucket      String
+  listing_id        Int
+  score             Float
+  source_event_count Int      @default(0)
+  updated_at        DateTime  @updatedAt
+
+  listing           MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@unique([category_public_id, brand, price_bucket, listing_id], map: "SegmentPopularity_segment_listing_unique")
+  @@index([category_public_id, brand, price_bucket, score(sort: Desc)])
+  @@index([updated_at(sort: Desc)])
+}
+
+model CartCrossSellRule {
+  id                   Int       @id @default(autoincrement())
+  source_category_id   Int?
+  source_subcategory_id Int?
+  source_item_id       Int?
+  source_brand         String?
+  source_model         String?
+  target_category_id   Int?
+  target_subcategory_id Int?
+  target_item_id       Int?
+  target_brand         String?
+  priority             Int       @default(50)
+  is_active            Boolean   @default(true)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  @@index([is_active, priority(sort: Desc)])
+  @@index([source_item_id, is_active, priority(sort: Desc)])
+  @@index([source_subcategory_id, is_active, priority(sort: Desc)])
+  @@index([source_category_id, is_active, priority(sort: Desc)])
+  @@index([target_item_id, is_active])
+  @@index([target_subcategory_id, is_active])
+  @@index([target_category_id, is_active])
+}
+
+model RecommendationRefreshQueue {
+  id           Int                      @id @default(autoincrement())
+  entity_type  RecommendationEntityType
+  entity_id    Int
+  reason       String
+  priority     Int                      @default(50)
+  next_run_at  DateTime                 @default(now())
+  locked_at    DateTime?
+  attempts     Int                      @default(0)
+  created_at   DateTime                 @default(now())
+  updated_at   DateTime                 @updatedAt
+
+  @@index([entity_type, entity_id, next_run_at])
+  @@index([locked_at, next_run_at])
 }
 
 model MarketOrder {

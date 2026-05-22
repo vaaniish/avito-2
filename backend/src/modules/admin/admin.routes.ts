@@ -8,6 +8,7 @@ import { registerAdminFinanceRoutes } from "./admin.finance.routes";
 import { registerAdminListingRoutes } from "./admin.listings.routes";
 import { registerAdminPartnershipRoutes } from "./admin.partnership.routes";
 import { registerAdminUserRoutes } from "./admin.users.routes";
+import { adminRecommendationsRouter } from "../recommendations";
 
 const adminRouter = Router();
 [
@@ -22,5 +23,6 @@ const adminRouter = Router();
 ].forEach((register) => register(adminRouter));
 
 adminRouter.use("/", complaintsRouter);
+adminRouter.use("/", adminRecommendationsRouter);
 
 export { adminRouter };

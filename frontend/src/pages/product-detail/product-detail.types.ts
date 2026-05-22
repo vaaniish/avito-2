@@ -1,4 +1,4 @@
-import type { Product } from "../../shared/types";
+import type { CartItem, Product } from "../../shared/types";
 
 export interface ProductDetailProps {
   product: Product;
@@ -10,6 +10,9 @@ export interface ProductDetailProps {
   onUpdateQuantity?: (productId: string, quantity: number) => void;
   cartQuantity?: number;
   relatedProducts: Product[];
+  relatedCartItems?: CartItem[];
+  wishlistProductIds?: Set<string>;
+  onOpenRecommendation?: (product: Product) => void;
   isWishlisted?: boolean;
   onWishlistToggle?: (productId: string, isWishlisted: boolean) => void;
 }

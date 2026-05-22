@@ -7,6 +7,7 @@ import { GetListingsService } from "./application/services/get-listings.service"
 import { GetSellerListingsService } from "./application/services/get-seller-listings.service";
 import { GetSuggestionsService } from "./application/services/get-suggestions.service";
 import { RecordListingViewService } from "./application/services/record-listing-view.service";
+import { recommendationServices } from "../recommendations";
 import { createCatalogRouter } from "./http/catalog.router";
 import { CatalogCircumventionGateway } from "./infrastructure/gateways/catalog-circumvention.gateway";
 import { CatalogNotificationGateway } from "./infrastructure/gateways/catalog-notification.gateway";
@@ -19,9 +20,15 @@ const circumventionGateway = new CatalogCircumventionGateway();
 export const catalogRouter = createCatalogRouter({
   services: {
     getCategories: new GetCategoriesService(repository),
-    getListings: new GetListingsService(repository),
+    getListings: new GetListingsService(repository, {
+      getScores: async (input) =>
+        recommendationServices.getCatalogRecommendationScores.execute(input),
+    }),
     getListingDetails: new GetListingDetailsService(repository),
-    recordListingView: new RecordListingViewService(repository),
+    recordListingView: new RecordListingViewService(
+      repository,
+      recommendationServices.recordEvent,
+    ),
     getSellerListings: new GetSellerListingsService(repository),
     getSuggestions: new GetSuggestionsService(repository),
     getListingQuestions: new GetListingQuestionsService(repository),

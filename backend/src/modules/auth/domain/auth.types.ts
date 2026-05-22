@@ -24,4 +24,5 @@ export type SessionUser = {
   blockedUntil: Date | null;
   email: string;
   name: string;
+  wishlistListingPublicIds: string[];
 };

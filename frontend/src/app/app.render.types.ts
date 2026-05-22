@@ -7,6 +7,7 @@ import type { SessionRole, SessionUser } from "../shared/lib/api";
 import type { AppView } from "./app-routing";
 import type { FilterState, Product } from "../shared/types";
 import type { CatalogPagesByOffset } from "./app.catalog.utils";
+import type { AppliedPromo } from "../shared/types/promo";
 
 export type CatalogMode = "products";
 
@@ -22,6 +23,10 @@ export type AppRenderProps = {
   lastOrderTotal: number;
   lastOrderIds: string[];
   lastDeliveryType: "delivery" | "pickup";
+  couponCode: string;
+  appliedPromo: AppliedPromo | null;
+  couponError: string | null;
+  isApplyingCoupon: boolean;
   selectedProduct: Product | null;
   wishlistProductIds: Set<string>;
   products: Product[];
@@ -31,6 +36,18 @@ export type AppRenderProps = {
   isLoadingMoreItems: boolean;
   loadedItemCount: number;
   totalItemCount: number;
+  catalogSearchMeta?: {
+    recognizedQuery: string | null;
+    emptyStateMessage?: string;
+    branchHints: Array<{
+      itemPublicId: string;
+      itemName: string;
+      subcategoryName: string;
+      categoryName: string;
+      matchedPhrases: string[];
+      suggestions: string[];
+    }>;
+  } | null;
   catalogPageOffsets: number[];
   catalogPagesByOffset: CatalogPagesByOffset;
   loadedCatalogOffsets: number[];
@@ -69,6 +86,10 @@ export type AppRenderProps = {
   onHandleUpdateQuantity: (id: string, quantity: number) => void;
   onHandleFooterNavigation: (page: FooterPage) => void;
   onHandleCheckout: (deliveryType: "delivery" | "pickup") => void;
+  onHandleCouponCodeChange: (value: string) => void;
+  onHandleApplyCoupon: (options?: { silent?: boolean; promoCode?: string }) => Promise<boolean>;
+  onHandleResetCoupon: () => void;
+  onHandleEditAppliedCoupon: () => void;
   onHandleLogoClick: () => void;
   onHandlePartnershipBack: () => void;
   onHandleOpenPartnershipPage: () => void;

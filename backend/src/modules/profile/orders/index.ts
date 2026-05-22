@@ -25,6 +25,7 @@ import {
   GetOrderPaymentStatusService,
   HandleYooKassaWebhookService,
   ListProfileOrdersService,
+  PreviewCheckoutPromoService,
 } from "./application/profile-orders.service";
 import type {
   DeliveryProviderCode,
@@ -116,6 +117,7 @@ export function createProfileOrdersRouter(
       policyReader,
       helpers,
     ),
+    previewCheckoutPromo: new PreviewCheckoutPromoService(repository),
     listProfileOrders: new ListProfileOrdersService(
       repository,
       deliveryGateway,

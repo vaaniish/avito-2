@@ -15,7 +15,13 @@ import {
   normalizeSearchText,
 } from "./search";
 type ListingTypeValue = "PRODUCT";
-type CatalogSortBy = "popular" | "price-asc" | "price-desc" | "rating" | "newest";
+type CatalogSortBy =
+  | "recommended"
+  | "popular"
+  | "price-asc"
+  | "price-desc"
+  | "rating"
+  | "newest";
 type CatalogPaginatedResponse<T> = {
   items: T[];
   pagination: {
@@ -287,6 +293,7 @@ function parseBooleanFlag(value: unknown): boolean {
 
 function parseCatalogSortBy(value: unknown): CatalogSortBy {
   if (
+    value === "recommended" ||
     value === "price-asc" ||
     value === "price-desc" ||
     value === "rating" ||
@@ -487,6 +494,9 @@ function sortCatalogCandidates<T extends {
 }>(
   candidates: Array<T & { searchRank: number }>,
   sortBy: CatalogSortBy,
+  options?: {
+    recommendationScores?: Map<number, number>;
+  },
 ): Array<T & { searchRank: number }> {
   return [...candidates].sort((left, right) => {
     if (left.searchRank !== right.searchRank) {
@@ -496,6 +506,20 @@ function sortCatalogCandidates<T extends {
     const leftPrice = resolveEffectivePrice(left);
     const rightPrice = resolveEffectivePrice(right);
     switch (sortBy) {
+      case "recommended": {
+        const leftRecommendationScore =
+          options?.recommendationScores?.get(left.id) ?? 0;
+        const rightRecommendationScore =
+          options?.recommendationScores?.get(right.id) ?? 0;
+        if (leftRecommendationScore !== rightRecommendationScore) {
+          return rightRecommendationScore - leftRecommendationScore;
+        }
+        if (left.views !== right.views) return right.views - left.views;
+        if (left.created_at.getTime() !== right.created_at.getTime()) {
+          return right.created_at.getTime() - left.created_at.getTime();
+        }
+        break;
+      }
       case "price-asc":
         if (leftPrice !== rightPrice) return leftPrice - rightPrice;
         break;

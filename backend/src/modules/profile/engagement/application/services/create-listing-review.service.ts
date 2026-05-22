@@ -4,12 +4,14 @@ import {
   notFound,
   validationError,
 } from "../../../../../common/application-error";
+import type { RecordRecommendationEventService } from "../../../../recommendations/application/services/record-recommendation-event.service";
 import { toListingReviewDto } from "../../domain/profile-engagement.helpers";
 import type { ProfileListingReviewRepositoryPort } from "../../domain/profile-engagement.types";
 
 export class CreateListingReviewService {
   constructor(
     private readonly repository: ProfileListingReviewRepositoryPort,
+    private readonly recommendationEvents: RecordRecommendationEventService,
   ) {}
 
   async execute(input: {
@@ -59,6 +61,14 @@ export class CreateListingReviewService {
       authorId: input.buyerUserId,
       rating,
       comment,
+    });
+
+    await this.recommendationEvents.execute({
+      userId: input.buyerUserId,
+      listingId: listing.id,
+      eventType: "REVIEW",
+      eventWeight: rating,
+      sourcePage: "listing-review",
     });
 
     return toListingReviewDto(created);

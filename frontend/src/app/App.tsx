@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useAppCartState,
   useAppCatalogData,
@@ -64,14 +64,19 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode] = useState<CatalogMode>("products");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [sortBy, setSortBy] = useState<string>("popular");
+  const [sortBy, setSortBy] = useState<string>("recommended");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     const scroll = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     scroll();
     window.requestAnimationFrame(scroll);
-  };
+  }, []);
+
+  const handleRequireAuth = useCallback(() => {
+    setCurrentView("auth");
+    scrollToTop();
+  }, [scrollToTop]);
 
   const {
     currentUser,
@@ -114,6 +119,14 @@ export default function App() {
     lastOrderTotal,
     selectedDeliveryType,
     setSelectedDeliveryType,
+    couponCode,
+    appliedPromo,
+    couponError,
+    isApplyingCoupon,
+    setCouponCode,
+    applyCoupon,
+    resetCouponState,
+    unlockAppliedCoupon,
     requestLoginForCartAccess,
     addToCartUnsafe,
     addToCart,
@@ -125,10 +138,7 @@ export default function App() {
     isAuthenticated,
     userType,
     currentUserPublicId: currentUser?.public_id ?? null,
-    onRequireAuth: () => {
-      setCurrentView("auth");
-      scrollToTop();
-    },
+    onRequireAuth: handleRequireAuth,
   });
 
   const {
@@ -298,6 +308,10 @@ export default function App() {
         lastOrderTotal={lastOrderTotal}
         lastOrderIds={lastOrderIds}
         lastDeliveryType={lastDeliveryType}
+        couponCode={couponCode}
+        appliedPromo={appliedPromo}
+        couponError={couponError}
+        isApplyingCoupon={isApplyingCoupon}
         selectedProduct={selectedProduct}
         wishlistProductIds={wishlistProductIds}
         products={products}
@@ -341,6 +355,10 @@ export default function App() {
         onHandleUpdateQuantity={updateQuantity}
         onHandleFooterNavigation={handleFooterNavigation}
         onHandleCheckout={handleCheckout}
+        onHandleCouponCodeChange={setCouponCode}
+        onHandleApplyCoupon={applyCoupon}
+        onHandleResetCoupon={resetCouponState}
+        onHandleEditAppliedCoupon={unlockAppliedCoupon}
         onHandleLogoClick={handleLogoClick}
         onHandlePartnershipBack={handlePartnershipBack}
         onHandleOpenPartnershipPage={handleOpenPartnershipPage}

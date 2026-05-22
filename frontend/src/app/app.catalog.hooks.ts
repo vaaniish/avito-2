@@ -498,8 +498,21 @@ export function useAppCatalogData(params: {
 
     if (params.filters.categories.length === 0) return;
 
-    const nextFilterCategories = params.filters.categories.filter((category) =>
-      validCatalogItemIds.has(category),
+    const nextFilterCategories = Array.from(
+      params.filters.categories.reduce((resolved, category) => {
+        if (validCatalogItemIds.has(category)) {
+          resolved.add(category);
+          return resolved;
+        }
+
+        for (const itemId of resolveCatalogItemIds(productCategories, [category])) {
+          if (validCatalogItemIds.has(itemId)) {
+            resolved.add(itemId);
+          }
+        }
+
+        return resolved;
+      }, new Set<string>()),
     );
     if (nextFilterCategories.length === params.filters.categories.length) return;
     params.onPruneInvalidFilterCategories(nextFilterCategories);

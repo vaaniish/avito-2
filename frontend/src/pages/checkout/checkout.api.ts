@@ -2,6 +2,7 @@ import type { Product } from "../../shared/types";
 import { apiGet, apiPost } from "../../shared/lib/api";
 import type {
   CreateOrdersResponse,
+  CheckoutPromoPreviewResponse,
   DeliveryProviderFilter,
   DeliveryPointsResponse,
   PaymentMethod,
@@ -49,6 +50,13 @@ export function fetchPaymentStatus(orderIds: string[]): Promise<PaymentStatusRes
   );
 }
 
+export function previewCheckoutPromo(payload: {
+  items: Array<{ listingId: string; quantity: number }>;
+  promoCode: string;
+}): Promise<CheckoutPromoPreviewResponse> {
+  return apiPost<CheckoutPromoPreviewResponse>("/profile/orders/promo/preview", payload);
+}
+
 export function createCheckoutOrders(
   payload: {
     items: Array<{ listingId: string; quantity: number }>;
@@ -58,6 +66,7 @@ export function createCheckoutOrders(
     pickupPointProvider: string | null;
     deliveryType: "delivery" | "pickup";
     paymentMethod: PaymentMethod;
+    promoCode: string;
   },
   idempotencyKey: string,
 ): Promise<CreateOrdersResponse> {

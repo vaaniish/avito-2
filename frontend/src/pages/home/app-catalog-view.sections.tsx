@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Hero } from "../../widgets/Hero";
 import { ProductGrid } from "../../entities/ProductGrid";
 import { FilterPanel } from "../../widgets/FilterPanel";
@@ -103,6 +103,7 @@ export function AppCatalogDesktopFilters({
   "filters" | "viewMode" | "categories" | "onFilterChange" | "onViewModeChange"
 >) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const stickyRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const stickyStartRef = useRef(0);
   const viewportHeightRef = useRef(0);
@@ -111,17 +112,39 @@ export function AppCatalogDesktopFilters({
   const lastProcessedScrollYRef = useRef(0);
   const contentOffsetRef = useRef(0);
   const frameRef = useRef<number | null>(null);
-  const [stickyTop, setStickyTop] = useState<number | null>(null);
-  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const filterBottomGap = 10;
+    const viewportBleed = 15;
 
     const readHeaderOffset = () => {
       const root = getComputedStyle(document.documentElement);
       const raw = root.getPropertyValue("--header-height").trim();
       const parsed = Number.parseFloat(raw || "84");
       return (Number.isFinite(parsed) ? parsed : 84) + 8;
+    };
+
+    const syncViewportMetrics = () => {
+      const container = containerRef.current;
+      const sticky = stickyRef.current;
+      const content = contentRef.current;
+      if (!container || !sticky || !content) return null;
+
+      const topOffset = readHeaderOffset();
+      const containerRect = container.getBoundingClientRect();
+      const contentHeight = Math.ceil(content.getBoundingClientRect().height);
+      const availableHeight = Math.max(240, window.innerHeight - topOffset - filterBottomGap);
+      const remainingContainerHeight = Math.max(0, containerRect.bottom - topOffset - filterBottomGap);
+      const visibleHeight = Math.min(contentHeight, availableHeight, remainingContainerHeight);
+
+      stickyStartRef.current = containerRect.top + window.scrollY - topOffset;
+      viewportHeightRef.current = visibleHeight;
+      contentHeightRef.current = contentHeight;
+      sticky.style.top = `${topOffset}px`;
+      sticky.style.height = `${visibleHeight + viewportBleed}px`;
+
+      return { contentHeight, visibleHeight };
     };
 
     const applyContentOffset = (nextOffset: number) => {
@@ -132,6 +155,15 @@ export function AppCatalogDesktopFilters({
 
     const runScrollFrame = () => {
       frameRef.current = null;
+
+      const metrics = syncViewportMetrics();
+      if (!metrics) return;
+
+      const maxOffset = Math.max(0, metrics.contentHeight - metrics.visibleHeight);
+      if (contentOffsetRef.current > maxOffset) {
+        contentOffsetRef.current = maxOffset;
+        applyContentOffset(maxOffset);
+      }
 
       const nextOffset = getNextFilterContentOffset({
         scrollY: latestScrollYRef.current,
@@ -155,24 +187,10 @@ export function AppCatalogDesktopFilters({
     };
 
     const syncLayout = () => {
-      const container = containerRef.current;
-      const content = contentRef.current;
-      if (!container || !content) return;
+      const metrics = syncViewportMetrics();
+      if (!metrics) return;
 
-      const topOffset = readHeaderOffset();
-      const contentHeight = Math.ceil(content.getBoundingClientRect().height);
-      const availableHeight = Math.max(240, window.innerHeight - topOffset - 8);
-      const visibleHeight = Math.min(contentHeight, availableHeight);
-
-      stickyStartRef.current =
-        container.getBoundingClientRect().top + window.scrollY - topOffset;
-      viewportHeightRef.current = visibleHeight;
-      contentHeightRef.current = contentHeight;
-
-      setStickyTop(topOffset);
-      setViewportHeight(visibleHeight);
-
-      const maxOffset = Math.max(0, contentHeight - visibleHeight);
+      const maxOffset = Math.max(0, metrics.contentHeight - metrics.visibleHeight);
       const nextOffset = Math.min(contentOffsetRef.current, maxOffset);
       contentOffsetRef.current = nextOffset;
       applyContentOffset(nextOffset);
@@ -216,11 +234,8 @@ export function AppCatalogDesktopFilters({
   return (
     <div ref={containerRef} className="hidden w-80 flex-shrink-0 self-stretch lg:block">
       <aside
+        ref={stickyRef}
         className="overflow-hidden lg:sticky"
-        style={{
-          top: stickyTop !== null ? `${stickyTop}px` : undefined,
-          height: viewportHeight !== null ? `${viewportHeight}px` : undefined,
-        }}
       >
         <div style={{ height: "100%", overflow: "hidden" }}>
           <div

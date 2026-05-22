@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import fs from "node:fs";
 import path from "node:path";
 import { syncListingSearchKeywords } from "../src/modules/catalog/catalog-search.shared";
+import { generateCartCrossSellRuleSeeds } from "../src/modules/recommendations/domain/cart-cross-sell.helpers";
 import { dnsProductCatalogSeed } from "./dns-product-catalog.seed";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -348,6 +349,47 @@ async function seedCatalogReferenceData(items: SeedCatalogItemRow[]): Promise<vo
   );
 }
 
+async function seedCartCrossSellRules(items: Array<{
+  id: number;
+  public_id: string;
+  name: string;
+  subcategory: {
+    id: number;
+    public_id: string;
+    name: string;
+    category: {
+      id: number;
+      public_id: string;
+      name: string;
+    };
+  };
+}>): Promise<void> {
+  const rules = generateCartCrossSellRuleSeeds(items);
+  const coveredSourceItemIds = new Set(
+    rules
+      .map((rule) => rule.source_item_id)
+      .filter((value): value is number => value !== null && Number.isInteger(value) && value > 0),
+  );
+  const uncovered = items.filter((item) => !coveredSourceItemIds.has(item.id));
+  if (uncovered.length > 0) {
+    throw new Error(
+      `Cross-sell seed не покрывает ${uncovered.length} кластеров каталога: ${uncovered
+        .slice(0, 10)
+        .map((item) => item.name)
+        .join(", ")}`,
+    );
+  }
+
+  await createManyInChunks(
+    "CartCrossSellRule",
+    rules,
+    (chunk) =>
+      prisma.cartCrossSellRule.createMany({
+        data: chunk,
+      }),
+  );
+}
+
 async function main(): Promise<void> {
   console.log("Очистка таблиц...");
   await prisma.adminIdempotencyKey.deleteMany();
@@ -367,6 +409,7 @@ async function main(): Promise<void> {
   await prisma.listingQuestion.deleteMany();
   await prisma.listingReview.deleteMany();
   await prisma.wishlistItem.deleteMany();
+  await prisma.cartCrossSellRule.deleteMany();
   await prisma.listingModerationEvent.deleteMany();
   await prisma.listingSearchKeyword.deleteMany();
   await prisma.listingAttribute.deleteMany();
@@ -1141,9 +1184,13 @@ async function main(): Promise<void> {
       name: true,
       subcategory: {
         select: {
+          id: true,
+          public_id: true,
           name: true,
           category: {
             select: {
+              id: true,
+              public_id: true,
               name: true,
             },
           },
@@ -1152,6 +1199,7 @@ async function main(): Promise<void> {
     },
   });
   await seedCatalogReferenceData(catalogReferenceItemRows);
+  await seedCartCrossSellRules(catalogReferenceItemRows);
 
   type AttributeSeed = {
     id: string;

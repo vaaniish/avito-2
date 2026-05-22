@@ -3,6 +3,7 @@ import type { AdminPage } from "../pages/admin/AdminPanel";
 import type { ProfileTab } from "../pages/profile/profile.models";
 import { notifyError } from "../shared/ui/notifications";
 import {
+  apiGet,
   apiDelete,
   apiPost,
   clearSessionUser,
@@ -16,6 +17,37 @@ import type { AppView } from "./app-routing";
 import { logAppDebug } from "./app.debug";
 
 type AuthProfileData = { wishlist: Array<{ id: string }> };
+type SessionBootstrapResponse = {
+  user: SessionUser;
+  profile?: AuthProfileData;
+};
+type WishlistBootstrapItem = { id: string };
+
+const WISHLIST_STORAGE_KEY = "ecomm_session_wishlist_ids";
+
+function saveWishlistIds(ids: Iterable<string>) {
+  localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(Array.from(new Set(ids))));
+}
+
+function loadWishlistIds() {
+  const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+  if (!raw) return new Set<string>();
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return new Set<string>();
+    return new Set(
+      parsed
+        .map((item) => (typeof item === "string" ? item.trim() : ""))
+        .filter(Boolean),
+    );
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function clearWishlistIds() {
+  localStorage.removeItem(WISHLIST_STORAGE_KEY);
+}
 
 export function useAppSessionState(params: {
   currentView: AppView;
@@ -46,6 +78,7 @@ export function useAppSessionState(params: {
           } else {
             next.delete(productId);
           }
+          saveWishlistIds(next);
           return next;
         });
       } catch (error) {
@@ -62,7 +95,9 @@ export function useAppSessionState(params: {
       setCurrentUser(user);
       setIsAuthenticated(true);
       setUserType(role || "regular");
-      setWishlistProductIds(new Set(profile.wishlist.map((item) => item.id)));
+      const nextWishlistIds = new Set(profile.wishlist.map((item) => item.id));
+      saveWishlistIds(nextWishlistIds);
+      setWishlistProductIds(nextWishlistIds);
       logAppDebug("session", "login-success", { role, currentProfileTab });
 
       if (role === "admin") {
@@ -87,6 +122,7 @@ export function useAppSessionState(params: {
     setIsAuthenticated(false);
     setUserType("regular");
     setWishlistProductIds(new Set());
+    clearWishlistIds();
     onSetCurrentAdminPage("transactions");
     onSetCurrentView("auth");
   }, [onSetCurrentAdminPage, onSetCurrentView]);
@@ -111,34 +147,81 @@ export function useAppSessionState(params: {
     setIsAuthenticated(false);
     setUserType("regular");
     setWishlistProductIds(new Set());
+    clearWishlistIds();
     onSetCurrentAdminPage("transactions");
     onSetCurrentView("auth");
   }, [onSetCurrentAdminPage, onSetCurrentView]);
 
   useEffect(() => {
-    const existingSession = getSessionUser();
-    const existingToken = getSessionToken();
-    if (!existingSession || !existingToken) {
-      if (existingSession && !existingToken) {
-        clearSessionUser();
-      }
-      logAppDebug("session", "hydrate-empty", {
-        hasSession: Boolean(existingSession),
-        hasToken: Boolean(existingToken),
-      });
-      setIsSessionHydrated(true);
-      return;
-    }
+    let ignore = false;
 
-    setCurrentUser(existingSession);
-    setUserType(existingSession.role);
-    setIsAuthenticated(true);
-    setIsSessionHydrated(true);
-    logAppDebug("session", "hydrate-passive", {
-      role: existingSession.role,
-      currentView,
-    });
-  }, [currentView]);
+    const hydrateSession = async () => {
+      const existingSession = getSessionUser();
+      const existingToken = getSessionToken();
+      if (!existingSession || !existingToken) {
+        if (existingSession && !existingToken) {
+          clearSessionUser();
+        }
+        if (!ignore) {
+          setWishlistProductIds(new Set());
+          clearWishlistIds();
+          logAppDebug("session", "hydrate-empty", {
+            hasSession: Boolean(existingSession),
+            hasToken: Boolean(existingToken),
+          });
+          setIsSessionHydrated(true);
+        }
+        return;
+      }
+
+      if (!ignore) {
+        setCurrentUser(existingSession);
+        setUserType(existingSession.role);
+        setIsAuthenticated(true);
+        setWishlistProductIds(loadWishlistIds());
+      }
+
+      try {
+        const response = await apiGet<SessionBootstrapResponse>("/auth/me");
+        if (ignore) return;
+
+        let wishlistIds: string[];
+        if (Array.isArray(response.profile?.wishlist)) {
+          wishlistIds = response.profile.wishlist.map((item) => item.id);
+        } else {
+          const wishlist = await apiGet<WishlistBootstrapItem[]>("/profile/wishlist");
+          if (ignore) return;
+          wishlistIds = wishlist.map((item) => item.id);
+        }
+
+        saveSessionUser(response.user);
+        setCurrentUser(response.user);
+        setUserType(response.user.role);
+        setIsAuthenticated(true);
+        const nextWishlistIds = new Set(wishlistIds);
+        saveWishlistIds(nextWishlistIds);
+        setWishlistProductIds(nextWishlistIds);
+        logAppDebug("session", "hydrate-verified", {
+          role: response.user.role,
+        });
+      } catch (error) {
+        if (ignore) return;
+        logAppDebug("session", "hydrate-bootstrap-failed-keep-local-session", {
+          message: error instanceof Error ? error.message : "unknown-error",
+        });
+      } finally {
+        if (!ignore) {
+          setIsSessionHydrated(true);
+        }
+      }
+    };
+
+    void hydrateSession();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isSessionHydrated) {

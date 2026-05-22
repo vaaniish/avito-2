@@ -11,14 +11,24 @@ import {
   mapCatalogListingToProduct,
 } from "../catalog.service";
 import { notFound, validationError } from "../../../../common/application-error";
-import type { CatalogRepositoryPort } from "../catalog.types";
+import type {
+  CatalogRecommendationScoresPort,
+  CatalogRepositoryPort,
+} from "../catalog.types";
 
 type QueryInput = Record<string, unknown>;
 
 export class GetListingsService {
-  constructor(private readonly repository: CatalogRepositoryPort) {}
+  constructor(
+    private readonly repository: CatalogRepositoryPort,
+    private readonly recommendationScores?: CatalogRecommendationScoresPort,
+  ) {}
 
-  async execute(query: QueryInput) {
+  async execute(input: {
+    query: QueryInput;
+    sessionUser?: { id: number } | null;
+  }) {
+    const query = input.query;
     const type = resolveListingType(query.type);
     const usePagination = query.paginated === "1";
     const limit = query.limit ? Number(query.limit) : usePagination ? 24 : undefined;
@@ -105,39 +115,48 @@ export class GetListingsService {
         candidateListings.map((listing) => listing.seller_id),
       );
 
-    const filteredCandidates = sortCatalogCandidates(
-      candidateListings
-        .map((listing) => {
-          const sellerRating =
-            sellerReviewMetricsBySellerIdForCandidates.get(listing.seller_id)?.rating ??
-            listing.rating;
-          const candidateWithEffectiveRating = {
-            ...listing,
-            rating: sellerRating,
-          };
-          const result = listingMatchesCatalogFilters(
-            candidateWithEffectiveRating,
-            {
-              searchQuery,
-              minPrice,
-              maxPrice,
-              minRating,
-              showOnlySale,
-              condition,
-              includeWords,
-              excludeWords,
-            },
-            searchRules,
-          );
-          if (!result.matches) return null;
-          return {
-            ...candidateWithEffectiveRating,
-            searchRank: result.searchRank,
-          };
-        })
-        .filter(Boolean) as Array<any>,
-      sortBy,
-    );
+    const filteredCandidatePool = candidateListings
+      .map((listing) => {
+        const sellerRating =
+          sellerReviewMetricsBySellerIdForCandidates.get(listing.seller_id)?.rating ??
+          listing.rating;
+        const candidateWithEffectiveRating = {
+          ...listing,
+          rating: sellerRating,
+        };
+        const result = listingMatchesCatalogFilters(
+          candidateWithEffectiveRating,
+          {
+            searchQuery,
+            minPrice,
+            maxPrice,
+            minRating,
+            showOnlySale,
+            condition,
+            includeWords,
+            excludeWords,
+          },
+          searchRules,
+        );
+        if (!result.matches) return null;
+        return {
+          ...candidateWithEffectiveRating,
+          searchRank: result.searchRank,
+        };
+      })
+      .filter(Boolean) as Array<any>;
+
+    const recommendationScores =
+      sortBy === "recommended" && this.recommendationScores
+        ? await this.recommendationScores.getScores({
+            userId: input.sessionUser?.id ?? null,
+            listingIds: filteredCandidatePool.map((listing) => listing.id),
+          })
+        : undefined;
+
+    const filteredCandidates = sortCatalogCandidates(filteredCandidatePool, sortBy, {
+      recommendationScores,
+    });
 
     const total = filteredCandidates.length;
     const pagedCandidateIds = filteredCandidates

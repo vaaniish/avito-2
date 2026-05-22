@@ -8,6 +8,7 @@ import {
 } from "./lib/http-observability";
 import { authRouter } from "./modules/auth/auth.routes";
 import { catalogRouter } from "./modules/catalog/catalog.routes";
+import { recommendationsRouter } from "./modules/recommendations";
 import { profileRouter } from "./modules/profile/profile.routes";
 import { partnerRouter } from "./modules/partner/partner.routes";
 import { adminRouter } from "./modules/admin/admin.routes";
@@ -88,6 +89,7 @@ app.get("/health/metrics", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/public", publicRouter);
 app.use("/api/catalog", catalogRouter);
+app.use("/api/recommendations", recommendationsRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/partner", partnerRouter);
 app.use("/api/admin", adminRouter);

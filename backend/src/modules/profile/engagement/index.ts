@@ -11,6 +11,7 @@ import { ProfileLegalEntityLookupGateway } from "./infrastructure/gateways/profi
 import { ProfileEngagementPolicyRepository } from "./infrastructure/repositories/profile-engagement-policy.repository";
 import { ProfileListingReviewRepository } from "./infrastructure/repositories/profile-listing-review.repository";
 import { ProfilePartnershipRepository } from "./infrastructure/repositories/profile-partnership.repository";
+import { recommendationServices } from "../../recommendations";
 
 const partnershipRepository = new ProfilePartnershipRepository(prisma);
 const reviewRepository = new ProfileListingReviewRepository(prisma);
@@ -37,6 +38,9 @@ export const profileEngagementRouter = createProfileEngagementRouter({
       partnershipRepository,
       policyRepository,
     ),
-    createListingReview: new CreateListingReviewService(reviewRepository),
+    createListingReview: new CreateListingReviewService(
+      reviewRepository,
+      recommendationServices.recordEvent,
+    ),
   },
 });

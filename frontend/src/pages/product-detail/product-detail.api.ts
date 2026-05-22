@@ -22,7 +22,9 @@ export function fetchListingQuestions(params: {
 }
 
 export function trackListingView(productId: string): Promise<ListingViewTrackResponse> {
-  return apiPost<ListingViewTrackResponse>(`/catalog/listings/${productId}/view`);
+  return apiPost<ListingViewTrackResponse>(`/catalog/listings/${productId}/view`, {
+    sourcePage: "product-detail",
+  });
 }
 
 export function createListingQuestion(params: {

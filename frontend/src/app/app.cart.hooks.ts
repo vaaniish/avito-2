@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CartItem, Product } from "../shared/types";
+import { trackRecommendationEvent } from "../shared/lib/recommendations.api";
 import { notifyInfo } from "../shared/ui/notifications";
+import { previewCheckoutPromo } from "../pages/checkout/checkout.api";
+import type { AppliedPromo } from "../shared/types/promo";
 type CheckoutFlowResult = {
   orderIds: string[];
   total: number;
@@ -55,7 +58,16 @@ export function useAppCartState(params: {
   const [lastDeliveryType, setLastDeliveryType] = useState<
     "delivery" | "pickup"
   >("delivery");
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const previousStorageKeyRef = useRef(storageKey);
+  const couponCodeRef = useRef(couponCode);
+
+  useEffect(() => {
+    couponCodeRef.current = couponCode;
+  }, [couponCode]);
 
   useEffect(() => {
     const previousStorageKey = previousStorageKeyRef.current;
@@ -77,6 +89,14 @@ export function useAppCartState(params: {
 
   const cartItemCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    [cartItems],
+  );
+  const cartPromoSignature = useMemo(
+    () =>
+      cartItems
+        .map((item) => `${item.id}:${item.quantity}`)
+        .sort((left, right) => left.localeCompare(right))
+        .join("|"),
     [cartItems],
   );
 
@@ -117,8 +137,13 @@ export function useAppCartState(params: {
         return;
       }
       addToCartUnsafe(product);
+      void trackRecommendationEvent({
+        listingPublicId: product.id,
+        eventType: "ADD_TO_CART",
+        sourcePage: "cart-flow",
+      }).catch(() => undefined);
     },
-    [addToCartUnsafe, currentUserPublicId, requestLoginForCartAccess, userType],
+    [addToCartUnsafe, currentUserPublicId, userType],
   );
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
@@ -143,6 +168,97 @@ export function useAppCartState(params: {
     setCartItems((prev) => prev.filter((item) => !itemIds.includes(item.id)));
   }, []);
 
+  const resetCouponState = useCallback(() => {
+    setCouponCode("");
+    setAppliedPromo(null);
+    setCouponError(null);
+  }, []);
+
+  const unlockAppliedCoupon = useCallback(() => {
+    setAppliedPromo(null);
+    setCouponError(null);
+  }, []);
+
+  const handleCouponCodeChange = useCallback((value: string) => {
+    setCouponCode(value);
+    if (appliedPromo && value.trim().toUpperCase() !== appliedPromo.code) {
+      setAppliedPromo(null);
+    }
+    if (couponError) {
+      setCouponError(null);
+    }
+  }, [appliedPromo, couponError]);
+
+  const applyCoupon = useCallback(
+    async (options?: { silent?: boolean; promoCode?: string }) => {
+      const nextCode = (options?.promoCode ?? couponCodeRef.current).trim().toUpperCase();
+
+      if (!requestLoginForCartAccess()) {
+        return false;
+      }
+      if (!nextCode) {
+        setAppliedPromo(null);
+        setCouponError("Введите промокод");
+        return false;
+      }
+      if (cartItems.length === 0) {
+        setAppliedPromo(null);
+        setCouponError("Добавьте товары в корзину, чтобы применить промокод");
+        return false;
+      }
+
+      if (!options?.silent) {
+        setIsApplyingCoupon(true);
+      }
+      if (!options?.silent) {
+        setCouponError(null);
+      }
+
+      try {
+        const result = await previewCheckoutPromo({
+          items: cartItems.map((item) => ({
+            listingId: item.id,
+            quantity: item.quantity,
+          })),
+          promoCode: nextCode,
+        });
+
+        setCouponCode(result.code);
+        setAppliedPromo({
+          code: result.code,
+          discountAmount: result.discountAmount,
+          discountPercent: result.discountPercent,
+          subtotal: result.subtotal,
+          remainingActivations: result.remainingActivations,
+          message: result.message,
+        });
+        setCouponError(null);
+        return true;
+      } catch (error) {
+        setAppliedPromo(null);
+        setCouponError(
+          error instanceof Error ? error.message : "Не удалось применить промокод",
+        );
+        return false;
+      } finally {
+        if (!options?.silent) {
+          setIsApplyingCoupon(false);
+        }
+      }
+    },
+    [cartItems, requestLoginForCartAccess],
+  );
+
+  useEffect(() => {
+    if (!appliedPromo) return;
+    if (cartItems.length === 0) {
+      setAppliedPromo(null);
+      setCouponError(null);
+      return;
+    }
+    void applyCoupon({ silent: true, promoCode: appliedPromo.code });
+  }, [appliedPromo?.code, applyCoupon, cartItems.length, cartPromoSignature]);
+
   const handleOrderCreated = useCallback((result: CheckoutFlowResult) => {
     setLastOrderTotal(result.total);
     setLastOrderIds(result.orderIds);
@@ -154,6 +270,9 @@ export function useAppCartState(params: {
     setLastOrderIds(result.orderIds);
     setLastDeliveryType(result.deliveryType);
     setCartItems([]);
+    setCouponCode("");
+    setAppliedPromo(null);
+    setCouponError(null);
   }, []);
 
   return {
@@ -164,6 +283,14 @@ export function useAppCartState(params: {
     lastOrderTotal,
     selectedDeliveryType,
     setSelectedDeliveryType,
+    couponCode,
+    appliedPromo,
+    couponError,
+    isApplyingCoupon,
+    setCouponCode: handleCouponCodeChange,
+    applyCoupon,
+    resetCouponState,
+    unlockAppliedCoupon,
     requestLoginForCartAccess,
     addToCartUnsafe,
     addToCart,

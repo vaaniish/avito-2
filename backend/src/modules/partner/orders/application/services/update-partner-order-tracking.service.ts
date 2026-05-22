@@ -1,5 +1,6 @@
 import { conflict, notFound, validationError } from "../../../../../common/application-error";
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
+import { recommendationServices } from "../../../../recommendations";
 import {
   mapExternalDeliveryStatusToOrderStatus,
   normalizeTrackingProvider,
@@ -140,6 +141,18 @@ export class UpdatePartnerOrderTrackingService {
             reason: "delivery.sync.after_tracking_update",
             ipAddress: input.requestIp,
           });
+
+          if (nextStatus === "COMPLETED") {
+            for (const item of existing.items) {
+              if (!item.listing?.public_id) continue;
+              await recommendationServices.recordEvent.execute({
+                userId: existing.buyer_id,
+                listingPublicId: item.listing.public_id,
+                eventType: "PURCHASE_COMPLETED",
+                sourcePage: "tracking-sync",
+              });
+            }
+          }
         }
       }
     }

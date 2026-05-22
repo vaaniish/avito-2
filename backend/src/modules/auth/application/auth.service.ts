@@ -150,7 +150,12 @@ export class AuthService {
   async getCurrentUser(input: {
     sessionToken?: string | null;
     meta: RequestMeta;
-  }): Promise<{ user: ReturnType<typeof toAuthUserView> }> {
+  }): Promise<{
+    user: ReturnType<typeof toAuthUserView>;
+    profile: {
+      wishlist: Array<{ id: string }>;
+    };
+  }> {
     const userId = input.sessionToken
       ? this.sessionTokenProvider.verify(input.sessionToken)
       : null;
@@ -177,6 +182,9 @@ export class AuthService {
 
     return {
       user: toAuthUserView(activeUser),
+      profile: {
+        wishlist: activeUser.wishlistListingPublicIds.map((id) => ({ id })),
+      },
     };
   }
 

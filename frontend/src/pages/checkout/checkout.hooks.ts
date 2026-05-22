@@ -28,6 +28,7 @@ import {
   type PaymentMethod,
 } from "./checkout.models";
 import { notifyError, notifyInfo } from "../../shared/ui/notifications";
+import type { AppliedPromo } from "../../shared/types/promo";
 
 function buildDeliveryPointSelectionKey(point: Pick<DeliveryPoint, "id" | "provider">): string {
   return `${point.provider}:${point.id}`;
@@ -47,10 +48,12 @@ function makeCheckoutIdempotencyFingerprint(params: {
   pickupPointProvider: string | null;
   deliveryType: "delivery" | "pickup";
   paymentMethod: PaymentMethod;
+  promoCode: string;
 }): string {
   return JSON.stringify({
     deliveryType: params.deliveryType,
     paymentMethod: params.paymentMethod,
+    promoCode: params.promoCode.trim().toUpperCase(),
     customAddress: params.customAddress.trim(),
     pickupPointId: params.pickupPointId ?? null,
     pickupPointProvider: params.pickupPointProvider ?? null,
@@ -352,8 +355,10 @@ export function useCheckoutPayment(params: {
   deliveryType: "delivery" | "pickup";
   selectedPoint: DeliveryPoint | null;
   subtotal: number;
+  discount: number;
   shipping: number;
   total: number;
+  appliedPromo: AppliedPromo | null;
   onBack: () => void;
   onRemoveUnavailableItems?: (itemIds: string[]) => void;
   onOrderCreated?: (result: {
@@ -375,6 +380,7 @@ export function useCheckoutPayment(params: {
   const [lockedSummary, setLockedSummary] = useState<{
     items: CartItem[];
     subtotal: number;
+    discount: number;
     shipping: number;
     total: number;
   } | null>(null);
@@ -594,6 +600,7 @@ export function useCheckoutPayment(params: {
         pickupPointProvider: params.selectedPoint?.provider ?? null,
         deliveryType: params.deliveryType,
         paymentMethod,
+        promoCode: params.appliedPromo?.code ?? "",
       };
       const checkoutFingerprint = makeCheckoutIdempotencyFingerprint({
         items: params.items.map((item) => ({ id: item.id, quantity: item.quantity })),
@@ -602,6 +609,7 @@ export function useCheckoutPayment(params: {
         pickupPointProvider: params.selectedPoint?.provider ?? null,
         deliveryType: params.deliveryType,
         paymentMethod,
+        promoCode: params.appliedPromo?.code ?? "",
       });
       const existingIdempotency = checkoutIdempotencyRef.current;
       const idempotencyKey =
@@ -630,8 +638,9 @@ export function useCheckoutPayment(params: {
       setLockedSummary({
         items: params.items.map((item) => ({ ...item })),
         subtotal: params.subtotal,
+        discount: response.discount,
         shipping: params.shipping,
-        total: params.total,
+        total: response.total,
       });
       setActivePayment({
         ...createdResult,

@@ -1,31 +1,79 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Minus, Plus, Heart, Trash2 } from "lucide-react";
-import type { CartItem } from "../../shared/types";
+import type { CartItem, Product } from "../../shared/types";
+import { fetchCartRecommendations } from "../../shared/lib/recommendations.api";
+import type { RecommendationItem } from "../../shared/types/recommendations";
+import { RecommendationShelf } from "../../widgets/recommendations/RecommendationShelf";
+import type { AppliedPromo } from "../../shared/types/promo";
+import { PromoCodePanel } from "../../shared/ui/PromoCodePanel";
 
 interface CartPageProps {
   items: CartItem[];
   wishlistProductIds: Set<string>;
+  couponCode: string;
+  appliedPromo: AppliedPromo | null;
+  couponError: string | null;
+  isApplyingCoupon: boolean;
   onUpdateQuantity: (id: string, quantity: number) => void;
   onWishlistToggle: (productId: string, shouldAddToWishlist: boolean) => void;
-  onOpenListing: (item: CartItem) => void;
+  onOpenListing: (product: Product) => void;
+  onAddToCart: (product: Product) => void;
   onCheckout: (deliveryType: "delivery" | "pickup") => void;
+  onCouponCodeChange: (value: string) => void;
+  onApplyCoupon: () => Promise<boolean>;
+  onEditAppliedCoupon: () => void;
   onBackToHome: () => void;
 }
 
 export function CartPage({
   items,
   wishlistProductIds,
+  couponCode,
+  appliedPromo,
+  couponError,
+  isApplyingCoupon,
   onUpdateQuantity,
   onWishlistToggle,
   onOpenListing,
+  onAddToCart,
   onCheckout,
+  onCouponCodeChange,
+  onApplyCoupon,
+  onEditAppliedCoupon,
   onBackToHome,
 }: CartPageProps) {
   const shippingMethod: "delivery" = "delivery";
-  const [couponCode, setCouponCode] = useState("");
   const [editingQuantities, setEditingQuantities] = useState<{
     [key: string]: string;
   }>({});
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+
+  useEffect(() => {
+    let ignore = false;
+    if (items.length === 0) {
+      setRecommendations([]);
+      return;
+    }
+
+    const load = async () => {
+      try {
+        const next = await fetchCartRecommendations(items.map((item) => item.id));
+        if (!ignore) {
+          setRecommendations(next);
+        }
+      } catch {
+        if (!ignore) {
+          setRecommendations([]);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      ignore = true;
+    };
+  }, [items]);
 
   const handleQuantityChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -94,12 +142,8 @@ export function CartPage({
   );
 
   const shippingCost = 500;
-  const total = subtotal + shippingCost;
-
-  const handleApplyCoupon = () => {
-    // Placeholder for coupon logic
-    console.log("Applying coupon:", couponCode);
-  };
+  const discountAmount = appliedPromo?.discountAmount ?? 0;
+  const total = Math.max(0, subtotal - discountAmount + shippingCost);
 
   return (
     <div className="min-h-screen app-shell pb-24 pt-6 md:pt-12">
@@ -171,9 +215,10 @@ export function CartPage({
             </button>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Cart Items */}
-            <div className="flex-1">
+          <>
+            <div className="flex max-w-full flex-col gap-8 lg:items-start lg:flex-row lg:gap-12">
+              {/* Cart Items */}
+              <div className="min-w-0 max-w-full flex-1">
               {/* Table Header - Desktop Only */}
               <div className="hidden lg:grid grid-cols-12 gap-6 pb-6 border-b border-gray-200 mb-8">
                 <div className="col-span-5 text-base text-gray-700">
@@ -426,41 +471,46 @@ export function CartPage({
                 })}
               </div>
 
-              {/* Coupon Section */}
-              <div className="mt-12 md:mt-16 pt-6 md:pt-8 border-t border-gray-200">
-                <h3 className="text-base md:text-lg mb-2">
-                  Есть купон?
-                </h3>
-                <p className="text-sm text-gray-500 mb-4 md:mb-6">
-                  Введите ваш код для мгновенной скидки на
-                  корзину
-                </p>
-                <div className="flex gap-2 sm:gap-3 md:gap-4">
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) =>
-                      setCouponCode(e.target.value)
-                    }
-                    placeholder="Код купона"
-                    className="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all text-sm sm:text-base"
+              {recommendations.length > 0 ? (
+                <div className="mt-12 min-w-0 max-w-full overflow-hidden md:mt-16">
+                  <h2 className="mb-3 text-xl text-gray-900 md:text-2xl">
+                    Вам может понравится
+                  </h2>
+                  <div className="min-w-0 max-w-full overflow-hidden">
+                  <RecommendationShelf
+                    title="Вам может понравится"
+                    showHeader={false}
+                    items={recommendations}
+                    cartItems={items}
+                    wishlistProductIds={wishlistProductIds}
+                    onProductClick={onOpenListing}
+                    onAddToCart={onAddToCart}
+                    onUpdateQuantity={onUpdateQuantity}
+                    onWishlistToggle={onWishlistToggle}
                   />
-                  <button
-                    onClick={handleApplyCoupon}
-                    className="btn-primary whitespace-nowrap px-4 py-3 text-sm font-medium sm:px-6 sm:text-base md:px-8"
-                  >
-                    Применить
-                  </button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
 
-            {/* Cart Summary Sidebar */}
-            <div className="w-full lg:w-[380px] flex-shrink-0">
-              <div className="border border-gray-200 rounded-2xl p-6 md:p-8 lg:sticky lg:top-32">
+              {/* Cart Summary Sidebar */}
+              <div className="w-full flex-shrink-0 lg:w-[380px] lg:self-start">
+                <div className="border border-gray-200 rounded-2xl p-6 md:p-8 lg:sticky lg:top-28">
                 <h2 className="text-lg md:text-xl mb-6">
                   Итого по заказу
                 </h2>
+
+                <div className="mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-200">
+                  <PromoCodePanel
+                    couponCode={couponCode}
+                    appliedPromo={appliedPromo}
+                    couponError={couponError}
+                    isApplyingCoupon={isApplyingCoupon}
+                    onCouponCodeChange={onCouponCodeChange}
+                    onApplyCoupon={onApplyCoupon}
+                    onEditAppliedCoupon={onEditAppliedCoupon}
+                  />
+                </div>
 
                 {/* Shipping Options */}
                 <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-200">
@@ -474,7 +524,7 @@ export function CartPage({
                         className="w-4 h-4 md:w-5 md:h-5 accent-gray-900"
                       />
                       <span className="text-sm md:text-base">
-                        Самовывоз из ПВЗ Яндекса
+                        Доставка в ПВЗ
                       </span>
                     </div>
                     <span className="text-sm md:text-base">
@@ -491,6 +541,14 @@ export function CartPage({
                     </span>
                     <span>
                       {subtotal.toLocaleString("ru-RU")} ₽
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm md:text-base">
+                    <span className="text-gray-600">
+                      Скидка
+                    </span>
+                    <span className={discountAmount > 0 ? "text-emerald-700" : "text-gray-400"}>
+                      {discountAmount > 0 ? `-${discountAmount.toLocaleString("ru-RU")} ₽` : "—"}
                     </span>
                   </div>
                   {shippingCost > 0 && (
@@ -520,9 +578,10 @@ export function CartPage({
                 >
                   Оформить заказ
                 </button>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

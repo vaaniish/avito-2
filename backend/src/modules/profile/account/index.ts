@@ -16,6 +16,7 @@ import {
   ListNotificationsSinceService,
   MarkNotificationsReadService,
 } from "./application/services/notifications.service";
+import { recommendationServices } from "../../recommendations";
 
 const profileRoles = ["BUYER", "SELLER", "ADMIN"];
 const FALLBACK_LISTING_IMAGE =
@@ -33,7 +34,10 @@ export const profileAccountRouter = createProfileAccountRouter({
       toClientCondition,
       extractPrimaryCityFromAddresses,
     }),
-    addWishlistItem: new AddWishlistItemService(wishlistRepository),
+    addWishlistItem: new AddWishlistItemService(
+      wishlistRepository,
+      recommendationServices.recordEvent,
+    ),
     removeWishlistItem: new RemoveWishlistItemService(wishlistRepository),
     listNotifications: new ListNotificationsService(notificationsRepository),
     listNotificationsSince: new ListNotificationsSinceService(

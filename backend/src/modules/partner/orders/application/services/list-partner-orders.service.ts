@@ -1,4 +1,5 @@
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
+import { recommendationServices } from "../../../../recommendations";
 import {
   mapExternalDeliveryStatusToOrderStatus,
   mapPartnerOrder,
@@ -85,6 +86,18 @@ export class ListPartnerOrdersService {
               reason: "delivery.sync.external_status",
               ipAddress: null,
             });
+
+            if (nextStatus === "COMPLETED") {
+              for (const item of order.items) {
+                if (!item.listing?.public_id) continue;
+                await recommendationServices.recordEvent.execute({
+                  userId: order.buyer_id,
+                  listingPublicId: item.listing.public_id,
+                  eventType: "PURCHASE_COMPLETED",
+                  sourcePage: "delivery-sync",
+                });
+              }
+            }
           }
         }),
       );

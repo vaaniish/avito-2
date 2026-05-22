@@ -9,6 +9,8 @@
     "dev:backend": "node node_modules/tsx/dist/cli.mjs watch backend/src/server.ts",
     "dev:frontend": "node node_modules/vite/bin/vite.js --config frontend/vite.config.ts --host 127.0.0.1 --port 3000 --strictPort",
     "dev:all": "node node_modules/concurrently/dist/bin/concurrently.js \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:ports": "lsof -nP -iTCP -sTCP:LISTEN | awk '$9 ~ /:(3000|3001|5173)$/ { print }'",
+    "dev:stop": "sh -c 'pids=$( (lsof -ti tcp:3000 -sTCP:LISTEN; lsof -ti tcp:3001 -sTCP:LISTEN; lsof -ti tcp:5173 -sTCP:LISTEN) | sort -u ); [ -z \"$pids\" ] || kill $pids'",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "node node_modules/typescript/bin/tsc -p backend/tsconfig.json",
     "build:frontend": "node node_modules/vite/bin/vite.js build --config frontend/vite.config.ts",

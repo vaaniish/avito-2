@@ -141,6 +141,9 @@ export function renderProductView(
               item.category === props.selectedProduct?.category,
           )
           .slice(0, 4)}
+        relatedCartItems={props.cartItems}
+        wishlistProductIds={props.wishlistProductIds}
+        onOpenRecommendation={props.onHandleProductClick}
         isWishlisted={props.wishlistProductIds.has(props.selectedProduct.id)}
         onWishlistToggle={props.onHandleWishlistToggle}
       />
@@ -206,10 +209,18 @@ export function renderCartView(props: AppRenderProps, lazyFallback: ReactNode) {
         <CartPage
           items={props.cartItems}
           wishlistProductIds={props.wishlistProductIds}
+          couponCode={props.couponCode}
+          appliedPromo={props.appliedPromo}
+          couponError={props.couponError}
+          isApplyingCoupon={props.isApplyingCoupon}
           onUpdateQuantity={props.onHandleUpdateQuantity}
           onWishlistToggle={props.onHandleWishlistToggle}
           onOpenListing={props.onHandleProductClick}
+          onAddToCart={props.onHandleAddToCart}
           onCheckout={props.onHandleCheckout}
+          onCouponCodeChange={props.onHandleCouponCodeChange}
+          onApplyCoupon={props.onHandleApplyCoupon}
+          onEditAppliedCoupon={props.onHandleEditAppliedCoupon}
           onBackToHome={props.onHandleLogoClick}
         />
       </Suspense>
@@ -229,6 +240,13 @@ export function renderCheckoutView(
         items={props.cartItems}
         deliveryType={props.selectedDeliveryType}
         userType={props.userType}
+        couponCode={props.couponCode}
+        appliedPromo={props.appliedPromo}
+        couponError={props.couponError}
+        isApplyingCoupon={props.isApplyingCoupon}
+        onCouponCodeChange={props.onHandleCouponCodeChange}
+        onApplyCoupon={props.onHandleApplyCoupon}
+        onEditAppliedCoupon={props.onHandleEditAppliedCoupon}
         onBack={() => props.onSetCurrentView("cart")}
         onRemoveUnavailableItems={props.onHandleRemoveUnavailableItems}
         onOrderCreated={props.onHandleOrderCreated}
@@ -395,7 +413,7 @@ export function renderCatalogView(
   return renderWithAppShell(
     <AppCatalogView
       isSearchActive={props.isSearchActive}
-      hideHero={props.isSearchActive || props.currentView === "catalogItem"}
+      hideHero={false}
       filters={props.filters}
       viewMode={props.viewMode}
       categories={props.categories}

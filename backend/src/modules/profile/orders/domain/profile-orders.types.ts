@@ -41,7 +41,14 @@ export type CheckoutRequestInput = {
   pickupPointProvider: DeliveryProviderCode;
   deliveryType: "DELIVERY" | "PICKUP";
   paymentMethod: "card" | "sbp" | string;
+  promoCode: string;
   requestIp: string | null;
+};
+
+export type CheckoutPromoPreviewInput = {
+  actorUserId: number;
+  items: CheckoutRequestItem[];
+  promoCode: string;
 };
 
 export type BuyerProfileOrderStatus =
@@ -185,12 +192,24 @@ export type CreateOrderCheckoutDto = {
     total_price: number;
   }>;
   total: number;
+  discount: number;
+  promoCode: string | null;
   payment: {
     provider: "yoomoney";
     paymentId: string | null;
     status: string | null;
     confirmationUrl: string | null;
   };
+};
+
+export type CheckoutPromoPreviewDto = {
+  success: true;
+  code: string;
+  discountPercent: number;
+  discountAmount: number;
+  subtotal: number;
+  remainingActivations: number;
+  message: string;
 };
 
 export type BuyerProfileOrderDto = {
@@ -283,6 +302,11 @@ export interface ProfileOrdersRepositoryPort {
   findApprovedActiveListingsByPublicIds(
     listingPublicIds: string[],
   ): Promise<ApprovedListingRecord[]>;
+  getLaunchPromoSnapshot(userId: number): Promise<{
+    hasSuccessfulOrders: boolean;
+    hasActiveDiscountedOrder: boolean;
+    activeDiscountedBuyerCount: number;
+  }>;
   findUserAddressByIdForUser(params: {
     addressId: number;
     userId: number;

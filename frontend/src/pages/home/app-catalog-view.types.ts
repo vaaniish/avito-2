@@ -14,6 +14,18 @@ export type AppCatalogViewProps = {
   isLoadingMoreItems: boolean;
   loadedItemCount: number;
   totalItemCount: number;
+  catalogSearchMeta?: {
+    recognizedQuery: string | null;
+    emptyStateMessage?: string;
+    branchHints: Array<{
+      itemPublicId: string;
+      itemName: string;
+      subcategoryName: string;
+      categoryName: string;
+      matchedPhrases: string[];
+      suggestions: string[];
+    }>;
+  } | null;
   catalogPageOffsets: number[];
   catalogPagesByOffset: CatalogPagesByOffset;
   loadedCatalogOffsets: number[];

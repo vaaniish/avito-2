@@ -22,7 +22,11 @@ interface ProductCardProps {
   onWishlistToggle?: (productId: string, isWishlisted: boolean) => void;
   dataTestId?: string;
   imagePriority?: "high" | "lazy";
+  className?: string;
 }
+
+export const CATALOG_CARD_WIDTH_PX = 292;
+export const CATALOG_CARD_MIN_HEIGHT_PX = 516;
 
 export function ProductCard({
   product,
@@ -36,6 +40,7 @@ export function ProductCard({
   onWishlistToggle,
   dataTestId,
   imagePriority = "lazy",
+  className = "",
 }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -166,7 +171,7 @@ export function ProductCard({
     <div
       data-testid={dataTestId}
       onClick={onClick}
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow duration-200 hover:shadow-lg"
+      className={`group relative flex h-full min-h-[516px] w-full flex-col cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow duration-200 hover:shadow-lg ${className}`}
     >
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
@@ -188,32 +193,40 @@ export function ProductCard({
         </div>
       </div>
 
-      <div className="flex flex-col p-2">
-        <h3 className="h-14 line-clamp-2 text-[17px] font-semibold text-black">{product.title}</h3>
+      <div className="flex flex-1 flex-col p-2">
+        <h3 className="h-14 text-balance line-clamp-2 text-[17px] font-semibold leading-[1.15] text-black">
+          {product.title}
+        </h3>
 
         <div className="flex-grow" />
 
         <div className="mt-2">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[22px] font-bold text-black">{displayPrice.toLocaleString("ru-RU")} ₽</span>
-            {product.isSale && product.salePrice && discountPercent > 0 ? (
-              <>
-                <span className="text-xs text-gray-400 line-through">{product.price.toLocaleString("ru-RU")} ₽</span>
-                <span className="text-xs text-red-500">-{discountPercent}%</span>
-              </>
-            ) : null}
+          <div className="min-h-[38px]">
+            <div className="flex min-w-0 items-baseline gap-1.5">
+              <span className="shrink-0 whitespace-nowrap text-[22px] font-bold text-black">
+                {displayPrice.toLocaleString("ru-RU")} ₽
+              </span>
+              {product.isSale && product.salePrice && discountPercent > 0 ? (
+                <>
+                  <span className="min-w-0 truncate text-xs text-gray-400 line-through">
+                    {product.price.toLocaleString("ru-RU")} ₽
+                  </span>
+                  <span className="shrink-0 text-xs text-red-500">-{discountPercent}%</span>
+                </>
+              ) : null}
+            </div>
           </div>
 
-          <div className="mt-1 flex min-w-0 items-center gap-1 text-[12px] text-[rgb(68,68,68)]">
+          <div className="mt-1 flex min-h-[20px] min-w-0 items-center gap-1 text-[12px] text-[rgb(68,68,68)]">
             <span className="max-w-[62%] truncate">{product.seller}</span>
             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
             <span className="tabular-nums">{sellerRatingValue}</span>
             <span className="tabular-nums text-gray-500">({sellerReviewsCountValue})</span>
           </div>
 
-          <div className="mb-2 mt-1 flex items-center gap-1 text-[12px] text-[rgb(119,119,119)]">
+          <div className="mb-2 mt-1 flex min-h-[20px] items-center gap-1 text-[12px] text-[rgb(119,119,119)]">
             <MapPin className="h-3.5 w-3.5" />
-            <span>{city}</span>
+            <span className="truncate">{city}</span>
           </div>
 
           <div className="h-11">

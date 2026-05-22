@@ -5,6 +5,7 @@ import type { CreateOrderService } from "../application/services/create-order.se
 import type { GetOrderPaymentStatusService } from "../application/services/get-order-payment-status.service";
 import type { HandleYooKassaWebhookService } from "../application/services/handle-yookassa-webhook.service";
 import type { ListProfileOrdersService } from "../application/services/list-profile-orders.service";
+import type { PreviewCheckoutPromoService } from "../application/services/preview-checkout-promo.service";
 
 type SessionResult =
   | { ok: true; user: { id: number; role: string } }
@@ -21,6 +22,7 @@ export type ProfileOrdersHttpDeps = {
     getOrderPaymentStatus: GetOrderPaymentStatusService;
     createOrder: CreateOrderService;
     listProfileOrders: ListProfileOrdersService;
+    previewCheckoutPromo: PreviewCheckoutPromoService;
   };
 };
 
@@ -159,6 +161,7 @@ export function createProfileOrdersHttpRouter(
         pickupPointProvider?: unknown;
         deliveryType?: unknown;
         paymentMethod?: unknown;
+        promoCode?: unknown;
       };
 
       const rawItems = Array.isArray(body.items) ? body.items : [];
@@ -190,11 +193,47 @@ export function createProfileOrdersHttpRouter(
         ),
         deliveryType: body.deliveryType === "pickup" ? "PICKUP" : "DELIVERY",
         paymentMethod: requestedPaymentMethodRaw || "card",
+        promoCode: typeof body.promoCode === "string" ? body.promoCode.trim() : "",
         requestIp: getRequestIp(req),
       });
       res.status(201).json(result);
     } catch (error) {
       console.error("Error creating orders:", error);
+      sendApplicationError(res, error);
+    }
+  });
+
+  router.post("/orders/promo/preview", async (req: Request, res: Response) => {
+    try {
+      const session = await deps.requireAnyRole(req, profileRoles(deps));
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      const body = (req.body ?? {}) as {
+        items?: unknown;
+        promoCode?: unknown;
+      };
+
+      const rawItems = Array.isArray(body.items) ? body.items : [];
+      const parsedItems = rawItems
+        .map((item) => item as { listingId?: unknown; quantity?: unknown })
+        .map((item) => ({
+          listingId:
+            typeof item.listingId === "string" ? item.listingId.trim() : "",
+          quantity: Number(item.quantity ?? 1),
+        }));
+
+      const result = await deps.services.previewCheckoutPromo.execute({
+        actorUserId: session.user.id,
+        items: parsedItems,
+        promoCode: typeof body.promoCode === "string" ? body.promoCode.trim() : "",
+      });
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error previewing checkout promo:", error);
       sendApplicationError(res, error);
     }
   });
