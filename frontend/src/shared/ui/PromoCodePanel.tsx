@@ -25,6 +25,11 @@ export function PromoCodePanel({
 }: PromoCodePanelProps) {
   const isApplied = Boolean(appliedPromo);
   const statusMessageId = couponError ? "promo-code-error" : appliedPromo ? "promo-code-success" : undefined;
+  const appliedMessage = appliedPromo
+    ? appliedPromo.discountPercent !== null
+      ? `${appliedPromo.message}. Скидка ${appliedPromo.discountPercent}% активна.`
+      : `${appliedPromo.message}. Скидка ${appliedPromo.discountAmount.toLocaleString("ru-RU")} ₽ активна.`
+    : null;
   const appliedInputStyle = isApplied
     ? {
         backgroundColor: "#ecfdf3",
@@ -101,7 +106,7 @@ export function PromoCodePanel({
 
       {appliedPromo ? (
         <p id="promo-code-success" className="mt-3 text-sm text-emerald-700">
-          {appliedPromo.message}. Скидка {appliedPromo.discountPercent}% активна.
+          {appliedMessage}
         </p>
       ) : null}
     </div>

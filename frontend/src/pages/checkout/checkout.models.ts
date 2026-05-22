@@ -44,7 +44,7 @@ export type CreateOrdersResponse = {
 export type CheckoutPromoPreviewResponse = {
   success: true;
   code: string;
-  discountPercent: number;
+  discountPercent: number | null;
   discountAmount: number;
   subtotal: number;
   remainingActivations: number;

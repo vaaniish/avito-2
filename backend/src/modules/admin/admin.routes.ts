@@ -7,6 +7,7 @@ import { complaintsRouter } from "./admin.complaints.routes";
 import { registerAdminFinanceRoutes } from "./admin.finance.routes";
 import { registerAdminListingRoutes } from "./admin.listings.routes";
 import { registerAdminPartnershipRoutes } from "./admin.partnership.routes";
+import { registerAdminPromoRoutes } from "./admin.promos.routes";
 import { registerAdminUserRoutes } from "./admin.users.routes";
 import { adminRecommendationsRouter } from "../recommendations";
 
@@ -19,6 +20,7 @@ const adminRouter = Router();
   registerAdminCommissionRoutes,
   registerAdminListingRoutes,
   registerAdminPartnershipRoutes,
+  registerAdminPromoRoutes,
   registerAdminUserRoutes,
 ].forEach((register) => register(adminRouter));
 

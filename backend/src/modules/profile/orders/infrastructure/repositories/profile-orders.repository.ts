@@ -3,6 +3,7 @@ import {
   Prisma,
   type PrismaClient,
 } from "@prisma/client";
+import { validationError } from "../../../../../common/application-error";
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
 import { recomputeSellerCommissionSnapshot } from "../../../../finance/infrastructure/repositories/commission-program.repository";
 import { recommendationServices } from "../../../../recommendations";
@@ -152,6 +153,59 @@ async function releaseReservedListingsByOrderIds(
     },
     data: {
       status: "ACTIVE",
+    },
+  });
+}
+
+async function releasePromoActivationsForCheckoutGroups(
+  tx: Prisma.TransactionClient,
+  checkoutGroupKeys: string[],
+): Promise<void> {
+  const groups = [...new Set(checkoutGroupKeys.map((value) => value.trim()).filter(Boolean))];
+  if (groups.length === 0) {
+    return;
+  }
+
+  const groupedOrders = await tx.marketOrder.findMany({
+    where: {
+      checkout_group_key: { in: groups },
+    },
+    select: {
+      checkout_group_key: true,
+      status: true,
+      transactions: {
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        take: 1,
+        select: { status: true },
+      },
+    },
+  });
+
+  const releasableGroups = groups.filter((groupKey) => {
+    const orders = groupedOrders.filter((order) => order.checkout_group_key === groupKey);
+    if (orders.length === 0) return false;
+    return orders.every((order) => {
+      const latestTxStatus = order.transactions[0]?.status ?? null;
+      return (
+        order.status === "CANCELLED" ||
+        latestTxStatus === "FAILED" ||
+        latestTxStatus === "CANCELLED" ||
+        latestTxStatus === "REFUNDED"
+      );
+    });
+  });
+
+  if (releasableGroups.length === 0) {
+    return;
+  }
+
+  await tx.promoActivation.updateMany({
+    where: {
+      checkout_group_key: { in: releasableGroups },
+      status: { in: ["RESERVED", "CONSUMED"] },
+    },
+    data: {
+      status: "RELEASED",
     },
   });
 }
@@ -432,6 +486,56 @@ export class ProfileOrdersRepository {
             .filter((item): item is number => Number.isInteger(item)),
         });
       }
+
+      const paidOrderGroups = await tx.marketOrder.findMany({
+        where: {
+          id: { in: payableOrders.map((order) => order.id) },
+          checkout_group_key: { not: null },
+        },
+        select: {
+          id: true,
+          checkout_group_key: true,
+        },
+      });
+
+      const activationRows = await tx.promoActivation.findMany({
+        where: {
+          checkout_group_key: {
+            in: paidOrderGroups
+              .map((order) => order.checkout_group_key)
+              .filter((value): value is string => Boolean(value)),
+          },
+          status: "RESERVED",
+        },
+        select: {
+          id: true,
+          checkout_group_key: true,
+          order_id: true,
+        },
+      });
+
+      const firstOrderIdByGroup = new Map<string, number>();
+      for (const order of paidOrderGroups) {
+        if (!order.checkout_group_key) continue;
+        if (!firstOrderIdByGroup.has(order.checkout_group_key)) {
+          firstOrderIdByGroup.set(order.checkout_group_key, order.id);
+        }
+      }
+
+      await Promise.all(
+        activationRows.map((activation) =>
+          tx.promoActivation.update({
+            where: { id: activation.id },
+            data: {
+              status: "CONSUMED",
+              order_id:
+                activation.order_id ??
+                firstOrderIdByGroup.get(activation.checkout_group_key) ??
+                null,
+            },
+          }),
+        ),
+      );
     });
 
     for (const signal of paidSignals) {
@@ -504,6 +608,23 @@ export class ProfileOrdersRepository {
           ipAddress: params.requestIp,
         })),
       });
+
+      const cancelledGroups = await tx.marketOrder.findMany({
+        where: {
+          id: { in: cancellableOrderIds },
+          checkout_group_key: { not: null },
+        },
+        select: {
+          checkout_group_key: true,
+        },
+      });
+
+      await releasePromoActivationsForCheckoutGroups(
+        tx,
+        cancelledGroups
+          .map((order) => order.checkout_group_key)
+          .filter((value): value is string => Boolean(value)),
+      );
     });
   }
 
@@ -515,11 +636,70 @@ export class ProfileOrdersRepository {
         status: "ACTIVE",
       },
       include: {
+        item: {
+          select: {
+            id: true,
+            public_id: true,
+            subcategory_id: true,
+            subcategory: {
+              select: {
+                id: true,
+                public_id: true,
+                category_id: true,
+                category: {
+                  select: {
+                    id: true,
+                    public_id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         images: {
           select: { url: true },
           orderBy: [{ sort_order: "asc" }, { id: "asc" }],
           take: 1,
         },
+      },
+    });
+  }
+
+  async findPromoByCode(code: string) {
+    return this.prisma.promoCode.findUnique({
+      where: { code },
+      include: {
+        scope_targets: {
+          select: {
+            target_type: true,
+            category_id: true,
+            subcategory_id: true,
+            item_id: true,
+            listing_id: true,
+          },
+        },
+      },
+    });
+  }
+
+  async countActivePromoActivations(promoId: number): Promise<number> {
+    return this.prisma.promoActivation.count({
+      where: {
+        promo_code_id: promoId,
+        status: { in: ["RESERVED", "CONSUMED"] },
+      },
+    });
+  }
+
+  async countActivePromoActivationsForUser(params: {
+    promoId: number;
+    userId: number;
+  }): Promise<number> {
+    return this.prisma.promoActivation.count({
+      where: {
+        promo_code_id: params.promoId,
+        user_id: params.userId,
+        status: { in: ["RESERVED", "CONSUMED"] },
       },
     });
   }
@@ -615,6 +795,13 @@ export class ProfileOrdersRepository {
     requestIp: string | null;
     paymentIntentIdBase: string;
     commissionRateBySellerId: Map<number, number>;
+    promoReservation:
+      | {
+          promoId: number;
+          buyerId: number;
+          checkoutGroupKey: string;
+        }
+      | null;
     appendPickupPointMetaToAddress: (
       address: string,
       pickupPointId: string | null,
@@ -629,6 +816,64 @@ export class ProfileOrdersRepository {
     }>
   > {
     return this.prisma.$transaction(async (tx) => {
+      let promoActivationId: number | null = null;
+      if (params.promoReservation) {
+        const promo = await tx.promoCode.findUnique({
+          where: { id: params.promoReservation.promoId },
+          select: {
+            id: true,
+            max_activations: true,
+            per_user_limit: true,
+            is_enabled: true,
+            starts_at: true,
+            ends_at: true,
+          },
+        });
+
+        if (!promo || !promo.is_enabled) {
+          throw validationError("Промокод не найден или больше не действует");
+        }
+
+        const now = new Date();
+        if (promo.starts_at.getTime() > now.getTime() || promo.ends_at.getTime() < now.getTime()) {
+          throw validationError("Промокод не найден или больше не действует");
+        }
+
+        const [activeCount, userActiveCount] = await Promise.all([
+          tx.promoActivation.count({
+            where: {
+              promo_code_id: promo.id,
+              status: { in: ["RESERVED", "CONSUMED"] },
+            },
+          }),
+          tx.promoActivation.count({
+            where: {
+              promo_code_id: promo.id,
+              user_id: params.promoReservation.buyerId,
+              status: { in: ["RESERVED", "CONSUMED"] },
+            },
+          }),
+        ]);
+
+        if (activeCount >= promo.max_activations) {
+          throw validationError("Лимит активаций этого промокода уже исчерпан");
+        }
+        if (userActiveCount >= promo.per_user_limit) {
+          throw validationError("Вы уже использовали этот промокод");
+        }
+
+        const activation = await tx.promoActivation.create({
+          data: {
+            promo_code_id: promo.id,
+            user_id: params.promoReservation.buyerId,
+            checkout_group_key: params.promoReservation.checkoutGroupKey,
+            status: "RESERVED",
+          },
+          select: { id: true },
+        });
+        promoActivationId = activation.id;
+      }
+
       const listingIdsToReserve = uniqueNumbers(
         params.preparedOrders.flatMap((preparedOrder) =>
           preparedOrder.items.map((item) => item.listing_id),
@@ -666,6 +911,8 @@ export class ProfileOrdersRepository {
             public_id: preparedOrder.publicId,
             buyer_id: params.buyerId,
             seller_id: preparedOrder.sellerId,
+            promo_code_id: params.promoReservation?.promoId ?? null,
+            checkout_group_key: params.promoReservation?.checkoutGroupKey ?? null,
             status: "CREATED",
             delivery_type: params.deliveryType,
             delivery_address:
@@ -690,6 +937,16 @@ export class ProfileOrdersRepository {
             },
           },
         });
+
+        if (promoActivationId !== null) {
+          await tx.promoActivation.update({
+            where: { id: promoActivationId },
+            data: {
+              order_id: order.id,
+            },
+          });
+          promoActivationId = null;
+        }
 
         assertOrderStatusTransitionAllowed({
           fromStatus: null,
@@ -823,6 +1080,18 @@ export class ProfileOrdersRepository {
       where: { id: params.orderId },
       data,
     });
+
+    if (params.nextStatus === "CANCELLED") {
+      const order = await this.prisma.marketOrder.findUnique({
+        where: { id: params.orderId },
+        select: { checkout_group_key: true },
+      });
+      if (order?.checkout_group_key) {
+        await this.prisma.$transaction(async (tx) => {
+          await releasePromoActivationsForCheckoutGroups(tx, [order.checkout_group_key!]);
+        });
+      }
+    }
   }
 
   async findReviewedListingIds(params: {

@@ -26,6 +26,7 @@ const ADMIN_ROUTE_PAGES: AdminPage[] = [
   "complaints",
   "sellers",
   "listings",
+  "promos",
   "catalog",
   "users",
   "commissions",

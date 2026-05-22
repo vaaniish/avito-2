@@ -44,12 +44,18 @@ const CatalogSuggestionsPage = lazy(() =>
     default: module.CatalogSuggestionsPage,
   })),
 );
+const PromosPage = lazy(() =>
+  import("./promos/PromosPage").then((module) => ({
+    default: module.PromosPage,
+  })),
+);
 
 export type AdminPage =
   | "transactions"
   | "complaints"
   | "sellers"
   | "listings"
+  | "promos"
   | "catalog"
   | "users"
   | "commissions"
@@ -104,6 +110,11 @@ export function AdminPanel({
       icon: FileText,
     },
     {
+      id: "promos" as AdminPage,
+      name: "Промокоды",
+      icon: ListPlus,
+    },
+    {
       id: "catalog" as AdminPage,
       name: "Каталог",
       icon: ListPlus,
@@ -135,6 +146,8 @@ export function AdminPanel({
         return <SellersPage />;
       case "listings":
         return <ListingsPage />;
+      case "promos":
+        return <PromosPage />;
       case "catalog":
         return <CatalogSuggestionsPage />;
       case "users":

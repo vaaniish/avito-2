@@ -100,6 +100,21 @@ export type ApprovedListingRecord = {
   seller_id: number;
   title: string;
   price: number;
+  item_id: number | null;
+  item: null | {
+    id: number;
+    public_id: string;
+    subcategory_id: number;
+    subcategory: {
+      id: number;
+      public_id: string;
+      category_id: number;
+      category: {
+        id: number;
+        public_id: string;
+      };
+    };
+  };
   images: Array<{ url: string }>;
 };
 
@@ -205,10 +220,44 @@ export type CreateOrderCheckoutDto = {
 export type CheckoutPromoPreviewDto = {
   success: true;
   code: string;
-  discountPercent: number;
+  discountPercent: number | null;
   discountAmount: number;
   subtotal: number;
   remainingActivations: number;
+  message: string;
+};
+
+export type PromoScopeTargetsInput = {
+  allCatalog: boolean;
+  categoryPublicIds: string[];
+  subcategoryPublicIds: string[];
+  itemPublicIds: string[];
+  listingPublicIds: string[];
+};
+
+export type PromoEligibilityResult = {
+  promo: {
+    id: number;
+    public_id: string;
+    code: string;
+    discount_type: "PERCENT" | "FIXED_AMOUNT";
+    discount_value: number;
+    min_subtotal: number;
+    max_activations: number;
+    per_user_limit: number;
+    starts_at: Date;
+    ends_at: Date;
+    is_enabled: boolean;
+    all_catalog: boolean;
+    is_system: boolean;
+    legacy_rule: string | null;
+  };
+  subtotal: number;
+  eligibleSubtotal: number;
+  discountAmount: number;
+  discountPercent: number | null;
+  remainingActivations: number;
+  eligibleListingPublicIds: Set<string>;
   message: string;
 };
 
@@ -302,6 +351,34 @@ export interface ProfileOrdersRepositoryPort {
   findApprovedActiveListingsByPublicIds(
     listingPublicIds: string[],
   ): Promise<ApprovedListingRecord[]>;
+  findPromoByCode(code: string): Promise<{
+    id: number;
+    public_id: string;
+    code: string;
+    discount_type: "PERCENT" | "FIXED_AMOUNT";
+    discount_value: number;
+    min_subtotal: number;
+    max_activations: number;
+    per_user_limit: number;
+    starts_at: Date;
+    ends_at: Date;
+    is_enabled: boolean;
+    all_catalog: boolean;
+    is_system: boolean;
+    legacy_rule: string | null;
+    scope_targets: Array<{
+      target_type: "CATEGORY" | "SUBCATEGORY" | "ITEM" | "LISTING";
+      category_id: number | null;
+      subcategory_id: number | null;
+      item_id: number | null;
+      listing_id: number | null;
+    }>;
+  } | null>;
+  countActivePromoActivations(promoId: number): Promise<number>;
+  countActivePromoActivationsForUser(params: {
+    promoId: number;
+    userId: number;
+  }): Promise<number>;
   getLaunchPromoSnapshot(userId: number): Promise<{
     hasSuccessfulOrders: boolean;
     hasActiveDiscountedOrder: boolean;
@@ -323,6 +400,13 @@ export interface ProfileOrdersRepositoryPort {
     requestIp: string | null;
     paymentIntentIdBase: string;
     commissionRateBySellerId: Map<number, number>;
+    promoReservation:
+      | {
+          promoId: number;
+          buyerId: number;
+          checkoutGroupKey: string;
+        }
+      | null;
     appendPickupPointMetaToAddress: (
       address: string,
       pickupPointId: string | null,

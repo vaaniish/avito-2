@@ -75,6 +75,24 @@ enum TransactionStatus {
   REFUNDED
 }
 
+enum PromoDiscountType {
+  PERCENT
+  FIXED_AMOUNT
+}
+
+enum PromoScopeTargetType {
+  CATEGORY
+  SUBCATEGORY
+  ITEM
+  LISTING
+}
+
+enum PromoActivationStatus {
+  RESERVED
+  CONSUMED
+  RELEASED
+}
+
 enum PaymentProvider {
   YOOMONEY
   STRIPE
@@ -247,6 +265,9 @@ model AppUser {
   commission_period_stats SellerCommissionPeriodStat[] @relation("seller_commission_period_stats")
   recommendation_events RecommendationEvent[]
   interest_profile     UserInterestProfile?
+  promo_codes_created  PromoCode[]           @relation("promo_codes_created_by")
+  promo_codes_updated  PromoCode[]           @relation("promo_codes_updated_by")
+  promo_activations    PromoActivation[]
 
   @@index([role, status])
   @@index([created_at])
@@ -316,6 +337,7 @@ model CatalogCategory {
   attribute_definitions CatalogAttributeDefinition[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_category")
   search_rules   CatalogSearchRule[]
+  promo_scope_targets PromoScopeTarget[]
 
   @@unique([type, name])
 }
@@ -334,6 +356,7 @@ model CatalogSubcategory {
   attribute_definitions CatalogAttributeDefinition[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_subcategory")
   search_rules   CatalogSearchRule[]
+  promo_scope_targets PromoScopeTarget[]
 
   @@unique([category_id, name])
 }
@@ -353,6 +376,7 @@ model CatalogItem {
   reference_brands CatalogReferenceBrand[]
   suggestions    CatalogSuggestion[] @relation("catalog_suggestion_item")
   search_rules   CatalogSearchRule[]
+  promo_scope_targets PromoScopeTarget[]
 
   @@unique([subcategory_id, name])
 }
@@ -558,12 +582,87 @@ model MarketplaceListing {
   similarities_from    ItemSimilarity[]     @relation("item_similarity_from")
   similarities_to      ItemSimilarity[]     @relation("item_similarity_to")
   segment_popularity   SegmentPopularity[]
+  promo_scope_targets  PromoScopeTarget[]
 
   @@index([seller_id])
   @@index([item_id])
   @@index([type, status, moderation_status])
   @@index([status, moderation_status, created_at])
   @@index([type, status, moderation_status, created_at(sort: Desc), id(sort: Desc)], map: "MarketplaceListing_type_status_moderation_created_id_idx")
+}
+
+model PromoCode {
+  id                Int                @id @default(autoincrement())
+  public_id         String             @unique
+  code              String             @unique
+  discount_type     PromoDiscountType
+  discount_value    Int
+  min_subtotal      Int                @default(0)
+  max_activations   Int
+  per_user_limit    Int                @default(1)
+  starts_at         DateTime
+  ends_at           DateTime
+  is_enabled        Boolean            @default(true)
+  all_catalog       Boolean            @default(false)
+  is_system         Boolean            @default(false)
+  legacy_rule       String?
+  created_by_id     Int?
+  updated_by_id     Int?
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+  created_by        AppUser?           @relation("promo_codes_created_by", fields: [created_by_id], references: [id], onDelete: SetNull)
+  updated_by        AppUser?           @relation("promo_codes_updated_by", fields: [updated_by_id], references: [id], onDelete: SetNull)
+  scope_targets     PromoScopeTarget[]
+  activations       PromoActivation[]
+  orders            MarketOrder[]
+
+  @@index([is_enabled, starts_at, ends_at])
+  @@index([created_at])
+}
+
+model PromoScopeTarget {
+  id                Int                  @id @default(autoincrement())
+  promo_code_id     Int
+  target_type       PromoScopeTargetType
+  category_id       Int?
+  subcategory_id    Int?
+  item_id           Int?
+  listing_id        Int?
+  created_at        DateTime             @default(now())
+
+  promo_code        PromoCode            @relation(fields: [promo_code_id], references: [id], onDelete: Cascade)
+  category          CatalogCategory?     @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  subcategory       CatalogSubcategory?  @relation(fields: [subcategory_id], references: [id], onDelete: Cascade)
+  item              CatalogItem?         @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  listing           MarketplaceListing?  @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@index([promo_code_id, target_type])
+  @@index([category_id])
+  @@index([subcategory_id])
+  @@index([item_id])
+  @@index([listing_id])
+}
+
+model PromoActivation {
+  id                 Int                   @id @default(autoincrement())
+  promo_code_id      Int
+  user_id            Int
+  order_id           Int?
+  checkout_group_key String
+  status             PromoActivationStatus @default(RESERVED)
+  created_at         DateTime              @default(now())
+  updated_at         DateTime              @updatedAt
+
+  promo_code         PromoCode             @relation(fields: [promo_code_id], references: [id], onDelete: Cascade)
+  user               AppUser               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  order              MarketOrder?          @relation(fields: [order_id], references: [id], onDelete: SetNull)
+
+  @@unique([promo_code_id, checkout_group_key], map: "PromoActivation_promo_group_unique")
+  @@index([promo_code_id, status])
+  @@index([user_id, promo_code_id, status])
+  @@index([checkout_group_key, status])
+  @@index([order_id])
 }
 
 model ListingSearchKeyword {
@@ -811,6 +910,8 @@ model MarketOrder {
   public_id             String               @unique
   buyer_id              Int
   seller_id             Int
+  promo_code_id         Int?
+  checkout_group_key    String?
   status                OrderStatus          @default(CREATED)
   delivery_type         DeliveryType
   delivery_address      String?
@@ -829,12 +930,16 @@ model MarketOrder {
 
   buyer                 AppUser              @relation("buyer_orders", fields: [buyer_id], references: [id], onDelete: Cascade)
   seller                AppUser              @relation("seller_orders", fields: [seller_id], references: [id], onDelete: Cascade)
+  promo_code            PromoCode?           @relation(fields: [promo_code_id], references: [id], onDelete: SetNull)
   items                 MarketOrderItem[]
   transactions          PlatformTransaction[]
   status_history        OrderStatusHistory[]
+  promo_activations     PromoActivation[]
 
   @@index([buyer_id])
   @@index([seller_id])
+  @@index([promo_code_id])
+  @@index([checkout_group_key])
   @@index([status, created_at])
   @@index([delivery_type, status, delivery_checked_at])
 }

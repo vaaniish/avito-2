@@ -2,6 +2,59 @@ import type { PrismaClient } from "@prisma/client";
 import { makeAuditPublicId } from "../../../common/domain/ids";
 import type { PartnerOrdersRepositoryPort } from "../../domain/partner-orders.types";
 
+async function releasePromoActivationsForCheckoutGroups(
+  prisma: PrismaClient,
+  checkoutGroupKeys: string[],
+): Promise<void> {
+  const groups = [...new Set(checkoutGroupKeys.map((value) => value.trim()).filter(Boolean))];
+  if (groups.length === 0) {
+    return;
+  }
+
+  const groupedOrders = await prisma.marketOrder.findMany({
+    where: {
+      checkout_group_key: { in: groups },
+    },
+    select: {
+      checkout_group_key: true,
+      status: true,
+      transactions: {
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        take: 1,
+        select: { status: true },
+      },
+    },
+  });
+
+  const releasableGroups = groups.filter((groupKey) => {
+    const orders = groupedOrders.filter((order) => order.checkout_group_key === groupKey);
+    if (orders.length === 0) return false;
+    return orders.every((order) => {
+      const latestTxStatus = order.transactions[0]?.status ?? null;
+      return (
+        order.status === "CANCELLED" ||
+        latestTxStatus === "FAILED" ||
+        latestTxStatus === "CANCELLED" ||
+        latestTxStatus === "REFUNDED"
+      );
+    });
+  });
+
+  if (releasableGroups.length === 0) {
+    return;
+  }
+
+  await prisma.promoActivation.updateMany({
+    where: {
+      checkout_group_key: { in: releasableGroups },
+      status: { in: ["RESERVED", "CONSUMED"] },
+    },
+    data: {
+      status: "RELEASED",
+    },
+  });
+}
+
 export class PartnerOrdersRepository implements PartnerOrdersRepositoryPort {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -58,13 +111,20 @@ export class PartnerOrdersRepository implements PartnerOrdersRepositoryPort {
       issued_at?: Date;
     };
   }): Promise<void> {
-    await this.prisma.marketOrder.update({
+    const updated = await this.prisma.marketOrder.update({
       where: { id: params.orderId },
       data: {
         ...params.data,
         status: params.data.status as any,
       },
+      select: {
+        checkout_group_key: true,
+      },
     });
+
+    if (params.data.status === "CANCELLED" && updated.checkout_group_key) {
+      await releasePromoActivationsForCheckoutGroups(this.prisma, [updated.checkout_group_key]);
+    }
   }
 
   async updateTrackingAssignment(params: {

@@ -7,9 +7,6 @@ import {
 } from "../../../../../common/application-error";
 import {
   buildCheckoutPolicyDto,
-  calculateLaunchPromoDiscount,
-  LAUNCH_PROMO_CODE,
-  LAUNCH_PROMO_MAX_BUYERS,
   LISTING_RESERVATION_CONFLICT,
   makeCheckoutIdempotencyHash,
   normalizeDeliveryAddressFromRecord,
@@ -24,15 +21,20 @@ import type {
   ProfileOrdersRepositoryPort,
   ProfileOrdersServiceHelpers,
 } from "../profile-orders.types";
+import { PromoEngineService } from "./promo-engine.service";
 
 export class CreateOrderService {
+  private readonly promoEngine: PromoEngineService;
+
   constructor(
     private readonly repository: ProfileOrdersRepositoryPort,
     private readonly paymentGateway: ProfileOrdersPaymentGatewayPort,
     private readonly notificationWriter: ProfileOrdersNotificationPort,
     private readonly policyReader: ProfileOrdersPolicyPort,
     private readonly helpers: ProfileOrdersServiceHelpers,
-  ) {}
+  ) {
+    this.promoEngine = new PromoEngineService(repository);
+  }
 
   async execute(input: CheckoutRequestInput): Promise<CreateOrderCheckoutDto> {
     if (input.actorRole === this.helpers.roleAdmin) {
@@ -142,6 +144,9 @@ export class CreateOrderService {
       const listingByPublicId = new Map(
         listings.map((listing) => [listing.public_id, listing]),
       );
+      const listingPublicIdById = new Map(
+        listings.map((listing) => [listing.id, listing.public_id]),
+      );
       const subtotal = parsedItems.reduce((sum, item) => {
         const listing = listingByPublicId.get(item.listingId);
         if (!listing) return sum;
@@ -181,31 +186,21 @@ export class CreateOrderService {
         groupedBySeller.set(listing.seller_id, current);
       }
 
-      const promoCode = input.promoCode.trim().toUpperCase();
       let globalDiscount = 0;
       let appliedPromoCode: string | null = null;
+      let reservedPromoId: number | null = null;
+      let eligibleListingPublicIds = new Set<string>();
 
-      if (promoCode) {
-        if (promoCode !== LAUNCH_PROMO_CODE) {
-          throw validationError("Промокод не найден или больше не действует");
-        }
-
-        const snapshot = await this.repository.getLaunchPromoSnapshot(input.actorUserId);
-        if (snapshot.hasActiveDiscountedOrder) {
-          throw validationError("Промокод уже используется в вашем активном заказе");
-        }
-        if (snapshot.hasSuccessfulOrders) {
-          throw validationError("Промокод START15 действует только на первый оплачиваемый заказ");
-        }
-        if (snapshot.activeDiscountedBuyerCount >= LAUNCH_PROMO_MAX_BUYERS) {
-          throw validationError("Лимит промокода для первых 100 покупателей уже исчерпан");
-        }
-
-        globalDiscount = calculateLaunchPromoDiscount(subtotal);
-        if (globalDiscount <= 0) {
-          throw validationError("Для этой корзины скидка не применяется");
-        }
-        appliedPromoCode = LAUNCH_PROMO_CODE;
+      if (input.promoCode.trim()) {
+        const promoEvaluation = await this.promoEngine.evaluate({
+          actorUserId: input.actorUserId,
+          promoCode: input.promoCode,
+          items: parsedItems,
+        });
+        globalDiscount = promoEvaluation.discountAmount;
+        appliedPromoCode = promoEvaluation.promo.code;
+        reservedPromoId = promoEvaluation.promo.id;
+        eligibleListingPublicIds = promoEvaluation.eligibleListingPublicIds;
       }
 
       if (input.paymentMethod !== "card" && input.paymentMethod !== "sbp") {
@@ -268,15 +263,37 @@ export class CreateOrderService {
         },
       );
 
+      const totalEligibleSubtotal = sellerOrderDrafts.reduce((sum, draft) => {
+        const eligibleSubtotal = draft.items.reduce((subtotalBySeller, item) => {
+          const listingPublicId = listingPublicIdById.get(item.listing_id);
+          if (!listingPublicId || !eligibleListingPublicIds.has(listingPublicId)) {
+            return subtotalBySeller;
+          }
+          return subtotalBySeller + item.price * item.quantity;
+        }, 0);
+        return sum + eligibleSubtotal;
+      }, 0);
+
       let remainingDiscount = globalDiscount;
       const preparedOrders = sellerOrderDrafts.map((draft, index) => {
         const deliveryCost = hasCheckoutDelivery && index === 0 ? checkoutDeliveryCost : 0;
+        const eligibleSellerSubtotal = draft.items.reduce((subtotalBySeller, item) => {
+          const listingPublicId = listingPublicIdById.get(item.listing_id);
+          if (!listingPublicId || !eligibleListingPublicIds.has(listingPublicId)) {
+            return subtotalBySeller;
+          }
+          return subtotalBySeller + item.price * item.quantity;
+        }, 0);
+
         const proportionalDiscount =
           index === sellerOrderDrafts.length - 1
             ? remainingDiscount
             : Math.min(
-                draft.subtotal,
-                Math.floor((globalDiscount * draft.subtotal) / Math.max(1, subtotal)),
+                eligibleSellerSubtotal,
+                Math.floor(
+                  (globalDiscount * eligibleSellerSubtotal) /
+                    Math.max(1, totalEligibleSubtotal || subtotal),
+                ),
               );
         remainingDiscount = Math.max(0, remainingDiscount - proportionalDiscount);
         return {
@@ -318,6 +335,7 @@ export class CreateOrderService {
           "YooKassa did not return confirmation URL for redirect payment",
         );
       }
+      const paymentIntentIdBase = yookassaPayment.id ?? `pay_${Date.now()}`;
 
       const createdOrders = await this.repository.createCheckoutOrders({
         buyerId: input.actorUserId,
@@ -327,8 +345,16 @@ export class CreateOrderService {
         pickupPointProvider: input.pickupPointProvider,
         preparedOrders,
         requestIp: input.requestIp,
-        paymentIntentIdBase: yookassaPayment.id ?? `pay_${Date.now()}`,
+        paymentIntentIdBase,
         commissionRateBySellerId,
+        promoReservation:
+          reservedPromoId !== null
+            ? {
+                promoId: reservedPromoId,
+                buyerId: input.actorUserId,
+                checkoutGroupKey: paymentIntentIdBase,
+              }
+            : null,
         appendPickupPointMetaToAddress:
           this.helpers.appendPickupPointMetaToAddress,
       });

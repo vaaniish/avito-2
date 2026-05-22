@@ -404,6 +404,9 @@ async function main(): Promise<void> {
   await prisma.policyAcceptance.deleteMany();
   await prisma.platformPolicy.deleteMany();
   await prisma.platformTransaction.deleteMany();
+  await prisma.promoActivation.deleteMany();
+  await prisma.promoScopeTarget.deleteMany();
+  await prisma.promoCode.deleteMany();
   await prisma.marketOrderItem.deleteMany();
   await prisma.marketOrder.deleteMany();
   await prisma.listingQuestion.deleteMany();
@@ -654,6 +657,26 @@ async function main(): Promise<void> {
       await prisma.appUser.findMany({ select: { id: true, public_id: true } })
     ).map((u) => [u.public_id, u.id]),
   );
+
+  await prisma.promoCode.create({
+    data: {
+      public_id: "PRM-START15",
+      code: "START15",
+      discount_type: "PERCENT",
+      discount_value: 15,
+      min_subtotal: 0,
+      max_activations: 100,
+      per_user_limit: 1,
+      starts_at: daysAgo(90),
+      ends_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      is_enabled: true,
+      all_catalog: true,
+      is_system: true,
+      legacy_rule: "FIRST_PAID_ORDER_100_BUYERS",
+      created_by_id: getRequired(userMap, "ADM-001", "Admin user"),
+      updated_by_id: getRequired(userMap, "ADM-001", "Admin user"),
+    },
+  });
 
   await prisma.platformPolicy.createMany({
     data: [
