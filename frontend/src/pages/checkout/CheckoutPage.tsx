@@ -69,14 +69,12 @@ export function CheckoutPage({
     selectedPoint,
     visibleDeliveryPoints,
     mapMarkers,
-    viewportBounds,
     deliverySearchInputRef,
     setDeliveryCity,
     setMapCenterQuery,
     setActiveDeliveryProvider,
     setDeliveryPoints,
     setSelectedPointKey,
-    setViewportBounds,
     loadDeliveryPoints,
     applyLocationSearch,
   } = useCheckoutDelivery({ deliveryType });
@@ -169,15 +167,7 @@ export function CheckoutPage({
                 if (!point) return;
                 setSelectedPointKey(`${point.provider}:${point.id}`);
               }}
-              onViewportChange={(bounds) => {
-                const unchanged =
-                  bounds?.minLat === viewportBounds?.minLat &&
-                  bounds?.minLng === viewportBounds?.minLng &&
-                  bounds?.maxLat === viewportBounds?.maxLat &&
-                  bounds?.maxLng === viewportBounds?.maxLng;
-                if (unchanged) return;
-                setViewportBounds(bounds);
-              }}
+              onViewportChange={() => {}}
             />
 
             <CheckoutPaymentMethodSection

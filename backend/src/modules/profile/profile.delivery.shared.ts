@@ -26,18 +26,6 @@ export const DELIVERY_PROVIDERS: Array<{
     code: "russian_post",
     label: DELIVERY_PROVIDER_LABELS.russian_post,
   },
-  {
-    code: "ozon",
-    label: DELIVERY_PROVIDER_LABELS.ozon,
-  },
-  {
-    code: "wildberries",
-    label: DELIVERY_PROVIDER_LABELS.wildberries,
-  },
-  {
-    code: "cdek",
-    label: DELIVERY_PROVIDER_LABELS.cdek,
-  },
 ];
 
 export function parseDeliveryProviderFilter(

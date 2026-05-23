@@ -134,9 +134,9 @@ export const DELIVERY_PROVIDER_TABS: Array<{
   { code: "all", label: "Все ПВЗ", enabled: true },
   { code: "yandex_pvz", label: "Яндекс ПВЗ", enabled: true },
   { code: "russian_post", label: "Почта России", enabled: true },
-  { code: "ozon", label: "Ozon", enabled: true },
-  { code: "wildberries", label: "Wildberries", enabled: true },
-  { code: "cdek", label: "СДЭК", enabled: true },
+  { code: "ozon", label: "Ozon", enabled: false },
+  { code: "wildberries", label: "Wildberries", enabled: false },
+  { code: "cdek", label: "СДЭК", enabled: false },
 ];
 
 export type PaymentStatusMeta = {

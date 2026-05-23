@@ -31,8 +31,18 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
   const autoGeolocationRequestedRef = useRef(false);
   const lastCenteredQueryRef = useRef<string | null>(null);
   const viewportUpdateTimerRef = useRef<number | null>(null);
+  const onViewportChangeRef = useRef(onViewportChange);
+  const onAddressSelectRef = useRef(onAddressSelect);
   const [viewportTick, setViewportTick] = useState(0);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+
+  useEffect(() => {
+    onViewportChangeRef.current = onViewportChange;
+  }, [onViewportChange]);
+
+  useEffect(() => {
+    onAddressSelectRef.current = onAddressSelect;
+  }, [onAddressSelect]);
 
   const readMapBounds = useCallback((map: any) => {
     const rawBounds = map?.getBounds?.();
@@ -156,7 +166,7 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
     if (!isRussianCountry(parsed.country)) return;
 
     setSelectedPlacemark(coords, parsed.fullText);
-    onAddressSelect({
+    onAddressSelectRef.current({
       region: parsed.region,
       city: parsed.city,
       street: parsed.street,
@@ -167,7 +177,7 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       lon: Number.isFinite(coords[1]) ? coords[1] : null,
       country: parsed.country,
     });
-  }, [allowAddressSelect, onAddressSelect, parseGeoObjectAddress, setSelectedPlacemark]);
+  }, [allowAddressSelect, parseGeoObjectAddress, setSelectedPlacemark]);
 
   useEffect(() => {
     if (!YANDEX_MAPS_KEY) {
@@ -216,7 +226,7 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
                       lng: Number(centerRaw[1]),
                     }
                   : null;
-              onViewportChange?.({
+              onViewportChangeRef.current?.({
                 zoom,
                 bounds: readMapBounds(map),
                 center,
@@ -258,7 +268,7 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       clustererRef.current = null;
       mapInstanceRef.current?.destroy?.();
     };
-  }, [allowAddressSelect, getAddressByCoords, onViewportChange, readMapBounds]);
+  }, [allowAddressSelect, getAddressByCoords, readMapBounds]);
 
   useEffect(() => {
     if (!window.ymaps || mapStatus !== "ready" || !mapInstanceRef.current) return;
@@ -331,6 +341,48 @@ export function useYandexMapPicker(params: YandexMapPickerProps): YandexMapPicke
       }
     }
   }, [allowAddressSelect, mapStatus, markers, onMarkerSelect, selectedMarkerId, viewportTick]);
+
+  useEffect(() => {
+    if (!window.ymaps || mapStatus !== "ready" || !mapInstanceRef.current) return;
+    if (markers.length === 0) return;
+
+    const map = mapInstanceRef.current;
+    const currentBounds = readMapBounds(map);
+    const hasVisiblePoint =
+      currentBounds !== null &&
+      markers.some(
+        (marker) =>
+          marker.lat >= currentBounds.minLat &&
+          marker.lat <= currentBounds.maxLat &&
+          marker.lng >= currentBounds.minLng &&
+          marker.lng <= currentBounds.maxLng,
+      );
+
+    if (hasVisiblePoint) return;
+
+    const points = markers
+      .filter(
+        (marker) =>
+          Number.isFinite(marker.lat) &&
+          Number.isFinite(marker.lng) &&
+          Math.abs(marker.lat) <= 90 &&
+          Math.abs(marker.lng) <= 180,
+      )
+      .map((marker) => [marker.lat, marker.lng]);
+    if (points.length === 0) return;
+
+    try {
+      const nextBounds = (window.ymaps as any)?.util?.bounds?.fromPoints?.(points);
+      if (!nextBounds) return;
+      map.setBounds(nextBounds, {
+        checkZoomRange: true,
+        zoomMargin: 32,
+        duration: 250,
+      });
+    } catch {
+      // noop
+    }
+  }, [mapStatus, markers, readMapBounds]);
 
   useEffect(() => {
     const query = centerQuery?.trim();

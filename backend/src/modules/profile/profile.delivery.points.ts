@@ -507,6 +507,9 @@ async function geocodeLocationByYandex(
                 Point?: { pos?: string };
                 name?: string;
                 description?: string;
+                boundedBy?: {
+                  Envelope?: { lowerCorner?: string; upperCorner?: string };
+                };
                 metaDataProperty?: {
                   GeocoderMetaData?: {
                     text?: string;
@@ -547,7 +550,8 @@ async function geocodeLocationByYandex(
         geoObject?.name?.trim() ||
         normalizedQuery;
       const bounds = parseYandexBounds(
-        geoObject?.metaDataProperty?.GeocoderMetaData?.boundedBy,
+        geoObject?.boundedBy ??
+          geoObject?.metaDataProperty?.GeocoderMetaData?.boundedBy,
       );
 
       return {
@@ -2152,14 +2156,7 @@ export async function getDeliveryPoints(
     });
   }
 
-  const demoProviders: DemoProviderCode[] =
-    providerFilter === "all"
-      ? ["ozon", "wildberries", "cdek"]
-      : providerFilter === "ozon" ||
-          providerFilter === "wildberries" ||
-          providerFilter === "cdek"
-        ? [providerFilter]
-        : [];
+  const demoProviders: DemoProviderCode[] = [];
 
   for (const provider of demoProviders) {
     loaders.push({

@@ -112,7 +112,7 @@ export function useCheckoutPolicy() {
 export function useCheckoutDelivery(params: {
   deliveryType: "delivery" | "pickup";
 }) {
-  const [deliveryCity, setDeliveryCity] = useState("");
+  const [deliveryCity, setDeliveryCity] = useState(DEFAULT_DELIVERY_CITY);
   const [mapCenterQuery, setMapCenterQuery] = useState<string | null>(null);
   const [deliveryProviders, setDeliveryProviders] = useState<DeliveryProvider[]>(
     DELIVERY_PROVIDER_TABS.filter(
@@ -132,7 +132,6 @@ export function useCheckoutDelivery(params: {
   const deliverySearchInputRef = useRef<HTMLInputElement | null>(null);
   const nativeAddressSuggestViewRef = useRef<any>(null);
   const activeDeliveryProviderRef = useRef<DeliveryProviderFilter>(DELIVERY_PICKUP_PROVIDER);
-  const viewportReloadTimerRef = useRef<number | null>(null);
 
   const selectedPoint = useMemo(
     () =>
@@ -234,9 +233,6 @@ export function useCheckoutDelivery(params: {
 
   useEffect(() => {
     if (params.deliveryType !== "delivery") return;
-    if (viewportReloadTimerRef.current) {
-      window.clearTimeout(viewportReloadTimerRef.current);
-    }
     void loadDeliveryPoints(
       deliveryCity.trim() || DEFAULT_DELIVERY_CITY,
       true,
@@ -244,27 +240,6 @@ export function useCheckoutDelivery(params: {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.deliveryType]);
-
-  useEffect(() => {
-    if (params.deliveryType !== "delivery") return;
-    if (!deliveryCity.trim()) return;
-    if (!viewportBounds) return;
-
-    if (viewportReloadTimerRef.current) {
-      window.clearTimeout(viewportReloadTimerRef.current);
-    }
-    viewportReloadTimerRef.current = window.setTimeout(() => {
-      void loadDeliveryPoints(deliveryCity, false, activeDeliveryProviderRef.current, {
-        silent: true,
-      });
-    }, 220);
-
-    return () => {
-      if (viewportReloadTimerRef.current) {
-        window.clearTimeout(viewportReloadTimerRef.current);
-      }
-    };
-  }, [deliveryCity, params.deliveryType, viewportBounds]);
 
   useEffect(() => {
     if (params.deliveryType !== "delivery") return;
