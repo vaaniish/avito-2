@@ -12,11 +12,22 @@ import { ProfileEngagementPolicyRepository } from "./infrastructure/repositories
 import { ProfileListingReviewRepository } from "./infrastructure/repositories/profile-listing-review.repository";
 import { ProfilePartnershipRepository } from "./infrastructure/repositories/profile-partnership.repository";
 import { recommendationServices } from "../../recommendations";
+import { GetCategoriesService } from "../../catalog/application/services/get-categories.service";
+import { CatalogRepository } from "../../catalog/infrastructure/repositories/catalog.repository";
 
 const partnershipRepository = new ProfilePartnershipRepository(prisma);
 const reviewRepository = new ProfileListingReviewRepository(prisma);
 const policyRepository = new ProfileEngagementPolicyRepository(prisma);
 const legalLookupGateway = new ProfileLegalEntityLookupGateway();
+const catalogRepository = new CatalogRepository();
+const getCategoriesService = new GetCategoriesService(catalogRepository);
+
+const loadAllowedPartnershipCategoryNames = async () => {
+  const categories = await getCategoriesService.execute({ type: "products" });
+  return categories
+    .map((item) => (typeof item?.name === "string" ? item.name.trim() : ""))
+    .filter(Boolean);
+};
 
 export const profileEngagementRouter = createProfileEngagementRouter({
   requireAnyRole,
@@ -26,17 +37,21 @@ export const profileEngagementRouter = createProfileEngagementRouter({
     ),
     createPartnershipDraft: new CreatePartnershipDraftService(
       partnershipRepository,
+      loadAllowedPartnershipCategoryNames,
     ),
     updatePartnershipDraft: new UpdatePartnershipDraftService(
       partnershipRepository,
+      loadAllowedPartnershipCategoryNames,
     ),
     submitPartnershipDraft: new SubmitPartnershipDraftService(
       partnershipRepository,
       policyRepository,
+      loadAllowedPartnershipCategoryNames,
     ),
     createLegacyPartnershipRequest: new CreateLegacyPartnershipRequestService(
       partnershipRepository,
       policyRepository,
+      loadAllowedPartnershipCategoryNames,
     ),
     createListingReview: new CreateListingReviewService(
       reviewRepository,

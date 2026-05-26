@@ -224,11 +224,7 @@ export function ProductGrid({
   const [measuredHeights, setMeasuredHeights] = useState<Record<number, number>>({});
 
   const sortOptions = [
-    {
-      value: "recommended",
-      label: "Для вас",
-      description: "Учитывает просмотры, избранное и покупки",
-    },
+    { value: "recommended", label: "Для вас"},
     { value: "popular", label: "Популярные" },
     { value: "price-asc", label: "Цена: по возрастанию" },
     { value: "price-desc", label: "Цена: по убыванию" },

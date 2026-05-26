@@ -16,6 +16,7 @@ export class CreateLegacyPartnershipRequestService {
   constructor(
     private readonly repository: ProfilePartnershipRepositoryPort,
     private readonly policyPort: ProfileEngagementPolicyPort,
+    private readonly loadAllowedCategoryNames: () => Promise<string[]>,
   ) {}
 
   async execute(input: {
@@ -75,6 +76,7 @@ export class CreateLegacyPartnershipRequestService {
       throw validationError("Заполните обязательные поля заявки");
     }
 
+    const allowedCategoryNames = await this.loadAllowedCategoryNames();
     const legacyProfile = validateAndNormalizeOnboardingPayload(
       {
         legalType: sellerType,
@@ -121,12 +123,12 @@ export class CreateLegacyPartnershipRequestService {
         serialCheckPolicy: whyUs,
         qualityCharterAccepted: true,
       },
-      { allowDraft: true },
+      { allowDraft: true, allowedCategoryNames },
     );
 
     if (!legacyProfile.ok || legacyProfile.profile.categories.length === 0) {
       throw validationError(
-        "Only categories related to electronics and home appliances are allowed.",
+        "Нужно выбрать хотя бы одну допустимую категорию каталога.",
       );
     }
 

@@ -60,8 +60,7 @@ export function previewCheckoutPromo(payload: {
 export function createCheckoutOrders(
   payload: {
     items: Array<{ listingId: string; quantity: number }>;
-    addressId: null;
-    customAddress: string;
+    pickupPointAddress: string;
     pickupPointId: string | null;
     pickupPointProvider: string | null;
     deliveryType: "delivery" | "pickup";

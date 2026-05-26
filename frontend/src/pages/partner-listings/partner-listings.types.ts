@@ -35,6 +35,10 @@ export type Listing = {
   description?: string | null;
   category?: string;
   city?: string | null;
+  sellerWarrantyEnabled?: boolean;
+  sellerWarrantyDays?: number | null;
+  hasMultipleStock?: boolean;
+  availableQuantity?: number;
   attributes?: ListingAttribute[];
   moderation?: {
     status: "approved" | "pending" | "rejected";
@@ -63,7 +67,10 @@ export type FormState = {
   images: string[];
   hasDefects: DefectsValue;
   characteristics: Record<string, string>;
+  sellerWarrantyEnabled: boolean;
+  sellerWarrantyDays: string;
   hasMultipleStock: boolean;
+  availableQuantity: string;
 };
 
 export type CatalogCategoryDto = {

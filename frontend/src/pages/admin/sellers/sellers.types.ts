@@ -23,8 +23,8 @@ export type StatusFilter =
 export type PartnerEvaluation = {
   legalIdentityScore: number;
   representativeScore: number;
-  payoutScore: number;
-  qualityScore: number;
+  channelsScore: number;
+  salesScore: number;
   categoryRisk: "low" | "medium" | "high";
   operationalScore: number;
   totalScore: number;
@@ -116,7 +116,7 @@ export type PartnershipRequest = {
 };
 
 export type ReviewAction = "approved_limited" | "approved" | "needs_more_info" | "rejected";
-export type ReviewTab = "business" | "contacts" | "sales" | "quality";
+export type ReviewTab = "business" | "contacts" | "sales";
 
 export type PartnershipRequestActionResponse = {
   success: boolean;

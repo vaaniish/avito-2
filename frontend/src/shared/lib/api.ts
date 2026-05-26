@@ -336,6 +336,14 @@ export function apiPatch<T>(
   return request<T>(path, { method: "PATCH", body, headers });
 }
 
+export function apiPut<T>(
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<T> {
+  return request<T>(path, { method: "PUT", body, headers });
+}
+
 export function apiDelete<T>(path: string): Promise<T> {
   return request<T>(path, { method: "DELETE" });
 }

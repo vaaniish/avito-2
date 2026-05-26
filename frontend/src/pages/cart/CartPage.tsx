@@ -7,6 +7,18 @@ import { RecommendationShelf } from "../../widgets/recommendations/Recommendatio
 import type { AppliedPromo } from "../../shared/types/promo";
 import { PromoCodePanel } from "../../shared/ui/PromoCodePanel";
 
+function resolveCartItemMaxQuantity(item: Pick<CartItem, "availableQuantity" | "hasMultipleStock">): number {
+  const explicitQuantity = Number(item.availableQuantity);
+  if (Number.isInteger(explicitQuantity) && explicitQuantity > 0) {
+    return explicitQuantity;
+  }
+  return item.hasMultipleStock ? 999 : 1;
+}
+
+function shouldShowLowStock(item: Pick<CartItem, "availableQuantity">): boolean {
+  return typeof item.availableQuantity === "number" && item.availableQuantity > 0 && item.availableQuantity <= 10;
+}
+
 interface CartPageProps {
   items: CartItem[];
   wishlistProductIds: Set<string>;
@@ -82,9 +94,10 @@ export function CartPage({
     const value = e.target.value;
     // Allow empty string or only digits
     if (value === "" || /^\d+$/.test(value)) {
-      // Prevent entering more than 999
+      const item = items.find((entry) => entry.id === itemId);
+      const maxQuantity = item ? resolveCartItemMaxQuantity(item) : 999;
       const numValue = parseInt(value, 10);
-      if (value !== "" && numValue > 999) {
+      if (value !== "" && numValue > maxQuantity) {
         return; // Don't update if trying to enter value > 999
       }
       setEditingQuantities((prev) => ({
@@ -102,16 +115,18 @@ export function CartPage({
       return;
     }
 
+    const item = items.find((entry) => entry.id === itemId);
+    const maxQuantity = item ? resolveCartItemMaxQuantity(item) : 999;
     if (value === "") {
       // Empty field, set to 1
       onUpdateQuantity(itemId, 1);
     } else {
       const numValue = parseInt(value, 10);
-      // Clamp value between 1 and 999
+      // Clamp value between 1 and listing stock
       if (numValue < 1) {
         onUpdateQuantity(itemId, 1);
-      } else if (numValue > 999) {
-        onUpdateQuantity(itemId, 999);
+      } else if (numValue > maxQuantity) {
+        onUpdateQuantity(itemId, maxQuantity);
       } else {
         onUpdateQuantity(itemId, numValue);
       }
@@ -236,6 +251,8 @@ export function CartPage({
               <div className="space-y-6 md:space-y-8">
                 {items.map((item) => {
                   const isWishlisted = wishlistProductIds.has(item.id);
+                  const maxQuantity = resolveCartItemMaxQuantity(item);
+                  const showLowStock = shouldShowLowStock(item);
                   return (
                     <div
                       key={item.id}
@@ -288,6 +305,11 @@ export function CartPage({
                               <Trash2 className="w-5 h-5 text-gray-700" />
                             </button>
                           </div>
+                          {showLowStock ? (
+                            <p className="mt-3 text-sm font-medium text-amber-700">
+                              Осталось только {item.availableQuantity} шт.
+                            </p>
+                          ) : null}
                         </div>
                       </div>
 
@@ -332,13 +354,13 @@ export function CartPage({
                           <button
                             type="button"
                             onClick={() =>
-                              onUpdateQuantity(
+                            onUpdateQuantity(
                                 item.id,
                                 item.quantity + 1,
                               )
                             }
                             className="px-4 py-2 hover:bg-gray-50 transition-colors"
-                            disabled={item.quantity >= 999}
+                            disabled={item.quantity >= maxQuantity}
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -406,6 +428,11 @@ export function CartPage({
                             </button>
                           </div>
                         </div>
+                        {showLowStock ? (
+                          <p className="mb-3 text-xs font-medium text-amber-700 sm:text-sm">
+                            Осталось только {item.availableQuantity} шт.
+                          </p>
+                        ) : null}
                         <div className="flex items-center justify-between gap-2">
                           <div className="inline-flex items-center border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0">
                             <button
@@ -452,7 +479,7 @@ export function CartPage({
                                 )
                               }
                               className="px-2 sm:px-3 py-1.5 hover:bg-gray-50 transition-colors"
-                              disabled={item.quantity >= 999}
+                              disabled={item.quantity >= maxQuantity}
                             >
                               <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                             </button>

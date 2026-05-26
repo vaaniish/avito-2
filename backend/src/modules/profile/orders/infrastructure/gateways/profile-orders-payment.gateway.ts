@@ -1,4 +1,7 @@
-import type { YooKassaPayment } from "../../domain/profile-orders.types";
+import type {
+  YooKassaPayment,
+  YooKassaRefund,
+} from "../../domain/profile-orders.types";
 
 export class ProfileOrdersPaymentGateway {
   constructor(
@@ -12,6 +15,12 @@ export class ProfileOrdersPaymentGateway {
     private readonly fetchYooKassaPaymentById: (
       paymentId: string,
     ) => Promise<YooKassaPayment | null>,
+    private readonly createYooKassaRefund: (params: {
+      paymentId: string;
+      amountRub: number;
+      description: string;
+      idempotenceKey?: string;
+    }) => Promise<YooKassaRefund>,
     private readonly extractYooKassaPaymentBaseId: (
       paymentIntentId: string,
     ) => string,
@@ -29,6 +38,15 @@ export class ProfileOrdersPaymentGateway {
 
   fetchPaymentById(paymentId: string): Promise<YooKassaPayment | null> {
     return this.fetchYooKassaPaymentById(paymentId);
+  }
+
+  refundPayment(params: {
+    paymentId: string;
+    amountRub: number;
+    description: string;
+    idempotenceKey?: string;
+  }): Promise<YooKassaRefund> {
+    return this.createYooKassaRefund(params);
   }
 
   extractBasePaymentId(paymentIntentId: string): string {

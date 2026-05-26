@@ -134,7 +134,10 @@ export class GetPartnerFinanceAnalyticsService {
             : 100,
         },
         resetsAt: commissionSnapshot.window.resetsAt.toISOString(),
-        payoutProfileStatus: payoutProfile?.status.toLowerCase() ?? "missing",
+        payoutProfileStatus:
+          payoutProfile?.status === "PENDING"
+            ? "rejected"
+            : payoutProfile?.status.toLowerCase() ?? "missing",
         payoutProfileUpdatedAt: payoutProfile?.updated_at ?? null,
       },
       availableQuarterKeys: quarterSummaries.map((summary) => summary.periodKey),

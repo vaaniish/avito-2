@@ -46,10 +46,73 @@ import {
 import {
   loadSellerModerationContext,
   hasBlockingOrderForListing,
+  hasActivationBlockingOrderForListing,
   applyAutoModerationDecision,
   validateSellerOnboardingForListing,
   writeListingModerationEvent,
 } from "./partner-listings-write.repository-helper";
+
+function parseOptionalPositiveInteger(value: unknown): number | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw validationError("Значение должно быть положительным целым числом");
+  }
+  return parsed;
+}
+
+function parseOptionalBoolean(value: unknown): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value === "boolean") return value;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  throw validationError("Некорректное булево значение");
+}
+
+function normalizeWarrantyAndStock(params: {
+  sellerWarrantyEnabled?: unknown;
+  sellerWarrantyDays?: unknown;
+  hasMultipleStock?: unknown;
+  availableQuantity?: unknown;
+  defaults: {
+    sellerWarrantyEnabled: boolean;
+    sellerWarrantyDays: number | null;
+    hasMultipleStock: boolean;
+    availableQuantity: number;
+  };
+}) {
+  const sellerWarrantyEnabled =
+    parseOptionalBoolean(params.sellerWarrantyEnabled) ??
+    params.defaults.sellerWarrantyEnabled;
+  const sellerWarrantyDaysInput =
+    parseOptionalPositiveInteger(params.sellerWarrantyDays);
+  const hasMultipleStock =
+    parseOptionalBoolean(params.hasMultipleStock) ?? params.defaults.hasMultipleStock;
+  const availableQuantityInput =
+    parseOptionalPositiveInteger(params.availableQuantity);
+
+  const sellerWarrantyDays = sellerWarrantyEnabled
+    ? (sellerWarrantyDaysInput ?? params.defaults.sellerWarrantyDays)
+    : null;
+  if (sellerWarrantyEnabled && (!sellerWarrantyDays || sellerWarrantyDays <= 0)) {
+    throw validationError("Укажите срок гарантии продавца в днях");
+  }
+
+  const availableQuantity = hasMultipleStock
+    ? (availableQuantityInput ?? params.defaults.availableQuantity)
+    : 1;
+  if (hasMultipleStock && (!availableQuantity || availableQuantity < 2)) {
+    throw validationError("Для нескольких единиц укажите количество не меньше 2");
+  }
+
+  return {
+    sellerWarrantyEnabled,
+    sellerWarrantyDays,
+    hasMultipleStock,
+    availableQuantity,
+  };
+}
 
 export class PartnerListingsWriteRepository
   implements PartnerListingsWriteRepositoryPort
@@ -73,6 +136,10 @@ export class PartnerListingsWriteRepository
     images: Array<{ url: string }>;
     item: any;
     attributes: Array<{ key: string; value: string }>;
+    seller_warranty_enabled: boolean;
+    seller_warranty_days: number | null;
+    has_multiple_stock: boolean;
+    available_quantity: number;
   }) {
     return {
       id: listing.public_id,
@@ -97,6 +164,10 @@ export class PartnerListingsWriteRepository
         defects: listing.tech_defects,
         included: listing.tech_included,
       }),
+      sellerWarrantyEnabled: listing.seller_warranty_enabled,
+      sellerWarrantyDays: listing.seller_warranty_days,
+      hasMultipleStock: listing.has_multiple_stock,
+      availableQuantity: listing.available_quantity,
       attributes: listing.attributes.map((attribute) => ({
         key: attribute.key,
         value: attribute.value,
@@ -144,6 +215,10 @@ export class PartnerListingsWriteRepository
       techState?: unknown;
       type?: unknown;
       draftId?: unknown;
+      sellerWarrantyEnabled?: unknown;
+      sellerWarrantyDays?: unknown;
+      hasMultipleStock?: unknown;
+      availableQuantity?: unknown;
     };
   }) {
     const title = typeof params.body.title === "string" ? params.body.title.trim() : "";
@@ -225,6 +300,18 @@ export class PartnerListingsWriteRepository
       attributes,
       listingState,
     });
+    const listingCommercialTerms = normalizeWarrantyAndStock({
+      sellerWarrantyEnabled: params.body.sellerWarrantyEnabled,
+      sellerWarrantyDays: params.body.sellerWarrantyDays,
+      hasMultipleStock: params.body.hasMultipleStock,
+      availableQuantity: params.body.availableQuantity,
+      defaults: {
+        sellerWarrantyEnabled: false,
+        sellerWarrantyDays: null,
+        hasMultipleStock: false,
+        availableQuantity: 1,
+      },
+    });
 
     const createdRow = await prisma.$transaction(async (tx) => {
       const listing = await tx.marketplaceListing.create({
@@ -241,6 +328,10 @@ export class PartnerListingsWriteRepository
           tech_battery_health: techState?.batteryHealthPercent ?? null,
           tech_defects: techState?.defects ?? null,
           tech_included: techState?.included ?? null,
+          seller_warranty_enabled: listingCommercialTerms.sellerWarrantyEnabled,
+          seller_warranty_days: listingCommercialTerms.sellerWarrantyDays,
+          has_multiple_stock: listingCommercialTerms.hasMultipleStock,
+          available_quantity: listingCommercialTerms.availableQuantity,
           status: LISTING_MODERATION,
           moderation_status: "PENDING",
         },
@@ -397,6 +488,10 @@ export class PartnerListingsWriteRepository
       imageModerationSignals?: unknown;
       attributes?: unknown;
       techState?: unknown;
+      sellerWarrantyEnabled?: unknown;
+      sellerWarrantyDays?: unknown;
+      hasMultipleStock?: unknown;
+      availableQuantity?: unknown;
     };
   }) {
     const existing = await prisma.marketplaceListing.findFirst({
@@ -533,6 +628,18 @@ export class PartnerListingsWriteRepository
     const nextPrice = price === undefined ? existing.price : Math.round(price);
     const nextImageForModeration =
       nextImages === undefined ? existing.images[0]?.url ?? FALLBACK_LISTING_IMAGE : nextImages[0];
+    const listingCommercialTerms = normalizeWarrantyAndStock({
+      sellerWarrantyEnabled: params.body.sellerWarrantyEnabled,
+      sellerWarrantyDays: params.body.sellerWarrantyDays,
+      hasMultipleStock: params.body.hasMultipleStock,
+      availableQuantity: params.body.availableQuantity,
+      defaults: {
+        sellerWarrantyEnabled: existing.seller_warranty_enabled,
+        sellerWarrantyDays: existing.seller_warranty_days,
+        hasMultipleStock: existing.has_multiple_stock,
+        availableQuantity: existing.available_quantity,
+      },
+    });
     const qualityValidation = validateListingQuality({
       type: existing.type as any,
       images: nextImages ?? existing.images.map((image) => image.url),
@@ -565,6 +672,10 @@ export class PartnerListingsWriteRepository
           tech_battery_health: nextTechState?.batteryHealthPercent ?? null,
           tech_defects: nextTechState?.defects ?? null,
           tech_included: nextTechState?.included ?? null,
+          seller_warranty_enabled: listingCommercialTerms.sellerWarrantyEnabled,
+          seller_warranty_days: listingCommercialTerms.sellerWarrantyDays,
+          has_multiple_stock: listingCommercialTerms.hasMultipleStock,
+          available_quantity: listingCommercialTerms.availableQuantity,
           status: LISTING_MODERATION,
           moderation_status: "PENDING",
         },
@@ -706,7 +817,10 @@ export class PartnerListingsWriteRepository
       });
     }
 
-    if (transition.nextStatus === LISTING_MODERATION && (await hasBlockingOrderForListing(existing.id))) {
+    if (
+      transition.nextStatus === LISTING_MODERATION &&
+      (await hasActivationBlockingOrderForListing(existing.id))
+    ) {
       throw conflict(
         "Нельзя повторно активировать объявление: по нему уже есть неотмененный заказ.",
         { status: toPartnerListingStatus(existing.status) },
@@ -803,7 +917,10 @@ export class PartnerListingsWriteRepository
       });
     }
 
-    if (transition.nextStatus === LISTING_MODERATION && (await hasBlockingOrderForListing(existing.id))) {
+    if (
+      transition.nextStatus === LISTING_MODERATION &&
+      (await hasActivationBlockingOrderForListing(existing.id))
+    ) {
       throw conflict(
         "Нельзя повторно активировать объявление: по нему уже есть неотмененный заказ.",
         { status: toPartnerListingStatus(existing.status) },

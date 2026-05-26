@@ -54,6 +54,37 @@ export async function hasBlockingOrderForListing(listingId: number): Promise<boo
   return Boolean(linked);
 }
 
+export async function hasActivationBlockingOrderForListing(listingId: number): Promise<boolean> {
+  const listing = await prisma.marketplaceListing.findUnique({
+    where: { id: listingId },
+    select: {
+      has_multiple_stock: true,
+      available_quantity: true,
+    },
+  });
+
+  if (!listing) {
+    return false;
+  }
+
+  if (listing.has_multiple_stock && listing.available_quantity > 0) {
+    return false;
+  }
+
+  const linked = await prisma.marketOrderItem.findFirst({
+    where: {
+      listing_id: listingId,
+      order: {
+        status: {
+          in: ["CREATED", "PAID", "PROCESSING", "PREPARED", "SHIPPED"],
+        },
+      },
+    },
+    select: { id: true },
+  });
+  return Boolean(linked);
+}
+
 export async function validateSellerOnboardingForListing(params: {
   sellerId: number;
   category: string;
@@ -70,7 +101,8 @@ export async function validateSellerOnboardingForListing(params: {
     return {
       ok: false,
       status: 403,
-      error: "Before publishing listings, verify the seller payout profile.",
+      error:
+        "Подключите и подтвердите реквизиты для выплат во вкладке «Финансы», чтобы публиковать и активировать объявления.",
     };
   }
 

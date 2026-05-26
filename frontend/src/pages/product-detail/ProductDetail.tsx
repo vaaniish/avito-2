@@ -143,6 +143,12 @@ export function ProductDetail({
   const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
   const isInCart = cartQuantity > 0;
   const isUnavailable = product.isAvailable === false;
+  const maxQuantity =
+    typeof product.availableQuantity === "number" && product.availableQuantity > 0
+      ? product.availableQuantity
+      : product.hasMultipleStock
+        ? 999
+        : 1;
 
   const sellerReviewsCount =
     sellerMetrics?.reviewsCount ??
@@ -219,7 +225,7 @@ export function ProductDetail({
 
   const handleQuantityChange = (newQuantity: number) => {
     if (onUpdateQuantity && newQuantity >= 0) {
-      onUpdateQuantity(product.id, newQuantity);
+      onUpdateQuantity(product.id, Math.min(newQuantity, maxQuantity));
     }
   };
 
@@ -337,6 +343,7 @@ export function ProductDetail({
           sellerReviewsCount={sellerReviewsCount}
           sellerJoinedYear={sellerJoinedYear}
           viewsLabel={viewsLabel}
+          maxQuantity={maxQuantity}
           onToggleWishlist={() => void toggleWishlist(isUnavailable)}
           onQuantityChange={handleQuantityChange}
           onAddToCart={handleAddToCart}

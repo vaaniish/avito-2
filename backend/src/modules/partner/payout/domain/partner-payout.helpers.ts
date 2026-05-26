@@ -21,6 +21,11 @@ export function payoutProfileToClient(profile: {
   rejection_reason?: string | null;
   updated_at: Date;
 }) {
+  const normalizedStatus =
+    profile.status.toUpperCase() === "PENDING"
+      ? "rejected"
+      : profile.status.toLowerCase();
+
   return {
     id: profile.public_id,
     legalType: profile.legal_type,
@@ -31,7 +36,7 @@ export function payoutProfileToClient(profile: {
     correspondentAccount: profile.correspondent_account,
     bankName: profile.bank_name,
     recipientName: profile.recipient_name,
-    status: profile.status.toLowerCase(),
+    status: normalizedStatus,
     verifiedAt: profile.verified_at ?? null,
     rejectionReason: profile.rejection_reason ?? null,
     updatedAt: profile.updated_at,

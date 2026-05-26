@@ -6,7 +6,6 @@ import type { ListPartnershipRequestsService } from "../application/services/lis
 import type { ListPayoutProfilesService } from "../application/services/list-payout-profiles.service";
 import type { UpdateKycStatusService } from "../application/services/update-kyc-status.service";
 import type { UpdatePartnershipRequestStatusService } from "../application/services/update-partnership-request-status.service";
-import type { UpdatePayoutProfileStatusService } from "../application/services/update-payout-profile-status.service";
 
 function getRequestIp(req: Request): string | null {
   const forwarded = req.header("x-forwarded-for");
@@ -23,7 +22,6 @@ export function createAdminPartnershipRouter(deps: {
     listKycRequests: ListKycRequestsService;
     updateKycStatus: UpdateKycStatusService;
     listPayoutProfiles: ListPayoutProfilesService;
-    updatePayoutProfileStatus: UpdatePayoutProfileStatusService;
   };
 }) {
   const router = Router();
@@ -109,31 +107,6 @@ export function createAdminPartnershipRouter(deps: {
       res.json(await deps.services.listPayoutProfiles.execute());
     } catch (error) {
       console.error("Error fetching payout profiles:", error);
-      sendApplicationError(res, error);
-    }
-  });
-
-  router.patch("/payout-profiles/:publicId", async (req: Request, res: Response) => {
-    try {
-      const access = await requireAdmin(req, res);
-      if (!access.ok) return;
-      const body = (req.body ?? {}) as {
-        status?: unknown;
-        rejectionReason?: unknown;
-      };
-      res.json(
-        await deps.services.updatePayoutProfileStatus.execute({
-          publicId: String(req.params.publicId ?? ""),
-          status: body.status,
-          rejectionReason: body.rejectionReason,
-          requestMeta: {
-            actorUserId: access.user.id,
-            requestIp: getRequestIp(req),
-          },
-        }),
-      );
-    } catch (error) {
-      console.error("Error updating payout profile:", error);
       sendApplicationError(res, error);
     }
   });

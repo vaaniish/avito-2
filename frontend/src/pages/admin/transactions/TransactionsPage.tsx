@@ -568,7 +568,9 @@ export function TransactionsPage() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            onClick={() => void loadAnalytics({ offset: 0 })}
+            onClick={() => {
+              void loadAnalytics({ offset: 0 });
+            }}
             className="btn-secondary flex items-center justify-center gap-2 px-4 py-2 text-sm"
             disabled={isLoading}
           >

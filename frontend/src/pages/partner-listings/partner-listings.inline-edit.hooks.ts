@@ -151,7 +151,7 @@ export function usePartnerListingInlineEditFlow({
         fields: inlineCharacteristicFields,
         imageModerationSignals,
         includeDefects: true,
-        includeMultipleStock: false,
+        includeMultipleStock: true,
       });
 
       const optimisticCity = listing.city ?? null;
@@ -168,6 +168,10 @@ export function usePartnerListingInlineEditFlow({
                 city: optimisticCity,
                 image: payload.images[0] ?? item.image,
                 images: payload.images,
+                sellerWarrantyEnabled: payload.sellerWarrantyEnabled,
+                sellerWarrantyDays: payload.sellerWarrantyDays,
+                hasMultipleStock: payload.hasMultipleStock,
+                availableQuantity: payload.availableQuantity ?? 1,
                 status: "moderation",
               }
             : item,

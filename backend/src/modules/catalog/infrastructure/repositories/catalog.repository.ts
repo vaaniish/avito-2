@@ -5,6 +5,8 @@ import {
   normalizeDisplayText,
 } from "../../domain/catalog.service";
 
+const APPROVED_PARTNERSHIP_STATUSES = ["APPROVED", "APPROVED_LIMITED"] as const;
+
 export class CatalogRepository {
   async findCategoriesWithTree(type: "PRODUCT") {
     return prisma.catalogCategory.findMany({
@@ -115,6 +117,10 @@ export class CatalogRepository {
         views: true,
         sku: true,
         shipping_by_seller: true,
+        seller_warranty_enabled: true,
+        seller_warranty_days: true,
+        has_multiple_stock: true,
+        available_quantity: true,
         tech_grade: true,
         tech_battery_health: true,
         tech_defects: true,
@@ -356,6 +362,7 @@ export class CatalogRepository {
         public_id: true,
         name: true,
         avatar: true,
+        work_email: true,
         joined_at: true,
         addresses: {
           select: { city: true },

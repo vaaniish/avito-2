@@ -398,7 +398,7 @@ async function main() {
       return `applicant=${applicantId}, request=${requestId}, status=${approved.data?.status ?? "unknown"}`;
     });
 
-    await runStep("payout profile submit -> admin verify", async () => {
+    await runStep("payout profile submit -> auto verify", async () => {
       const seller = await login("seller1@ecomm.local", "seller123");
       const admin = await login("admin@ecomm.local", "admin123");
 
@@ -408,7 +408,7 @@ async function main() {
           legalType: "COMPANY",
           legalName: "ООО Тех Поинт",
           taxId: "7701234567",
-          bankAccount: "40702810900000000001",
+          bankAccount: "40702810900000000000",
           bankBic: "044525225",
           correspondentAccount: "30101810400000000225",
           bankName: "ПАО Сбербанк",
@@ -417,23 +417,13 @@ async function main() {
         expected: [200],
       });
       invariant(submitted.data?.success === true, "payout profile submit failed");
-      invariant(submitted.data?.profile?.status === "pending", "payout profile should be pending after submit");
+      invariant(
+        submitted.data?.profile?.status === "verified",
+        "payout profile should be auto-verified after submit",
+      );
 
       const payoutProfileId = submitted.data?.profile?.id;
       invariant(typeof payoutProfileId === "string" && payoutProfileId.length > 0, "payout profile id missing");
-
-      const verified = await apiRequest(
-        "PATCH",
-        `/admin/payout-profiles/${encodeURIComponent(payoutProfileId)}`,
-        {
-          token: admin.token,
-          body: {
-            status: "verified",
-          },
-          expected: [200],
-        },
-      );
-      invariant(verified.data?.success === true, "admin verify payout profile failed");
 
       const sellerView = await apiRequest("GET", "/partner/payout-profile", {
         token: seller.token,

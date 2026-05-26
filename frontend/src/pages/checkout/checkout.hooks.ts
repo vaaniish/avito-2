@@ -43,7 +43,7 @@ function formatViewportBbox(bounds: YandexMapViewportBounds | null): string | nu
 
 function makeCheckoutIdempotencyFingerprint(params: {
   items: Array<{ id: string; quantity: number }>;
-  customAddress: string;
+  pickupPointAddress: string;
   pickupPointId: string | null;
   pickupPointProvider: string | null;
   deliveryType: "delivery" | "pickup";
@@ -54,7 +54,7 @@ function makeCheckoutIdempotencyFingerprint(params: {
     deliveryType: params.deliveryType,
     paymentMethod: params.paymentMethod,
     promoCode: params.promoCode.trim().toUpperCase(),
-    customAddress: params.customAddress.trim(),
+    pickupPointAddress: params.pickupPointAddress.trim(),
     pickupPointId: params.pickupPointId ?? null,
     pickupPointProvider: params.pickupPointProvider ?? null,
     items: params.items
@@ -366,8 +366,13 @@ export function useCheckoutPayment(params: {
   const hasCompletedRef = useRef(false);
   const paymentWindowRef = useRef<Window | null>(null);
   const checkoutIdempotencyRef = useRef<{ key: string; fingerprint: string } | null>(null);
+  const latestParamsRef = useRef(params);
 
   const hasActivePayment = Boolean(activePayment);
+
+  useEffect(() => {
+    latestParamsRef.current = params;
+  }, [params]);
 
   const openOrReusePaymentTab = (url: string) => {
     let paymentWindow = paymentWindowRef.current;
@@ -420,11 +425,11 @@ export function useCheckoutPayment(params: {
 
         if (response.summary === "paid" && !hasCompletedRef.current) {
           hasCompletedRef.current = true;
-          params.onComplete({
+          latestParamsRef.current.onComplete({
             orderIds: activePayment.orderIds,
             total: activePayment.total,
             deliveryType: activePayment.deliveryType,
-            itemIds: params.items.map((item) => item.id),
+            itemIds: latestParamsRef.current.items.map((item) => item.id),
           });
           return;
         }
@@ -448,7 +453,7 @@ export function useCheckoutPayment(params: {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [activePayment, params]);
+  }, [activePayment]);
 
   useEffect(() => {
     if (!activePayment || activePayment.summary !== "pending") return;
@@ -466,11 +471,11 @@ export function useCheckoutPayment(params: {
 
         if (response.summary === "paid" && !hasCompletedRef.current) {
           hasCompletedRef.current = true;
-          params.onComplete({
+          latestParamsRef.current.onComplete({
             orderIds: activePayment.orderIds,
             total: activePayment.total,
             deliveryType: activePayment.deliveryType,
-            itemIds: params.items.map((item) => item.id),
+            itemIds: latestParamsRef.current.items.map((item) => item.id),
           });
         }
       } catch (error) {
@@ -502,7 +507,7 @@ export function useCheckoutPayment(params: {
       window.removeEventListener("storage", onStorage);
       channel?.close();
     };
-  }, [activePayment, params]);
+  }, [activePayment]);
 
   const openPayment = () => {
     if (!activePayment?.confirmationUrl) {
@@ -569,8 +574,7 @@ export function useCheckoutPayment(params: {
 
       const checkoutPayload = {
         items: params.items.map((item) => ({ listingId: item.id, quantity: item.quantity })),
-        addressId: null,
-        customAddress: effectivePickupPoint,
+        pickupPointAddress: effectivePickupPoint,
         pickupPointId: params.selectedPoint?.id ?? null,
         pickupPointProvider: params.selectedPoint?.provider ?? null,
         deliveryType: params.deliveryType,
@@ -579,7 +583,7 @@ export function useCheckoutPayment(params: {
       };
       const checkoutFingerprint = makeCheckoutIdempotencyFingerprint({
         items: params.items.map((item) => ({ id: item.id, quantity: item.quantity })),
-        customAddress: effectivePickupPoint,
+        pickupPointAddress: effectivePickupPoint,
         pickupPointId: params.selectedPoint?.id ?? null,
         pickupPointProvider: params.selectedPoint?.provider ?? null,
         deliveryType: params.deliveryType,

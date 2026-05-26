@@ -8,6 +8,7 @@ import { DetailLinkList, DetailRow, DetailSection } from "./SellerDetailPrimitiv
 import { SellerStatusBadge } from "./SellerStatusBadge";
 import type { PartnershipRequest, ReviewAction, ReviewTab } from "./sellers.types";
 import {
+  authorityTypeLabel,
   categoryRiskLabel,
   deriveAllowedActions,
   joinList,
@@ -36,7 +37,7 @@ export function SellerReviewModal({
   const evaluation = request.evaluation;
   const allowedActions = request.allowedActions ?? deriveAllowedActions(request.status);
   const hasFinalDecision = request.status === "approved" || request.status === "rejected";
-  const requiresNote = action === "needs_more_info" || action === "rejected" || (action === "approved" && !profile?.payoutVerified);
+  const requiresNote = action === "needs_more_info" || action === "rejected";
   const noteLabel = action === "approved" ? "Причина override для полного одобрения" : "Комментарий модератора";
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export function SellerReviewModal({
   const reviewActions: Array<{ value: ReviewAction; label: string; className: string }> = [
     { value: "approved_limited", label: "Ограниченно", className: "btn-success-soft" },
     { value: "approved", label: "Одобрить", className: "btn-success-soft" },
-    { value: "needs_more_info", label: "Документы", className: "btn-secondary" },
+    { value: "needs_more_info", label: "Уточнить", className: "btn-secondary" },
     { value: "rejected", label: "Отклонить", className: "btn-danger-soft" },
   ];
 
@@ -207,11 +208,7 @@ export function SellerReviewModal({
                 <DetailRow label="Статус регистрации" value={profile.registrationStatus} />
                 <DetailRow label="Юр. адрес" value={profile.registeredAddress} />
                 <DetailRow label="Налоговый регион" value={profile.taxRegion} />
-                <DetailRow label="DaData lookup" value={profile.legalLookupVerified} />
-                <DetailRow label="Сайт / основной профиль" value={profile.websiteUrl} />
                 <DetailLinkList label="Публичные профили" urls={profile.publicProfileUrls} />
-                <DetailRow label="Регион" value={profile.region} />
-                <DetailRow label="Город" value={profile.city} />
               </DetailSection>
 
               <DetailSection title="Заявка">
@@ -226,44 +223,27 @@ export function SellerReviewModal({
           {activeTab === "contacts" && profile && (
             <DetailSection title="Контакты и полномочия">
               <DetailRow label="ФИО" value={profile.representativeFullName} />
-              <DetailRow label="Роль" value={profile.representativeRole} />
-              <DetailRow label="Телефон" value={profile.representativePhone} />
-              <DetailRow label="Email" value={profile.representativeEmail} />
-              <DetailRow label="Бизнес email" value={profile.businessEmail} />
-              <DetailRow label="Основание полномочий" value={profile.authorityType} />
+              <DetailRow label="Основание полномочий" value={authorityTypeLabel(profile.authorityType)} />
+              <DetailRow label="Телефон представителя" value={profile.representativePhone} />
+              <DetailRow label="Email представителя" value={profile.representativeEmail} />
+              <DetailRow label="Рабочий телефон компании / ИП" value={profile.supportPhone} />
+              <DetailRow label="Рабочий email компании / ИП" value={profile.supportEmail || profile.businessEmail} />
+              <DetailRow label="Часы связи / поддержки" value={profile.serviceHours} />
               <DetailRow label="Доверенность / документ" value={profile.authorityDocument} />
-              <DetailRow label="Метод домена" value={profile.domainOwnershipMethod} />
-              <DetailRow label="Представитель подтверждён" value={profile.representativeVerified} />
-              <DetailRow label="Email подтверждён" value={profile.emailVerified} />
-              <DetailRow label="Домен подтверждён" value={profile.domainVerified} />
             </DetailSection>
           )}
 
           {activeTab === "sales" && profile && (
-            <DetailSection title="Продажи">
-              <DetailRow label="Чем занимается партнёр" value={profile.businessRole} />
-              <DetailRow label="Категории" value={joinList(profile.categories)} />
-              <DetailRow label="Модель доставки" value={profile.fulfillmentModel} />
-              <DetailRow label="Адрес возврата" value={profile.returnAddress} />
-              <DetailRow label="Телефон поддержки" value={profile.supportPhone} />
-              <DetailRow label="Email поддержки" value={profile.supportEmail} />
-              <DetailRow label="Часы поддержки" value={profile.serviceHours} />
-              <DetailRow label="Мощность в месяц" value={profile.monthlyCapacity} />
-              <DetailRow label="Лимит объявлений" value={profile.listingLimit} />
-              <DetailRow label="Разрешённые категории" value={joinList(profile.allowedCategories)} />
-            </DetailSection>
-          )}
-
-          {activeTab === "quality" && profile && (
             <>
-              <DetailSection title="Качество и товар">
-                <DetailRow label="Откуда товар" value={profile.productSourceType} />
-                <DetailRow label="Документы происхождения" value={profile.supplierDocuments} />
-                <DetailRow label="Гарантия, дней" value={profile.warrantyDays} />
-                <DetailRow label="Возврат, дней" value={profile.returnDays} />
-                <DetailRow label="Quality charter принят" value={profile.qualityCharterAccepted} />
-                <DetailRow label="Риск категории" value={categoryRiskLabel(evaluation?.categoryRisk)} />
-              </DetailSection>
+            <DetailSection title="Продажи и правила платформы">
+              <DetailRow
+                label="Описание бизнеса и происхождение товара"
+                value={profile.productSourceType || profile.businessRole}
+              />
+              <DetailRow label="Категории" value={joinList(profile.categories)} />
+              <DetailRow label="Мощность в месяц" value={profile.monthlyCapacity} />
+              <DetailRow label="Риск категории" value={categoryRiskLabel(evaluation?.categoryRisk)} />
+            </DetailSection>
 
               <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -275,8 +255,8 @@ export function SellerReviewModal({
                 <div className="mb-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
                   <div className="rounded-lg bg-white p-2">Юр: {evaluation?.legalIdentityScore ?? "-"}</div>
                   <div className="rounded-lg bg-white p-2">Предст: {evaluation?.representativeScore ?? "-"}</div>
-                  <div className="rounded-lg bg-white p-2">Payout: {evaluation?.payoutScore ?? "-"}</div>
-                  <div className="rounded-lg bg-white p-2">Качество: {evaluation?.qualityScore ?? "-"}</div>
+                  <div className="rounded-lg bg-white p-2">Каналы: {evaluation?.channelsScore ?? "-"}</div>
+                  <div className="rounded-lg bg-white p-2">Продажи: {evaluation?.salesScore ?? "-"}</div>
                   <div className="rounded-lg bg-white p-2">Итого: {evaluation?.totalScore ?? "-"}</div>
                 </div>
                 {evaluation?.checklist?.length ? (

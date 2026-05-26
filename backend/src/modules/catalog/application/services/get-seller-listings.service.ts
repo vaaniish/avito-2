@@ -162,6 +162,7 @@ export class GetSellerListingsService {
     const sellerResponseTime = formatResponseTime(
       seller.seller_profile?.average_response_minutes,
     );
+    const supportEmail = seller.work_email?.trim() || null;
     const sellerListings = seller._count.listings;
     const sellerVerified = Boolean(seller.seller_profile?.is_verified);
     const sellerReviewMetrics = sellerReviewMetricsBySellerId.get(seller.id) ?? {
@@ -177,6 +178,7 @@ export class GetSellerListingsService {
         city: sellerCity,
         isVerified: sellerVerified,
         responseTime: sellerResponseTime,
+        supportEmail,
         rating: sellerReviewMetrics.rating,
         reviewsCount: sellerReviewMetrics.reviewsCount,
         listingsCount: sellerListings,
@@ -217,6 +219,11 @@ export class GetSellerListingsService {
           isVerified: sellerVerified,
           description: normalizeDisplayText(listing.description ?? "", ""),
           shippingBySeller: listing.shipping_by_seller,
+          sellerWarrantyEnabled: listing.seller_warranty_enabled,
+          sellerWarrantyDays: listing.seller_warranty_days,
+          hasMultipleStock: listing.has_multiple_stock,
+          availableQuantity: listing.available_quantity,
+          isLowStock: listing.available_quantity <= 10,
           city: sellerCity,
           publishDate: formatPublishDate(listing.created_at),
           views: listing.views,

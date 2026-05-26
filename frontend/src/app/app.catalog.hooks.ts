@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CatalogCategory } from "../widgets/FilterPanel";
 import { notifyError } from "../shared/ui/notifications";
 import { apiGet } from "../shared/lib/api";
+import { CATALOG_ORDER_UPDATED_EVENT } from "../shared/lib/catalog-order-events";
 import type { AppView } from "./app-routing";
 import type { FilterState, Product } from "../shared/types";
 import {
@@ -16,7 +17,6 @@ import {
 } from "./app.catalog.utils";
 import { logAppDebug } from "./app.debug";
 
-const CATALOG_ORDER_UPDATED_EVENT = "catalog-order-updated";
 type PaginatedCatalogResponse = {
   items: Product[];
   pagination: {
@@ -285,6 +285,16 @@ export function useAppCatalogData(params: {
   useEffect(() => {
     const reloadCatalogOrder = () => {
       void loadStaticCatalogData();
+      loadingOffsetsRef.current.clear();
+      pagesByOffsetRef.current = {};
+      loadedOffsetsRef.current = [];
+      setCatalogPagesByOffset({});
+      setLoadedOffsets([]);
+      setHasMoreProducts(true);
+      setCatalogSearchMeta(null);
+      totalProductsRef.current = 0;
+      setTotalProducts(0);
+      void loadCatalogPage(activeOffsetRef.current);
     };
     const handleStorage = (event: StorageEvent) => {
       if (event.key === CATALOG_ORDER_UPDATED_EVENT) {

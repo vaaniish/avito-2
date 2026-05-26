@@ -1,13 +1,13 @@
 import type {
   AppUser,
   ListingImage,
-  MarketOrder,
-  MarketOrderItem,
   MarketplaceListing,
   UserAddress,
   WishlistItem,
 } from "@prisma/client";
 import { notFound, validationError } from "../../../../common/application-error";
+import { mapBuyerOrder } from "../../orders/domain/profile-orders.helpers";
+import type { BuyerOrderWithRelations as BuyerOrderWithRelationsView } from "../../orders/domain/profile-orders.types";
 import type { ProfileAddressDto } from "../../profile.shared";
 
 export type ProfileUserViewHelpers = {
@@ -27,10 +27,7 @@ export type ProfileUserViewHelpers = {
 
 export type ProfileOverviewUser = AppUser & {
   addresses: UserAddress[];
-  orders_as_buyer: (MarketOrder & {
-    seller: AppUser & { addresses: Array<{ city: string }> };
-    items: (MarketOrderItem & { listing: { public_id: string } | null })[];
-  })[];
+  orders_as_buyer: BuyerOrderWithRelationsView[];
   wishlist_items: (WishlistItem & {
     listing: MarketplaceListing & {
       seller: AppUser & { addresses: Array<{ city: string }> };
@@ -44,61 +41,34 @@ export function buildProfileOverviewDto(
   reviewedListingIds: Set<number>,
   helpers: ProfileUserViewHelpers,
 ) {
+  const clientRole = helpers.toClientRole(user.role);
+  const isPartner = user.role === "SELLER";
+
   return {
     user: {
       id: user.id,
       public_id: user.public_id,
-      role: helpers.toClientRole(user.role),
+      role: clientRole,
       firstName: user.first_name ?? "",
       lastName: user.last_name ?? "",
       displayName: user.display_name ?? user.name,
       name: user.name,
       email: user.email,
+      workEmail: isPartner ? user.work_email : null,
       avatar: user.avatar,
       city: helpers.extractPrimaryCityFromAddresses(user.addresses),
       joinDate: user.joined_at.getFullYear().toString(),
     },
     addresses: user.addresses.map((address) => helpers.mapUserAddressToDto(address)),
-    orders: user.orders_as_buyer.map((order) => ({
-      id: String(order.id),
-      orderNumber: `#${order.public_id}`,
-      date: order.created_at,
-      status: helpers.toProfileOrderStatus(order.status),
-      total: order.total_price,
-      deliveryDate: helpers.toLocalizedDeliveryDate(order.created_at),
-      deliveryAddress:
-        helpers.stripPickupPointTag(order.delivery_address) || "Адрес не указан",
-      deliveryCost: order.delivery_cost,
-      discount: order.discount,
-      trackingProvider: order.tracking_provider,
-      trackingNumber: order.tracking_number,
-      trackingUrl: order.tracking_url,
-      deliveryExternalStatus: order.delivery_ext_status,
-      seller: {
-        name: order.seller.name,
-        avatar: order.seller.avatar,
-        phone: order.seller.phone ?? "",
-        address: `${helpers.extractPrimaryCityFromAddresses(order.seller.addresses) ?? "Город не указан"}`,
-        workingHours: "пн — вс: 9:00-21:00",
-      },
-      items: order.items.map((item) => {
-        const reviewed =
-          item.listing_id !== null && reviewedListingIds.has(item.listing_id);
-        return {
-          id: String(item.id),
-          listingPublicId: item.listing?.public_id ?? "",
-          name: item.name,
-          image: item.image ?? "",
-          price: item.price,
-          quantity: item.quantity,
-          reviewed,
-          canReview:
-            order.status === "COMPLETED" &&
-            item.listing_id !== null &&
-            !reviewed,
-        };
+    orders: user.orders_as_buyer.map((order) =>
+      mapBuyerOrder(order, reviewedListingIds, {
+        stripPickupPointTag: helpers.stripPickupPointTag,
+        toLocalizedDeliveryDate: helpers.toLocalizedDeliveryDate,
+        extractPrimaryCityFromAddresses:
+          helpers.extractPrimaryCityFromAddresses,
+        toProfileOrderStatus: helpers.toProfileOrderStatus,
       }),
-    })),
+    ),
     wishlist: user.wishlist_items.map((item) => ({
       id: item.listing.public_id,
       name: item.listing.title,
@@ -126,6 +96,7 @@ export function parseProfileUserUpdate(body: {
   lastName?: unknown;
   displayName?: unknown;
   email?: unknown;
+  workEmail?: unknown;
   oldPassword?: unknown;
   newPassword?: unknown;
 }) {
@@ -141,6 +112,10 @@ export function parseProfileUserUpdate(body: {
     email:
       typeof body.email === "string"
         ? body.email.trim().toLowerCase()
+        : undefined,
+    workEmail:
+      typeof body.workEmail === "string"
+        ? body.workEmail.trim().toLowerCase()
         : undefined,
     oldPassword: typeof body.oldPassword === "string" ? body.oldPassword : "",
     newPassword: typeof body.newPassword === "string" ? body.newPassword : "",

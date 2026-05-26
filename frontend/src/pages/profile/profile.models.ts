@@ -32,6 +32,7 @@ export type ProfileUser = {
   displayName: string;
   name: string;
   email: string;
+  workEmail: string | null;
   avatar?: string | null;
   city?: string | null;
   joinDate: string;
@@ -86,6 +87,7 @@ export type ProfileFormState = {
   lastName: string;
   displayName: string;
   email: string;
+  workEmail: string;
   oldPassword: string;
   newPassword: string;
 };
@@ -103,9 +105,11 @@ export type OrderItem = {
 
 export type Order = {
   id: string;
+  publicId: string;
   orderNumber: string;
   date: string;
   status: "processing" | "prepared" | "completed" | "cancelled" | "shipped";
+  canCancel: boolean;
   total: number;
   deliveryDate: string;
   deliveryAddress: string;
@@ -121,6 +125,9 @@ export type Order = {
   trackingNumber?: string | null;
   trackingUrl?: string | null;
   deliveryExternalStatus?: string | null;
+  sellerSupportPhone?: string | null;
+  sellerSupportEmail?: string | null;
+  sellerWorkingHours?: string | null;
   seller: {
     name: string;
     avatar?: string | null;
@@ -149,6 +156,12 @@ export type ProfilePayload = {
   wishlist: WishlistItem[];
 };
 
+export type CancelOrderResponse = {
+  success: true;
+  order: Order;
+  message: string;
+};
+
 export type ProfileUpdateResponse = {
   success: boolean;
   user: {
@@ -159,11 +172,12 @@ export type ProfileUpdateResponse = {
     lastName: string;
     displayName: string;
     email: string;
+    workEmail: string | null;
   };
 };
 
 export type PartnershipForm = {
-  sellerType: "company" | "ip" | "brand";
+  sellerType: "company" | "ip";
   name: string;
   email: string;
   contact: string;

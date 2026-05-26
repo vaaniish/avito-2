@@ -11,6 +11,7 @@ import { AppRender } from "./app.render";
 import type { ProfileTab } from "../pages/profile/profile.models";
 import type { AdminPage } from "../pages/admin/AdminPanel";
 import type { FilterState, Product } from "../shared/types";
+import { apiGet } from "../shared/lib/api";
 import { parseRoute, type AppView } from "./app-routing";
 import { logAppDebug } from "./app.debug";
 
@@ -131,6 +132,7 @@ export default function App() {
     addToCartUnsafe,
     addToCart,
     updateQuantity,
+    syncCartItemProduct,
     handleRemoveUnavailableItems,
     handleOrderCreated,
     handleOrderComplete: handleCartOrderComplete,
@@ -198,6 +200,24 @@ export default function App() {
       };
     });
   };
+
+  useEffect(() => {
+    if (currentView !== "product" || !deepLinkListingId) return;
+    let cancelled = false;
+
+    void apiGet<Product>(`/catalog/listings/${encodeURIComponent(deepLinkListingId)}`)
+      .then((product) => {
+        if (cancelled) return;
+        setSelectedProduct(product);
+        syncCartItemProduct(product);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentView, deepLinkListingId, syncCartItemProduct]);
+
   useAppRouteSync({
     currentAdminPage,
     currentProfileTab,

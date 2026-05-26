@@ -2,7 +2,7 @@ import type { PartnerOnboardingProfile, PartnershipRequestStatus, Prisma, Seller
 
 export type OnboardingLegalType = "COMPANY" | "IP" | "BRAND";
 
-export const PARTNERSHIP_ALLOWED_CATEGORY_KEYS = [
+const LEGACY_PARTNERSHIP_ALLOWED_CATEGORY_KEYS = [
   "electronics",
   "smartphones",
   "laptops",
@@ -18,7 +18,7 @@ export const PARTNERSHIP_ALLOWED_CATEGORY_KEYS = [
   "home_appliance_repair",
 ] as const;
 
-export const PARTNERSHIP_CATEGORY_LABELS: Record<string, string> = {
+const LEGACY_PARTNERSHIP_CATEGORY_LABELS: Record<string, string> = {
   electronics: "Электроника",
   smartphones: "Смартфоны",
   laptops: "Ноутбуки",
@@ -34,7 +34,7 @@ export const PARTNERSHIP_CATEGORY_LABELS: Record<string, string> = {
   home_appliance_repair: "Ремонт бытовой техники",
 };
 
-const ALLOWED_CATEGORY_SET = new Set<string>(PARTNERSHIP_ALLOWED_CATEGORY_KEYS);
+const LEGACY_ALLOWED_CATEGORY_SET = new Set<string>(LEGACY_PARTNERSHIP_ALLOWED_CATEGORY_KEYS);
 const HIGH_RISK_CATEGORIES = new Set<string>(["smartphones", "laptops", "audio"]);
 const ELECTRONICS_CHILD_CATEGORIES = new Set<string>([
   "smartphones",
@@ -55,6 +55,10 @@ const HOME_APPLIANCE_CHILD_CATEGORIES = new Set<string>([
 const INN_REGEX = /^\d{10}(\d{2})?$/;
 const OGRN_REGEX = /^\d{13}(\d{2})?$/;
 const KPP_REGEX = /^\d{9}$/;
+const PARTNERSHIP_ONBOARDING_WARRANTY_DAYS = 90;
+const PARTNERSHIP_ONBOARDING_RETURN_DAYS = 14;
+const PARTNERSHIP_ONBOARDING_SUPPLIER_DOCS_PLACEHOLDER =
+  "not_required_for_initial_onboarding";
 
 export function hasValidInnChecksum(inn: string): boolean {
   const normalized = inn.replace(/\D/g, "");
@@ -189,8 +193,8 @@ export type OnboardingValidationResult =
 export type OnboardingEvaluation = {
   legalIdentityScore: number;
   representativeScore: number;
-  payoutScore: number;
-  qualityScore: number;
+  channelsScore: number;
+  salesScore: number;
   categoryRisk: "low" | "medium" | "high";
   operationalScore: number;
   totalScore: number;
@@ -237,23 +241,39 @@ export function toClientPartnershipStatus(status: PartnershipRequestStatus): str
 
 export function normalizeCategoryKey(value: string): string {
   const normalized = value.trim().toLowerCase();
-  const labelMatch = Object.entries(PARTNERSHIP_CATEGORY_LABELS).find(
+  const labelMatch = Object.entries(LEGACY_PARTNERSHIP_CATEGORY_LABELS).find(
     ([, label]) => label.toLowerCase() === normalized,
   );
   return labelMatch?.[0] ?? normalized;
 }
 
-export function normalizeCategories(value: unknown): string[] {
+export function normalizeCategories(
+  value: unknown,
+  allowedCategoryNames: string[] = [],
+): string[] {
   const rawItems = Array.isArray(value)
     ? value
     : typeof value === "string"
       ? value.split(/[,\n;|]/g)
       : [];
+  const allowedCategoryMap = new Map(
+    allowedCategoryNames
+      .map((name) => name.trim())
+      .filter(Boolean)
+      .map((name) => [normalizeCategoryKey(name), name] as const),
+  );
   return Array.from(
     new Set(
       rawItems
-        .map((item) => (typeof item === "string" ? normalizeCategoryKey(item) : ""))
-        .filter((item) => ALLOWED_CATEGORY_SET.has(item)),
+        .map((item) => {
+          if (typeof item !== "string") return "";
+          const normalized = normalizeCategoryKey(item);
+          if (allowedCategoryMap.has(normalized)) {
+            return allowedCategoryMap.get(normalized) ?? "";
+          }
+          return LEGACY_ALLOWED_CATEGORY_SET.has(normalized) ? normalized : "";
+        })
+        .filter(Boolean),
     ),
   );
 }
@@ -272,7 +292,7 @@ export function isListingCategoryAllowed(listingCategory: string, allowedCategor
 
 export function validateAndNormalizeOnboardingPayload(
   body: PartnerOnboardingPayload,
-  options: { allowDraft?: boolean } = {},
+  options: { allowDraft?: boolean; allowedCategoryNames?: string[] } = {},
 ): OnboardingValidationResult {
   const legalType = parsePartnershipLegalType(body.legalType ?? body.sellerType);
   const profile: NormalizedOnboardingProfile = {
@@ -295,7 +315,10 @@ export function validateAndNormalizeOnboardingPayload(
     domainOwnershipMethod: text(body.domainOwnershipMethod),
     publicProfileUrls: stringList(body.publicProfileUrls ?? body.socialProfile),
     businessRole: text(body.businessRole),
-    categories: normalizeCategories(body.categories ?? body.category),
+    categories: normalizeCategories(
+      body.categories ?? body.category,
+      options.allowedCategoryNames,
+    ),
     fulfillmentModel: text(body.fulfillmentModel),
     country: text(body.country) || "Россия",
     region: text(body.region),
@@ -310,13 +333,20 @@ export function validateAndNormalizeOnboardingPayload(
     serviceHours: text(body.serviceHours),
     monthlyCapacity: positiveInt(body.monthlyCapacity),
     productSourceType: text(body.productSourceType),
-    supplierDocuments: text(body.supplierDocuments),
+    supplierDocuments:
+      text(body.supplierDocuments) ||
+      PARTNERSHIP_ONBOARDING_SUPPLIER_DOCS_PLACEHOLDER,
     diagnosticProcess: text(body.diagnosticProcess),
     gradingStandard: text(body.gradingStandard),
-    warrantyDays: positiveInt(body.warrantyDays),
-    returnDays: positiveInt(body.returnDays),
+    warrantyDays:
+      positiveInt(body.warrantyDays) || PARTNERSHIP_ONBOARDING_WARRANTY_DAYS,
+    returnDays:
+      positiveInt(body.returnDays) || PARTNERSHIP_ONBOARDING_RETURN_DAYS,
     serialCheckPolicy: text(body.serialCheckPolicy),
-    qualityCharterAccepted: bool(body.qualityCharterAccepted),
+    qualityCharterAccepted:
+      body.qualityCharterAccepted == null
+        ? true
+        : bool(body.qualityCharterAccepted),
     legalLookupVerified: bool(body.legalLookupVerified),
     emailVerified: bool(body.emailVerified),
     domainVerified: bool(body.domainVerified),
@@ -329,7 +359,7 @@ export function validateAndNormalizeOnboardingPayload(
   }
 
   const errors: string[] = [];
-  if (!legalType) errors.push("Выберите тип продавца: юрлицо, ИП или бренд.");
+  if (!legalType) errors.push("Выберите тип продавца: юрлицо или ИП.");
   if (!INN_REGEX.test(profile.inn)) errors.push("ИНН должен содержать 10 или 12 цифр.");
   if (INN_REGEX.test(profile.inn) && !hasValidInnChecksum(profile.inn)) {
     errors.push("Проверьте ИНН: контрольная сумма не сходится.");
@@ -360,19 +390,23 @@ export function validateAndNormalizeOnboardingPayload(
     profile.businessEmail = profile.representativeEmail;
   }
   if (!profile.businessRole) errors.push("Опишите, чем занимается партнер.");
-  if (profile.categories.length === 0) errors.push("Выберите электронику и/или бытовую технику.");
+  if (profile.categories.length === 0) {
+    errors.push("Выберите хотя бы одну категорию каталога.");
+  }
   if (!profile.region || !profile.city) errors.push("Укажите регион и город.");
-  if (!profile.returnAddress) errors.push("Укажите адрес возврата.");
+  if (!profile.returnAddress) errors.push("Укажите адрес организации или головного офиса.");
   if (profile.supportPhone.length < 6 || !isValidEmail(profile.supportEmail)) {
-    errors.push("Укажите корректные контакты поддержки.");
+    errors.push("Укажите корректные рабочие контакты компании/ИП.");
   }
   if (!profile.serviceHours) errors.push("Укажите часы поддержки.");
   if (profile.monthlyCapacity <= 0) errors.push("Укажите месячную мощность обработки заказов.");
   if (!profile.productSourceType) errors.push("Укажите происхождение товара.");
-  if (!profile.supplierDocuments) errors.push("Укажите документы на происхождение товара.");
-  if (profile.warrantyDays < 90) errors.push("Минимальная гарантия для MVP — 90 дней.");
-  if (profile.returnDays < 14) errors.push("Минимальный срок возврата — 14 дней.");
-  if (!profile.qualityCharterAccepted) errors.push("Примите quality charter восстановленной техники.");
+  if (profile.warrantyDays !== PARTNERSHIP_ONBOARDING_WARRANTY_DAYS) {
+    errors.push("Гарантия для этой модели партнёрства фиксирована: 90 дней.");
+  }
+  if (profile.returnDays !== PARTNERSHIP_ONBOARDING_RETURN_DAYS) {
+    errors.push("Срок возврата для этой модели партнёрства фиксирован: 14 дней.");
+  }
 
   return errors.length === 0 ? { ok: true, profile } : { ok: false, errors };
 }
@@ -454,6 +488,7 @@ export function evaluateOnboardingProfile(
     | "support_email"
     | "service_hours"
     | "monthly_capacity"
+    | "product_source_type"
     | "supplier_documents"
     | "diagnostic_process"
     | "grading_standard"
@@ -493,11 +528,6 @@ export function evaluateOnboardingProfile(
       label: "Представитель связан с бизнесом",
     },
     {
-      key: "payout_verified",
-      passed: Boolean(profile.payout_verified),
-      label: "Платежные реквизиты/KYB подтверждены",
-    },
-    {
       key: "channels_verified",
       passed:
         (
@@ -509,49 +539,47 @@ export function evaluateOnboardingProfile(
       label: "Есть рабочий email и публичный онлайн-след бизнеса",
     },
     {
-      key: "quality_charter",
+      key: "sales_model_described",
       passed:
-        Boolean(profile.quality_charter_accepted) &&
-        profile.warranty_days >= 90 &&
-        profile.return_days >= 14 &&
-        profile.supplier_documents.length > 0,
-      label: "Quality charter и документы на товар заполнены",
+        profile.product_source_type.length > 0 &&
+        categories.length > 0 &&
+        profile.monthly_capacity > 0,
+      label: "Описаны товары, происхождение и объём продаж",
     },
     {
       key: "operational_readiness",
       passed:
-        profile.return_address.length > 0 &&
         profile.support_phone.length >= 6 &&
         isValidEmail(profile.support_email) &&
-        profile.service_hours.length > 0 &&
-        profile.monthly_capacity > 0,
+        profile.service_hours.length > 0,
       label: "Операционная модель готова",
     },
   ];
 
   const legalIdentityScore = checklist[0].passed ? 100 : 45;
   const representativeScore = checklist[1].passed ? 100 : 50;
-  const payoutScore = checklist[2].passed ? 100 : 0;
-  const qualityScore = checklist[4].passed ? (hasHighRiskCategory ? 80 : 90) : 35;
-  const operationalScore = checklist[5].passed ? 90 : 45;
+  const channelsScore = checklist[2].passed ? 90 : 45;
+  const salesScore = checklist[3].passed ? (hasHighRiskCategory ? 80 : 90) : 35;
+  const operationalScore = checklist[4].passed ? 90 : 45;
   const categoryRisk: OnboardingEvaluation["categoryRisk"] = hasHighRiskCategory
     ? "high"
     : categories.length >= 4
       ? "medium"
       : "low";
   const totalScore = Math.round(
-    legalIdentityScore * 0.24 +
-      representativeScore * 0.16 +
-      payoutScore * 0.2 +
-      qualityScore * 0.24 +
-      operationalScore * 0.16,
+    legalIdentityScore * 0.26 +
+      representativeScore * 0.18 +
+      channelsScore * 0.18 +
+      salesScore * 0.2 +
+      operationalScore * 0.18,
   );
 
-  const failedCritical = !checklist[0].passed || !checklist[4].passed;
+  const failedCritical =
+    !checklist[0].passed || !checklist[1].passed || !checklist[3].passed;
   const recommendation: OnboardingEvaluation["recommendation"] =
     failedCritical
       ? "request_more_documents"
-      : payoutScore === 0
+      : hasHighRiskCategory || !checklist[4].passed
         ? "approve_limited"
         : totalScore >= 85
           ? "approve"
@@ -562,8 +590,8 @@ export function evaluateOnboardingProfile(
   return {
     legalIdentityScore,
     representativeScore,
-    payoutScore,
-    qualityScore,
+    channelsScore,
+    salesScore,
     categoryRisk,
     operationalScore,
     totalScore,

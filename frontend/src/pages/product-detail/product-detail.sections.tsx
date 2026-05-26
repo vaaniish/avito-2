@@ -285,6 +285,7 @@ export function ProductSellerSidebarSection({
   sellerReviewsCount,
   sellerJoinedYear,
   viewsLabel,
+  maxQuantity,
   onToggleWishlist,
   onQuantityChange,
   onAddToCart,
@@ -304,6 +305,7 @@ export function ProductSellerSidebarSection({
   sellerReviewsCount: number;
   sellerJoinedYear: string | null;
   viewsLabel: string;
+  maxQuantity: number;
   onToggleWishlist: () => void;
   onQuantityChange: (value: number) => void;
   onAddToCart: () => void;
@@ -317,10 +319,22 @@ export function ProductSellerSidebarSection({
       <div className="rounded-2xl border border-gray-200 bg-white p-5">
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <div className="text-3xl text-black">{displayPrice.toLocaleString("ru-RU")} ₽</div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="text-3xl text-black">{displayPrice.toLocaleString("ru-RU")} ₽</div>
+              {product.sellerWarrantyEnabled && product.sellerWarrantyDays ? (
+                <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-semibold text-gray-950">
+                  Гарантия продавца · {product.sellerWarrantyDays} дней
+                </span>
+              ) : null}
+            </div>
             {product.isSale && product.salePrice ? (
               <div className="text-base text-gray-400 line-through">
                 {product.price.toLocaleString("ru-RU")} ₽
+              </div>
+            ) : null}
+            {typeof product.availableQuantity === "number" ? (
+              <div className="mt-2 text-sm font-medium text-gray-700">
+                В наличии: {product.availableQuantity} шт.
               </div>
             ) : null}
           </div>
@@ -351,6 +365,7 @@ export function ProductSellerSidebarSection({
             <button
               onClick={() => onQuantityChange(cartQuantity + 1)}
               className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white transition-all duration-300 hover:bg-gray-900 hover:text-white"
+              disabled={cartQuantity >= maxQuantity}
             >
               <Plus className="h-4 w-4" />
             </button>

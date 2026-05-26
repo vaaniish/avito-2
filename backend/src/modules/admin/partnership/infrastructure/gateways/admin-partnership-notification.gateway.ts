@@ -40,17 +40,5 @@ export class AdminPartnershipNotificationGateway
       });
       return;
     }
-
-    await createNotification({
-      userId: input.userId,
-      type: input.nextStatus === "REJECTED" ? "SYSTEM" : "INFO",
-      message:
-        input.nextStatus === "REJECTED"
-          ? `Платёжный профиль отклонён.${input.rejectionReason ? ` Причина: ${input.rejectionReason}` : ""}`
-          : input.nextStatus === "VERIFIED"
-            ? "Платёжный профиль подтверждён."
-            : "Платёжный профиль снова ожидает проверки.",
-      targetUrl: buildTargetUrl("partner"),
-    });
   }
 }

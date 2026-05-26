@@ -17,6 +17,12 @@ export type YooKassaPayment = {
   };
 };
 
+export type YooKassaRefund = {
+  id: string;
+  status: string;
+  payment_id?: string;
+};
+
 export type YooKassaWebhookPayload = {
   event?: unknown;
   object?: {
@@ -35,8 +41,7 @@ export type CheckoutRequestInput = {
   actorRole: string;
   idempotencyKey: string;
   items: CheckoutRequestItem[];
-  addressId: number;
-  customAddress: string;
+  pickupPointAddress: string;
   pickupPointId: string;
   pickupPointProvider: DeliveryProviderCode;
   deliveryType: "DELIVERY" | "PICKUP";
@@ -100,6 +105,8 @@ export type ApprovedListingRecord = {
   seller_id: number;
   title: string;
   price: number;
+  has_multiple_stock: boolean;
+  available_quantity: number;
   item_id: number | null;
   item: null | {
     id: number;
@@ -116,13 +123,6 @@ export type ApprovedListingRecord = {
     };
   };
   images: Array<{ url: string }>;
-};
-
-export type UserAddressRecord = {
-  region: string | null;
-  city: string | null;
-  street: string | null;
-  house: string | null;
 };
 
 export type PreparedCheckoutOrder = {
@@ -166,7 +166,15 @@ export type BuyerOrderWithRelations = {
     name: string;
     avatar: string | null;
     phone: string | null;
+    work_email: string | null;
     addresses: Array<{ city: string }>;
+    partnership_requests: Array<{
+      onboarding_profile: {
+        support_phone: string;
+        support_email: string;
+        service_hours: string;
+      } | null;
+    }>;
   };
   items: Array<{
     id: number;
@@ -187,9 +195,27 @@ export type BuyerPaymentStatusDto = {
   paymentIntentId: string | null;
 };
 
-export type OrderPaymentStatusDto = {
-  summary: "failed" | "paid" | "pending";
+export type PaymentSummary = "failed" | "paid" | "pending";
+
+export type OrderPaymentSummaryDto = {
+  summary: PaymentSummary;
   orders: BuyerPaymentStatusDto[];
+};
+
+export type OrderPaymentStatusDto = OrderPaymentSummaryDto;
+
+export type CheckoutGroupOrderPaymentStatusRow = {
+  id: number;
+  public_id: string;
+  status: string;
+  created_at: Date;
+  total_price: number;
+  delivery_type: string;
+  transactions: OrderPaymentStatusTransaction[];
+  status_history: Array<{
+    to_status: string;
+    created_at: Date;
+  }>;
 };
 
 export type CheckoutPolicyDto = {
@@ -263,9 +289,11 @@ export type PromoEligibilityResult = {
 
 export type BuyerProfileOrderDto = {
   id: string;
+  publicId: string;
   orderNumber: string;
   date: Date;
   status: BuyerProfileOrderStatus;
+  canCancel: boolean;
   total: number;
   deliveryDate: string;
   deliveryAddress: string;
@@ -275,6 +303,9 @@ export type BuyerProfileOrderDto = {
   trackingNumber: string | null;
   trackingUrl: string | null;
   deliveryExternalStatus: string | null;
+  sellerSupportPhone: string | null;
+  sellerSupportEmail: string | null;
+  sellerWorkingHours: string | null;
   seller: {
     name: string;
     avatar: string | null;
@@ -293,6 +324,14 @@ export type BuyerProfileOrderDto = {
     canReview: boolean;
   }>;
 };
+
+export type BuyerOrderPresentationHelpers = Pick<
+  ProfileOrdersServiceHelpers,
+  | "stripPickupPointTag"
+  | "toLocalizedDeliveryDate"
+  | "extractPrimaryCityFromAddresses"
+  | "toProfileOrderStatus"
+>;
 
 export type ProfileOrdersServiceHelpers = {
   roleAdmin: string;
@@ -384,18 +423,14 @@ export interface ProfileOrdersRepositoryPort {
     hasActiveDiscountedOrder: boolean;
     activeDiscountedBuyerCount: number;
   }>;
-  findUserAddressByIdForUser(params: {
-    addressId: number;
-    userId: number;
-  }): Promise<UserAddressRecord | null>;
-  findDefaultAddressForUser(userId: number): Promise<UserAddressRecord | null>;
   getCommissionRateForSeller(sellerId: number): Promise<number>;
   createCheckoutOrders(params: {
     buyerId: number;
     deliveryType: "DELIVERY" | "PICKUP";
-    deliveryAddress: string;
+    pickupPointAddress: string;
     pickupPointId: string;
     pickupPointProvider: DeliveryProviderCode;
+    checkoutGroupKey: string;
     preparedOrders: PreparedCheckoutOrder[];
     requestIp: string | null;
     paymentIntentIdBase: string;
@@ -413,7 +448,40 @@ export interface ProfileOrdersRepositoryPort {
       pickupProvider: DeliveryProviderCode,
     ) => string;
   }): Promise<CreatedCheckoutOrder[]>;
+  findOrdersByCheckoutGroupKey(
+    checkoutGroupKey: string,
+  ): Promise<CheckoutGroupOrderPaymentStatusRow[]>;
+  findOrdersByIds(orderIds: number[]): Promise<CheckoutGroupOrderPaymentStatusRow[]>;
   findBuyerOrdersDetailed(buyerId: number): Promise<BuyerOrderWithRelations[]>;
+  findBuyerOrderDetailedByPublicId(params: {
+    buyerId: number;
+    orderPublicId: string;
+  }): Promise<BuyerOrderWithRelations | null>;
+  findBuyerOrderForCancellation(params: {
+    buyerId: number;
+    orderPublicId: string;
+  }): Promise<{
+    id: number;
+    public_id: string;
+    status: OrderStatus;
+    transactions: Array<{
+      id: number;
+      public_id: string;
+      amount: number;
+      status: string;
+      payment_provider: string;
+      payment_intent_id: string;
+    }>;
+  } | null>;
+  cancelBuyerOrder(params: {
+    buyerId: number;
+    orderId: number;
+    currentStatus: OrderStatus;
+    transactionId: number | null;
+    markRefunded: boolean;
+    requestIp: string | null;
+    reason: string;
+  }): Promise<void>;
   updateOrderDeliveryTracking(params: {
     orderId: number;
     currentStatus: OrderStatus;
@@ -436,6 +504,12 @@ export interface ProfileOrdersPaymentGatewayPort {
     idempotenceKey?: string;
   }): Promise<YooKassaPayment>;
   fetchPaymentById(paymentId: string): Promise<YooKassaPayment | null>;
+  refundPayment(params: {
+    paymentId: string;
+    amountRub: number;
+    description: string;
+    idempotenceKey?: string;
+  }): Promise<YooKassaRefund>;
   extractBasePaymentId(paymentIntentId: string): string;
 }
 

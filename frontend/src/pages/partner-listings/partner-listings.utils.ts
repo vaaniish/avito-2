@@ -425,7 +425,10 @@ export function buildInitialForm(type: ListingType): FormState {
     images: [],
     hasDefects: "",
     characteristics: {},
+    sellerWarrantyEnabled: false,
+    sellerWarrantyDays: "",
     hasMultipleStock: false,
+    availableQuantity: "",
   };
 }
 

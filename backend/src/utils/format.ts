@@ -26,6 +26,7 @@ export function toProfileOrderStatus(
   status: string,
 ): "processing" | "prepared" | "completed" | "cancelled" | "shipped" {
   if (status === "PREPARED") return "prepared";
+  if (status === "DELIVERED") return "completed";
   if (status === "COMPLETED") return "completed";
   if (status === "CANCELLED") return "cancelled";
   if (status === "SHIPPED") return "shipped";

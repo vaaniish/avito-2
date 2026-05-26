@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { apiDelete, apiGet, apiPatch } from "../../shared/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost } from "../../shared/lib/api";
+import { dispatchCatalogOrderUpdated } from "../../shared/lib/catalog-order-events";
 import { notifyError, notifySuccess } from "../../shared/ui/notifications";
 import type {
   Address,
+  CancelOrderResponse,
   Order,
   ProfileFormState,
   ProfilePageProps,
@@ -19,6 +21,7 @@ export function useProfileData(params: {
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
   const [profileForm, setProfileForm] = useState<ProfileFormState>({
@@ -26,6 +29,7 @@ export function useProfileData(params: {
     lastName: "",
     displayName: "",
     email: "",
+    workEmail: "",
     oldPassword: "",
     newPassword: "",
   });
@@ -45,6 +49,7 @@ export function useProfileData(params: {
         lastName: data.user.lastName || "",
         displayName: data.user.displayName || data.user.name || "",
         email: data.user.email,
+        workEmail: data.user.workEmail || "",
         oldPassword: "",
         newPassword: "",
       });
@@ -71,6 +76,10 @@ export function useProfileData(params: {
         email: profileForm.email,
       };
 
+      if (profile?.role === "partner") {
+        payload.workEmail = profileForm.workEmail;
+      }
+
       if (profileForm.newPassword) {
         payload.oldPassword = profileForm.oldPassword;
         payload.newPassword = profileForm.newPassword;
@@ -87,7 +96,7 @@ export function useProfileData(params: {
     } finally {
       setSaveLoading(false);
     }
-  }, [loadProfile, profileForm]);
+  }, [loadProfile, profile, profileForm]);
 
   const removeWishlistItem = useCallback(
     async (id: string) => {
@@ -102,8 +111,32 @@ export function useProfileData(params: {
     [params],
   );
 
+  const cancelOrder = useCallback(async (orderPublicId: string) => {
+    if (!orderPublicId.trim()) return;
+    setCancelOrderId(orderPublicId);
+    try {
+      const response = await apiPost<CancelOrderResponse>(
+        `/profile/orders/${encodeURIComponent(orderPublicId)}/cancel`,
+        {},
+      );
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.publicId === response.order.publicId ? response.order : order,
+        ),
+      );
+      dispatchCatalogOrderUpdated();
+      notifySuccess(response.message);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : "Не удалось отменить заказ");
+    } finally {
+      setCancelOrderId(null);
+    }
+  }, []);
+
   return {
     addresses,
+    cancelOrder,
+    cancelOrderId,
     isLoading,
     orders,
     profile,

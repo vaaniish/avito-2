@@ -46,12 +46,6 @@ export type AdminPartnershipNotificationInput =
       userId: number;
       nextStatus: KycStatusValue;
       rejectionReason: string | null;
-    }
-  | {
-      kind: "payout";
-      userId: number;
-      nextStatus: PayoutStatusValue;
-      rejectionReason: string | null;
     };
 
 export type AdminOnboardingProfileRecord = {
@@ -228,7 +222,6 @@ export interface AdminPartnershipRequestRepositoryPort {
     nextStatus: PartnershipStatusValue;
     rejectionReason: string | null;
     adminNote: string | null;
-    payoutVerified: boolean;
     currentListingLimit: number | null;
     currentAllowedCategories: string[];
   }): Promise<{ status: PartnershipStatusValue }>;
@@ -248,12 +241,6 @@ export interface AdminKycRepositoryPort {
 export interface AdminPayoutRepositoryPort {
   listProfiles(): Promise<PayoutProfileRecord[]>;
   findByPublicId(publicId: string): Promise<PayoutProfileRecord | null>;
-  updateStatus(params: {
-    profileId: number;
-    actorUserId: number;
-    nextStatus: PayoutStatusValue;
-    rejectionReason: string | null;
-  }): Promise<{ status: PayoutStatusValue; sellerId: number; rejectionReason: string | null }>;
 }
 
 export interface AdminPartnershipNotificationPort {

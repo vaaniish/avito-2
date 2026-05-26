@@ -13,7 +13,7 @@ import {
 import { apiGet, apiPatch } from "../../shared/lib/api";
 import { matchesSearch } from "../../shared/lib/search";
 import { ConfirmDialog, ToastViewport, type AppNotice } from "../../shared/ui/feedback";
-import type { OrderStatusValue } from "../checkout.models";
+import type { OrderStatusValue } from "../checkout/checkout.models";
 
 type OrderStatus = OrderStatusValue;
 type TrackingProvider =

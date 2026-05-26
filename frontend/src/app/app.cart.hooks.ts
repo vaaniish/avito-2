@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CartItem, Product } from "../shared/types";
 import { trackRecommendationEvent } from "../shared/lib/recommendations.api";
+import { apiGet } from "../shared/lib/api";
+import { dispatchCatalogOrderUpdated } from "../shared/lib/catalog-order-events";
 import { notifyInfo } from "../shared/ui/notifications";
 import { previewCheckoutPromo } from "../pages/checkout/checkout.api";
 import type { AppliedPromo } from "../shared/types/promo";
@@ -36,6 +38,14 @@ function readCartFromStorage(storageKey: string): CartItem[] {
   } catch {
     return [];
   }
+}
+
+function resolveMaxCartQuantity(item: Pick<Product, "availableQuantity" | "hasMultipleStock">): number {
+  const explicitQuantity = Number(item.availableQuantity);
+  if (Number.isInteger(explicitQuantity) && explicitQuantity > 0) {
+    return explicitQuantity;
+  }
+  return item.hasMultipleStock ? 999 : 1;
 }
 
 export function useAppCartState(params: {
@@ -87,6 +97,71 @@ export function useAppCartState(params: {
     window.localStorage.setItem(storageKey, JSON.stringify(cartItems));
   }, [cartItems, storageKey]);
 
+  useEffect(() => {
+    setCartItems((prev) => {
+      let changed = false;
+      const next = prev.map((item) => {
+        const maxQuantity = resolveMaxCartQuantity(item);
+        if (item.quantity <= maxQuantity) {
+          return item;
+        }
+        changed = true;
+        return {
+          ...item,
+          quantity: maxQuantity,
+        };
+      }).filter((item) => item.quantity > 0);
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const cartItemIdsSignature = useMemo(
+    () => cartItems.map((item) => item.id).sort((left, right) => left.localeCompare(right)).join("|"),
+    [cartItems],
+  );
+
+  useEffect(() => {
+    if (cartItems.length === 0) return;
+    let cancelled = false;
+
+    const refreshCartItems = async () => {
+      try {
+        const latestProducts = await Promise.all(
+          cartItems.map((item) =>
+            apiGet<Product>(`/catalog/listings/${encodeURIComponent(item.id)}`).catch(() => null),
+          ),
+        );
+        if (cancelled) return;
+
+        const latestById = new Map(
+          latestProducts
+            .filter((item): item is Product => Boolean(item?.id))
+            .map((item) => [item.id, item]),
+        );
+
+        setCartItems((prev) =>
+          prev.map((item) => {
+            const latest = latestById.get(item.id);
+            if (!latest) return item;
+            return {
+              ...item,
+              ...latest,
+              quantity: Math.min(item.quantity, resolveMaxCartQuantity(latest)),
+            };
+          }).filter((item) => item.quantity > 0),
+        );
+      } catch {
+        // Keep existing cart snapshot if refresh fails.
+      }
+    };
+
+    void refreshCartItems();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItemIdsSignature]);
+
   const cartItemCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems],
@@ -112,12 +187,15 @@ export function useAppCartState(params: {
   const addToCartUnsafe = useCallback((product: Product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+      const maxQuantity = resolveMaxCartQuantity(product);
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
             ? {
+                ...product,
                 ...item,
-                quantity: item.quantity + 1,
+                ...product,
+                quantity: Math.min(item.quantity + 1, maxQuantity),
               }
             : item,
         );
@@ -136,6 +214,16 @@ export function useAppCartState(params: {
         notifyInfo("Нельзя добавить в корзину собственное объявление.");
         return;
       }
+      const existing = cartItems.find((item) => item.id === product.id);
+      const maxQuantity = resolveMaxCartQuantity(product);
+      if (existing && existing.quantity >= maxQuantity) {
+        notifyInfo(
+          maxQuantity <= 1
+            ? "Этот товар доступен только в одном экземпляре."
+            : `Доступно только ${maxQuantity} шт.`,
+        );
+        return;
+      }
       addToCartUnsafe(product);
       void trackRecommendationEvent({
         listingPublicId: product.id,
@@ -143,7 +231,7 @@ export function useAppCartState(params: {
         sourcePage: "cart-flow",
       }).catch(() => undefined);
     },
-    [addToCartUnsafe, currentUserPublicId, userType],
+    [addToCartUnsafe, cartItems, currentUserPublicId, userType],
   );
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
@@ -152,12 +240,29 @@ export function useAppCartState(params: {
       return;
     }
 
-    setCartItems((prev) =>
-      prev.map((item) =>
+    setCartItems((prev) => {
+      const current = prev.find((item) => item.id === id);
+      if (!current) return prev;
+      const maxQuantity = resolveMaxCartQuantity(current);
+      return prev.map((item) =>
         item.id === id
           ? {
               ...item,
-              quantity,
+              quantity: Math.max(1, Math.min(quantity, maxQuantity)),
+            }
+          : item,
+      );
+    });
+  }, []);
+
+  const syncCartItemProduct = useCallback((product: Product) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === product.id
+          ? {
+              ...item,
+              ...product,
+              quantity: Math.min(item.quantity, resolveMaxCartQuantity(product)),
             }
           : item,
       ),
@@ -273,6 +378,7 @@ export function useAppCartState(params: {
     setCouponCode("");
     setAppliedPromo(null);
     setCouponError(null);
+    dispatchCatalogOrderUpdated();
   }, []);
 
   return {
@@ -295,6 +401,7 @@ export function useAppCartState(params: {
     addToCartUnsafe,
     addToCart,
     updateQuantity,
+    syncCartItemProduct,
     handleRemoveUnavailableItems,
     handleOrderCreated,
     handleOrderComplete,

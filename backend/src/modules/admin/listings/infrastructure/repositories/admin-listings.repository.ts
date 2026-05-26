@@ -51,13 +51,29 @@ export class AdminListingsRepository {
     });
   }
 
-  hasBlockingOrderForListing(listingId: number) {
+  async hasBlockingOrderForListing(listingId: number) {
+    const listing = await this.prisma.marketplaceListing.findUnique({
+      where: { id: listingId },
+      select: {
+        has_multiple_stock: true,
+        available_quantity: true,
+      },
+    });
+
+    if (!listing) {
+      return null;
+    }
+
+    if (listing.has_multiple_stock && listing.available_quantity > 0) {
+      return null;
+    }
+
     return this.prisma.marketOrderItem.findFirst({
       where: {
         listing_id: listingId,
         order: {
           status: {
-            not: "CANCELLED",
+            in: ["CREATED", "PAID", "PROCESSING", "PREPARED", "SHIPPED"],
           },
         },
       },

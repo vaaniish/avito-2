@@ -63,6 +63,12 @@ export function ProductCard({
   };
 
   const displayPrice = product.isSale && product.salePrice ? product.salePrice : product.price;
+  const maxQuantity =
+    typeof product.availableQuantity === "number" && product.availableQuantity > 0
+      ? product.availableQuantity
+      : product.hasMultipleStock
+        ? 999
+        : 1;
   const discountPercent =
     product.isSale && product.salePrice
       ? Math.round(((product.price - product.salePrice) / product.price) * 100)
@@ -147,6 +153,7 @@ export function ProductCard({
                     onClick={handleIncrement}
                     className="flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-200 hover:bg-gray-800"
                     aria-label="increment"
+                    disabled={cartQuantity >= maxQuantity}
                   >
                     <Plus className="h-4 w-4 text-white" />
                   </button>
@@ -155,6 +162,7 @@ export function ProductCard({
                 <GlowButton
                   onClick={handleAddToCart}
                   className="relative flex h-full w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-[rgb(38,83,141)] text-[15px] text-white"
+                  disabled={product.isAvailable === false || maxQuantity <= 0}
                 >
                   <ShoppingCart className="relative z-10 h-4 w-4" />
                   <span className="relative z-10">В Корзину</span>
@@ -244,6 +252,7 @@ export function ProductCard({
                   onClick={handleIncrement}
                   className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
                   aria-label="increment"
+                  disabled={cartQuantity >= maxQuantity}
                 >
                   <Plus className="h-3.5 w-3.5 text-white" />
                 </button>
@@ -252,6 +261,7 @@ export function ProductCard({
               <GlowButton
                 onClick={handleAddToCart}
                 className="h-full w-full rounded-[12px] bg-[rgb(38,83,141)] text-[16px] text-white"
+                disabled={product.isAvailable === false || maxQuantity <= 0}
               >
                 <ShoppingCart className="h-3.5 w-3.5" />
                 <span>В Корзину</span>

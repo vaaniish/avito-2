@@ -108,7 +108,6 @@ export class AdminPartnershipRequestRepository
     nextStatus: PartnershipStatusValue;
     rejectionReason: string | null;
     adminNote: string | null;
-    payoutVerified: boolean;
     currentListingLimit: number | null;
     currentAllowedCategories: string[];
   }): Promise<{ status: PartnershipStatusValue }> {
@@ -133,7 +132,6 @@ export class AdminPartnershipRequestRepository
         await tx.partnerOnboardingProfile.update({
           where: { request_id: params.requestId },
           data: {
-            payout_verified: params.payoutVerified,
             allowed_categories: params.currentAllowedCategories as Prisma.InputJsonValue,
             listing_limit:
               params.nextStatus === "APPROVED_LIMITED"
@@ -145,7 +143,14 @@ export class AdminPartnershipRequestRepository
 
       const requestOwner = await tx.partnershipRequest.findUnique({
         where: { id: params.requestId },
-        select: { user_id: true },
+        select: {
+          user_id: true,
+          onboarding_profile: {
+            select: {
+              support_email: true,
+            },
+          },
+        },
       });
 
       if (!requestOwner) {
@@ -161,6 +166,8 @@ export class AdminPartnershipRequestRepository
           data: {
             role: "SELLER",
             status: "ACTIVE",
+            work_email:
+              requestOwner.onboarding_profile?.support_email?.trim() || null,
           },
         });
 
@@ -181,6 +188,7 @@ export class AdminPartnershipRequestRepository
           where: { id: requestOwner.user_id },
           data: {
             role: "BUYER",
+            work_email: null,
           },
         });
       }

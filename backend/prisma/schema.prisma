@@ -217,6 +217,7 @@ model AppUser {
   role                 UserRole
   status               UserStatus            @default(ACTIVE)
   email                String                @unique
+  work_email           String?
   password             String
   name                 String
   first_name           String?
@@ -559,6 +560,10 @@ model MarketplaceListing {
   moderation_status    ModerationStatus  @default(APPROVED)
   views                Int               @default(0)
   shipping_by_seller   Boolean           @default(true)
+  seller_warranty_enabled Boolean        @default(false)
+  seller_warranty_days Int?
+  has_multiple_stock   Boolean           @default(false)
+  available_quantity   Int               @default(1)
   sku                  String?
   tech_grade           String?
   tech_battery_health  Int?

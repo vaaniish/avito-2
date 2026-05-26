@@ -1,13 +1,11 @@
 import type {
-  ProfileOrdersPaymentGatewayPort,
-  ProfileOrdersRepositoryPort,
   YooKassaWebhookPayload,
 } from "../profile-orders.types";
+import type { ResolveYooKassaPaymentService } from "./resolve-yookassa-payment.service";
 
 export class HandleYooKassaWebhookService {
   constructor(
-    private readonly repository: ProfileOrdersRepositoryPort,
-    private readonly paymentGateway: ProfileOrdersPaymentGatewayPort,
+    private readonly paymentResolver: ResolveYooKassaPaymentService,
   ) {}
 
   async execute(input: {
@@ -30,47 +28,25 @@ export class HandleYooKassaWebhookService {
       return { success: true, ignored: true };
     }
 
-    let effectiveStatus = webhookStatus;
-    try {
-      const remotePayment = await this.paymentGateway.fetchPaymentById(paymentId);
-      if (remotePayment?.status) {
-        effectiveStatus = remotePayment.status;
-      }
-    } catch (error) {
-      console.warn("Unable to validate YooKassa payment in webhook:", error);
-    }
-
-    const isSucceeded =
-      event === "payment.succeeded" || effectiveStatus === "succeeded";
-    const isCanceled =
-      event === "payment.canceled" || effectiveStatus === "canceled";
+    const resolution = await this.paymentResolver.resolveByPaymentId(paymentId);
+    const effectiveStatus = resolution.remoteStatus || webhookStatus;
+    const isSucceeded = event === "payment.succeeded" || effectiveStatus === "succeeded";
+    const isCanceled = event === "payment.canceled" || effectiveStatus === "canceled";
 
     if (!isSucceeded && !isCanceled) {
       return { success: true, ignored: true };
     }
-
-    const matchedRefs =
-      await this.repository.findPaymentTransactionRefsByPaymentId(paymentId);
-
-    if (matchedRefs.length === 0) {
-      return { success: true };
-    }
-
-    if (isSucceeded) {
-      await this.repository.applySuccessfulPayment({
-        transactionIds: matchedRefs.map((row) => row.txId),
-        orderIds: matchedRefs.map((row) => row.orderId),
+    await this.paymentResolver.applyResolution(
+      {
+        ...resolution,
+        outcome: isSucceeded ? "succeeded" : "canceled",
+      },
+      {
         requestIp: input.requestIp,
-        reason: "payment.webhook.succeeded",
-      });
-    } else {
-      await this.repository.applyFailedPayment({
-        transactionIds: matchedRefs.map((row) => row.txId),
-        orderIds: matchedRefs.map((row) => row.orderId),
-        requestIp: input.requestIp,
-        reason: "payment.webhook.canceled",
-      });
-    }
+        successReason: "payment.webhook.succeeded",
+        canceledReason: "payment.webhook.canceled",
+      },
+    );
 
     return { success: true };
   }

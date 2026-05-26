@@ -3,6 +3,7 @@ import type { ProfileFormState } from "./profile.models";
 type ProfileSettingsTabProps = {
   profileForm: ProfileFormState;
   saveLoading: boolean;
+  showWorkEmail: boolean;
   onFieldChange: (field: keyof ProfileFormState, value: string) => void;
   onSave: () => void;
 };
@@ -10,6 +11,7 @@ type ProfileSettingsTabProps = {
 export function ProfileSettingsTab({
   profileForm,
   saveLoading,
+  showWorkEmail,
   onFieldChange,
   onSave,
 }: ProfileSettingsTabProps) {
@@ -39,9 +41,17 @@ export function ProfileSettingsTab({
       <input
         value={profileForm.email}
         onChange={(event) => onFieldChange("email", event.target.value)}
-        placeholder="Email"
+        placeholder="Личный email"
         className="field-control"
       />
+      {showWorkEmail ? (
+        <input
+          value={profileForm.workEmail}
+          onChange={(event) => onFieldChange("workEmail", event.target.value)}
+          placeholder="Рабочий email"
+          className="field-control"
+        />
+      ) : null}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <input
           type="password"

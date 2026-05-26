@@ -24,7 +24,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
               <h2 className="mb-3 text-slate-900">Наша миссия</h2>
               <p>
                 Ecom — это универсальная B2C площадка, которая объединяет качественные товары в одном месте. 
-                Мы создали платформу, где покупатели находят всё необходимое, а проверенные продавцы получают доступ 
+                Мы создали платформу, где покупатели находят всё необходимое, а проверенные партнеры получают доступ 
                 к платёжеспособной аудитории.
               </p>
             </div>
@@ -36,7 +36,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
                   <h3 className="mb-2 text-xl font-semibold text-gray-900">Качество</h3>
                   <p>
                     Мы тщательно проверяем каждого продавца перед допуском на платформу. 
-                    Только бренды, магазины и доверенные частные продавцы.
+                    Только бренды, магазины и доверенные частные партнеры.
                   </p>
                 </div>
 
@@ -67,7 +67,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
-                  <span>Проверенные продавцы с гарантией качества</span>
+                  <span>Проверенные партнеры с гарантией качества</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-3 flex-shrink-0"></span>
@@ -100,4 +100,3 @@ export function AboutPage({ onBack }: AboutPageProps) {
     </div>
   );
 }
-

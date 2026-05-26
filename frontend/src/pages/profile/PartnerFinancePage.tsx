@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, type UIEvent } from "react";
 import { Download, Search } from "lucide-react";
-import { apiGet } from "../../shared/lib/api";
-import { notifyError } from "../../shared/ui/notifications";
+import { apiGet, apiPut } from "../../shared/lib/api";
+import { notifyError, notifyInfo, notifySuccess } from "../../shared/ui/notifications";
 
-type FinanceDashboardTab = "overview" | "quarters" | "ledger";
+type FinanceDashboardTab = "overview" | "quarters" | "ledger" | "requisites";
 type FinanceGroupBy = "day" | "week" | "month";
 type FinanceTransactionStatus =
   | "all"
@@ -173,6 +173,58 @@ type PartnerFinanceQuarterAnalytics = {
   quarterSummaries: QuarterSummary[];
 };
 
+type PayoutProfileStatus = "missing" | "pending" | "verified" | "rejected";
+type PayoutLegalType = "COMPANY" | "IP";
+type SellerIdentityLegalType = "COMPANY" | "IP" | "BRAND";
+
+type PartnerPayoutProfile = {
+  id: string;
+  legalType: string;
+  legalName: string;
+  taxId: string;
+  bankAccount: string;
+  bankBic: string;
+  correspondentAccount: string;
+  bankName: string;
+  recipientName: string;
+  status: PayoutProfileStatus;
+  verifiedAt: string | null;
+  rejectionReason: string | null;
+  updatedAt: string;
+};
+
+type PartnerSellerIdentity = {
+  legalType: SellerIdentityLegalType;
+  legalName: string;
+  taxId: string;
+};
+
+type PartnerPayoutProfileResponse = {
+  profile: PartnerPayoutProfile | null;
+  sellerIdentity: PartnerSellerIdentity | null;
+};
+
+type PartnerPayoutProfileSaveResponse = {
+  success: boolean;
+  profile: PartnerPayoutProfile;
+};
+
+type PayoutFormState = {
+  legalType: PayoutLegalType;
+  legalName: string;
+  taxId: string;
+  bankAccount: string;
+  bankBic: string;
+  correspondentAccount: string;
+  bankName: string;
+  recipientName: string;
+};
+
+type PayoutFeedbackState = {
+  tone: "success" | "info" | "error";
+  message: string;
+} | null;
+
 type SheetValue = string | number;
 
 type WorkbookSheet = {
@@ -202,6 +254,66 @@ type WorkbookInstance = {
 type XlsxPopulateModule = {
   fromBlankAsync: () => Promise<WorkbookInstance>;
 };
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+function buildEmptyPayoutForm(): PayoutFormState {
+  return {
+    legalType: "COMPANY",
+    legalName: "",
+    taxId: "",
+    bankAccount: "",
+    bankBic: "",
+    correspondentAccount: "",
+    bankName: "",
+    recipientName: "",
+  };
+}
+
+function payoutProfileToForm(
+  profile: PartnerPayoutProfile | null,
+  sellerIdentity?: PartnerSellerIdentity | null,
+): PayoutFormState {
+  if (!profile) {
+    return {
+      ...buildEmptyPayoutForm(),
+      legalType: sellerIdentity?.legalType === "IP" ? "IP" : "COMPANY",
+      legalName: sellerIdentity?.legalName ?? "",
+      taxId: sellerIdentity?.taxId ?? "",
+      recipientName: sellerIdentity?.legalName ?? "",
+    };
+  }
+
+  return {
+    legalType:
+      sellerIdentity?.legalType === "IP" || profile.legalType === "IP"
+        ? "IP"
+        : "COMPANY",
+    legalName: sellerIdentity?.legalName ?? profile.legalName,
+    taxId: sellerIdentity?.taxId ?? profile.taxId,
+    bankAccount: profile.bankAccount,
+    bankBic: profile.bankBic,
+    correspondentAccount: profile.correspondentAccount,
+    bankName: profile.bankName,
+    recipientName: sellerIdentity?.legalName ?? profile.recipientName,
+  };
+}
+
+function validatePayoutForm(form: PayoutFormState): string | null {
+  if (!/^\d{20}$/.test(digitsOnly(form.bankAccount))) {
+    return "Расчётный счёт должен содержать 20 цифр.";
+  }
+  if (!/^\d{9}$/.test(digitsOnly(form.bankBic))) {
+    return "БИК должен содержать 9 цифр.";
+  }
+  if (!/^\d{20}$/.test(digitsOnly(form.correspondentAccount))) {
+    return "Корреспондентский счёт должен содержать 20 цифр.";
+  }
+  if (!form.bankName.trim()) return "Укажите наименование банка.";
+  return null;
+}
 
 const TRANSACTION_OPTIONS: Array<{ value: FinanceTransactionStatus; label: string }> = [
   { value: "all", label: "Все платежи" },
@@ -268,11 +380,36 @@ function formatShortDate(value: string): string {
   }).format(date);
 }
 
+function normalizePayoutStatus(status: PayoutProfileStatus): "missing" | "verified" | "rejected" {
+  if (status === "pending") return "rejected";
+  return status;
+}
+
 function formatPayoutStatus(status: CommissionProgram["payoutProfileStatus"]): string {
-  if (status === "verified") return "Подтвержден";
-  if (status === "pending") return "На проверке";
-  if (status === "rejected") return "Отклонен";
+  const normalizedStatus = normalizePayoutStatus(status);
+  if (normalizedStatus === "verified") return "Подтвержден";
+  if (normalizedStatus === "rejected") return "Некорректен";
   return "Не заполнен";
+}
+
+function payoutStatusTone(status: PayoutProfileStatus): "neutral" | "ok" | "warn" | "danger" {
+  const normalizedStatus = normalizePayoutStatus(status);
+  if (normalizedStatus === "verified") return "ok";
+  if (normalizedStatus === "rejected") return "danger";
+  return "neutral";
+}
+
+function payoutStatusDescription(status: PayoutProfileStatus, rejectionReason?: string | null): string {
+  const normalizedStatus = normalizePayoutStatus(status);
+  if (normalizedStatus === "verified") {
+    return "Продажи доступны.";
+  }
+  if (normalizedStatus === "rejected") {
+    return rejectionReason
+      ? "Исправьте данные и сохраните их повторно."
+      : "Исправьте данные и сохраните их повторно. Без подтверждённого профиля продажи недоступны.";
+  }
+  return "Подключите реквизиты для выплат. Без подтверждённого профиля продажи недоступны.";
 }
 
 function formatQuarterKeyLabel(periodKey: string): string {
@@ -435,7 +572,7 @@ function buildExplanationSheetRows(): SheetValue[][] {
     ["Комиссия", "Сколько площадка удержала комиссии", "Рассчитывается по ставке, действовавшей на момент сделки."],
     ["Возвраты и отмены", "Сумма отменённых и возвращённых операций", "Помогает увидеть проблемные или откатившиеся платежи."],
     ["Qualified GMV", "Оборот, который участвует в расчёте уровня комиссии", "Используется для перехода между ставками комиссии, а не любой оборот подряд."],
-    ["Payout profile", "Статус платёжного профиля продавца", "Показывает, можно ли безопасно готовить выплаты продавцу."],
+    ["Финансовый профиль", "Статус профиля реквизитов продавца", "Показывает, можно ли безопасно готовить выплаты продавцу."],
     ["Удержано", "Деньги, которые ещё не готовы к выплате", "Обычно это активные или незавершённые сделки."],
   ];
 }
@@ -466,7 +603,7 @@ function buildSummarySheetRows(analytics: PartnerFinanceAnalytics): SheetValue[]
         : "Максимальный уровень",
     ],
     ["Осталось до следующего уровня", formatCurrency(analytics.commissionProgram.salesToNextTier)],
-    ["Payout profile", formatPayoutStatus(analytics.commissionProgram.payoutProfileStatus)],
+    ["Финансовый профиль", formatPayoutStatus(analytics.commissionProgram.payoutProfileStatus)],
   ];
 }
 
@@ -1000,6 +1137,13 @@ export function PartnerFinancePage() {
   const [selectedQuarterKey, setSelectedQuarterKey] = useState("");
   const [quarterAnalytics, setQuarterAnalytics] = useState<PartnerFinanceQuarterAnalytics | null>(null);
   const [isQuarterLoading, setIsQuarterLoading] = useState(false);
+  const [payoutProfile, setPayoutProfile] = useState<PartnerPayoutProfile | null>(null);
+  const [sellerIdentity, setSellerIdentity] = useState<PartnerSellerIdentity | null>(null);
+  const [payoutForm, setPayoutForm] = useState<PayoutFormState>(buildEmptyPayoutForm);
+  const [isPayoutLoading, setIsPayoutLoading] = useState(false);
+  const [isPayoutSaving, setIsPayoutSaving] = useState(false);
+  const [isPayoutEditing, setIsPayoutEditing] = useState(false);
+  const [payoutFeedback, setPayoutFeedback] = useState<PayoutFeedbackState>(null);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -1069,6 +1213,94 @@ export function PartnerFinancePage() {
     }
   };
 
+  const loadPayoutProfile = async () => {
+    setIsPayoutLoading(true);
+    try {
+      const result = await apiGet<PartnerPayoutProfileResponse>("/partner/payout-profile");
+      setSellerIdentity(result.sellerIdentity);
+      setPayoutProfile(result.profile);
+      setPayoutForm(payoutProfileToForm(result.profile, result.sellerIdentity));
+      setIsPayoutEditing(!result.profile);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : "Не удалось загрузить профиль выплат");
+    } finally {
+      setIsPayoutLoading(false);
+    }
+  };
+
+  const handlePayoutFieldChange = <K extends keyof PayoutFormState>(
+    field: K,
+    value: PayoutFormState[K],
+  ) => {
+    setPayoutFeedback(null);
+    setPayoutForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleSavePayoutProfile = async () => {
+    if (payoutProfile && !hasPayoutChanges) {
+      setIsPayoutEditing(false);
+      setPayoutFeedback({
+        tone: "info",
+        message: "Реквизиты не изменились. Статус профиля остался прежним.",
+      });
+      notifyInfo("Реквизиты не изменились.");
+      return;
+    }
+
+    const validationMessage = validatePayoutForm(payoutForm);
+    if (validationMessage) {
+      setPayoutFeedback({
+        tone: "error",
+        message: validationMessage,
+      });
+      notifyError(validationMessage);
+      return;
+    }
+
+    setIsPayoutSaving(true);
+    try {
+      const result = await apiPut<PartnerPayoutProfileSaveResponse>("/partner/payout-profile", {
+        bankAccount: digitsOnly(payoutForm.bankAccount),
+        bankBic: digitsOnly(payoutForm.bankBic),
+        correspondentAccount: digitsOnly(payoutForm.correspondentAccount),
+        bankName: payoutForm.bankName.trim(),
+        recipientName: displayLegalName.trim(),
+      });
+
+      setPayoutProfile(result.profile);
+      setPayoutForm(payoutProfileToForm(result.profile, sellerIdentity));
+      const normalizedStatus = normalizePayoutStatus(result.profile.status);
+      setIsPayoutEditing(normalizedStatus === "rejected");
+      setPayoutFeedback({
+        tone: normalizedStatus === "verified" ? "success" : "error",
+        message:
+          normalizedStatus === "verified"
+            ? "Изменения сохранены."
+            : "Реквизиты сохранены как некорректные. Исправьте данные и попробуйте снова.",
+      });
+      if (normalizedStatus === "verified") {
+        notifySuccess("Изменения сохранены.");
+      } else {
+        notifyError(result.profile.rejectionReason ?? "Реквизиты не прошли автоматическую проверку.");
+      }
+      void loadAnalytics({ offset: 0 });
+      void loadQuarterAnalytics();
+    } catch (error) {
+      const baseMessage = error instanceof Error ? error.message : "Не удалось сохранить реквизиты";
+      const message =
+        payoutProfile && effectivePayoutStatus === "verified"
+          ? `Новые реквизиты не сохранены. Сохранён предыдущий подтверждённый профиль. ${baseMessage}`
+          : baseMessage;
+      setPayoutFeedback({
+        tone: "error",
+        message,
+      });
+      notifyError(message);
+    } finally {
+      setIsPayoutSaving(false);
+    }
+  };
+
   useEffect(() => {
     void loadAnalytics({ offset: 0 });
   }, [queryString]);
@@ -1076,6 +1308,10 @@ export function PartnerFinancePage() {
   useEffect(() => {
     void loadQuarterAnalytics();
   }, [selectedYear, selectedQuarterKey]);
+
+  useEffect(() => {
+    void loadPayoutProfile();
+  }, []);
 
   const fetchAllReportRows = async (): Promise<FinanceReportRow[]> => {
     const rows: FinanceReportRow[] = [];
@@ -1139,6 +1375,18 @@ export function PartnerFinancePage() {
   );
   const quarterProgram = quarterAnalytics?.commissionProgram ?? null;
   const selectedQuarterProgress = quarterProgram?.progress.percentToNextTier ?? 0;
+  const effectivePayoutStatus = normalizePayoutStatus(
+    payoutProfile?.status ?? overviewCommission?.payoutProfileStatus ?? "missing",
+  );
+  const displayLegalName = sellerIdentity?.legalName ?? payoutProfile?.legalName ?? "";
+  const isPayoutEditable = isPayoutEditing || !payoutProfile;
+  const canSavePayoutProfile = Boolean(displayLegalName.trim());
+  const hasPayoutChanges = payoutProfile
+    ? digitsOnly(payoutForm.bankAccount) !== digitsOnly(payoutProfile.bankAccount) ||
+      digitsOnly(payoutForm.bankBic) !== digitsOnly(payoutProfile.bankBic) ||
+      digitsOnly(payoutForm.correspondentAccount) !== digitsOnly(payoutProfile.correspondentAccount) ||
+      payoutForm.bankName.trim() !== payoutProfile.bankName.trim()
+    : true;
   const activePanelHeading =
     activeTab === "quarters"
       ? {
@@ -1150,6 +1398,11 @@ export function PartnerFinancePage() {
             title: "Реестр сделок",
             subtitle: "Фильтруйте платежи, заказы и быстро выгружайте отчет по текущему диапазону.",
           }
+        : activeTab === "requisites"
+          ? {
+              title: "Реквизиты для выплат",
+              subtitle: "Здесь настраиваются только банковские реквизиты. Система автоматически подтверждает корректные данные или просит исправить несоответствия.",
+            }
         : {
             title: "Оперативный обзор",
             subtitle: "Фильтры, поиск и экспорт доступны сразу, а ключевые метрики и динамика идут ниже.",
@@ -1187,61 +1440,6 @@ export function PartnerFinancePage() {
         </div>
       </div>
 
-      <section className="dashboard-card finance-panel">
-        <div className="finance-panel__header">
-          <div>
-            <h3>{activePanelHeading.title}</h3>
-            <p>{activePanelHeading.subtitle}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => void handleExport()}
-            className="btn-primary flex items-center justify-center gap-2 px-4 py-2 text-sm"
-            disabled={!analytics || isReportLoading}
-          >
-            <Download className="h-4 w-4" />
-            Финансовый отчет XLSX
-          </button>
-        </div>
-
-        <div className="dashboard-toolbar finance-toolbar">
-          <input className="dashboard-select" type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
-          <input className="dashboard-select" type="date" value={to} onChange={(event) => setTo(event.target.value)} />
-          <select
-            className="dashboard-select"
-            value={transactionStatus}
-            onChange={(event) => setTransactionStatus(event.target.value as FinanceTransactionStatus)}
-          >
-            {TRANSACTION_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select className="dashboard-select" value={orderStatus} onChange={(event) => setOrderStatus(event.target.value as FinanceOrderStatus)}>
-            {ORDER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select className="dashboard-select" value={groupBy} onChange={(event) => setGroupBy(event.target.value as FinanceGroupBy)}>
-            <option value="day">По дням</option>
-            <option value="week">По неделям</option>
-            <option value="month">По месяцам</option>
-          </select>
-          <div className="dashboard-search finance-toolbar__search">
-            <Search className="dashboard-search__icon" />
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Товар, заказ, покупатель"
-              className="dashboard-search__input"
-            />
-          </div>
-        </div>
-      </section>
-
       <div className="finance-tabs">
         <FinanceTabButton
           active={activeTab === "overview"}
@@ -1261,7 +1459,70 @@ export function PartnerFinancePage() {
           subtitle="Фильтры, поиск и выгрузка сделок"
           onClick={() => setActiveTab("ledger")}
         />
+        <FinanceTabButton
+          active={activeTab === "requisites"}
+          label="Реквизиты"
+          subtitle="Профиль выплат и статус проверки"
+          onClick={() => setActiveTab("requisites")}
+        />
       </div>
+
+      {activeTab !== "requisites" ? (
+        <section className="dashboard-card finance-panel">
+          <div className="finance-panel__header">
+            <div>
+              <h3>{activePanelHeading.title}</h3>
+              <p>{activePanelHeading.subtitle}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleExport()}
+              className="btn-primary flex items-center justify-center gap-2 px-4 py-2 text-sm"
+              disabled={!analytics || isReportLoading}
+            >
+              <Download className="h-4 w-4" />
+              Финансовый отчет XLSX
+            </button>
+          </div>
+
+          <div className="dashboard-toolbar finance-toolbar">
+            <input className="dashboard-select" type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+            <input className="dashboard-select" type="date" value={to} onChange={(event) => setTo(event.target.value)} />
+            <select
+              className="dashboard-select"
+              value={transactionStatus}
+              onChange={(event) => setTransactionStatus(event.target.value as FinanceTransactionStatus)}
+            >
+              {TRANSACTION_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select className="dashboard-select" value={orderStatus} onChange={(event) => setOrderStatus(event.target.value as FinanceOrderStatus)}>
+              {ORDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select className="dashboard-select" value={groupBy} onChange={(event) => setGroupBy(event.target.value as FinanceGroupBy)}>
+              <option value="day">По дням</option>
+              <option value="week">По неделям</option>
+              <option value="month">По месяцам</option>
+            </select>
+            <div className="dashboard-search finance-toolbar__search">
+              <Search className="dashboard-search__icon" />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Товар, заказ, покупатель"
+                className="dashboard-search__input"
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {activeTab === "overview" ? (
         <div className="space-y-4">
@@ -1282,7 +1543,7 @@ export function PartnerFinancePage() {
                 <div>
                   <h3>Текущая программа комиссии</h3>
                   <p>
-                    {overviewCommission.periodLabel} · payout profile {formatPayoutStatus(overviewCommission.payoutProfileStatus).toLowerCase()}
+                    {overviewCommission.periodLabel} · финансовый профиль {formatPayoutStatus(overviewCommission.payoutProfileStatus).toLowerCase()}
                   </p>
                 </div>
                 <strong>{overviewCommission.currentTier.rate.toFixed(1)}%</strong>
@@ -1435,7 +1696,7 @@ export function PartnerFinancePage() {
                     </div>
                   </div>
                   <FinanceMetricCard
-                    label="Payout profile"
+                    label="Финансовый профиль"
                     value={formatPayoutStatus(quarterProgram.payoutProfileStatus)}
                     note={`Обновлен ${formatDateTime(quarterProgram.payoutProfileUpdatedAt)} · новый пересчет ${formatShortDate(quarterProgram.resetsAt)}`}
                     tone="info"
@@ -1486,6 +1747,162 @@ export function PartnerFinancePage() {
             </div>
           </section>
         </div>
+      ) : null}
+
+      {activeTab === "requisites" ? (
+        <section className="dashboard-card finance-panel">
+          <div className="finance-panel__header">
+            <div>
+              <h3>Подключение реквизитов для выплат</h3>
+              <p>
+                Реквизиты привязаны к одобренной партнёрской заявке и проверяются автоматически по банковским
+                справочникам и контрольным правилам.
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Статус профиля</div>
+              <div className="mt-1">
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    effectivePayoutStatus === "verified"
+                      ? "bg-green-100 text-green-700"
+                      : effectivePayoutStatus === "rejected"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {formatPayoutStatus(effectivePayoutStatus)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <FinanceMetricCard
+              label="Готовность к продажам"
+              value={formatPayoutStatus(effectivePayoutStatus)}
+              note={payoutStatusDescription(effectivePayoutStatus, payoutProfile?.rejectionReason)}
+              tone={payoutStatusTone(effectivePayoutStatus)}
+            />
+
+            {payoutProfile?.updatedAt ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Последнее обновление реквизитов: {formatDateTime(payoutProfile.updatedAt)}
+              {payoutProfile.verifiedAt ? ` · подтверждено ${formatDateTime(payoutProfile.verifiedAt)}` : ""}
+            </div>
+            ) : null}
+
+            {payoutFeedback ? (
+              <div
+                className={`rounded-2xl px-4 py-3 text-sm ${
+                  payoutFeedback.tone === "success"
+                    ? "border border-green-200 bg-green-50 text-green-700"
+                    : payoutFeedback.tone === "error"
+                      ? "border border-red-200 bg-red-50 text-red-700"
+                    : "border border-blue-200 bg-blue-50 text-blue-700"
+                }`}
+              >
+                {payoutFeedback.message}
+              </div>
+            ) : effectivePayoutStatus === "rejected" && payoutProfile?.rejectionReason ? (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {payoutProfile.rejectionReason}
+              </div>
+            ) : null}
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <input
+                className="dashboard-select"
+                placeholder="Расчётный счёт"
+                value={payoutForm.bankAccount}
+                inputMode="numeric"
+                onChange={(event) => handlePayoutFieldChange("bankAccount", digitsOnly(event.target.value).slice(0, 20))}
+                readOnly={!isPayoutEditable}
+                disabled={isPayoutLoading || isPayoutSaving}
+              />
+              <input
+                className="dashboard-select"
+                placeholder="БИК"
+                value={payoutForm.bankBic}
+                inputMode="numeric"
+                onChange={(event) => handlePayoutFieldChange("bankBic", digitsOnly(event.target.value).slice(0, 9))}
+                readOnly={!isPayoutEditable}
+                disabled={isPayoutLoading || isPayoutSaving}
+              />
+              <input
+                className="dashboard-select"
+                placeholder="Корреспондентский счёт"
+                value={payoutForm.correspondentAccount}
+                inputMode="numeric"
+                onChange={(event) =>
+                  handlePayoutFieldChange("correspondentAccount", digitsOnly(event.target.value).slice(0, 20))
+                }
+                readOnly={!isPayoutEditable}
+                disabled={isPayoutLoading || isPayoutSaving}
+              />
+              <input
+                className="dashboard-select md:col-span-2"
+                placeholder="Банк"
+                value={payoutForm.bankName}
+                onChange={(event) => handlePayoutFieldChange("bankName", event.target.value)}
+                readOnly={!isPayoutEditable}
+                disabled={isPayoutLoading || isPayoutSaving}
+              />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-slate-500">
+                После сохранения система сразу выполняет автопроверку реквизитов. Если данные не совпадают со
+                справочником банка или не проходят контрольную проверку, профиль помечается как некорректный до
+                исправления.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                {payoutProfile && !isPayoutEditable ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsPayoutEditing(true)}
+                    className="btn-secondary min-w-[220px] px-4 py-2 text-sm"
+                    disabled={isPayoutLoading || isPayoutSaving}
+                  >
+                    Изменить реквизиты
+                  </button>
+                ) : null}
+                {isPayoutEditable ? (
+                  <>
+                    {payoutProfile ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPayoutForm(payoutProfileToForm(payoutProfile, sellerIdentity));
+                          setIsPayoutEditing(false);
+                        }}
+                        className="btn-secondary min-w-[180px] px-4 py-2 text-sm"
+                        disabled={isPayoutLoading || isPayoutSaving}
+                      >
+                        Отмена
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => void handleSavePayoutProfile()}
+                      className="btn-primary min-w-[220px] px-4 py-2 text-sm"
+                      disabled={isPayoutLoading || isPayoutSaving || !canSavePayoutProfile || !hasPayoutChanges}
+                    >
+                      {isPayoutSaving
+                        ? "Сохраняем..."
+                        : payoutProfile
+                          ? "Сохранить изменения"
+                          : "Сохранить реквизиты"}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            {payoutProfile && isPayoutEditable && !hasPayoutChanges ? (
+              <p className="text-sm text-slate-500">Измените хотя бы одно банковское поле, чтобы отправить реквизиты на повторную проверку.</p>
+            ) : null}
+          </div>
+        </section>
       ) : null}
     </div>
   );

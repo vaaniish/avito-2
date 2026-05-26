@@ -1,10 +1,14 @@
 import type { OrderStatus } from "@prisma/client";
 import { createHash } from "node:crypto";
 import type {
+  BuyerOrderPaymentStatusRow,
   BuyerOrderWithRelations,
   BuyerProfileOrderDto,
   BuyerProfileOrderStatus,
+  BuyerOrderPresentationHelpers,
+  CheckoutGroupOrderPaymentStatusRow,
   DeliveryProviderCode,
+  OrderPaymentSummaryDto,
   ProfileOrdersServiceHelpers,
 } from "./profile-orders.types";
 
@@ -24,6 +28,18 @@ export function makeCheckoutIdempotencyHash(payload: unknown): string {
 export function uniqueNumbers(values: number[]): number[] {
   return [...new Set(values)];
 }
+
+const BUYER_CANCELLABLE_ORDER_STATUSES = new Set<OrderStatus>([
+  "CREATED",
+  "PAID",
+  "PROCESSING",
+]);
+
+const BUYER_POST_PURCHASE_SUPPORT_STATUSES = new Set<OrderStatus>([
+  "SHIPPED",
+  "DELIVERED",
+  "COMPLETED",
+]);
 
 export function calculateLaunchPromoDiscount(subtotal: number): number {
   return Math.max(0, Math.floor((Math.max(0, subtotal) * LAUNCH_PROMO_PERCENT) / 100));
@@ -72,16 +88,82 @@ export function buildCheckoutPolicyDto(policy: {
   };
 }
 
+function normalizeSupportField(value: string | null | undefined): string | null {
+  const normalized = value?.trim() ?? "";
+  return normalized ? normalized : null;
+}
+
+export function canBuyerCancelOrder(status: OrderStatus): boolean {
+  return BUYER_CANCELLABLE_ORDER_STATUSES.has(status);
+}
+
+export function shouldExposeSellerSupportForBuyerOrder(status: OrderStatus): boolean {
+  return BUYER_POST_PURCHASE_SUPPORT_STATUSES.has(status);
+}
+
+export function summarizeOrderPayments(
+  orders: Array<BuyerOrderPaymentStatusRow | CheckoutGroupOrderPaymentStatusRow>,
+): OrderPaymentSummaryDto {
+  const paymentOrders = orders.map((order) => ({
+    orderId: order.public_id,
+    orderStatus: order.status,
+    paymentStatus: order.transactions[0]?.status ?? null,
+    paymentProvider: order.transactions[0]?.payment_provider ?? null,
+    paymentIntentId: order.transactions[0]?.payment_intent_id ?? null,
+  }));
+
+  const hasFailed = paymentOrders.some(
+    (order) =>
+      order.orderStatus === "CANCELLED" ||
+      order.paymentStatus === "FAILED" ||
+      order.paymentStatus === "CANCELLED",
+  );
+  const isPaid =
+    paymentOrders.length > 0 &&
+    paymentOrders.every(
+      (order) =>
+        order.orderStatus === "PAID" || order.paymentStatus === "SUCCESS",
+    );
+
+  return {
+    summary: hasFailed ? "failed" : isPaid ? "paid" : "pending",
+    orders: paymentOrders,
+  };
+}
+
+export function getSellerSupportContacts(order: BuyerOrderWithRelations): {
+  sellerSupportPhone: string | null;
+  sellerSupportEmail: string | null;
+  sellerWorkingHours: string | null;
+} {
+  const profile = order.seller.partnership_requests[0]?.onboarding_profile ?? null;
+  return {
+    sellerSupportPhone: normalizeSupportField(profile?.support_phone),
+    sellerSupportEmail: normalizeSupportField(order.seller.work_email),
+    sellerWorkingHours: normalizeSupportField(profile?.service_hours),
+  };
+}
+
 export function mapBuyerOrder(
   order: BuyerOrderWithRelations,
   reviewedListingIds: Set<number>,
-  helpers: ProfileOrdersServiceHelpers,
+  helpers: BuyerOrderPresentationHelpers,
 ): BuyerProfileOrderDto {
+  const sellerSupport = shouldExposeSellerSupportForBuyerOrder(order.status)
+    ? getSellerSupportContacts(order)
+    : {
+        sellerSupportPhone: null,
+        sellerSupportEmail: null,
+        sellerWorkingHours: null,
+      };
+
   return {
     id: String(order.id),
+    publicId: order.public_id,
     orderNumber: `#${order.public_id}`,
     date: order.created_at,
     status: helpers.toProfileOrderStatus(order.status),
+    canCancel: canBuyerCancelOrder(order.status),
     total: order.total_price,
     deliveryDate: helpers.toLocalizedDeliveryDate(order.created_at),
     deliveryAddress:
@@ -92,6 +174,9 @@ export function mapBuyerOrder(
     trackingNumber: order.tracking_number,
     trackingUrl: order.tracking_url,
     deliveryExternalStatus: order.delivery_ext_status,
+    sellerSupportPhone: sellerSupport.sellerSupportPhone,
+    sellerSupportEmail: sellerSupport.sellerSupportEmail,
+    sellerWorkingHours: sellerSupport.sellerWorkingHours,
     seller: {
       name: order.seller.name,
       avatar: order.seller.avatar,
@@ -100,7 +185,7 @@ export function mapBuyerOrder(
         helpers.extractPrimaryCityFromAddresses(order.seller.addresses) ??
         "Город не указан"
       }`,
-      workingHours: "пн — вс: 9:00-21:00",
+      workingHours: sellerSupport.sellerWorkingHours ?? "",
     },
     items: order.items.map((item) => {
       const reviewed =
@@ -130,23 +215,6 @@ export type ProfileOrdersServicesDeps = {
   policyReader: import("./profile-orders.types").ProfileOrdersPolicyPort;
   helpers: ProfileOrdersServiceHelpers;
 };
-
-export function normalizeDeliveryAddressFromRecord(params: {
-  address: {
-    region: string | null;
-    city: string | null;
-    street: string | null;
-    house: string | null;
-  };
-  helpers: ProfileOrdersServiceHelpers;
-}): string {
-  return params.helpers.buildAddressFullAddress({
-    region: params.address.region ?? "",
-    city: params.address.city ?? "",
-    street: params.address.street ?? "",
-    house: params.address.house ?? "",
-  });
-}
 
 export type ProfileOrderStatusOutput = BuyerProfileOrderStatus;
 export type DeliveryProvider = DeliveryProviderCode;

@@ -16,6 +16,7 @@ import {
 export class UpdatePartnershipDraftService {
   constructor(
     private readonly repository: ProfilePartnershipRepositoryPort,
+    private readonly loadAllowedCategoryNames: () => Promise<string[]>,
   ) {}
 
   async execute(input: {
@@ -36,8 +37,10 @@ export class UpdatePartnershipDraftService {
       throw conflict("Only draft or needs_more_info requests can be edited.");
     }
 
+    const allowedCategoryNames = await this.loadAllowedCategoryNames();
     const normalized = validateAndNormalizeOnboardingPayload(input.payload, {
       allowDraft: true,
+      allowedCategoryNames,
     });
     if (!normalized.ok) {
       throw validationError("Invalid onboarding draft", {

@@ -21,6 +21,7 @@ export class SubmitPartnershipDraftService {
   constructor(
     private readonly repository: ProfilePartnershipRepositoryPort,
     private readonly policyPort: ProfileEngagementPolicyPort,
+    private readonly loadAllowedCategoryNames: () => Promise<string[]>,
   ) {}
 
   async execute(input: { publicId: string; userId: number }) {
@@ -45,8 +46,10 @@ export class SubmitPartnershipDraftService {
       throw notFound("Partnership draft not found");
     }
 
+    const allowedCategoryNames = await this.loadAllowedCategoryNames();
     const validation = validateAndNormalizeOnboardingPayload(
       storedProfileToPayload(existing.onboarding_profile),
+      { allowedCategoryNames },
     );
     if (!validation.ok) {
       throw validationError(

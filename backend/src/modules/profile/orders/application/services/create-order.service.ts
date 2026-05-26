@@ -9,7 +9,6 @@ import {
   buildCheckoutPolicyDto,
   LISTING_RESERVATION_CONFLICT,
   makeCheckoutIdempotencyHash,
-  normalizeDeliveryAddressFromRecord,
   uniqueStrings,
 } from "../profile-orders.helpers";
 import type {
@@ -70,8 +69,7 @@ export class CreateOrderService {
     const idempotencyHash = makeCheckoutIdempotencyHash({
       deliveryType: input.deliveryType,
       paymentMethod: input.paymentMethod || "card",
-      addressId: Number.isInteger(input.addressId) ? input.addressId : 0,
-      customAddress: input.customAddress,
+      pickupPointAddress: input.pickupPointAddress,
       pickupPointId: input.pickupPointId,
       pickupPointProvider: input.pickupPointProvider,
       promoCode: input.promoCode,
@@ -112,12 +110,6 @@ export class CreateOrderService {
     try {
       if (parsedItems.length === 0) {
         throw validationError("Корзина пуста или содержит некорректные позиции");
-      }
-
-      if (parsedItems.some((item) => item.quantity !== 1)) {
-        throw validationError(
-          "Каждое объявление можно добавить в заказ только в количестве 1",
-        );
       }
 
       const hasDuplicateListings =
@@ -175,13 +167,25 @@ export class CreateOrderService {
           );
         }
 
+        if (!listing.has_multiple_stock && item.quantity > 1) {
+          throw validationError(
+            `Товар ${listing.title} доступен только в количестве 1`,
+          );
+        }
+
+        if (item.quantity > listing.available_quantity) {
+          throw validationError(
+            `Для товара ${listing.title} доступно только ${listing.available_quantity} шт.`,
+          );
+        }
+
         const current = groupedBySeller.get(listing.seller_id) ?? [];
         current.push({
           listing_id: listing.id,
           name: listing.title,
           image: listing.images[0]?.url ?? this.helpers.fallbackListingImage,
           price: listing.price,
-          quantity: 1,
+          quantity: item.quantity,
         });
         groupedBySeller.set(listing.seller_id, current);
       }
@@ -207,42 +211,13 @@ export class CreateOrderService {
         throw validationError("Unsupported payment method");
       }
 
-      let deliveryAddress = input.customAddress;
-      if (
-        !deliveryAddress &&
-        Number.isInteger(input.addressId) &&
-        input.addressId > 0
-      ) {
-        const selectedAddress = await this.repository.findUserAddressByIdForUser({
-          addressId: input.addressId,
-          userId: input.actorUserId,
-        });
-        if (selectedAddress) {
-          deliveryAddress = normalizeDeliveryAddressFromRecord({
-            address: selectedAddress,
-            helpers: this.helpers,
-          });
-        }
-      }
-
-      if (!deliveryAddress) {
-        const defaultAddress = await this.repository.findDefaultAddressForUser(
-          input.actorUserId,
-        );
-        if (defaultAddress) {
-          deliveryAddress = normalizeDeliveryAddressFromRecord({
-            address: defaultAddress,
-            helpers: this.helpers,
-          });
-        }
-      }
-
-      if (input.deliveryType === "DELIVERY" && !deliveryAddress) {
-        throw validationError("Укажите адрес доставки");
+      const pickupPointAddress = input.pickupPointAddress.trim();
+      if (input.deliveryType === "DELIVERY" && !pickupPointAddress) {
+        throw validationError("Укажите ПВЗ для доставки");
       }
 
       if (input.deliveryType === "DELIVERY" && !input.pickupPointId) {
-        throw validationError("Pickup point id is required for delivery");
+        throw validationError("Pickup point id is required for pickup-point delivery");
       }
 
       const hasCheckoutDelivery = input.deliveryType === "DELIVERY";
@@ -320,7 +295,7 @@ export class CreateOrderService {
 
       const yookassaPayment = await this.paymentGateway.createPayment({
         amountRub: totalAmount,
-        description: `РћРїР»Р°С‚Р° Р·Р°РєР°Р·Р° РІ Ecomm (${preparedOrders.length} С€С‚.)`,
+        description: `Оплата заказа в Ecomm (${preparedOrders.length} шт.)`,
         metadata: {
           source: "avito-2",
           buyer_id: String(input.actorUserId),
@@ -336,13 +311,15 @@ export class CreateOrderService {
         );
       }
       const paymentIntentIdBase = yookassaPayment.id ?? `pay_${Date.now()}`;
+      const checkoutGroupKey = paymentIntentIdBase;
 
       const createdOrders = await this.repository.createCheckoutOrders({
         buyerId: input.actorUserId,
         deliveryType: input.deliveryType,
-        deliveryAddress: deliveryAddress || "",
+        pickupPointAddress,
         pickupPointId: input.pickupPointId,
         pickupPointProvider: input.pickupPointProvider,
+        checkoutGroupKey,
         preparedOrders,
         requestIp: input.requestIp,
         paymentIntentIdBase,
@@ -352,7 +329,7 @@ export class CreateOrderService {
             ? {
                 promoId: reservedPromoId,
                 buyerId: input.actorUserId,
-                checkoutGroupKey: paymentIntentIdBase,
+                checkoutGroupKey,
               }
             : null,
         appendPickupPointMetaToAddress:

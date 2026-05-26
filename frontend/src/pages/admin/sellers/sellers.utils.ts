@@ -32,7 +32,7 @@ export function recommendationLabel(value?: PartnerEvaluation["recommendation"])
   if (value === "approve") return "Рекомендуется одобрить";
   if (value === "approve_limited") return "Рекомендуется ограниченное одобрение";
   if (value === "reject") return "Рекомендуется отклонить";
-  if (value === "request_more_documents") return "Нужно запросить документы";
+  if (value === "request_more_documents") return "Нужно уточнение";
   return "Нет рекомендации";
 }
 
@@ -47,6 +47,13 @@ export function legalTypeLabel(value?: string): string {
   if (value === "COMPANY") return "Юрлицо";
   if (value === "IP") return "ИП";
   if (value === "BRAND") return "Бренд / реселлер";
+  return value || "Не указано";
+}
+
+export function authorityTypeLabel(value?: string): string {
+  if (value === "director") return "Директор / руководитель";
+  if (value === "owner") return "Владелец / ИП";
+  if (value === "employee") return "Сотрудник по доверенности";
   return value || "Не указано";
 }
 

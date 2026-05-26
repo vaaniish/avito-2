@@ -20,6 +20,7 @@ export class UpdateProfileUserService {
       lastName?: unknown;
       displayName?: unknown;
       email?: unknown;
+      workEmail?: unknown;
       oldPassword?: unknown;
       newPassword?: unknown;
     };
@@ -31,6 +32,11 @@ export class UpdateProfileUserService {
     const user = assertProfileUserExists(
       await this.repository.loadUserForUpdate(input.userId),
     );
+    const canManageWorkEmail = user.role === "SELLER";
+
+    if (!canManageWorkEmail && normalized.workEmail !== undefined) {
+      throw validationError("Рабочая почта доступна только партнёрам");
+    }
 
     let nextPasswordHash: string | undefined;
     if (normalized.newPassword) {
@@ -44,12 +50,19 @@ export class UpdateProfileUserService {
       nextPasswordHash = await this.passwordHasher.hash(normalized.newPassword);
     }
 
+    const nextWorkEmail = canManageWorkEmail
+      ? normalized.workEmail === undefined
+        ? undefined
+        : normalized.workEmail || null
+      : undefined;
+
     const updated = await this.repository.updateUser({
       userId: input.userId,
       firstName: normalized.firstName,
       lastName: normalized.lastName,
       displayName: normalized.displayName,
       email: normalized.email,
+      workEmail: nextWorkEmail,
       password: nextPasswordHash,
     });
 
@@ -63,6 +76,7 @@ export class UpdateProfileUserService {
         lastName: updated.last_name ?? "",
         displayName: updated.display_name ?? updated.name,
         email: updated.email,
+        workEmail: updated.role === "SELLER" ? updated.work_email : null,
       },
     };
   }

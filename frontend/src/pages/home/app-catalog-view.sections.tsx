@@ -116,7 +116,7 @@ export function AppCatalogDesktopFilters({
   useEffect(() => {
     if (typeof window === "undefined") return;
     const filterBottomGap = 10;
-    const viewportBleed = 15;
+    const viewportBleed = 150;
 
     const readHeaderOffset = () => {
       const root = getComputedStyle(document.documentElement);

@@ -19,6 +19,11 @@ export interface Product {
   isVerified?: boolean;
   description?: string;
   shippingBySeller?: boolean;
+  sellerWarrantyEnabled?: boolean;
+  sellerWarrantyDays?: number | null;
+  hasMultipleStock?: boolean;
+  availableQuantity?: number;
+  isLowStock?: boolean;
   reviews?: Review[];
   images?: string[];
   location?: string; // Location of seller

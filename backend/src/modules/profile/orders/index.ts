@@ -15,17 +15,20 @@ import {
   normalizeTextField,
 } from "../profile.shared";
 import {
+  createYooKassaRefund,
   createYooKassaPayment,
   extractYooKassaPaymentBaseId,
   fetchYooKassaPaymentById,
 } from "../profile.payment";
 import { toProfileOrderStatus } from "../../../utils/format";
 import {
+  CancelProfileOrderService,
   CreateOrderService,
   GetOrderPaymentStatusService,
   HandleYooKassaWebhookService,
   ListProfileOrdersService,
   PreviewCheckoutPromoService,
+  ResolveYooKassaPaymentService,
 } from "./application/profile-orders.service";
 import type {
   DeliveryProviderCode,
@@ -60,6 +63,12 @@ export type ProfileOrdersModuleDeps = {
     paymentMethod: "card" | "sbp";
     idempotenceKey?: string;
   }) => Promise<YooKassaPayment>;
+  createYooKassaRefund: (params: {
+    paymentId: string;
+    amountRub: number;
+    description: string;
+    idempotenceKey?: string;
+  }) => Promise<import("./application/profile-orders.types").YooKassaRefund>;
   fetchYooKassaPaymentById: (
     paymentId: string,
   ) => Promise<YooKassaPayment | null>;
@@ -84,11 +93,16 @@ export function createProfileOrdersRouter(
   const paymentGateway = new ProfileOrdersPaymentGateway(
     deps.createYooKassaPayment,
     deps.fetchYooKassaPaymentById,
+    deps.createYooKassaRefund,
     deps.extractYooKassaPaymentBaseId,
   );
   const deliveryGateway = new ProfileOrdersDeliveryGateway();
   const notificationWriter = new ProfileOrdersNotificationRepository(prisma);
   const policyReader = new ProfileOrdersPolicyRepository(prisma);
+  const paymentResolver = new ResolveYooKassaPaymentService(
+    repository,
+    paymentGateway,
+  );
   const helpers: ProfileOrdersServiceHelpers = {
     roleAdmin: deps.roleAdmin,
     fallbackListingImage: deps.fallbackListingImage,
@@ -102,10 +116,7 @@ export function createProfileOrdersRouter(
   };
 
   const services: ProfileOrdersHttpDeps["services"] = {
-    handleYooKassaWebhook: new HandleYooKassaWebhookService(
-      repository,
-      paymentGateway,
-    ),
+    handleYooKassaWebhook: new HandleYooKassaWebhookService(paymentResolver),
     getOrderPaymentStatus: new GetOrderPaymentStatusService(
       repository,
       paymentGateway,
@@ -121,6 +132,11 @@ export function createProfileOrdersRouter(
     listProfileOrders: new ListProfileOrdersService(
       repository,
       deliveryGateway,
+      helpers,
+    ),
+    cancelProfileOrder: new CancelProfileOrderService(
+      repository,
+      paymentGateway,
       helpers,
     ),
   };
@@ -154,6 +170,7 @@ export const profileOrdersRouter = createProfileOrdersRouter({
   extractPrimaryCityFromAddresses,
   toProfileOrderStatus,
   createYooKassaPayment,
+  createYooKassaRefund,
   fetchYooKassaPaymentById,
   extractYooKassaPaymentBaseId,
   ensureYandexTrackingForOrders: (orderIds) =>

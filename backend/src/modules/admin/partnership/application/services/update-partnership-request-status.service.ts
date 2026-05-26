@@ -52,13 +52,6 @@ export class UpdatePartnershipRequestStatusService {
       );
     }
 
-    const payoutVerified = existing.user.payout_profile?.status === "VERIFIED";
-    if (nextStatus === "APPROVED" && !payoutVerified && !adminNote) {
-      throw validationError(
-        "Verified payout profile or explicit admin override note is required for full approval.",
-      );
-    }
-
     const allowedActions = getAllowedPartnershipActions(existing.status);
     if (!allowedActions.includes(toClientReviewAction(nextStatus))) {
       throw validationError(
@@ -73,7 +66,6 @@ export class UpdatePartnershipRequestStatusService {
       nextStatus,
       rejectionReason,
       adminNote,
-      payoutVerified,
       currentListingLimit: existing.onboarding_profile?.listing_limit ?? null,
       currentAllowedCategories: existing.onboarding_profile?.categories ?? [],
     });

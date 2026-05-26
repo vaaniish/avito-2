@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import {
   AlertTriangle,
+  BadgePercent,
   ClipboardList,
   FileText,
   ListPlus,
@@ -100,24 +101,24 @@ export function AdminPanel({
       icon: AlertTriangle,
     },
     {
-      id: "sellers" as AdminPage,
-      name: "Партнёры",
-      icon: UserCheck,
-    },
-    {
       id: "listings" as AdminPage,
       name: "Объявления",
       icon: FileText,
     },
     {
-      id: "promos" as AdminPage,
-      name: "Промокоды",
-      icon: ListPlus,
-    },
-    {
       id: "catalog" as AdminPage,
       name: "Каталог",
       icon: ListPlus,
+    },
+    {
+      id: "promos" as AdminPage,
+      name: "Промокоды",
+      icon: BadgePercent,
+    },
+    {
+      id: "sellers" as AdminPage,
+      name: "Партнёры",
+      icon: UserCheck,
     },
     {
       id: "users" as AdminPage,

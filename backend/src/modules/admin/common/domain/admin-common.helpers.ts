@@ -12,7 +12,6 @@ export type AuditAction =
   | "complaint.status_changed"
   | "kyc.status_changed"
   | "partnership_request.status_changed"
-  | "seller.payout_profile.status_changed"
   | "listing.moderation_changed"
   | "user.status_changed"
   | "user.role_changed"

@@ -91,7 +91,15 @@ export function listingToEditForm(params: {
       ...attributesToCharacteristics(listing.attributes, fields),
       ...referenceCharacteristicsFromAttributes(listing.attributes),
     },
-    hasMultipleStock:
-      getMetaAttribute(listing.attributes, "Несколько штук в наличии") === "Да",
+    sellerWarrantyEnabled: Boolean(listing.sellerWarrantyEnabled),
+    sellerWarrantyDays:
+      listing.sellerWarrantyEnabled && listing.sellerWarrantyDays
+        ? String(listing.sellerWarrantyDays)
+        : "",
+    hasMultipleStock: Boolean(listing.hasMultipleStock),
+    availableQuantity:
+      listing.hasMultipleStock && listing.availableQuantity
+        ? String(listing.availableQuantity)
+        : "",
   };
 }

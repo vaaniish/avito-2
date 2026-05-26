@@ -9413,7 +9413,7 @@ button {
 
 @media (min-width: 768px) {
   .finance-tabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -9422,7 +9422,7 @@ button {
   border: 1px solid #d7e1ec;
   border-radius: 0.95rem;
   background: #fff;
-  padding: 0.85rem 0.95rem;
+  padding: 0.8rem 0.9rem;
   text-align: left;
   color: #334155;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
@@ -9448,14 +9448,14 @@ button {
 }
 
 .finance-tab__label {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .finance-tab__subtitle {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   line-height: 1.4;
   color: #66768f;
 }

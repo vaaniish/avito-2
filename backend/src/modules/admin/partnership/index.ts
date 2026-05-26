@@ -5,7 +5,6 @@ import { ListPartnershipRequestsService } from "./application/services/list-part
 import { ListPayoutProfilesService } from "./application/services/list-payout-profiles.service";
 import { UpdateKycStatusService } from "./application/services/update-kyc-status.service";
 import { UpdatePartnershipRequestStatusService } from "./application/services/update-partnership-request-status.service";
-import { UpdatePayoutProfileStatusService } from "./application/services/update-payout-profile-status.service";
 import { createAdminPartnershipRouter } from "./http/admin-partnership.router";
 import { AdminPartnershipNotificationGateway } from "./infrastructure/gateways/admin-partnership-notification.gateway";
 import { AdminAuditWriterRepository } from "./infrastructure/repositories/admin-audit-writer.repository";
@@ -39,11 +38,6 @@ export function registerAdminPartnershipRoutes(adminRouter: Router) {
           auditWriter,
         ),
         listPayoutProfiles: new ListPayoutProfilesService(payoutRepository),
-        updatePayoutProfileStatus: new UpdatePayoutProfileStatusService(
-          payoutRepository,
-          notificationGateway,
-          auditWriter,
-        ),
       },
     }),
   );

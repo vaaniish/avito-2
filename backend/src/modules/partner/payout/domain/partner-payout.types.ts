@@ -4,6 +4,12 @@ export type PayoutLegalTypeValue =
   | "BRAND"
   | "ADMIN_APPROVED";
 
+export type PartnerSellerIdentity = {
+  legalType: "COMPANY" | "IP" | "BRAND";
+  legalName: string;
+  taxId: string;
+} | null;
+
 export interface PartnerPayoutRepositoryPort {
   getProfile(sellerId: number): Promise<{
     public_id: string;
@@ -20,6 +26,7 @@ export interface PartnerPayoutRepositoryPort {
     rejection_reason: string | null;
     updated_at: Date;
   } | null>;
+  getSellerIdentity(sellerId: number): Promise<PartnerSellerIdentity>;
   upsertProfile(params: {
     sellerId: number;
     publicId: string;
@@ -31,6 +38,9 @@ export interface PartnerPayoutRepositoryPort {
     correspondentAccount: string;
     bankName: string;
     recipientName: string;
+    status: "REJECTED" | "VERIFIED";
+    verifiedAt: Date | null;
+    rejectionReason: string | null;
   }): Promise<{
     public_id: string;
     legal_type: string;
@@ -42,6 +52,8 @@ export interface PartnerPayoutRepositoryPort {
     bank_name: string;
     recipient_name: string;
     status: string;
+    verified_at: Date | null;
+    rejection_reason: string | null;
     updated_at: Date;
   }>;
 }

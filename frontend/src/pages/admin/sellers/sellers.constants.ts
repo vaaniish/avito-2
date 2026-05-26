@@ -22,5 +22,4 @@ export const REVIEW_TABS: Array<{ value: ReviewTab; label: string }> = [
   { value: "business", label: "1. Бизнес" },
   { value: "contacts", label: "2. Контакты" },
   { value: "sales", label: "3. Продажи" },
-  { value: "quality", label: "4. Качество" },
 ];

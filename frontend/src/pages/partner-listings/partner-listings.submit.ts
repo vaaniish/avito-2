@@ -35,6 +35,10 @@ export type PartnerListingSavePayload = {
   images: string[];
   imageModerationSignals: ImageModerationSignal[];
   attributes: ListingAttribute[];
+  sellerWarrantyEnabled: boolean;
+  sellerWarrantyDays: number | null;
+  hasMultipleStock: boolean;
+  availableQuantity: number | null;
 };
 
 type CharacteristicValidationOptions = {
@@ -56,8 +60,10 @@ export function snapshotListingFormForSave(
     catalogRequestAttributes: form.catalogRequestAttributes.trim(),
     catalogRequestComment: form.catalogRequestComment.trim(),
     price: String(Math.round(Number(form.price))),
+    sellerWarrantyDays: form.sellerWarrantyDays.trim(),
     images: [...form.images],
     characteristics: normalizeCharacteristics(fields, form.characteristics),
+    availableQuantity: form.availableQuantity.trim(),
   };
 }
 
@@ -135,6 +141,18 @@ export async function validateCreateListingDetails(params: {
   }
   const price = Number(form.price);
   if (!Number.isFinite(price) || price <= 0) return "Укажите корректную цену";
+  if (form.sellerWarrantyEnabled) {
+    const sellerWarrantyDays = Number(form.sellerWarrantyDays);
+    if (!Number.isInteger(sellerWarrantyDays) || sellerWarrantyDays <= 0) {
+      return "Укажите срок гарантии продавца в днях";
+    }
+  }
+  if (form.hasMultipleStock) {
+    const availableQuantity = Number(form.availableQuantity);
+    if (!Number.isInteger(availableQuantity) || availableQuantity < 2) {
+      return "Укажите количество товара не меньше 2";
+    }
+  }
   if (form.meetingAddress.trim().length < 5) {
     return "Выберите или добавьте адрес самовывоза";
   }
@@ -185,6 +203,18 @@ export async function validateInlineListingDetails(params: {
     return "Описание должно быть не короче 10 символов";
   }
   if (meetingAddress.length < 5) return "Укажите адрес";
+  if (form.sellerWarrantyEnabled) {
+    const sellerWarrantyDays = Number(form.sellerWarrantyDays);
+    if (!Number.isInteger(sellerWarrantyDays) || sellerWarrantyDays <= 0) {
+      return "Укажите срок гарантии продавца в днях";
+    }
+  }
+  if (form.hasMultipleStock) {
+    const availableQuantity = Number(form.availableQuantity);
+    if (!Number.isInteger(availableQuantity) || availableQuantity < 2) {
+      return "Укажите количество товара не меньше 2";
+    }
+  }
 
   const imageError = await validateImages(form.type, form.images);
   if (imageError) return imageError;
@@ -241,9 +271,6 @@ export function buildPartnerListingSavePayload(params: {
           { key: "Дефекты", value: getDefectsLabel(form.hasDefects) },
         ]
       : []),
-    ...(includeMultipleStock && form.hasMultipleStock
-      ? [{ key: "Несколько штук в наличии", value: "Да" }]
-      : []),
     { key: META_ATTR_MEETING_ADDRESS, value: form.meetingAddress.trim() },
   ].filter((attribute) => attribute.value.trim());
 
@@ -256,5 +283,14 @@ export function buildPartnerListingSavePayload(params: {
     images: form.images,
     imageModerationSignals,
     attributes,
+    sellerWarrantyEnabled: form.sellerWarrantyEnabled,
+    sellerWarrantyDays: form.sellerWarrantyEnabled
+      ? Math.round(Number(form.sellerWarrantyDays))
+      : null,
+    hasMultipleStock: includeMultipleStock ? form.hasMultipleStock : false,
+    availableQuantity:
+      includeMultipleStock && form.hasMultipleStock
+        ? Math.round(Number(form.availableQuantity))
+        : null,
   };
 }

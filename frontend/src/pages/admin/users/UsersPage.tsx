@@ -237,7 +237,7 @@ export function UsersPage() {
           {[
             { value: "all", label: "Все роли" },
             { value: "regular", label: "Покупатели" },
-            { value: "partner", label: "Продавцы" },
+            { value: "partner", label: "Партнёры" },
             { value: "admin", label: "Админы" },
           ].map((option) => (
             <button

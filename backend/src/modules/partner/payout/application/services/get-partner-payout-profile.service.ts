@@ -5,9 +5,13 @@ export class GetPartnerPayoutProfileService {
   constructor(private readonly repository: PartnerPayoutRepositoryPort) {}
 
   async execute(sellerId: number) {
-    const profile = await this.repository.getProfile(sellerId);
+    const [profile, sellerIdentity] = await Promise.all([
+      this.repository.getProfile(sellerId),
+      this.repository.getSellerIdentity(sellerId),
+    ]);
     return {
       profile: profile ? payoutProfileToClient(profile) : null,
+      sellerIdentity,
     };
   }
 }

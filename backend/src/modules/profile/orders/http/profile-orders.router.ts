@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import type { DeliveryProviderCode, YooKassaWebhookPayload } from "../application/profile-orders.types";
+import type { CancelProfileOrderService } from "../application/services/cancel-profile-order.service";
 import type { CreateOrderService } from "../application/services/create-order.service";
 import type { GetOrderPaymentStatusService } from "../application/services/get-order-payment-status.service";
 import type { HandleYooKassaWebhookService } from "../application/services/handle-yookassa-webhook.service";
@@ -23,6 +24,7 @@ export type ProfileOrdersHttpDeps = {
     createOrder: CreateOrderService;
     listProfileOrders: ListProfileOrdersService;
     previewCheckoutPromo: PreviewCheckoutPromoService;
+    cancelProfileOrder: CancelProfileOrderService;
   };
 };
 
@@ -155,8 +157,7 @@ export function createProfileOrdersHttpRouter(
 
       const body = (req.body ?? {}) as {
         items?: unknown;
-        addressId?: unknown;
-        customAddress?: unknown;
+        pickupPointAddress?: unknown;
         pickupPointId?: unknown;
         pickupPointProvider?: unknown;
         deliveryType?: unknown;
@@ -181,9 +182,10 @@ export function createProfileOrdersHttpRouter(
         actorRole: session.user.role,
         idempotencyKey: req.header("Idempotency-Key")?.trim() ?? "",
         items: parsedItems,
-        addressId: Number(body.addressId ?? 0),
-        customAddress:
-          typeof body.customAddress === "string" ? body.customAddress.trim() : "",
+        pickupPointAddress:
+          typeof body.pickupPointAddress === "string"
+            ? body.pickupPointAddress.trim()
+            : "",
         pickupPointId:
           typeof body.pickupPointId === "string"
             ? body.pickupPointId.trim()
@@ -252,6 +254,28 @@ export function createProfileOrdersHttpRouter(
       res.status(200).json(result);
     } catch (error) {
       console.error("Error fetching orders:", error);
+      sendApplicationError(res, error);
+    }
+  });
+
+  router.post("/orders/:orderId/cancel", async (req: Request, res: Response) => {
+    try {
+      const session = await deps.requireAnyRole(req, profileRoles(deps));
+      if (!session.ok) {
+        res.status(session.status).json({ error: session.message });
+        return;
+      }
+
+      const orderId =
+        typeof req.params.orderId === "string" ? req.params.orderId.trim() : "";
+      const result = await deps.services.cancelProfileOrder.execute({
+        buyerId: session.user.id,
+        orderPublicId: orderId,
+        requestIp: getRequestIp(req),
+      });
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error cancelling order:", error);
       sendApplicationError(res, error);
     }
   });

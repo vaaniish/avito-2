@@ -2,7 +2,6 @@ import type { PrismaClient } from "@prisma/client";
 import type {
   AdminPayoutRepositoryPort,
   PayoutProfileRecord,
-  PayoutStatusValue,
 } from "../../domain/admin-partnership.types";
 
 export class AdminPayoutRepository implements AdminPayoutRepositoryPort {
@@ -52,28 +51,5 @@ export class AdminPayoutRepository implements AdminPayoutRepositoryPort {
         },
       },
     })) as any;
-  }
-
-  async updateStatus(params: {
-    profileId: number;
-    actorUserId: number;
-    nextStatus: PayoutStatusValue;
-    rejectionReason: string | null;
-  }) {
-    const updated = await this.prisma.sellerPayoutProfile.update({
-      where: { id: params.profileId },
-      data: {
-        status: params.nextStatus,
-        verified_by_id: params.nextStatus === "PENDING" ? null : params.actorUserId,
-        verified_at: params.nextStatus === "PENDING" ? null : new Date(),
-        rejection_reason: params.rejectionReason,
-      },
-    });
-
-    return {
-      status: updated.status as PayoutStatusValue,
-      sellerId: updated.seller_id,
-      rejectionReason: updated.rejection_reason,
-    };
   }
 }

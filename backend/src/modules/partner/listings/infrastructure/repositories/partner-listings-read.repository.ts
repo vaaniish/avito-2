@@ -87,6 +87,10 @@ export class PartnerListingsReadRepository
           defects: listing.tech_defects,
           included: listing.tech_included,
         }),
+        sellerWarrantyEnabled: listing.seller_warranty_enabled,
+        sellerWarrantyDays: listing.seller_warranty_days,
+        hasMultipleStock: listing.has_multiple_stock,
+        availableQuantity: listing.available_quantity,
         attributes: listing.attributes.map((attribute) => ({
           key: attribute.key,
           value: attribute.value,

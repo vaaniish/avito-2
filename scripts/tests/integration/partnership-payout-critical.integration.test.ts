@@ -119,7 +119,7 @@ async function resetApplicant(email: string): Promise<number> {
 }
 
 test(
-  "integration: partnership approval and payout verification persist access, audit and notifications",
+  "integration: partnership approval and payout auto-verification persist access and audit",
   { skip: !safeDb },
   async () => {
     const applicantEmail = "buyer2@ecomm.local";
@@ -208,25 +208,29 @@ test(
         legalType: "COMPANY",
         legalName: "Integration Partner LLC",
         taxId: "7707083893",
-        bankAccount: "40702810900000012345",
+        bankAccount: "40702810900000000000",
         bankBic: "044525225",
         correspondentAccount: "30101810400000000225",
-        bankName: "АО Тест Банк",
+        bankName: "ПАО Сбербанк",
         recipientName: "Integration Partner LLC",
       },
     });
     assert.equal(typeof payoutSubmit.profile?.id, "string");
     const payoutProfileId = payoutSubmit.profile?.id as string;
+    assert.equal(payoutSubmit.profile?.status, "verified");
 
-    await apiRequest({
-      method: "PATCH",
-      path: `/api/admin/payout-profiles/${encodeURIComponent(payoutProfileId)}`,
-      token: admin.token,
-      expected: 200,
-      body: {
-        status: "verified",
+    const removedPatchResponse = await fetch(
+      `${baseUrl}/api/admin/payout-profiles/${encodeURIComponent(payoutProfileId)}`,
+      {
+        method: "PATCH",
+        headers: {
+          authorization: `Bearer ${admin.token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ status: "verified" }),
       },
-    });
+    );
+    assert.equal(removedPatchResponse.status, 404);
 
     const sellerView = await apiRequest({
       method: "GET",
@@ -249,14 +253,17 @@ test(
 
     const payoutAudit = await prisma.auditLog.findFirst({
       where: {
-        actor_user_id: admin.userId,
-        action: "seller.payout_profile.status_changed",
-        entity_public_id: payoutProfileId,
+        actor_user_id: applicant.userId,
+        action: "seller.payout_profile.updated",
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
       select: { details: true },
     });
     assert.ok(payoutAudit, "payout audit row missing");
+    assert.deepEqual(payoutAudit.details, {
+      payoutProfileId,
+      status: "VERIFIED",
+    });
 
     const notifications = await prisma.notification.findMany({
       where: { user_id: applicantId },
@@ -273,16 +280,10 @@ test(
       ),
       "partnership approval notification missing",
     );
-    assert.ok(
-      notifications.some(
-        (item) => item.target_url === "/profile?tab=partner" && /платёжный профиль подтверждён/i.test(item.message),
-      ),
-      "payout verification notification missing",
-    );
 
     const afterNotifications = await prisma.notification.count({
       where: { user_id: applicantId },
     });
-    assert.ok(afterNotifications >= beforeNotifications + 2);
+    assert.ok(afterNotifications >= beforeNotifications + 1);
   },
 );

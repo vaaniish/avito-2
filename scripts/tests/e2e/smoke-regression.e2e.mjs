@@ -995,7 +995,6 @@ async function main() {
       body: {
         items: [{ listingId: activeListing.id, quantity: 1 }],
         deliveryType: "pickup",
-        customAddress: "Самовывоз",
         paymentMethod: "card",
       },
       expected: [201, 502],

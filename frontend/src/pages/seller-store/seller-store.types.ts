@@ -8,6 +8,7 @@ export type SellerProfile = {
   city: string;
   isVerified: boolean;
   responseTime: string | null;
+  supportEmail?: string | null;
   rating: number;
   reviewsCount: number;
   listingsCount: number;

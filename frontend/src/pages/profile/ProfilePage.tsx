@@ -41,6 +41,8 @@ export function ProfilePage({
 
   const {
     addresses,
+    cancelOrder,
+    cancelOrderId,
     isLoading,
     orders,
     profile,
@@ -174,6 +176,7 @@ export function ProfilePage({
     <ProfileSettingsTab
       profileForm={profileForm}
       saveLoading={saveLoading}
+      showWorkEmail={userType === "partner"}
       onFieldChange={(field, value) => {
         setProfileForm((prev) => ({ ...prev, [field]: value }));
       }}
@@ -218,10 +221,14 @@ export function ProfilePage({
   const renderOrdersTab = () => (
     <ProfileOrdersTab
       orders={orders}
+      cancelOrderId={cancelOrderId}
       reviewModalOpen={reviewModalOpen}
       itemToReview={itemToReview}
       reviewForm={reviewForm}
       getOrderStatusMeta={getOrderStatusMeta}
+      onCancelOrder={(order) => {
+        void cancelOrder(order.publicId);
+      }}
       onOpenListing={handleOpenListing}
       onStartReview={(item) => {
         startReview(item);

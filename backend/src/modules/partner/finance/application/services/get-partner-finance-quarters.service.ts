@@ -125,7 +125,10 @@ export class GetPartnerFinanceQuartersService {
         resetsAt:
           getQuarterWindowByKey(selectedQuarterKey)?.resetsAt.toISOString() ??
           getQuarterWindow().resetsAt.toISOString(),
-        payoutProfileStatus: payoutProfile?.status.toLowerCase() ?? "missing",
+        payoutProfileStatus:
+          payoutProfile?.status === "PENDING"
+            ? "rejected"
+            : payoutProfile?.status.toLowerCase() ?? "missing",
         payoutProfileUpdatedAt: payoutProfile?.updated_at ?? null,
       },
       quarterSummaries: mergedQuarterSummaries.map((summary) => ({

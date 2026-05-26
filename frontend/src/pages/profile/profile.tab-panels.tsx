@@ -10,12 +10,14 @@ import type {
 
 type ProfileOrdersTabProps = {
   orders: Order[];
+  cancelOrderId: string | null;
   reviewModalOpen: boolean;
   itemToReview: OrderItem | null;
   reviewForm: { rating: number; comment: string };
   getOrderStatusMeta: (
     status: Order["status"],
   ) => { label: string; className: string };
+  onCancelOrder: (order: Order) => void;
   onOpenListing: (listingPublicId: string) => void;
   onStartReview: (item: OrderItem) => void;
   onReviewModalClose: () => void;
@@ -69,12 +71,26 @@ function buildBuyerTrackingLink(order: Order): string | null {
   return null;
 }
 
+function hasSellerSupportContacts(order: Order): boolean {
+  return Boolean(
+    order.sellerSupportPhone?.trim() ||
+      order.sellerSupportEmail?.trim() ||
+      order.sellerWorkingHours?.trim(),
+  );
+}
+
+function shouldShowSellerSupport(order: Order): boolean {
+  return (order.status === "shipped" || order.status === "completed") && hasSellerSupportContacts(order);
+}
+
 export function ProfileOrdersTab({
   orders,
+  cancelOrderId,
   reviewModalOpen,
   itemToReview,
   reviewForm,
   getOrderStatusMeta,
+  onCancelOrder,
   onOpenListing,
   onStartReview,
   onReviewModalClose,
@@ -121,6 +137,16 @@ export function ProfileOrdersTab({
               >
                 {getOrderStatusMeta(order.status).label}
               </span>
+              {order.canCancel ? (
+                <button
+                  type="button"
+                  onClick={() => onCancelOrder(order)}
+                  disabled={cancelOrderId === order.publicId}
+                  className="mt-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {cancelOrderId === order.publicId ? "Отменяем..." : "Отменить заказ"}
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="mt-4 space-y-3">
@@ -192,6 +218,28 @@ export function ProfileOrdersTab({
               </div>
             )}
           </div>
+          {shouldShowSellerSupport(order) ? (
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+              <div className="font-medium text-slate-900">
+                По вопросам возврата и гарантии обращайтесь напрямую к продавцу
+              </div>
+              {order.sellerSupportPhone ? (
+                <div className="mt-2">
+                  Телефон: <span className="font-medium">{order.sellerSupportPhone}</span>
+                </div>
+              ) : null}
+              {order.sellerSupportEmail ? (
+                <div className="mt-1">
+                  Email: <span className="font-medium">{order.sellerSupportEmail}</span>
+                </div>
+              ) : null}
+              {order.sellerWorkingHours ? (
+                <div className="mt-1">
+                  Часы работы: <span className="font-medium">{order.sellerWorkingHours}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ))}
       {orders.length === 0 && (
@@ -357,7 +405,7 @@ export function ProfilePartnershipTab({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold md:text-xl">Заявка на партнерство</h3>
       <p className="text-xs text-gray-500">
-        Отбор только для ИП, юрлиц и брендов из электроники, бытовой техники и профильного ремонта. Частных продавцов в MVP не подключаем.
+        Отбор только для ИП и юрлиц из электроники, бытовой техники и профильного ремонта. Частных продавцов в MVP не подключаем.
       </p>
       <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600 md:grid-cols-3">
         <div>
@@ -381,12 +429,11 @@ export function ProfilePartnershipTab({
         >
           <option value="company">Компания</option>
           <option value="ip">ИП</option>
-          <option value="brand">Бренд</option>
         </select>
         <input
           value={partnershipForm.name}
           onChange={(event) => onFieldChange("name", event.target.value)}
-          placeholder="Название компании / ИП"
+          placeholder="Название компании или ФИО ИП"
           className="field-control"
         />
       </div>

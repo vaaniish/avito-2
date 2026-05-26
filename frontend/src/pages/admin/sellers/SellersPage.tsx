@@ -82,7 +82,7 @@ export function SellersPage() {
         <p className="dashboard-subtitle">Проверка юрлица, представителя, качества и условий продавца</p>
       </div>
 
-      <div className="dashboard-grid-stats">
+      <div className="dashboard-grid-stats dashboard-grid-stats--5">
         <div className="dashboard-stat">
           <div className="dashboard-stat__label">Всего заявок</div>
           <div className="dashboard-stat__value">{stats.total}</div>

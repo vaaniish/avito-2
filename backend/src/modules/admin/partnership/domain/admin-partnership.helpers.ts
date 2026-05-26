@@ -11,7 +11,6 @@ import type {
   PartnershipRequestModerationRecord,
   PartnershipStatusValue,
   PayoutProfileRecord,
-  PayoutStatusValue,
   ReviewActionClient,
 } from "./admin-partnership.types";
 
@@ -62,13 +61,6 @@ export function parsePartnershipStatus(
   status: unknown,
 ): PartnershipStatusValue | null {
   return parseOnboardingPartnershipStatus(status) as PartnershipStatusValue | null;
-}
-
-export function parsePayoutStatus(status: unknown): PayoutStatusValue | null {
-  if (status === "verified") return "VERIFIED";
-  if (status === "rejected") return "REJECTED";
-  if (status === "pending") return "PENDING";
-  return null;
 }
 
 export function splitEvidenceFiles(value: string | null): string[] {

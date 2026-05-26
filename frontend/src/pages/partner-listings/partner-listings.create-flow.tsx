@@ -626,17 +626,77 @@ export function PartnerListingCreateFlow({
                 <label className="flex items-center gap-3 text-sm font-semibold text-gray-900">
                   <input
                     type="checkbox"
+                    checked={form.sellerWarrantyEnabled}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        sellerWarrantyEnabled: event.target.checked,
+                        sellerWarrantyDays: event.target.checked
+                          ? prev.sellerWarrantyDays
+                          : "",
+                      }))
+                    }
+                    className="h-5 w-5 rounded border-gray-300"
+                  />
+                  Даю гарантию продавца на этот товар
+                </label>
+                {form.sellerWarrantyEnabled ? (
+                  <label className="block space-y-2">
+                    <span className="text-sm font-bold text-gray-950">
+                      Срок гарантии, дней
+                    </span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={form.sellerWarrantyDays}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          sellerWarrantyDays: event.target.value,
+                        }))
+                      }
+                      className="h-14 w-full rounded-xl border-0 bg-gray-100 px-4 text-base outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Например, 30"
+                    />
+                  </label>
+                ) : null}
+                <label className="flex items-center gap-3 text-sm font-semibold text-gray-900">
+                  <input
+                    type="checkbox"
                     checked={form.hasMultipleStock}
                     onChange={(event) =>
                       setForm((prev) => ({
                         ...prev,
                         hasMultipleStock: event.target.checked,
+                        availableQuantity: event.target.checked
+                          ? prev.availableQuantity
+                          : "",
                       }))
                     }
                     className="h-5 w-5 rounded border-gray-300"
                   />
                   Несколько штук в наличии
                 </label>
+                {form.hasMultipleStock ? (
+                  <label className="block space-y-2">
+                    <span className="text-sm font-bold text-gray-950">
+                      Сколько единиц готовы продать
+                    </span>
+                    <input
+                      type="number"
+                      min={2}
+                      value={form.availableQuantity}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          availableQuantity: event.target.value,
+                        }))
+                      }
+                      className="h-14 w-full rounded-xl border-0 bg-gray-100 px-4 text-base outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Например, 5"
+                    />
+                  </label>
+                ) : null}
               </section>
 
               <div className="listing-create-modal__submit-row">

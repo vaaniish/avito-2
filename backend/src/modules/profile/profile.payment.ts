@@ -10,6 +10,12 @@ export type YooKassaPayment = {
   };
 };
 
+export type YooKassaRefund = {
+  id: string;
+  status: string;
+  payment_id?: string;
+};
+
 type YooKassaConfig = {
   shopId: string;
   secretKey: string;
@@ -269,4 +275,78 @@ export async function fetchYooKassaPaymentById(
   }
 
   return payload as YooKassaPayment;
+}
+
+export async function createYooKassaRefund(params: {
+  paymentId: string;
+  amountRub: number;
+  description: string;
+  idempotenceKey?: string;
+}): Promise<YooKassaRefund> {
+  const paymentId = params.paymentId.trim();
+  if (!paymentId) {
+    throw new Error("YooKassa payment id is required for refund");
+  }
+
+  const isProduction = process.env.NODE_ENV === "production";
+  const shopId = process.env.YOOKASSA_SHOP_ID?.trim();
+  const secretKey = process.env.YOOKASSA_SECRET_KEY?.trim();
+  const shouldUseLocalStub =
+    !isProduction && isPlaceholderYooKassaConfig(shopId, secretKey);
+
+  if (!shopId || !secretKey || shouldUseLocalStub) {
+    return {
+      id: `refund_local_${randomUUID()}`,
+      status: "succeeded",
+      payment_id: paymentId,
+    };
+  }
+
+  const config = getYooKassaConfig();
+  const authToken = Buffer.from(
+    `${config.shopId}:${config.secretKey}`,
+    "utf8",
+  ).toString("base64");
+
+  const response = await fetch(`${config.apiUrl}/refunds`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${authToken}`,
+      "Content-Type": "application/json",
+      "Idempotence-Key": params.idempotenceKey?.trim() || randomUUID(),
+    },
+    body: JSON.stringify({
+      payment_id: paymentId,
+      amount: {
+        value: params.amountRub.toFixed(2),
+        currency: "RUB",
+      },
+      description: params.description,
+    }),
+  });
+
+  const rawBody = await response.text();
+  const payload = rawBody ? (JSON.parse(rawBody) as unknown) : {};
+
+  if (!response.ok) {
+    const message =
+      typeof payload === "object" &&
+      payload !== null &&
+      "description" in payload &&
+      typeof (payload as { description?: unknown }).description === "string"
+        ? (payload as { description: string }).description
+        : `YooKassa refund request failed with status ${response.status}`;
+    throw new Error(message);
+  }
+
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    typeof (payload as { id?: unknown }).id !== "string" ||
+    typeof (payload as { status?: unknown }).status !== "string"
+  ) {
+    throw new Error("Invalid YooKassa refund response");
+  }
+
+  return payload as YooKassaRefund;
 }

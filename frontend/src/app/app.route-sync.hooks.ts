@@ -107,6 +107,7 @@ export function useAppRouteSync(params: {
         productBackAdminPage === "listings" ? "admin-listings" : null,
     });
     const currentPath = `${window.location.pathname}${window.location.search}`;
+
     if (targetPath === currentPath) {
       lastSyncedPathRef.current = currentPath;
       return;

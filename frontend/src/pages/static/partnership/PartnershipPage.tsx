@@ -7,8 +7,7 @@ type PartnershipPageProps = {
   onBack: () => void;
 };
 
-type LegalTypeValue = "COMPANY" | "IP" | "BRAND";
-type CategoryValue = "electronics" | "home_appliances";
+type LegalTypeValue = "COMPANY" | "IP";
 
 type PartnershipPolicy = {
   id: string;
@@ -30,6 +29,27 @@ type LegalLookupResult = {
   managementPost: string | null;
 };
 
+type CatalogCategoryOption = {
+  id: string;
+  name: string;
+};
+
+type WeekdayKey =
+  | "mon"
+  | "tue"
+  | "wed"
+  | "thu"
+  | "fri"
+  | "sat"
+  | "sun";
+
+type ServiceDaySchedule = {
+  day: WeekdayKey;
+  enabled: boolean;
+  openHour: string;
+  closeHour: string;
+};
+
 type OnboardingForm = {
   legalType: LegalTypeValue;
   inn: string;
@@ -38,33 +58,46 @@ type OnboardingForm = {
   representativeEmail: string;
   authorityType: "director" | "owner" | "employee";
   authorityDocument: string;
-  onlinePresenceUrls: string;
-  businessDescription: string;
-  categories: CategoryValue[];
-  region: string;
-  city: string;
-  returnAddress: string;
   supportPhone: string;
   supportEmail: string;
-  serviceHours: string;
+  serviceSchedule: ServiceDaySchedule[];
+  onlinePresenceUrls: string;
+  businessDescription: string;
+  categories: string[];
   monthlyCapacity: string;
-  productSourceType: string;
-  supplierDocuments: string;
-  warrantyDays: string;
-  qualityCharterAccepted: boolean;
 };
 
 type FormErrors = Partial<Record<keyof OnboardingForm | "legalLookup" | "policy", string>>;
 
-const STEP_TITLES = ["Бизнес", "Контакты", "Продажи", "Качество"];
+const STEP_TITLES = ["Бизнес", "Контакты", "Продажи"];
+const FIXED_WARRANTY_DAYS = 90;
 const RETURN_DAYS = 14;
-const PARTNERSHIP_DOCUMENTS_EMAIL = "partners@ecomm.ru";
-const STEP_FIELDS: Array<Array<keyof OnboardingForm | "legalLookup" | "policy">> = [
-  ["legalType", "inn", "legalLookup", "onlinePresenceUrls", "region", "city"],
-  ["representativeFullName", "authorityType", "representativePhone", "representativeEmail", "authorityDocument"],
-  ["businessDescription", "categories", "returnAddress", "supportPhone", "supportEmail", "serviceHours", "monthlyCapacity"],
-  ["productSourceType", "supplierDocuments", "warrantyDays", "qualityCharterAccepted", "policy"],
+const WEEKDAY_OPTIONS: Array<{ key: WeekdayKey; short: string; label: string }> = [
+  { key: "mon", short: "Пн", label: "Понедельник" },
+  { key: "tue", short: "Вт", label: "Вторник" },
+  { key: "wed", short: "Ср", label: "Среда" },
+  { key: "thu", short: "Чт", label: "Четверг" },
+  { key: "fri", short: "Пт", label: "Пятница" },
+  { key: "sat", short: "Сб", label: "Суббота" },
+  { key: "sun", short: "Вс", label: "Воскресенье" },
 ];
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) =>
+  `${String(index).padStart(2, "0")}:00`,
+);
+const STEP_FIELDS: Array<Array<keyof OnboardingForm | "legalLookup" | "policy">> = [
+  ["legalType", "inn", "legalLookup", "onlinePresenceUrls"],
+  ["representativeFullName", "authorityType", "representativePhone", "representativeEmail", "authorityDocument", "supportPhone", "supportEmail", "serviceSchedule"],
+  ["businessDescription", "categories", "monthlyCapacity", "policy"],
+];
+
+function createDefaultServiceSchedule(): ServiceDaySchedule[] {
+  return WEEKDAY_OPTIONS.map((day, index) => ({
+    day: day.key,
+    enabled: index < 5,
+    openHour: "10:00",
+    closeHour: "19:00",
+  }));
+}
 
 function createEmptyForm(): OnboardingForm {
   return {
@@ -75,20 +108,13 @@ function createEmptyForm(): OnboardingForm {
     representativeEmail: "",
     authorityType: "director",
     authorityDocument: "",
+    supportPhone: "",
+    supportEmail: "",
+    serviceSchedule: createDefaultServiceSchedule(),
     onlinePresenceUrls: "",
     businessDescription: "",
     categories: [],
-    region: "",
-    city: "",
-    returnAddress: "",
-    supportPhone: "",
-    supportEmail: "",
-    serviceHours: "Пн-Пт 10:00-19:00",
-    monthlyCapacity: "20",
-    productSourceType: "",
-    supplierDocuments: "",
-    warrantyDays: "90",
-    qualityCharterAccepted: false,
+    monthlyCapacity: "",
   };
 }
 
@@ -180,6 +206,104 @@ function validateInnForLegalType(innValue: string, legalType: LegalTypeValue): s
   return null;
 }
 
+function weekdayOrderIndex(day: WeekdayKey): number {
+  return WEEKDAY_OPTIONS.findIndex((item) => item.key === day);
+}
+
+function formatServiceDays(days: WeekdayKey[]): string {
+  const sorted = [...days].sort(
+    (left, right) => weekdayOrderIndex(left) - weekdayOrderIndex(right),
+  );
+  const labels = sorted.map(
+    (day) => WEEKDAY_OPTIONS.find((item) => item.key === day)?.short ?? day,
+  );
+  const isWeekdays =
+    sorted.length === 5 &&
+    sorted.every((day, index) => day === WEEKDAY_OPTIONS[index]?.key);
+  const isFullWeek =
+    sorted.length === 7 &&
+    sorted.every((day, index) => day === WEEKDAY_OPTIONS[index]?.key);
+  if (isWeekdays) return "Пн-Пт";
+  if (isFullWeek) return "Пн-Вс";
+  return labels.join(", ");
+}
+
+function buildServiceHours(schedule: ServiceDaySchedule[]): string {
+  const sorted = [...schedule].sort(
+    (left, right) => weekdayOrderIndex(left.day) - weekdayOrderIndex(right.day),
+  );
+
+  const enabledDays = sorted.filter(
+    (item) => item.enabled && item.openHour && item.closeHour,
+  );
+  const disabledDays = sorted.filter((item) => !item.enabled);
+
+  if (enabledDays.length === 0 && disabledDays.length === 0) return "";
+
+  const workingGroups: Array<{ days: WeekdayKey[]; openHour: string; closeHour: string }> = [];
+  for (const item of enabledDays) {
+    const previous = workingGroups[workingGroups.length - 1];
+    const previousLastDay = previous?.days[previous.days.length - 1];
+    const isNextDay =
+      typeof previousLastDay !== "undefined" &&
+      weekdayOrderIndex(item.day) === weekdayOrderIndex(previousLastDay) + 1;
+
+    if (
+      previous &&
+      isNextDay &&
+      previous.openHour === item.openHour &&
+      previous.closeHour === item.closeHour
+    ) {
+      previous.days.push(item.day);
+      continue;
+    }
+
+    workingGroups.push({
+      days: [item.day],
+      openHour: item.openHour,
+      closeHour: item.closeHour,
+    });
+  }
+
+  const offGroups: WeekdayKey[][] = [];
+  for (const item of disabledDays) {
+    const previous = offGroups[offGroups.length - 1];
+    const previousLastDay = previous?.[previous.length - 1];
+    const isNextDay =
+      typeof previousLastDay !== "undefined" &&
+      weekdayOrderIndex(item.day) === weekdayOrderIndex(previousLastDay) + 1;
+
+    if (previous && isNextDay) {
+      previous.push(item.day);
+      continue;
+    }
+
+    offGroups.push([item.day]);
+  }
+
+  return [
+    ...workingGroups.map(
+      (group) =>
+        `${formatServiceDays(group.days)} ${group.openHour}-${group.closeHour}`,
+    ),
+    ...offGroups.map((days) => `${formatServiceDays(days)} выходной`),
+  ].join("; ");
+}
+
+function deriveCityFromAddress(address: string, region: string): string {
+  const normalized = address.replace(/\s+/g, " ").trim();
+  const patterns = [
+    /(?:^|,\s*)(?:г\.?|город)\s*([А-ЯA-ZЁ][^,]+)/iu,
+    /(?:^|,\s*)(?:пос\.?|поселок|пгт\.?)\s*([А-ЯA-ZЁ][^,]+)/iu,
+    /(?:^|,\s*)(?:д\.?|деревня)\s*([А-ЯA-ZЁ][^,]+)/iu,
+  ];
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+  return region;
+}
+
 function validateForm(
   form: OnboardingForm,
   policyAccepted: boolean,
@@ -188,7 +312,6 @@ function validateForm(
   const errors: FormErrors = {};
   const onlineUrls = splitList(form.onlinePresenceUrls);
   const monthlyCapacity = Number(form.monthlyCapacity);
-  const warrantyDays = Number(form.warrantyDays);
 
   if (!form.legalType) errors.legalType = "Выберите тип продавца.";
   const innError = validateInnForLegalType(form.inn, form.legalType);
@@ -203,8 +326,6 @@ function validateForm(
   } else if (onlineUrls.some((url) => !isValidHttpUrl(url))) {
     errors.onlinePresenceUrls = "Ссылки должны начинаться с http:// или https://.";
   }
-  if (form.region.trim().length < 2) errors.region = "Укажите регион.";
-  if (form.city.trim().length < 2) errors.city = "Укажите город.";
 
   if (form.representativeFullName.trim().split(/\s+/).length < 2) {
     errors.representativeFullName = "Укажите минимум имя и фамилию представителя.";
@@ -218,23 +339,34 @@ function validateForm(
   }
 
   if (form.businessDescription.trim().length < 20) {
-    errors.businessDescription = "Опишите партнера чуть подробнее: минимум 20 символов.";
+    errors.businessDescription =
+      "Коротко опишите, что вы продаёте и какое происхождение у товара.";
   }
-  if (form.categories.length === 0) errors.categories = "Выберите электронику и/или бытовую технику.";
-  if (form.returnAddress.trim().length < 10) errors.returnAddress = "Укажите понятный адрес для возвратов.";
+  if (form.categories.length === 0) errors.categories = "Выберите хотя бы одну категорию каталога.";
   if (!isValidRuPhone(form.supportPhone)) {
-    errors.supportPhone = "Укажите телефон в формате +7 (999) 123-45-67.";
+    errors.supportPhone = "Укажите рабочий телефон компании/ИП в формате +7 (999) 123-45-67.";
   }
-  if (!isValidEmail(form.supportEmail)) errors.supportEmail = "Укажите корректный email поддержки.";
-  if (form.serviceHours.trim().length < 3) errors.serviceHours = "Укажите часы поддержки.";
+  if (!isValidEmail(form.supportEmail)) errors.supportEmail = "Укажите корректный рабочий email компании/ИП.";
+  const enabledScheduleDays = form.serviceSchedule.filter((item) => item.enabled);
+  if (enabledScheduleDays.length === 0) {
+    errors.serviceSchedule = "Выберите хотя бы один рабочий день.";
+  } else {
+    for (const day of enabledScheduleDays) {
+      if (!day.openHour || !day.closeHour) {
+        errors.serviceSchedule = "Для каждого рабочего дня укажите время начала и окончания.";
+        break;
+      }
+      if (HOUR_OPTIONS.indexOf(day.openHour) >= HOUR_OPTIONS.indexOf(day.closeHour)) {
+        errors.serviceSchedule =
+          "Во всех рабочих днях время окончания должно быть позже времени начала.";
+        break;
+      }
+    }
+  }
   if (!Number.isFinite(monthlyCapacity) || monthlyCapacity < 1) {
     errors.monthlyCapacity = "Укажите количество заказов в месяц числом больше 0.";
   }
 
-  if (form.productSourceType.trim().length < 10) errors.productSourceType = "Опишите, откуда товар.";
-  if (form.supplierDocuments.trim().length < 5) errors.supplierDocuments = "Перечислите документы на товар.";
-  if (!Number.isFinite(warrantyDays) || warrantyDays < 90) errors.warrantyDays = "Гарантия должна быть минимум 90 дней.";
-  if (!form.qualityCharterAccepted) errors.qualityCharterAccepted = "Примите quality charter.";
   if (!policyAccepted) errors.policy = "Примите правила партнерства.";
 
   return errors;
@@ -270,6 +402,9 @@ function HelpNote({ children }: { children: React.ReactNode }) {
 
 export function PartnershipPage({ onBack }: PartnershipPageProps) {
   const [formData, setFormData] = useState<OnboardingForm>(createEmptyForm);
+  const [catalogCategories, setCatalogCategories] = useState<CatalogCategoryOption[]>([]);
+  const [catalogCategoriesLoading, setCatalogCategoriesLoading] = useState(false);
+  const [catalogCategoriesError, setCatalogCategoriesError] = useState<string | null>(null);
   const [legalLookup, setLegalLookup] = useState<LegalLookupResult | null>(null);
   const [legalLookupLoading, setLegalLookupLoading] = useState(false);
   const [step, setStep] = useState(0);
@@ -279,7 +414,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
   const [formAlert, setFormAlert] = useState<string | null>(null);
   const [policy, setPolicy] = useState<PartnershipPolicy>({
     id: "",
-    title: "правила партнерства и безопасной сделки",
+    title: "Правила использования",
     version: "",
     contentUrl: "/terms",
   });
@@ -302,10 +437,40 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
     };
   }, []);
 
-  const policyTitle = useMemo(
-    () => (policy.version ? `${policy.title} (v${policy.version})` : policy.title),
-    [policy.title, policy.version],
-  );
+  const loadCatalogCategories = async () => {
+    setCatalogCategoriesLoading(true);
+    setCatalogCategoriesError(null);
+    try {
+      const response = await apiGet<Array<{ id: string; name: string }>>(
+        "/catalog/categories?type=products",
+      );
+      const nextCategories = response
+        .map((item) => ({
+          id: String(item.id ?? ""),
+          name: String(item.name ?? "").trim(),
+        }))
+        .filter((item) => item.id && item.name);
+      setCatalogCategories(nextCategories);
+      setFormData((prev) => ({
+        ...prev,
+        categories: prev.categories.filter((selected) =>
+          nextCategories.some((category) => category.name === selected),
+        ),
+      }));
+    } catch {
+      setCatalogCategoriesError(
+        "Не удалось загрузить актуальные категории каталога. Попробуйте ещё раз.",
+      );
+    } finally {
+      setCatalogCategoriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadCatalogCategories();
+  }, []);
+
+  const policyTitle = useMemo(() => "Правила использования", []);
 
   const updateField = <K extends keyof OnboardingForm>(
     field: K,
@@ -327,7 +492,7 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
     });
   };
 
-  const toggleCategory = (category: CategoryValue) => {
+  const toggleCategory = (category: string) => {
     setFormAlert(null);
     setFormData((prev) => ({
       ...prev,
@@ -339,6 +504,44 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
       if (!prev.categories) return prev;
       const next = { ...prev };
       delete next.categories;
+      return next;
+    });
+  };
+
+  const toggleWorkingDay = (day: WeekdayKey) => {
+    setFormAlert(null);
+    setFormData((prev) => {
+      return {
+        ...prev,
+        serviceSchedule: prev.serviceSchedule.map((item) =>
+          item.day === day ? { ...item, enabled: !item.enabled } : item,
+        ),
+      };
+    });
+    setErrors((prev) => {
+      if (!prev.serviceSchedule) return prev;
+      const next = { ...prev };
+      delete next.serviceSchedule;
+      return next;
+    });
+  };
+
+  const updateDayScheduleField = (
+    day: WeekdayKey,
+    field: "openHour" | "closeHour",
+    value: string,
+  ) => {
+    setFormAlert(null);
+    setFormData((prev) => ({
+      ...prev,
+      serviceSchedule: prev.serviceSchedule.map((item) =>
+        item.day === day ? { ...item, [field]: value } : item,
+      ),
+    }));
+    setErrors((prev) => {
+      if (!prev.serviceSchedule) return prev;
+      const next = { ...prev };
+      delete next.serviceSchedule;
       return next;
     });
   };
@@ -404,18 +607,12 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
     }
   };
 
-  const copyDocumentsEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(PARTNERSHIP_DOCUMENTS_EMAIL);
-      notifySuccess("Email для документов скопирован.");
-    } catch {
-      notifyInfo(`Email для документов: ${PARTNERSHIP_DOCUMENTS_EMAIL}`);
-    }
-  };
-
   const buildPayload = () => {
     const onlinePresenceUrls = splitList(formData.onlinePresenceUrls);
     const primaryOnlineUrl = onlinePresenceUrls[0] ?? "";
+    const derivedRegion = legalLookup?.taxRegion?.trim() ?? "";
+    const derivedAddress = legalLookup?.registeredAddress?.trim() ?? "";
+    const derivedCity = deriveCityFromAddress(derivedAddress, derivedRegion);
     const representativeRole =
       formData.authorityType === "director"
         ? "Директор / руководитель"
@@ -439,32 +636,32 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
       authorityType: formData.authorityType,
       authorityDocument: formData.authorityDocument,
       websiteUrl: primaryOnlineUrl,
-      businessEmail: formData.representativeEmail,
+      businessEmail: formData.supportEmail,
       domainOwnershipMethod: "manual_review",
       publicProfileUrls: onlinePresenceUrls,
       businessRole: formData.businessDescription,
       categories: formData.categories,
       fulfillmentModel: "platform_pvz",
       country: "Россия",
-      region: formData.region,
-      city: formData.city,
-      warehouseAddress: formData.returnAddress,
-      serviceCenterAddress: formData.returnAddress,
+      region: derivedRegion,
+      city: derivedCity,
+      warehouseAddress: derivedAddress,
+      serviceCenterAddress: derivedAddress,
       deliveryCoverageRegions: ["Россия"],
       pickupAvailable: false,
-      returnAddress: formData.returnAddress,
+      returnAddress: derivedAddress,
       supportPhone: formData.supportPhone,
       supportEmail: formData.supportEmail,
-      serviceHours: formData.serviceHours,
+      serviceHours: buildServiceHours(formData.serviceSchedule),
       monthlyCapacity: Number(formData.monthlyCapacity),
-      productSourceType: formData.productSourceType,
-      supplierDocuments: formData.supplierDocuments,
+      productSourceType: formData.businessDescription,
+      supplierDocuments: "not_required_for_initial_onboarding",
       diagnosticProcess: "Проверяется по внутреннему регламенту продавца перед публикацией.",
       gradingStandard: "Используется шкала площадки: new_open_box, refurbished_a, refurbished_b, refurbished_c.",
-      warrantyDays: Number(formData.warrantyDays),
+      warrantyDays: FIXED_WARRANTY_DAYS,
       returnDays: RETURN_DAYS,
       serialCheckPolicy: "Продавец обязуется не публиковать заблокированные, краденые или неподтвержденные устройства.",
-      qualityCharterAccepted: formData.qualityCharterAccepted,
+      qualityCharterAccepted: true,
       legalLookupVerified: legalLookup?.registrationStatus === "active" && legalLookup.inn === onlyDigits(formData.inn),
       emailVerified: false,
       domainVerified: false,
@@ -530,12 +727,12 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
         <div className="content-page mb-8 text-center sm:mb-10">
           <h1 className="mb-4 text-3xl text-gray-900 sm:text-5xl">Партнерская проверка</h1>
           <p className="text-base text-gray-600 sm:text-xl">
-            Минимум ручной бюрократии: ИНН, представитель, онлайн-след бизнеса и правила качества.
+            Минимум ручной бюрократии: ИНН, представитель, онлайн-след бизнеса и правила площадки.
           </p>
         </div>
 
         <form onSubmit={(event) => void handleSubmit(event)} className="content-page rounded-2xl border border-gray-200 bg-gray-50 p-6 sm:p-10">
-          <div className="mb-6 grid grid-cols-2 gap-2 md:grid-cols-4">
+          <div className="mb-6 grid grid-cols-3 gap-2">
             {STEP_TITLES.map((title, index) => (
               <button
                 key={title}
@@ -557,9 +754,6 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
 
           {step === 0 && (
             <div className="space-y-4">
-              <HelpNote>
-                Продавец вводит ИНН. ОГРН/ОГРНИП, КПП, юридическое название, адрес и статус регистрации должны подтягиваться системой из реестра при реальной интеграции с ФНС/DaData.
-              </HelpNote>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="h-full">
                   <select
@@ -570,7 +764,6 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                   >
                     <option value="COMPANY">Юрлицо</option>
                     <option value="IP">ИП</option>
-                    <option value="BRAND">Бренд / официальный реселлер</option>
                   </select>
                   <FieldError message={errors.legalType} />
                 </div>
@@ -629,14 +822,6 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                 />
                 <FieldError message={errors.onlinePresenceUrls} />
               </div>
-              <div>
-                <input value={formData.region} onChange={(event) => updateField("region", event.target.value)} placeholder="Регион работы, например Москва" className={fieldClass("region")} />
-                <FieldError message={errors.region} />
-              </div>
-              <div>
-                <input value={formData.city} onChange={(event) => updateField("city", event.target.value)} placeholder="Город, например Москва" className={fieldClass("city")} />
-                <FieldError message={errors.city} />
-              </div>
             </div>
           )}
 
@@ -683,47 +868,10 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                   <FieldError message={errors.representativeEmail} />
                 </div>
               </div>
-              {formData.authorityType === "employee" && (
-                <>
-                  <HelpNote>
-                    Доверенность обычно выдаёт руководитель компании. На MVP можно указать номер документа или ссылку на PDF в облаке, например Яндекс Диск/Google Drive с доступом по ссылке. Позже это поле лучше заменить настоящей загрузкой файла.
-                  </HelpNote>
-                  <input value={formData.authorityDocument} onChange={(event) => updateField("authorityDocument", event.target.value)} placeholder="Номер доверенности или ссылка на PDF" className={fieldClass("authorityDocument")} />
-                  <FieldError message={errors.authorityDocument} />
-                </>
-              )}
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-4">
-              <textarea
-                value={formData.businessDescription}
-                onChange={(event) => updateField("businessDescription", event.target.value)}
-                rows={3}
-                placeholder="Кратко опишите, чем занимается партнер. Например: восстанавливаем смартфоны и ноутбуки, продаем уцененную бытовую технику после диагностики."
-                className={fieldClass("businessDescription")}
-              />
-              <FieldError message={errors.businessDescription} />
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className={`flex items-center gap-2 rounded-lg border bg-white p-3 text-sm ${errors.categories ? "border-red-300" : "border-gray-200"}`}>
-                  <input type="checkbox" checked={formData.categories.includes("electronics")} onChange={() => toggleCategory("electronics")} />
-                  Электроника
-                </label>
-                <label className={`flex items-center gap-2 rounded-lg border bg-white p-3 text-sm ${errors.categories ? "border-red-300" : "border-gray-200"}`}>
-                  <input type="checkbox" checked={formData.categories.includes("home_appliances")} onChange={() => toggleCategory("home_appliances")} />
-                  Бытовая техника
-                </label>
-              </div>
-              <FieldError message={errors.categories} />
               <HelpNote>
-                Доставка в MVP считается политикой площадки: продавец подтверждает готовность отправлять заказы через подключенный ПВЗ-сценарий по России. Самовывоз и карта ПВЗ лучше включать позже, когда будет реальная интеграция с платным API доставки.
+                Ниже укажите рабочие контакты компании или ИП. Для ИП можно использовать рабочий номер и email самого предпринимателя, если это основной канал связи по бизнесу.
               </HelpNote>
-              <div>
-                <input value={formData.returnAddress} onChange={(event) => updateField("returnAddress", event.target.value)} placeholder="Адрес для возвратов" className={fieldClass("returnAddress")} />
-                <FieldError message={errors.returnAddress} />
-              </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <input
                     value={formData.supportPhone}
@@ -744,63 +892,197 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
                     type="email"
                     inputMode="email"
                     autoComplete="email"
-                    placeholder="support@company.ru"
+                    placeholder="Рабочий email компании / ИП"
                     className={fieldClass("supportEmail")}
                   />
                   <FieldError message={errors.supportEmail} />
                 </div>
-                <div>
-                  <input value={formData.serviceHours} onChange={(event) => updateField("serviceHours", event.target.value)} placeholder="Часы поддержки" className={fieldClass("serviceHours")} />
-                  <FieldError message={errors.serviceHours} />
+              </div>
+              <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+                <div className="text-sm font-medium text-gray-800">
+                  График работы компании / ИП
+                </div>
+                <div className="flex items-start flex-nowrap gap-1 overflow-x-auto">
+                  {formData.serviceSchedule.map((schedule) => {
+                    const dayMeta = WEEKDAY_OPTIONS.find(
+                      (item) => item.key === schedule.day,
+                    );
+                    return (
+                      <div
+                        key={schedule.day}
+                        className={`min-w-0 shrink-0 self-start overflow-hidden rounded-xl border p-1.5 transition ${
+                          schedule.enabled
+                            ? "border-[rgb(38,83,141)] bg-[rgba(38,83,141,0.05)]"
+                            : "border-gray-200 bg-gray-50"
+                        }`}
+                        style={{ width: "calc((100% - 1.5rem) / 7)" }}
+                      >
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => toggleWorkingDay(schedule.day)}
+                            className={`flex w-full items-center justify-center rounded-full border px-2 py-1 text-center text-sm font-medium transition ${
+                              schedule.enabled
+                                ? "border-[rgb(38,83,141)] bg-[rgb(38,83,141)] text-white"
+                                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                            }`}
+                          >
+                            {dayMeta?.short ?? schedule.day}
+                          </button>
+                        </div>
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-out ${
+                            schedule.enabled
+                              ? "mt-1.5 max-h-40 opacity-100"
+                              : "mt-0 max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div className="text-center text-[10px] font-medium text-gray-500">
+                            рабочий
+                          </div>
+                          <div
+                            className="mt-1.5 space-y-1"
+                          >
+                            <div>
+                              <label className="mb-0.5 block text-[10px] font-medium text-gray-700">
+                                С
+                              </label>
+                              <select
+                                value={schedule.openHour}
+                                onChange={(event) =>
+                                  updateDayScheduleField(
+                                    schedule.day,
+                                    "openHour",
+                                    event.target.value,
+                                  )
+                                }
+                                disabled={!schedule.enabled}
+                                className={`${fieldClass("serviceSchedule")} min-h-[2rem] px-1.5 py-1 text-xs ${
+                                  !schedule.enabled
+                                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                                    : ""
+                                }`}
+                              >
+                                {HOUR_OPTIONS.map((value) => (
+                                  <option key={value} value={value}>
+                                    {value}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="mb-0.5 block text-[10px] font-medium text-gray-700">
+                                До
+                              </label>
+                              <select
+                                value={schedule.closeHour}
+                                onChange={(event) =>
+                                  updateDayScheduleField(
+                                    schedule.day,
+                                    "closeHour",
+                                    event.target.value,
+                                  )
+                                }
+                                disabled={!schedule.enabled}
+                                className={`${fieldClass("serviceSchedule")} min-h-[2rem] px-1.5 py-1 text-xs ${
+                                  !schedule.enabled
+                                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                                    : ""
+                                }`}
+                              >
+                                {HOUR_OPTIONS.map((value) => (
+                                  <option key={value} value={value}>
+                                    {value}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <FieldError message={errors.serviceSchedule} />
+                <div className="text-xs text-gray-500">
+                  График:{" "}
+                  {buildServiceHours(formData.serviceSchedule) ||
+                    "выберите хотя бы один рабочий день"}
                 </div>
               </div>
-              <div>
-                <input value={formData.monthlyCapacity} onChange={(event) => updateField("monthlyCapacity", onlyDigits(event.target.value))} inputMode="numeric" placeholder="Сколько заказов можете обработать в месяц" className={fieldClass("monthlyCapacity")} />
-                <FieldError message={errors.monthlyCapacity} />
-              </div>
+              {formData.authorityType === "employee" && (
+                <>
+                  <HelpNote>
+                    Доверенность обычно выдаёт руководитель компании. На MVP можно указать номер документа или ссылку на PDF в облаке, например Яндекс Диск/Google Drive с доступом по ссылке. Позже это поле лучше заменить настоящей загрузкой файла.
+                  </HelpNote>
+                  <input value={formData.authorityDocument} onChange={(event) => updateField("authorityDocument", event.target.value)} placeholder="Номер доверенности или ссылка на PDF" className={fieldClass("authorityDocument")} />
+                  <FieldError message={errors.authorityDocument} />
+                </>
+              )}
             </div>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <div className="space-y-4">
               <textarea
-                value={formData.productSourceType}
-                onChange={(event) => updateField("productSourceType", event.target.value)}
+                value={formData.businessDescription}
+                onChange={(event) => updateField("businessDescription", event.target.value)}
                 rows={3}
-                placeholder="Откуда товар: например, возвраты из сервиса, выкуп у компаний, уценка от поставщика, собственный ремонт"
-                className={fieldClass("productSourceType")}
+                placeholder="Кратко опишите, что продаете и какое происхождение у товара. Например: восстанавливаем смартфоны и ноутбуки, продаем уцененную бытовую технику после диагностики."
+                className={fieldClass("businessDescription")}
               />
-              <FieldError message={errors.productSourceType} />
+              <FieldError message={errors.businessDescription} />
+              <div className="space-y-3">
+                <div className="text-sm font-medium text-gray-800">Категории каталога</div>
+                {catalogCategoriesLoading ? (
+                  <div className="rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-500">
+                    Загружаем актуальные категории каталога...
+                  </div>
+                ) : catalogCategoriesError ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                    <div>{catalogCategoriesError}</div>
+                    <button
+                      type="button"
+                      onClick={() => void loadCatalogCategories()}
+                      className="mt-2 text-sm font-medium text-blue-700 underline"
+                    >
+                      Повторить загрузку
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {catalogCategories.length === 0 ? (
+                      <div className="rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-500">
+                        В каталоге пока нет корневых категорий для выбора.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {catalogCategories.map((category) => (
+                          <label
+                            key={category.id}
+                            className={`flex items-center gap-2 rounded-lg border bg-white p-3 text-sm ${errors.categories ? "border-red-300" : "border-gray-200"}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.categories.includes(category.name)}
+                              onChange={() => toggleCategory(category.name)}
+                            />
+                            {category.name}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              <FieldError message={errors.categories} />
+              <div>
+                <input value={formData.monthlyCapacity} onChange={(event) => updateField("monthlyCapacity", onlyDigits(event.target.value))} inputMode="numeric" placeholder="Среднее количество продаж в месяц" className={fieldClass("monthlyCapacity")} />
+                <FieldError message={errors.monthlyCapacity} />
+              </div>
               <HelpNote>
-                Укажите, какие документы подтверждают происхождение товара: УПД, договор поставки, накладные, акты выкупа, инвойсы или гарантийные письма поставщика. Сами документы нужно отправить с email представителя, указанного в заявке, чтобы мы могли связать письмо с этим бизнесом.
+                В этом описании кратко укажите и сам товар, и его происхождение. Документы по происхождению площадка может запросить позже точечно: при жалобе, споре, риск-категории или ручной модерации.
               </HelpNote>
-              <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="font-medium text-gray-900">Почта для документов</div>
-                  <a href={`mailto:${PARTNERSHIP_DOCUMENTS_EMAIL}`} className="text-blue-700 underline">
-                    {PARTNERSHIP_DOCUMENTS_EMAIL}
-                  </a>
-                </div>
-                <button type="button" onClick={copyDocumentsEmail} className="btn-secondary px-4 py-2 text-sm">
-                  Скопировать email
-                </button>
-              </div>
-              <div>
-                <textarea value={formData.supplierDocuments} onChange={(event) => updateField("supplierDocuments", event.target.value)} rows={3} placeholder="Какие документы есть у вас. Например: УПД, договор поставки, накладные или акты выкупа" className={fieldClass("supplierDocuments")} />
-                <FieldError message={errors.supplierDocuments} />
-              </div>
-              <div>
-                <input value={formData.warrantyDays} onChange={(event) => updateField("warrantyDays", onlyDigits(event.target.value))} inputMode="numeric" placeholder="Гарантия в днях, минимум 90" className={fieldClass("warrantyDays")} />
-                <FieldError message={errors.warrantyDays} />
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
-                Возврат для покупателей фиксированный: {RETURN_DAYS} дней. Продавец не выбирает этот срок отдельно.
-              </div>
-              <label className={`flex items-start gap-2 rounded-xl border bg-white p-3 text-sm text-gray-700 ${errors.qualityCharterAccepted ? "border-red-300" : "border-gray-200"}`}>
-                <input type="checkbox" checked={formData.qualityCharterAccepted} onChange={(event) => updateField("qualityCharterAccepted", event.target.checked)} className="mt-0.5" />
-                <span>Принимаю quality charter: техника должна быть рабочей, товары “на запчасти” запрещены, дефекты должны быть явно описаны, гарантия минимум 90 дней.</span>
-              </label>
-              <FieldError message={errors.qualityCharterAccepted} />
               <label className={`flex items-start gap-2 rounded-xl border bg-white p-3 text-sm text-gray-700 ${errors.policy ? "border-red-300" : "border-gray-200"}`}>
                 <input
                   type="checkbox"

@@ -78,13 +78,11 @@ npm run dev:frontend
 ### 5. Сценарий C: Payout Profile Submit -> Admin Verify
 
 - Залогиниться под seller и заполнить payout profile
-- Залогиниться под admin и подтвердить payout profile
-- Снова зайти под seller и проверить статус `verified`
+- Снова зайти под seller и проверить статус `verified` сразу после сохранения
 
 Ожидаемые запросы:
 
 - `PUT /api/partner/payout-profile` -> `200`
-- `PATCH /api/admin/payout-profiles/:id` -> `200`
 - `GET /api/partner/payout-profile` -> `200`
 
 ## Как анализировать тайминги

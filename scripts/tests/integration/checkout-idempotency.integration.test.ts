@@ -36,14 +36,23 @@ after(async () => {
   await prisma.$disconnect();
 });
 
-async function startCheckoutServer(buyerId: number, createPaymentCalls: { count: number }) {
+async function startCheckoutServer(
+  buyerId: number,
+  paymentProbe: {
+    count: number;
+    lastDescription: string | null;
+  },
+) {
   const app = express();
   app.use(express.json());
   app.use(
     "/api/profile",
     createProfileOrdersRouter({
       prisma,
-      requireAnyRole: async () => ({ ok: true as const, user: { id: buyerId } }),
+      requireAnyRole: async () => ({
+        ok: true as const,
+        user: { id: buyerId, role: "BUYER" },
+      }),
       roleBuyer: "BUYER",
       roleSeller: "SELLER",
       roleAdmin: "ADMIN",
@@ -56,11 +65,13 @@ async function startCheckoutServer(buyerId: number, createPaymentCalls: { count:
       toLocalizedDeliveryDate: (date: Date) => date.toISOString(),
       extractPrimaryCityFromAddresses: () => null,
       toProfileOrderStatus: () => "processing",
-      createYooKassaPayment: async () => {
-        createPaymentCalls.count += 1;
+      createYooKassaPayment: async (params) => {
+        paymentProbe.count += 1;
+        paymentProbe.lastDescription = params.description;
         return {
           id: "pay-test-checkout-idempotency",
           status: "pending",
+          paid: false,
           confirmation: {
             type: "redirect",
             confirmation_url: "https://pay.example/confirm",
@@ -68,6 +79,11 @@ async function startCheckoutServer(buyerId: number, createPaymentCalls: { count:
         };
       },
       fetchYooKassaPaymentById: async () => null,
+      createYooKassaRefund: async () => ({
+        id: "refund-test-checkout-idempotency",
+        status: "succeeded",
+        payment_id: "pay-test-checkout-idempotency",
+      }),
       extractYooKassaPaymentBaseId: (paymentIntentId: string) => paymentIntentId.split(":")[0] ?? paymentIntentId,
       ensureYandexTrackingForOrders: async () => {},
     }),
@@ -150,8 +166,11 @@ test(
     const buyer = await createUserFixture("CHK-IDEMP-BUYER", "BUYER");
     const seller = await createUserFixture("CHK-IDEMP-SELLER", "SELLER");
     const listing = await createListingFixture(seller.id, "CHK-IDEMP-LST");
-    const createPaymentCalls = { count: 0 };
-    const baseUrl = await startCheckoutServer(buyer.id, createPaymentCalls);
+    const paymentProbe = {
+      count: 0,
+      lastDescription: null as string | null,
+    };
+    const baseUrl = await startCheckoutServer(buyer.id, paymentProbe);
     const idempotencyKey = `checkout-idempotency-${Date.now()}`;
 
     try {
@@ -185,7 +204,8 @@ test(
       assert.equal(first.status, 201);
       assert.equal(second.status, 201);
       assert.deepEqual(secondPayload, firstPayload);
-      assert.equal(createPaymentCalls.count, 1);
+      assert.equal(paymentProbe.count, 1);
+      assert.equal(paymentProbe.lastDescription, "Оплата заказа в Ecomm (1 шт.)");
 
       const orders = await prisma.marketOrder.findMany({
         where: {
@@ -194,9 +214,11 @@ test(
         },
         select: {
           public_id: true,
+          delivery_address: true,
         },
       });
       assert.equal(orders.length, 1);
+      assert.equal(orders[0]?.delivery_address, "Самовывоз");
 
       const idempotencyRows = await prisma.checkoutIdempotencyKey.findMany({
         where: {
@@ -226,8 +248,12 @@ test(
     const seller = await createUserFixture("CHK-CONFLICT-SELLER", "SELLER");
     const primaryListing = await createListingFixture(seller.id, "CHK-CONFLICT-LST-A");
     const alternateListing = await createListingFixture(seller.id, "CHK-CONFLICT-LST-B");
-    const createPaymentCalls = { count: 0 };
-    const baseUrl = await startCheckoutServer(buyer.id, createPaymentCalls);
+    const paymentProbe = {
+      count: 0,
+      lastDescription: null as string | null,
+      lastReturnUrl: null as string | null,
+    };
+    const baseUrl = await startCheckoutServer(buyer.id, paymentProbe);
     const idempotencyKey = `checkout-conflict-${Date.now()}`;
 
     try {
@@ -265,7 +291,7 @@ test(
         conflictPayload.error,
         "Idempotency-Key reuse with different payload is not allowed for checkout.",
       );
-      assert.equal(createPaymentCalls.count, 1);
+      assert.equal(paymentProbe.count, 1);
 
       const orders = await prisma.marketOrder.findMany({
         where: {

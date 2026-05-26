@@ -3,7 +3,10 @@ import {
   Prisma,
   type PrismaClient,
 } from "@prisma/client";
-import { validationError } from "../../../../../common/application-error";
+import {
+  conflict,
+  validationError,
+} from "../../../../../common/application-error";
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
 import { recomputeSellerCommissionSnapshot } from "../../../../finance/infrastructure/repositories/commission-program.repository";
 import { recommendationServices } from "../../../../recommendations";
@@ -18,6 +21,52 @@ import {
   makeCheckoutIdempotencyHash,
 } from "../../domain/profile-orders.helpers";
 const CHECKOUT_CREATE_ACTION = "checkout.orders.create";
+
+const APPROVED_PARTNERSHIP_STATUSES = ["APPROVED", "APPROVED_LIMITED"] as const;
+const BUYER_ORDER_DETAIL_INCLUDE: Prisma.MarketOrderInclude = {
+  seller: {
+    select: {
+      name: true,
+      avatar: true,
+      phone: true,
+      work_email: true,
+      addresses: {
+        select: {
+          city: true,
+        },
+        orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+        take: 1,
+      },
+      partnership_requests: {
+        where: {
+          status: {
+            in: [...APPROVED_PARTNERSHIP_STATUSES],
+          },
+        },
+        orderBy: [{ created_at: "desc" }],
+        take: 1,
+        select: {
+          onboarding_profile: {
+            select: {
+              support_phone: true,
+              support_email: true,
+              service_hours: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  items: {
+    include: {
+      listing: {
+        select: {
+          public_id: true,
+        },
+      },
+    },
+  },
+};
 
 function serializeForJson(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -92,7 +141,7 @@ async function writeOrderStatusTransitionRecords(params: {
   );
 }
 
-async function releaseReservedListingsByOrderIds(
+async function restoreListingStockByOrderIds(
   tx: Prisma.TransactionClient,
   orderIds: number[],
 ): Promise<void> {
@@ -108,48 +157,44 @@ async function releaseReservedListingsByOrderIds(
     },
     select: {
       listing_id: true,
+      quantity: true,
     },
   });
 
-  const listingIds = uniqueNumbers(
-    orderItems
-      .map((item) => item.listing_id)
-      .filter((listingId): listingId is number => listingId !== null),
-  );
+  const quantityByListingId = new Map<number, number>();
+  for (const item of orderItems) {
+    if (item.listing_id === null) continue;
+    quantityByListingId.set(
+      item.listing_id,
+      (quantityByListingId.get(item.listing_id) ?? 0) + Math.max(1, item.quantity),
+    );
+  }
+
+  const listingIds = Array.from(quantityByListingId.keys());
 
   if (listingIds.length === 0) {
     return;
   }
 
-  const lockedByOtherOrders = await tx.marketOrderItem.findMany({
-    where: {
-      listing_id: { in: listingIds },
-      order: {
-        status: { not: "CANCELLED" },
+  for (const [listingId, quantity] of quantityByListingId.entries()) {
+    await tx.marketplaceListing.update({
+      where: { id: listingId },
+      data: {
+        available_quantity: {
+          increment: quantity,
+        },
       },
-    },
-    select: {
-      listing_id: true,
-    },
-  });
-
-  const blockedListingIds = new Set(
-    lockedByOtherOrders
-      .map((item) => item.listing_id)
-      .filter((listingId): listingId is number => listingId !== null),
-  );
-  const releasableListingIds = listingIds.filter(
-    (listingId) => !blockedListingIds.has(listingId),
-  );
-  if (releasableListingIds.length === 0) {
-    return;
+    });
   }
 
   await tx.marketplaceListing.updateMany({
     where: {
-      id: { in: releasableListingIds },
+      id: { in: listingIds },
       status: "INACTIVE",
       moderation_status: "APPROVED",
+      available_quantity: {
+        gt: 0,
+      },
     },
     data: {
       status: "ACTIVE",
@@ -392,6 +437,46 @@ export class ProfileOrdersRepository {
     });
   }
 
+  async findOrdersByCheckoutGroupKey(checkoutGroupKey: string) {
+    return this.prisma.marketOrder.findMany({
+      where: {
+        checkout_group_key: checkoutGroupKey,
+      },
+      include: {
+        transactions: {
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+        },
+        status_history: {
+          where: { to_status: "PAID" },
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+        },
+      },
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
+    });
+  }
+
+  async findOrdersByIds(orderIds: number[]) {
+    return this.prisma.marketOrder.findMany({
+      where: {
+        id: { in: uniqueNumbers(orderIds) },
+      },
+      include: {
+        transactions: {
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+        },
+        status_history: {
+          where: { to_status: "PAID" },
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+        },
+      },
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
+    });
+  }
+
   async findPaymentTransactionRefsByPaymentId(paymentId: string): Promise<
     Array<{ txId: number; orderId: number }>
   > {
@@ -594,7 +679,7 @@ export class ProfileOrdersRepository {
         },
       });
 
-      await releaseReservedListingsByOrderIds(tx, cancellableOrderIds);
+      await restoreListingStockByOrderIds(tx, cancellableOrderIds);
 
       await writeOrderStatusTransitionRecords({
         tx,
@@ -743,27 +828,6 @@ export class ProfileOrdersRepository {
     };
   }
 
-  async findUserAddressByIdForUser(params: {
-    addressId: number;
-    userId: number;
-  }) {
-    return this.prisma.userAddress.findFirst({
-      where: {
-        id: params.addressId,
-        user_id: params.userId,
-      },
-    });
-  }
-
-  async findDefaultAddressForUser(userId: number) {
-    return this.prisma.userAddress.findFirst({
-      where: {
-        user_id: userId,
-        is_default: true,
-      },
-    });
-  }
-
   async getCommissionRateForSeller(sellerId: number): Promise<number> {
     const snapshot = await recomputeSellerCommissionSnapshot({
       prismaClient: this.prisma,
@@ -775,9 +839,10 @@ export class ProfileOrdersRepository {
   async createCheckoutOrders(params: {
     buyerId: number;
     deliveryType: "DELIVERY" | "PICKUP";
-    deliveryAddress: string;
+    pickupPointAddress: string;
     pickupPointId: string;
     pickupPointProvider: DeliveryProviderCode;
+    checkoutGroupKey: string;
     preparedOrders: Array<{
       sellerId: number;
       items: Array<{
@@ -866,7 +931,7 @@ export class ProfileOrdersRepository {
           data: {
             promo_code_id: promo.id,
             user_id: params.promoReservation.buyerId,
-            checkout_group_key: params.promoReservation.checkoutGroupKey,
+            checkout_group_key: params.checkoutGroupKey,
             status: "RESERVED",
           },
           select: { id: true },
@@ -874,25 +939,50 @@ export class ProfileOrdersRepository {
         promoActivationId = activation.id;
       }
 
-      const listingIdsToReserve = uniqueNumbers(
-        params.preparedOrders.flatMap((preparedOrder) =>
-          preparedOrder.items.map((item) => item.listing_id),
-        ),
-      );
-      const reservedListing = await tx.marketplaceListing.updateMany({
+      const quantityByListingId = new Map<number, number>();
+      for (const preparedOrder of params.preparedOrders) {
+        for (const item of preparedOrder.items) {
+          quantityByListingId.set(
+            item.listing_id,
+            (quantityByListingId.get(item.listing_id) ?? 0) + Math.max(1, item.quantity),
+          );
+        }
+      }
+
+      const listingIdsToReserve = Array.from(quantityByListingId.keys());
+      for (const [listingId, quantity] of quantityByListingId.entries()) {
+        const reservedListing = await tx.marketplaceListing.updateMany({
+          where: {
+            id: listingId,
+            status: "ACTIVE",
+            moderation_status: "APPROVED",
+            available_quantity: {
+              gte: quantity,
+            },
+          },
+          data: {
+            available_quantity: {
+              decrement: quantity,
+            },
+          },
+        });
+
+        if (reservedListing.count !== 1) {
+          throw new Error(LISTING_RESERVATION_CONFLICT);
+        }
+      }
+
+      await tx.marketplaceListing.updateMany({
         where: {
           id: { in: listingIdsToReserve },
-          status: "ACTIVE",
-          moderation_status: "APPROVED",
+          available_quantity: {
+            lte: 0,
+          },
         },
         data: {
           status: "INACTIVE",
         },
       });
-
-      if (reservedListing.count !== listingIdsToReserve.length) {
-        throw new Error(LISTING_RESERVATION_CONFLICT);
-      }
 
       const result: Array<{
         db_id: number;
@@ -912,13 +1002,13 @@ export class ProfileOrdersRepository {
             buyer_id: params.buyerId,
             seller_id: preparedOrder.sellerId,
             promo_code_id: params.promoReservation?.promoId ?? null,
-            checkout_group_key: params.promoReservation?.checkoutGroupKey ?? null,
+            checkout_group_key: params.checkoutGroupKey,
             status: "CREATED",
             delivery_type: params.deliveryType,
             delivery_address:
               params.deliveryType === "DELIVERY"
-                ? params.deliveryAddress
-                : "РЎР°РјРѕРІС‹РІРѕР·",
+                ? params.pickupPointAddress
+                : "Самовывоз",
             tracking_provider: initialTrackingProvider,
             tracking_number: null,
             tracking_url: null,
@@ -984,7 +1074,7 @@ export class ProfileOrdersRepository {
             where: { id: order.id },
             data: {
               delivery_address: params.appendPickupPointMetaToAddress(
-                order.delivery_address ?? params.deliveryAddress,
+                order.delivery_address ?? params.pickupPointAddress,
                 params.pickupPointId,
                 params.pickupPointProvider,
               ),
@@ -1028,29 +1118,143 @@ export class ProfileOrdersRepository {
   async findBuyerOrdersDetailed(buyerId: number): Promise<BuyerOrderWithRelations[]> {
     return this.prisma.marketOrder.findMany({
       where: { buyer_id: buyerId },
-      include: {
-        seller: {
-          include: {
-            addresses: {
-              select: {
-                city: true,
-              },
-              orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
-              take: 1,
-            },
-          },
-        },
-        items: {
-          include: {
-            listing: {
-              select: {
-                public_id: true,
-              },
-            },
+      include: BUYER_ORDER_DETAIL_INCLUDE,
+      orderBy: [{ created_at: "desc" }],
+    }) as unknown as Promise<BuyerOrderWithRelations[]>;
+  }
+
+  async findBuyerOrderDetailedByPublicId(params: {
+    buyerId: number;
+    orderPublicId: string;
+  }): Promise<BuyerOrderWithRelations | null> {
+    return this.prisma.marketOrder.findFirst({
+      where: {
+        buyer_id: params.buyerId,
+        public_id: params.orderPublicId,
+      },
+      include: BUYER_ORDER_DETAIL_INCLUDE,
+    }) as unknown as Promise<BuyerOrderWithRelations | null>;
+  }
+
+  async findBuyerOrderForCancellation(params: {
+    buyerId: number;
+    orderPublicId: string;
+  }): Promise<{
+    id: number;
+    public_id: string;
+    status: OrderStatus;
+    transactions: Array<{
+      id: number;
+      public_id: string;
+      amount: number;
+      status: string;
+      payment_provider: string;
+      payment_intent_id: string;
+    }>;
+  } | null> {
+    return this.prisma.marketOrder.findFirst({
+      where: {
+        buyer_id: params.buyerId,
+        public_id: params.orderPublicId,
+      },
+      select: {
+        id: true,
+        public_id: true,
+        status: true,
+        transactions: {
+          orderBy: [{ created_at: "desc" }, { id: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            public_id: true,
+            amount: true,
+            status: true,
+            payment_provider: true,
+            payment_intent_id: true,
           },
         },
       },
-      orderBy: [{ created_at: "desc" }],
+    });
+  }
+
+  async cancelBuyerOrder(params: {
+    buyerId: number;
+    orderId: number;
+    currentStatus: OrderStatus;
+    transactionId: number | null;
+    markRefunded: boolean;
+    requestIp: string | null;
+    reason: string;
+  }): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const order = await tx.marketOrder.findFirst({
+        where: {
+          id: params.orderId,
+          buyer_id: params.buyerId,
+        },
+        select: {
+          id: true,
+          public_id: true,
+          status: true,
+          checkout_group_key: true,
+        },
+      });
+
+      if (!order) {
+        throw conflict("Заказ не найден");
+      }
+
+      if (order.status !== params.currentStatus) {
+        throw conflict(
+          "Статус заказа изменился. Обновите страницу и попробуйте снова",
+        );
+      }
+
+      await tx.marketOrder.update({
+        where: { id: order.id },
+        data: {
+          status: "CANCELLED",
+        },
+      });
+
+      if (params.transactionId !== null) {
+        await tx.platformTransaction.updateMany({
+          where: {
+            id: params.transactionId,
+            order_id: order.id,
+            status: params.markRefunded
+              ? "SUCCESS"
+              : {
+                  in: ["HELD", "PENDING", "FAILED", "CANCELLED"],
+                },
+          },
+          data: {
+            status: params.markRefunded ? "REFUNDED" : "CANCELLED",
+          },
+        });
+      }
+
+      await writeOrderStatusTransitionRecords({
+        tx,
+        transitions: [
+          {
+            orderId: order.id,
+            orderPublicId: order.public_id,
+            fromStatus: order.status,
+            toStatus: "CANCELLED",
+            changedById: params.buyerId,
+            reason: params.reason,
+            ipAddress: params.requestIp,
+          },
+        ],
+      });
+
+      await restoreListingStockByOrderIds(tx, [order.id]);
+      if (order.checkout_group_key) {
+        await releasePromoActivationsForCheckoutGroups(tx, [
+          order.checkout_group_key,
+        ]);
+      }
     });
   }
 

@@ -98,6 +98,17 @@ export function SellerStoreHeader({
                     </>
                   ) : null}
                 </div>
+                {seller.supportEmail ? (
+                  <div className="mt-3 text-sm text-gray-700">
+                    <span className="font-semibold text-gray-900">Рабочая почта:</span>{" "}
+                    <a
+                      href={`mailto:${seller.supportEmail}`}
+                      className="text-[rgb(38,83,141)] hover:underline"
+                    >
+                      {seller.supportEmail}
+                    </a>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
