@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const removedCatalogItem = "Товары для обслуживания ПК";
@@ -63,10 +63,14 @@ const catalogReferenceServiceSource = readFileSync(
   "backend/src/modules/catalog/catalog-reference.service.ts",
   "utf8",
 );
-const catalogReferenceMigrationSource = readFileSync(
-  "backend/prisma/migrations/20260515231000_init_squashed/migration.sql",
-  "utf8",
-);
+const catalogReferenceMigrationSource = readdirSync("backend/prisma/migrations", {
+  withFileTypes: true,
+})
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => `backend/prisma/migrations/${entry.name}/migration.sql`)
+  .filter((path) => existsSync(path))
+  .map((path) => readFileSync(path, "utf8"))
+  .join("\n");
 const catalogReferenceImportSource = readFileSync(
   "scripts/catalog/import-catalog-reference-to-db.ts",
   "utf8",
