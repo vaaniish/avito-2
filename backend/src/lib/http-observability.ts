@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
+import { getRequestIpFromExpressLike } from "../common/http/request-meta";
 
 type HttpMetricsState = {
   startedAt: number;
@@ -51,11 +52,7 @@ function resolveRequestId(req: Request): string {
 }
 
 function sanitizeIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
+  return getRequestIpFromExpressLike(req);
 }
 
 function reportRequest(params: {

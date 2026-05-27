@@ -1,12 +1,9 @@
 import type { PrismaClient } from "@prisma/client";
+import { makeAuditPublicId } from "../../../../../common/domain/public-id";
 import type {
   AdminAuditWriterPort,
   AdminAuditWriteInput,
 } from "../../domain/admin-partnership.types";
-
-function makeAuditPublicId(): string {
-  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
-}
 
 export class AdminAuditWriterRepository implements AdminAuditWriterPort {
   constructor(private readonly prisma: PrismaClient) {}

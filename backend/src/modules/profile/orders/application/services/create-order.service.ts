@@ -5,6 +5,7 @@ import {
   preconditionFailed,
   validationError,
 } from "../../../../../common/application-error";
+import { makeOpaquePublicId } from "../../../../../common/domain/public-id";
 import {
   buildCheckoutPolicyDto,
   LISTING_RESERVATION_CONFLICT,
@@ -228,7 +229,7 @@ export class CreateOrderService {
             (sum, item) => sum + item.price * item.quantity,
             0,
           );
-          const publicId = `ORD-${Date.now()}-${index + 1}`;
+          const publicId = makeOpaquePublicId("ORD", 20);
           return {
             sellerId,
             items,

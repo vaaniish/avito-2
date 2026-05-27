@@ -8,6 +8,7 @@ import {
   notFound,
   validationError,
 } from "../../../../../common/application-error";
+import { makeOpaquePublicId } from "../../../../../common/domain/public-id";
 
 type PromoStatus =
   | "scheduled"
@@ -27,7 +28,7 @@ const MAX_PROMO_PERCENT = 25;
 const MAX_PROMO_FIXED_AMOUNT = 2500;
 
 function makePromoPublicId(): string {
-  return `PRM-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("PRM", 20);
 }
 
 function readTrimmedString(value: unknown): string {

@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import type { ListPartnerOrdersService } from "../application/services/list-partner-orders.service";
 import type { UpdatePartnerOrderStatusService } from "../application/services/update-partner-order-status.service";
 import type { UpdatePartnerOrderTrackingService } from "../application/services/update-partner-order-tracking.service";
@@ -7,14 +8,6 @@ import type { UpdatePartnerOrderTrackingService } from "../application/services/
 type SessionResult =
   | { ok: true; user: { id: number; role: string } }
   | { ok: false; status: number; message: string };
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createPartnerOrdersRouter(deps: {
   requireAnyRole: (req: Request, roles: string[]) => Promise<SessionResult>;
@@ -53,7 +46,7 @@ export function createPartnerOrdersRouter(deps: {
         await deps.services.updatePartnerOrderStatus.execute({
           sellerId: session.user.id,
           actorUserId: session.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
           publicId: String(req.params.publicId ?? ""),
           status: body.status,
         }),
@@ -79,7 +72,7 @@ export function createPartnerOrdersRouter(deps: {
         await deps.services.updatePartnerOrderTracking.execute({
           sellerId: session.user.id,
           actorUserId: session.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
           publicId: String(req.params.publicId ?? ""),
           tracking_number: body.tracking_number,
           provider: body.provider,

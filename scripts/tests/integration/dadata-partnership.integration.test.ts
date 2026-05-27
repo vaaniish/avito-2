@@ -118,7 +118,7 @@ test(
 );
 
 test(
-  "integration: legal lookup returns 503 when DaData key is missing",
+  "integration: legal lookup returns 502 when DaData key is missing",
   { skip: !safeDb },
   async () => {
     const sellerToken = await login("seller1@ecomm.local", "seller123");
@@ -128,7 +128,7 @@ test(
         method: "POST",
         path: "/api/profile/partnership-requests/legal-lookup",
         token: sellerToken,
-        expected: [503],
+        expected: [502],
         body: { inn: "7707083893", legalType: "COMPANY" },
       }),
     );

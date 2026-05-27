@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { Prisma } from "@prisma/client";
+import { makeAuditPublicId } from "../../../../../common/domain/public-id";
 import {
   applyApprovedComplaintConsequences,
 } from "../repositories/complaint-sanction.repository";
@@ -92,10 +93,6 @@ const COMPLAINT_LIST_INCLUDE = Prisma.validator<Prisma.ComplaintInclude>()({
 type ComplaintWithRelations = Prisma.ComplaintGetPayload<{
   include: typeof COMPLAINT_LIST_INCLUDE;
 }>;
-
-function makeAuditPublicId(): string {
-  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
-}
 
 function serializeForJson(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value ?? null)) as Prisma.InputJsonValue;

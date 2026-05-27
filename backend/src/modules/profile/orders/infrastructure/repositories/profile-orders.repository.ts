@@ -7,6 +7,10 @@ import {
   conflict,
   validationError,
 } from "../../../../../common/application-error";
+import {
+  makeAuditPublicId,
+  makeOpaquePublicId,
+} from "../../../../../common/domain/public-id";
 import { assertOrderStatusTransitionAllowed } from "../../../../orders/order-status-fsm";
 import { recomputeSellerCommissionSnapshot } from "../../../../finance/infrastructure/repositories/commission-program.repository";
 import { recommendationServices } from "../../../../recommendations";
@@ -80,10 +84,6 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 function uniqueNumbers(values: number[]): number[] {
   return [...new Set(values)];
-}
-
-function makeAuditPublicId(): string {
-  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 }
 
 async function writeOrderStatusTransitionRecords(params: {
@@ -323,7 +323,7 @@ export class ProfileOrdersRepository {
     try {
       const created = await delegate.create({
         data: {
-          public_id: `CID-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`,
+          public_id: makeOpaquePublicId("CID", 20),
           actor_user_id: params.actorUserId,
           action: CHECKOUT_CREATE_ACTION,
           idempotency_key: params.key,
@@ -1090,7 +1090,7 @@ export class ProfileOrdersRepository {
         const paymentIntentId = `${params.paymentIntentIdBase}:${sequence}`;
         await tx.platformTransaction.create({
           data: {
-            public_id: `TXN-${Date.now()}-${sequence}`,
+            public_id: makeOpaquePublicId("TXN", 20),
             order_id: order.id,
             buyer_id: params.buyerId,
             seller_id: preparedOrder.sellerId,

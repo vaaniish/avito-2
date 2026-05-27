@@ -64,11 +64,7 @@ const catalogReferenceServiceSource = readFileSync(
   "utf8",
 );
 const catalogReferenceMigrationSource = readFileSync(
-  "backend/prisma/migrations/20260508120000_catalog_reference_db/migration.sql",
-  "utf8",
-);
-const catalogReferenceUniqueMigrationSource = readFileSync(
-  "backend/prisma/migrations/20260508164000_catalog_reference_normalized_uniques/migration.sql",
+  "backend/prisma/migrations/20260515231000_init_squashed/migration.sql",
   "utf8",
 );
 const catalogReferenceImportSource = readFileSync(
@@ -157,12 +153,15 @@ test("catalog reference source of truth: runtime reference data is persisted and
   assert.match(runtimeSeedSource, /catalogReferenceModel\.createMany/);
   assert.match(runtimeSeedSource, /catalogReferenceVariant\.createMany/);
   assert.match(runtimeSeedSource, /catalogReferenceCharacteristic\.createMany/);
-  assert.match(catalogReferenceMigrationSource, /CREATE EXTENSION IF NOT EXISTS pg_trgm/);
-  assert.match(catalogReferenceMigrationSource, /CatalogReferenceBrand_name_trgm_idx/);
-  assert.match(catalogReferenceMigrationSource, /CatalogReferenceModel_name_trgm_idx/);
-  assert.match(catalogReferenceMigrationSource, /CatalogReferenceVariant_title_trgm_idx/);
-  assert.match(catalogReferenceUniqueMigrationSource, /CatalogReferenceBrand_item_id_normalized_name_key/);
-  assert.match(catalogReferenceUniqueMigrationSource, /CatalogReferenceModel_brand_id_normalized_name_key/);
+  assert.match(catalogReferenceMigrationSource, /CatalogReferenceBrand_name_idx/);
+  assert.match(catalogReferenceMigrationSource, /CatalogReferenceModel_name_idx/);
+  assert.match(catalogReferenceMigrationSource, /CatalogReferenceVariant_title_idx/);
+  assert.match(catalogReferenceMigrationSource, /CatalogReferenceBrand_item_id_name_key/);
+  assert.match(catalogReferenceMigrationSource, /CatalogReferenceModel_brand_id_name_key/);
+  assert.match(
+    catalogReferenceMigrationSource,
+    /CatalogReferenceVariant_model_id_external_product_id_key/,
+  );
 });
 
 test("catalog reference source of truth: DNS parser-only fields are not persisted", () => {

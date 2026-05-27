@@ -40,5 +40,6 @@ export function defaultListingModerationReasonCode(params: {
 }
 
 export function makeListingModerationEventPublicId(): string {
-  return `LME-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("LME", 20);
 }
+import { makeOpaquePublicId } from "../../common/domain/public-id";

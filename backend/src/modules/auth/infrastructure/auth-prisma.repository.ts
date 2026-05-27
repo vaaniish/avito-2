@@ -74,14 +74,6 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
     return user;
   }
 
-  async countBuyers(): Promise<number> {
-    return this.prisma.appUser.count({
-      where: {
-        role: "BUYER",
-      },
-    });
-  }
-
   async createBuyer(input: CreateBuyerInput): Promise<CreatedBuyerRecord> {
     const user = await this.prisma.appUser.create({
       data: {

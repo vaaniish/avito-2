@@ -1,17 +1,10 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import { requireAdmin } from "../../common/http/admin-session";
 import type { ListAdminUsersService } from "../application/services/list-admin-users.service";
 import type { UpdateAdminUserRoleService } from "../application/services/update-admin-user-role.service";
 import type { UpdateAdminUserStatusService } from "../application/services/update-admin-user-status.service";
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createAdminUsersRouter(deps: {
   services: {
@@ -50,7 +43,7 @@ export function createAdminUsersRouter(deps: {
           status: body.status,
           blockReason: body.blockReason,
           actorUserId: access.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
         }),
       );
     } catch (error) {
@@ -70,7 +63,7 @@ export function createAdminUsersRouter(deps: {
           publicId: String(req.params.publicId ?? ""),
           role: body.role,
           actorUserId: access.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
         }),
       );
     } catch (error) {

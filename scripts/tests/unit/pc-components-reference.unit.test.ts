@@ -70,8 +70,8 @@ const generatorSource = readFileSync(
   "scripts/catalog/generate-pc-components-reference.mjs",
   "utf8",
 );
-const partnerRoutesSource = readFileSync(
-  "backend/src/modules/partner/partner.routes.ts",
+const partnerSearchRepositorySource = readFileSync(
+  "backend/src/modules/partner/listings/infrastructure/repositories/partner-listings-search.repository.ts",
   "utf8",
 );
 const catalogReferenceServiceSource = readFileSync(
@@ -286,16 +286,22 @@ referenceTest("pc components reference: SSD brand is extracted after the drive n
 });
 
 referenceTest("pc components reference: create suggestions search models and prefill reference data", () => {
-  assert.match(partnerRoutesSource, /findCatalogReferenceCreateSuggestions\(query, type\)/);
-  assert.match(partnerRoutesSource, /catalogReferenceTitleSuggestions\(query, referenceSuggestions\)/);
-  assert.match(partnerRoutesSource, /titleSuggestions/);
-  assert.doesNotMatch(partnerRoutesSource, /referenceBrand/);
-  assert.doesNotMatch(partnerRoutesSource, /referenceModel/);
-  assert.doesNotMatch(partnerRoutesSource, /referenceCharacteristics/);
-  assert.match(partnerRoutesSource, /catalogReferenceFields/);
+  assert.match(
+    partnerSearchRepositorySource,
+    /findCatalogReferenceCreateSuggestions\(query, type\)/,
+  );
+  assert.match(
+    partnerSearchRepositorySource,
+    /catalogReferenceTitleSuggestions\(query, referenceSuggestions\)/,
+  );
+  assert.match(partnerSearchRepositorySource, /titleSuggestions/);
+  assert.doesNotMatch(partnerSearchRepositorySource, /referenceBrand/);
+  assert.doesNotMatch(partnerSearchRepositorySource, /referenceModel/);
+  assert.doesNotMatch(partnerSearchRepositorySource, /referenceCharacteristics/);
+  assert.match(catalogReferenceServiceSource, /catalogReferenceFields/);
   assert.match(catalogReferenceServiceSource, /source: "bracketGroups"/);
   assert.match(catalogReferenceServiceSource, /locked/);
-  assert.doesNotMatch(partnerRoutesSource, /referenceCode/);
+  assert.doesNotMatch(partnerSearchRepositorySource, /referenceCode/);
 
   const score = findModel("Процессоры", "AMD", "Ryzen 7 5700X OEM");
   assert.ok(score.variants[0].title.includes("Ryzen 7 5700X"));

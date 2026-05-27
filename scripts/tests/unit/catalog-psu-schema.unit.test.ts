@@ -148,7 +148,8 @@ test("catalog creation: backend binds existing product items without deferred MV
     "utf8",
   );
 
-  assert.match(comprehensiveBlock, /mvpItemIds\.has\(item\)/);
+  assert.match(comprehensiveBlock, /filter\(\(\[item\]\) => itemMap\.has\(item\)\)/);
+  assert.doesNotMatch(comprehensiveBlock, /mvpItemIds\.has\(item\)/);
   assert.match(backendSeed, /"sub-pc-laptops-accessories::Ноутбуки", "ITM-003"/);
   assert.match(backendSeed, /const mvpItemIds = new Set/);
   assert.doesNotMatch(partnerListingsCatalogHelper, /isDeferredItem/);

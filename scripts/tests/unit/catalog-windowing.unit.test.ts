@@ -90,5 +90,8 @@ test("session hydration: admin session no longer auto-opens admin panel from hom
     sessionHooksSource,
     /existingSession\.role === "admin"[\s\S]*onSetCurrentView\("adminPanel"\)/,
   );
-  assert.match(sessionHooksSource, /hydrate-passive/);
+  assert.match(sessionHooksSource, /hydrate-empty/);
+  assert.match(sessionHooksSource, /hydrate-verified/);
+  assert.match(sessionHooksSource, /handleAdminLoginSuccess/);
+  assert.match(sessionHooksSource, /onSetCurrentView\("adminPanel"\)/);
 });

@@ -1,14 +1,11 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { makeAuditPublicId } from "../../../../../common/domain/public-id";
 import type {
   AuditAction,
   AuditEntityType,
 } from "../../domain/admin-common.helpers";
 
 type AuditClient = PrismaClient | Prisma.TransactionClient;
-
-function makeAuditPublicId(): string {
-  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
-}
 
 function serializeDetails(value: Prisma.InputJsonValue | undefined) {
   return JSON.parse(JSON.stringify(value ?? null)) as Prisma.InputJsonValue;

@@ -1,16 +1,13 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../common/http/map-application-error";
+import { getRequestMetaFromExpressLike } from "../../../common/http/request-meta";
 import type { AuthService } from "../application/auth.service";
 
 function getRequestMeta(req: Request) {
-  const forwarded = req.header("x-forwarded-for")?.trim();
-  const requestIp = forwarded
-    ? (forwarded.split(",")[0]?.trim() ?? null)
-    : (req.ip?.trim() ?? null);
-
+  const requestMeta = getRequestMetaFromExpressLike(req);
   return {
-    requestIp,
-    requestUserAgent: req.header("user-agent")?.trim() || null,
+    requestIp: requestMeta.ipAddress,
+    requestUserAgent: requestMeta.userAgent,
   };
 }
 

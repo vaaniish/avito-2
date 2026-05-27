@@ -1,4 +1,5 @@
 import { prisma } from "../../../../lib/prisma";
+import { makeOpaquePublicId } from "../../../../common/domain/public-id";
 import { loadEffectiveCatalogSearchRules } from "./catalog-search.repository";
 import {
   catalogListingDetailInclude,
@@ -489,7 +490,7 @@ export class CatalogRepository {
   }) {
     return prisma.listingQuestion.create({
       data: {
-        public_id: `Q-${Date.now()}`,
+        public_id: makeOpaquePublicId("Q", 18),
         listing_id: params.listingId,
         buyer_id: params.buyerId,
         question: params.question,

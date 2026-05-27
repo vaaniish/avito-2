@@ -203,7 +203,7 @@ export type OnboardingEvaluation = {
 };
 
 export function makePartnershipPublicId(prefix = "PRQ"): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  return makeOpaquePublicId(prefix, 20);
 }
 
 export function parsePartnershipLegalType(value: unknown): OnboardingLegalType | null {
@@ -660,3 +660,4 @@ function isValidHttpUrl(value: string): boolean {
     return false;
   }
 }
+import { makeOpaquePublicId } from "../../common/domain/public-id";

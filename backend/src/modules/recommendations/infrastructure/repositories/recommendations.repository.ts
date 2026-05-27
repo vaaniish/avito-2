@@ -268,6 +268,14 @@ export class RecommendationsRepository {
   }
 
   async recomputeUserInterestProfile(userId: number) {
+    const userExists = await this.prisma.appUser.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!userExists) {
+      return;
+    }
+
     const since = new Date(Date.now() - PROFILE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
     const events = await this.prisma.recommendationEvent.findMany({
       where: {

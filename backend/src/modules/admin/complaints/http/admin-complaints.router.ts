@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import { requireAdmin } from "../../common/http/admin-session";
 import type { GetComplaintDetailsService } from "../application/services/get-complaint-details.service";
 import type { GetComplaintStatsService } from "../application/services/get-complaint-stats.service";
@@ -9,14 +10,6 @@ import type { GetSellerSummaryService } from "../application/services/get-seller
 import type { ListComplaintsService } from "../application/services/list-complaints.service";
 import type { UpdateComplaintLegacyService } from "../application/services/update-complaint-legacy.service";
 import type { UpdateComplaintStatusService } from "../application/services/update-complaint-status.service";
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createAdminComplaintsRouter(deps: {
   services: {
@@ -60,7 +53,7 @@ export function createAdminComplaintsRouter(deps: {
           status: body.status,
           actionTaken: body.actionTaken,
           actorUserId: access.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
         }),
       );
     } catch (error) {
@@ -168,7 +161,7 @@ export function createAdminComplaintsRouter(deps: {
         status: body.status,
         actionTaken: body.actionTaken,
         actorUserId: access.user.id,
-        requestIp: getRequestIp(req),
+        requestIp: getRequestIpFromExpressLike(req),
         idempotencyKey: req.header("Idempotency-Key")?.trim() ?? "",
       }),
     );

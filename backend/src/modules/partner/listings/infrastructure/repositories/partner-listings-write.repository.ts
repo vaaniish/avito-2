@@ -4,6 +4,7 @@ import {
   notFound,
   validationError,
 } from "../../../../../common/application-error";
+import { makeOpaquePublicId } from "../../../../../common/domain/public-id";
 import { prisma } from "../../../../../lib/prisma";
 import { toPartnerListingStatus } from "../../../../../utils/format";
 import { normalizeListingTechState, validateListingQuality } from "../../../listing-quality";
@@ -316,7 +317,7 @@ export class PartnerListingsWriteRepository
     const createdRow = await prisma.$transaction(async (tx) => {
       const listing = await tx.marketplaceListing.create({
         data: {
-          public_id: `LSTTMP-${Date.now()}`,
+          public_id: makeOpaquePublicId("LSTTMP", 20),
           seller_id: params.sellerId,
           type,
           title,

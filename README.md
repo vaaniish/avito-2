@@ -44,6 +44,18 @@
 ### Бэкенд
 
 - `DATABASE_URL` — строка подключения к PostgreSQL
+- `CORS_ALLOWED_ORIGINS` — список разрешенных origin через запятую; если пусто, локально разрешаются только `localhost` и `127.0.0.1`
+- `TRUST_PROXY` — настройка `Express trust proxy`: `true`, `false`, число хопов или CSV-список доверенных прокси
+- `RATE_LIMIT_AUTH_LOGIN_WINDOW_MS` — окно rate limit для `/api/auth/login`
+- `RATE_LIMIT_AUTH_LOGIN_MAX` — максимум попыток логина за окно
+- `RATE_LIMIT_AUTH_SIGNUP_WINDOW_MS` — окно rate limit для `/api/auth/signup`
+- `RATE_LIMIT_AUTH_SIGNUP_MAX` — максимум регистраций за окно
+- `RATE_LIMIT_CHECKOUT_WINDOW_MS` — окно rate limit для мутаций checkout `/api/profile/orders`
+- `RATE_LIMIT_CHECKOUT_MAX` — максимум checkout-запросов за окно
+- `RATE_LIMIT_PARTNER_WRITE_WINDOW_MS` — окно rate limit для partner write API
+- `RATE_LIMIT_PARTNER_WRITE_MAX` — максимум partner write-запросов за окно
+- `RATE_LIMIT_ADMIN_WRITE_WINDOW_MS` — окно rate limit для admin write API
+- `RATE_LIMIT_ADMIN_WRITE_MAX` — максимум admin write-запросов за окно
 - `YOOKASSA_SHOP_ID` — тестовый магазин YooKassa
 - `YOOKASSA_SECRET_KEY` — секрет YooKassa
 - `YOOKASSA_RETURN_URL` — URL возврата после оплаты

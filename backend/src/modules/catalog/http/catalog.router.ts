@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { getRequestIpFromExpressLike } from "../../../common/http/request-meta";
 import { getSessionUser, requireAnyRole } from "../../../lib/session";
 import { sendApplicationError } from "../../../common/http/map-application-error";
 import type { CreateListingComplaintService } from "../application/services/create-listing-complaint.service";
@@ -10,14 +11,6 @@ import type { GetListingsService } from "../application/services/get-listings.se
 import type { GetSellerListingsService } from "../application/services/get-seller-listings.service";
 import type { GetSuggestionsService } from "../application/services/get-suggestions.service";
 import type { RecordListingViewService } from "../application/services/record-listing-view.service";
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createCatalogRouter(deps: {
   services: {
@@ -145,7 +138,7 @@ export function createCatalogRouter(deps: {
         publicId: String(req.params.publicId ?? ""),
         actorUserId: session.user.id,
         actorRole: session.user.role,
-        requestIp: getRequestIp(req),
+        requestIp: getRequestIpFromExpressLike(req),
         question: typeof body.question === "string" ? body.question : "",
       });
       res.status(201).json(result);

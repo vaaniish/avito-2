@@ -190,23 +190,51 @@ async function main() {
       return `listing=${sellerListing.id}`;
     });
 
-    await runStep("checkout invariant quantity=1", async () => {
-      const oversized = await apiRequest("POST", "/profile/orders", {
+    await runStep("checkout respects current stock model and still rejects duplicate rows", async () => {
+      const listingStock = await db.query(
+        `SELECT has_multiple_stock, available_quantity
+         FROM "MarketplaceListing"
+         WHERE public_id = $1
+         LIMIT 1`,
+        [sellerListing.id],
+      );
+      const listingRow = listingStock.rows[0];
+      invariant(Boolean(listingRow), "listing stock row not found");
+
+      const availableQuantity = Math.max(Number(listingRow.available_quantity ?? 0), 0);
+      const validQuantity =
+        listingRow.has_multiple_stock && availableQuantity >= 2 ? 2 : 1;
+
+      const validOrder = await apiRequest("POST", "/profile/orders", {
         token: buyer.token,
         headers: {
           "content-type": "application/json",
           "Idempotency-Key": randomUUID(),
         },
         body: {
-          items: [{ listingId: sellerListing.id, quantity: 2 }],
+          items: [{ listingId: sellerListing.id, quantity: validQuantity }],
           deliveryType: "pickup",
           paymentMethod: "card",
         },
-        expected: [400],
+        expected: [201],
       });
-      invariant(
-        typeof oversized.data?.error === "string" && oversized.data.error.length > 0,
-        "expected validation error for quantity > 1",
+      invariant(validOrder.data?.success === true, "expected checkout success for valid quantity");
+      const createdOrderPublicIds = Array.isArray(validOrder.data?.orders)
+        ? validOrder.data.orders
+            .map((order) => order?.order_id)
+            .filter((value) => typeof value === "string" && value.length > 0)
+        : [];
+      invariant(createdOrderPublicIds.length > 0, "created order ids missing from checkout response");
+      const createdOrderRows = await db.query(
+        `SELECT id
+         FROM "MarketOrder"
+         WHERE public_id = ANY($1::text[])`,
+        [createdOrderPublicIds],
+      );
+      syntheticOrderIds.push(
+        ...createdOrderRows.rows
+          .map((row) => Number(row.id))
+          .filter(Number.isInteger),
       );
 
       const duplicated = await apiRequest("POST", "/profile/orders", {
@@ -230,7 +258,7 @@ async function main() {
         typeof duplicated.data?.error === "string" && duplicated.data.error.length > 0,
         "expected duplicate listing validation error",
       );
-      return "quantity>1 and duplicate listing are rejected";
+      return `valid quantity=${validQuantity}, duplicate rows rejected`;
     });
 
     await runStep("buyer anti-circumvention incident logged", async () => {
@@ -331,9 +359,9 @@ async function main() {
       return `complaints ${beforeCount} -> ${afterCount}`;
     });
 
-    await runStep("listing cannot be reactivated when linked to order", async () => {
+    await runStep("listing linked to order can return to moderation but admin approval keeps it inactive", async () => {
       const listingRow = await db.query(
-        `SELECT id, public_id, seller_id, title, price, status, moderation_status
+        `SELECT id, public_id, seller_id, title, price, status, moderation_status, has_multiple_stock, available_quantity
          FROM "MarketplaceListing"
          WHERE public_id = $1
          LIMIT 1`,
@@ -390,13 +418,17 @@ async function main() {
           body: {
             status: "moderation",
           },
-          expected: [409],
+          expected: [200],
         },
       );
       invariant(
-        typeof sellerActivationAttempt.data?.error === "string" &&
-          sellerActivationAttempt.data.error.length > 0,
-        "seller reactivation should be blocked",
+        sellerActivationAttempt.data?.success === true,
+        "seller moderation resubmission should succeed",
+      );
+      invariant(sellerActivationAttempt.data?.status === "moderation", "listing status should move to moderation");
+      invariant(
+        sellerActivationAttempt.data?.moderationStatus === "pending",
+        "moderation status should return to pending",
       );
 
       const adminModeration = await apiRequest(
@@ -412,9 +444,20 @@ async function main() {
         },
       );
 
-      invariant(adminModeration.data?.activationBlockedByOrder === true, "admin flag is not set");
-      invariant(adminModeration.data?.listingStatus === "inactive", "listing must stay inactive");
-      return "seller/admin activation blocked";
+      const canStayActiveWithOrders =
+        Boolean(listing.has_multiple_stock) && Number(listing.available_quantity ?? 0) > 0;
+
+      invariant(
+        adminModeration.data?.activationBlockedByOrder === !canStayActiveWithOrders,
+        "admin activationBlockedByOrder flag does not match listing stock mode",
+      );
+      invariant(
+        adminModeration.data?.listingStatus === (canStayActiveWithOrders ? "active" : "inactive"),
+        "listing status after moderation does not match stock mode",
+      );
+      return canStayActiveWithOrders
+        ? "seller resubmission allowed, multi-stock listing stays activatable"
+        : "seller resubmission allowed, admin activation blocked";
     });
 
     await runStep("partner orders expose finance fields", async () => {

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { makeOpaquePublicId } from "../../../../common/domain/public-id";
 
 export function buildDefaultItemAttributeDefinitions(params: {
   itemId: number;
@@ -50,11 +51,7 @@ export function buildDefaultItemAttributeDefinitions(params: {
 }
 
 export function makePublicId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.floor(
-    Math.random() * 10_000,
-  )
-    .toString(36)
-    .toUpperCase()}`;
+  return makeOpaquePublicId(prefix, 18);
 }
 
 export function parseCatalogListingType(value: unknown): "PRODUCT" | null {

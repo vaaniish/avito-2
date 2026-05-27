@@ -33,7 +33,6 @@ export interface AuthUserRepository {
   findLoginUserByEmail(email: string): Promise<LoginUserRecord | null>;
   activateUser(userId: number): Promise<void>;
   findByEmail(email: string): Promise<{ id: number } | null>;
-  countBuyers(): Promise<number>;
   createBuyer(input: CreateBuyerInput): Promise<CreatedBuyerRecord>;
   findSessionUserById(userId: number): Promise<SessionUser | null>;
   refreshActiveSessionUser(userId: number): Promise<SessionUser>;

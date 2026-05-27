@@ -1,5 +1,7 @@
 import type { Prisma, UserRole } from "@prisma/client";
 import type { Request } from "express";
+import { makeAuditPublicId, makeOpaquePublicId } from "../../common/domain/public-id";
+import { getRequestIpFromExpressLike } from "../../common/http/request-meta";
 import { prisma } from "../../lib/prisma";
 
 const VIOLATION_ACTION = "anti_circumvention.violation_detected";
@@ -67,25 +69,16 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
   return parsed;
 }
 
-function makeAuditPublicId(): string {
-  return `AUD-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
-}
-
 function makeComplaintPublicId(): string {
-  return `CMP-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("CMP", 20);
 }
 
 function makeComplaintEventPublicId(): string {
-  return `CEV-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("CEV", 20);
 }
 
 function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-
-  return req.ip || null;
+  return getRequestIpFromExpressLike(req);
 }
 
 function clipText(value: string, maxLength: number): string {

@@ -1,4 +1,5 @@
 import { Prisma, type ComplaintSanctionLevel } from "@prisma/client";
+import { makeOpaquePublicId } from "../../../../../common/domain/public-id";
 
 const SANCTION_PUBLIC_ID_PREFIX = "SNC";
 
@@ -26,9 +27,7 @@ export type ComplaintEnforcementResult = {
 };
 
 function makeSanctionPublicId(): string {
-  return `${SANCTION_PUBLIC_ID_PREFIX}-${Date.now()}-${Math.floor(
-    Math.random() * 1_000_000,
-  )}`;
+  return makeOpaquePublicId(SANCTION_PUBLIC_ID_PREFIX, 20);
 }
 
 function addDays(base: Date, days: number): Date {

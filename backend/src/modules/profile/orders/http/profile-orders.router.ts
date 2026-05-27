@@ -1,5 +1,9 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import {
+  getRequestIpFromExpressLike,
+  normalizeRequestIp,
+} from "../../../../common/http/request-meta";
 import type { DeliveryProviderCode, YooKassaWebhookPayload } from "../application/profile-orders.types";
 import type { CancelProfileOrderService } from "../application/services/cancel-profile-order.service";
 import type { CreateOrderService } from "../application/services/create-order.service";
@@ -33,27 +37,11 @@ function profileRoles(deps: ProfileOrdersHttpDeps): string[] {
 }
 
 function normalizeIp(value: string): string {
-  const normalized = value.trim();
-  if (!normalized) return "";
-  if (normalized.startsWith("::ffff:")) {
-    return normalized.slice("::ffff:".length);
-  }
-  return normalized;
+  return normalizeRequestIp(value) ?? "";
 }
 
 function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (typeof forwarded === "string" && forwarded.trim()) {
-    const candidate = normalizeIp(forwarded.split(",")[0] ?? "");
-    return candidate || null;
-  }
-
-  if (typeof req.ip === "string" && req.ip.trim()) {
-    const candidate = normalizeIp(req.ip);
-    return candidate || null;
-  }
-
-  return null;
+  return getRequestIpFromExpressLike(req);
 }
 
 function parseIpAllowlist(rawValue: string | undefined): Set<string> {

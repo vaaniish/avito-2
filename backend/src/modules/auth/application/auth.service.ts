@@ -4,6 +4,7 @@ import {
   unauthorized,
   validationError,
 } from "../../../common/application-error";
+import { makeOpaquePublicId } from "../../../common/domain/public-id";
 import { toClientRole } from "../../../utils/format";
 import type { AuthSuccessResult } from "../domain/auth.types";
 import type {
@@ -125,8 +126,7 @@ export class AuthService {
       throw conflict("Пользователь с таким email уже существует");
     }
 
-    const sequence = await this.userRepository.countBuyers();
-    const publicId = `USR-${String(sequence + 1000).padStart(3, "0")}`;
+    const publicId = makeOpaquePublicId("USR", 18);
     const passwordHash = await this.passwordHasher.hash(password);
     const user = await this.userRepository.createBuyer({
       publicId,

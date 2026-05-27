@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import { requireRole } from "../../../../lib/session";
 
 const ROLE_ADMIN = "ADMIN";
@@ -22,10 +23,5 @@ export async function requireAdmin(
 }
 
 export function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-
-  return req.ip || null;
+  return getRequestIpFromExpressLike(req);
 }

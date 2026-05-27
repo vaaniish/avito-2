@@ -1,19 +1,12 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import type { GetPartnerPayoutProfileService } from "../application/services/get-partner-payout-profile.service";
 import type { UpsertPartnerPayoutProfileService } from "../application/services/upsert-partner-payout-profile.service";
 
 type SessionResult =
   | { ok: true; user: { id: number } }
   | { ok: false; status: number; message: string };
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createPartnerPayoutRouter(deps: {
   requireAnyRole: (req: Request, roles: string[]) => Promise<SessionResult>;
@@ -54,7 +47,7 @@ export function createPartnerPayoutRouter(deps: {
         await deps.services.upsertPartnerPayoutProfile.execute({
           sellerId: session.user.id,
           actorUserId: session.user.id,
-          requestIp: getRequestIp(req),
+          requestIp: getRequestIpFromExpressLike(req),
           body: (req.body ?? {}) as Record<string, unknown>,
         }),
       );

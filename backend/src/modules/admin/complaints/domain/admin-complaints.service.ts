@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { makeOpaquePublicId } from "../../../../common/domain/public-id";
 import type {
   ComplaintDto,
   ComplaintListFilters,
@@ -70,7 +71,7 @@ export function buildComplaintEvaluation(params: {
 }
 
 export function makePublicId(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId(prefix, 20);
 }
 
 export function toClientComplaintStatus(

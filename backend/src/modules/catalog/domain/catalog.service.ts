@@ -8,6 +8,7 @@ import {
   MarketplaceListing,
   Prisma,
 } from "@prisma/client";
+import { makeOpaquePublicId } from "../../../common/domain/public-id";
 import { toClientCondition } from "../../../utils/format";
 import {
   buildCatalogBranchHints,
@@ -207,11 +208,11 @@ function formatResponseTime(minutes: number | null | undefined): string | null {
 }
 
 function makeComplaintPublicId(): string {
-  return `CMP-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("CMP", 20);
 }
 
 function makeComplaintEventPublicId(): string {
-  return `CME-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  return makeOpaquePublicId("CME", 20);
 }
 
 function listingCategoryName(

@@ -1,19 +1,12 @@
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
+import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
 import { requireAdmin } from "../../common/http/admin-session";
 import type { ListKycRequestsService } from "../application/services/list-kyc-requests.service";
 import type { ListPartnershipRequestsService } from "../application/services/list-partnership-requests.service";
 import type { ListPayoutProfilesService } from "../application/services/list-payout-profiles.service";
 import type { UpdateKycStatusService } from "../application/services/update-kyc-status.service";
 import type { UpdatePartnershipRequestStatusService } from "../application/services/update-partnership-request-status.service";
-
-function getRequestIp(req: Request): string | null {
-  const forwarded = req.header("x-forwarded-for");
-  if (forwarded && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? null;
-  }
-  return req.ip || null;
-}
 
 export function createAdminPartnershipRouter(deps: {
   services: {
@@ -54,7 +47,7 @@ export function createAdminPartnershipRouter(deps: {
           adminNote: body.adminNote,
           requestMeta: {
             actorUserId: access.user.id,
-            requestIp: getRequestIp(req),
+            requestIp: getRequestIpFromExpressLike(req),
           },
         }),
       );
@@ -90,7 +83,7 @@ export function createAdminPartnershipRouter(deps: {
           rejectionReason: body.rejectionReason,
           requestMeta: {
             actorUserId: access.user.id,
-            requestIp: getRequestIp(req),
+            requestIp: getRequestIpFromExpressLike(req),
           },
         }),
       );
