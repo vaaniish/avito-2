@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  lookupDadataBankByBic,
   lookupDadataParty,
   mapDadataPartySuggestion,
 } from "../../../backend/src/modules/partnership/dadata";
@@ -93,6 +94,22 @@ test("dadata party: returns service unavailable when token is missing", async ()
 
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.status, 503);
+});
+
+test("dadata bank: local fixtures resolve known bic without api key", async () => {
+  const result = await withEnv(
+    {
+      DADATA_API_KEY: undefined,
+      DADATA_USE_LOCAL_BANK_FIXTURES: "1",
+    },
+    () => lookupDadataBankByBic("044525225"),
+  );
+
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.equal(result.result.bankName, "ПАО Сбербанк");
+    assert.equal(result.result.correspondentAccount, "30101810400000000225");
+  }
 });
 
 const VALID_ONBOARDING_PAYLOAD = {

@@ -23,76 +23,6 @@ function invariant(condition, message) {
   }
 }
 
-function withEnv(overrides, fn) {
-  const snapshot = {};
-  for (const [key, value] of Object.entries(overrides)) {
-    snapshot[key] = process.env[key];
-    if (value === undefined) {
-      delete process.env[key];
-    } else {
-      process.env[key] = value;
-    }
-  }
-
-  return fn().finally(() => {
-    for (const [key, value] of Object.entries(snapshot)) {
-      if (value === undefined) {
-        delete process.env[key];
-      } else {
-        process.env[key] = value;
-      }
-    }
-  });
-}
-
-function withMockedDadataBankLookup(fn) {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async (input, init) => {
-    const url =
-      typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url;
-
-    if (url.includes("/findById/bank")) {
-      return new Response(
-        JSON.stringify({
-          suggestions: [
-            {
-              value: "ПАО Сбербанк",
-              data: {
-                bic: "044525225",
-                correspondent_account: "30101810400000000225",
-                name: {
-                  payment: "ПАО Сбербанк",
-                  short: "Сбербанк",
-                  full: "Публичное акционерное общество Сбербанк России",
-                },
-                state: {
-                  status: "ACTIVE",
-                },
-              },
-            },
-          ],
-        }),
-        {
-          status: 200,
-          headers: {
-            "content-type": "application/json",
-          },
-        },
-      );
-    }
-
-    return originalFetch(input, init);
-  });
-
-  return withEnv({ DADATA_API_KEY: "test-token" }, fn).finally(() => {
-    globalThis.fetch = originalFetch;
-  });
-}
-
 function isSafeDatabaseUrl(url) {
   const normalized = url.toLowerCase();
   return (
@@ -470,22 +400,20 @@ async function main() {
 
     await runStep("payout profile submit -> auto verify", async () => {
       const seller = await login("seller1@ecomm.local", "seller123");
-      const submitted = await withMockedDadataBankLookup(() =>
-        apiRequest("PUT", "/partner/payout-profile", {
-          token: seller.token,
-          body: {
-            legalType: "COMPANY",
-            legalName: "ООО Тех Поинт",
-            taxId: "7701234567",
-            bankAccount: "40702810900000000000",
-            bankBic: "044525225",
-            correspondentAccount: "30101810400000000225",
-            bankName: "ПАО Сбербанк",
-            recipientName: "ООО Тех Поинт",
-          },
-          expected: [200],
-        }),
-      );
+      const submitted = await apiRequest("PUT", "/partner/payout-profile", {
+        token: seller.token,
+        body: {
+          legalType: "COMPANY",
+          legalName: "ООО Тех Поинт",
+          taxId: "7701234567",
+          bankAccount: "40702810900000000000",
+          bankBic: "044525225",
+          correspondentAccount: "30101810400000000225",
+          bankName: "ПАО Сбербанк",
+          recipientName: "ООО Тех Поинт",
+        },
+        expected: [200],
+      });
       invariant(submitted.data?.success === true, "payout profile submit failed");
       invariant(
         submitted.data?.profile?.status === "verified",

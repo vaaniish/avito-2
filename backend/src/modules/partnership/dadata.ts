@@ -97,6 +97,15 @@ type DadataBankResponse = {
 
 const DEFAULT_DADATA_API_BASE_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs";
 const DEFAULT_DADATA_TIMEOUT_MS = 7000;
+const LOCAL_DADATA_BANK_FIXTURES: Record<string, DadataBankLookupResult> = {
+  "044525225": {
+    bic: "044525225",
+    bankName: "ПАО Сбербанк",
+    correspondentAccount: "30101810400000000225",
+    paymentName: "ПАО Сбербанк",
+    stateStatus: "ACTIVE",
+  },
+};
 
 function text(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -136,6 +145,10 @@ function buildBankName(suggestion: DadataBankSuggestion): string {
     text(suggestion.value) ||
     text(suggestion.unrestricted_value)
   );
+}
+
+function lookupLocalDadataBankFixture(bic: string): DadataBankLookupResult | null {
+  return LOCAL_DADATA_BANK_FIXTURES[bic] ?? null;
 }
 
 export function mapDadataPartySuggestion(
@@ -262,6 +275,13 @@ export async function lookupDadataBankByBic(
   const bic = onlyDigits(bicInput);
   if (!bic || bic.length !== 9) {
     return { ok: false, status: 400, error: "Укажите корректный БИК из 9 цифр." };
+  }
+
+  if (process.env.DADATA_USE_LOCAL_BANK_FIXTURES === "1") {
+    const fixture = lookupLocalDadataBankFixture(bic);
+    if (fixture) {
+      return { ok: true, result: fixture };
+    }
   }
 
   const apiKey = process.env.DADATA_API_KEY?.trim();

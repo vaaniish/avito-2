@@ -23,7 +23,7 @@
     "test:integration": "node node_modules/tsx/dist/cli.mjs --test scripts/tests/integration/*.test.ts",
     "test:e2e:smoke": "node scripts/tests/run-with-backend.mjs -- node scripts/tests/e2e/smoke-regression.e2e.mjs",
     "test:e2e:critical": "node scripts/tests/run-with-backend.mjs -- node scripts/tests/e2e/critical-regression.e2e.mjs",
-    "test:e2e:phasea": "node scripts/tests/run-with-backend.mjs -- node scripts/tests/e2e/phase-a-critical-flows.e2e.mjs",
+    "test:e2e:phasea": "DADATA_USE_LOCAL_BANK_FIXTURES=1 node scripts/tests/run-with-backend.mjs -- node scripts/tests/e2e/phase-a-critical-flows.e2e.mjs",
     "test:e2e:api:smoke": "npm run test:e2e:smoke",
     "test:e2e:api:critical": "npm run test:e2e:critical && npm run test:e2e:phasea",
     "test:e2e:ui:smoke": "playwright test --config=playwright.config.ts --project=desktop-smoke --project=mobile-smoke --grep @smoke",
