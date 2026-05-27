@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import fs from "node:fs";
 import path from "node:path";
+import { getPasswordHashSaltRounds } from "../src/common/config/password-hash";
 import { syncListingSearchKeywords } from "../src/modules/catalog/catalog-search.shared";
 import { generateCartCrossSellRuleSeeds } from "../src/modules/recommendations/domain/cart-cross-sell.helpers";
 import { dnsProductCatalogSeed } from "./dns-product-catalog.seed";
@@ -14,6 +15,8 @@ if (!databaseUrl) throw new Error("Переменная DATABASE_URL не зад
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
+
+const PASSWORD_HASH_SALT_ROUNDS = getPasswordHashSaltRounds();
 
 const daysAgo = (days: number): Date =>
   new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -643,7 +646,7 @@ async function main(): Promise<void> {
         status: u[2],
         email: u[3],
         work_email: u[1] === "SELLER" ? u[3] : null,
-        password: await bcrypt.hash(u[4], 10),
+        password: await bcrypt.hash(u[4], PASSWORD_HASH_SALT_ROUNDS),
         name: u[5],
         username: u[6],
         joined_at: daysAgo(u[8]),
