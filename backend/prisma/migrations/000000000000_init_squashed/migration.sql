@@ -35,6 +35,15 @@ CREATE TYPE "DeliveryType" AS ENUM ('PICKUP', 'DELIVERY');
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'HELD', 'SUCCESS', 'FAILED', 'CANCELLED', 'REFUNDED');
 
 -- CreateEnum
+CREATE TYPE "PromoDiscountType" AS ENUM ('PERCENT', 'FIXED_AMOUNT');
+
+-- CreateEnum
+CREATE TYPE "PromoScopeTargetType" AS ENUM ('CATEGORY', 'SUBCATEGORY', 'ITEM', 'LISTING');
+
+-- CreateEnum
+CREATE TYPE "PromoActivationStatus" AS ENUM ('RESERVED', 'CONSUMED', 'RELEASED');
+
+-- CreateEnum
 CREATE TYPE "PaymentProvider" AS ENUM ('YOOMONEY', 'STRIPE', 'OTHER');
 
 -- CreateEnum
@@ -62,6 +71,15 @@ CREATE TYPE "PolicyScope" AS ENUM ('CHECKOUT', 'PARTNERSHIP');
 CREATE TYPE "PayoutProfileStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 
 -- CreateEnum
+CREATE TYPE "RecommendationEventType" AS ENUM ('VIEW', 'WISHLIST', 'ADD_TO_CART', 'PURCHASE_PAID', 'PURCHASE_COMPLETED', 'REVIEW');
+
+-- CreateEnum
+CREATE TYPE "ItemSimilaritySource" AS ENUM ('CO_VIEW', 'CO_PURCHASE', 'CONTENT', 'HYBRID');
+
+-- CreateEnum
+CREATE TYPE "RecommendationEntityType" AS ENUM ('USER', 'LISTING', 'GLOBAL');
+
+-- CreateEnum
 CREATE TYPE "ListingModerationActorType" AS ENUM ('SYSTEM', 'ADMIN');
 
 -- CreateEnum
@@ -80,6 +98,7 @@ CREATE TABLE "AppUser" (
     "role" "UserRole" NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "email" TEXT NOT NULL,
+    "work_email" TEXT,
     "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "first_name" TEXT,
@@ -128,13 +147,10 @@ CREATE TABLE "UserAddress" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "label" TEXT NOT NULL,
-    "full_address" TEXT NOT NULL,
-    "region" TEXT NOT NULL,
+    "region" TEXT,
     "city" TEXT NOT NULL,
     "street" TEXT NOT NULL,
     "house" TEXT NOT NULL,
-    "apartment" TEXT DEFAULT '',
-    "entrance" TEXT DEFAULT '',
     "postal_code" TEXT NOT NULL,
     "lat" DOUBLE PRECISION,
     "lon" DOUBLE PRECISION,
@@ -194,14 +210,11 @@ CREATE TABLE "CatalogSearchRule" (
     "category_id" INTEGER,
     "subcategory_id" INTEGER,
     "item_id" INTEGER,
-    "brand_name" TEXT,
     "normalized_brand" TEXT,
-    "model_name" TEXT,
     "normalized_model" TEXT,
     "characteristic_key" TEXT,
     "characteristic_value" TEXT,
     "weight" INTEGER NOT NULL DEFAULT 50,
-    "is_generated" BOOLEAN NOT NULL DEFAULT false,
     "source" TEXT NOT NULL DEFAULT 'manual',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -333,20 +346,71 @@ CREATE TABLE "MarketplaceListing" (
     "moderation_status" "ModerationStatus" NOT NULL DEFAULT 'APPROVED',
     "views" INTEGER NOT NULL DEFAULT 0,
     "shipping_by_seller" BOOLEAN NOT NULL DEFAULT true,
+    "seller_warranty_enabled" BOOLEAN NOT NULL DEFAULT false,
+    "seller_warranty_days" INTEGER,
+    "has_multiple_stock" BOOLEAN NOT NULL DEFAULT false,
+    "available_quantity" INTEGER NOT NULL DEFAULT 1,
     "sku" TEXT,
     "tech_grade" TEXT,
     "tech_battery_health" INTEGER,
     "tech_defects" TEXT,
     "tech_included" TEXT,
-    "photo_count" INTEGER NOT NULL DEFAULT 0,
-    "photo_front_present" BOOLEAN NOT NULL DEFAULT false,
-    "photo_back_present" BOOLEAN NOT NULL DEFAULT false,
-    "photo_left_present" BOOLEAN NOT NULL DEFAULT false,
-    "photo_right_present" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "MarketplaceListing_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PromoCode" (
+    "id" SERIAL NOT NULL,
+    "public_id" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "discount_type" "PromoDiscountType" NOT NULL,
+    "discount_value" INTEGER NOT NULL,
+    "min_subtotal" INTEGER NOT NULL DEFAULT 0,
+    "max_activations" INTEGER NOT NULL,
+    "per_user_limit" INTEGER NOT NULL DEFAULT 1,
+    "starts_at" TIMESTAMP(3) NOT NULL,
+    "ends_at" TIMESTAMP(3) NOT NULL,
+    "is_enabled" BOOLEAN NOT NULL DEFAULT true,
+    "all_catalog" BOOLEAN NOT NULL DEFAULT false,
+    "is_system" BOOLEAN NOT NULL DEFAULT false,
+    "legacy_rule" TEXT,
+    "created_by_id" INTEGER,
+    "updated_by_id" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PromoCode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PromoScopeTarget" (
+    "id" SERIAL NOT NULL,
+    "promo_code_id" INTEGER NOT NULL,
+    "target_type" "PromoScopeTargetType" NOT NULL,
+    "category_id" INTEGER,
+    "subcategory_id" INTEGER,
+    "item_id" INTEGER,
+    "listing_id" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PromoScopeTarget_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PromoActivation" (
+    "id" SERIAL NOT NULL,
+    "promo_code_id" INTEGER NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "order_id" INTEGER,
+    "checkout_group_key" TEXT NOT NULL,
+    "status" "PromoActivationStatus" NOT NULL DEFAULT 'RESERVED',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PromoActivation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -459,11 +523,105 @@ CREATE TABLE "WishlistItem" (
 );
 
 -- CreateTable
+CREATE TABLE "RecommendationEvent" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "session_id" TEXT,
+    "listing_id" INTEGER NOT NULL,
+    "event_type" "RecommendationEventType" NOT NULL,
+    "event_weight" INTEGER NOT NULL,
+    "source_page" TEXT,
+    "occurred_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "dedupe_key" TEXT,
+
+    CONSTRAINT "RecommendationEvent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserInterestProfile" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "top_categories_json" JSONB NOT NULL DEFAULT '[]',
+    "top_brands_json" JSONB NOT NULL DEFAULT '[]',
+    "top_price_buckets_json" JSONB NOT NULL DEFAULT '[]',
+    "recent_listing_ids_json" JSONB NOT NULL DEFAULT '[]',
+    "short_term_listing_ids_json" JSONB NOT NULL DEFAULT '[]',
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserInterestProfile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ItemSimilarity" (
+    "id" SERIAL NOT NULL,
+    "listing_id" INTEGER NOT NULL,
+    "related_listing_id" INTEGER NOT NULL,
+    "source" "ItemSimilaritySource" NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ItemSimilarity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SegmentPopularity" (
+    "id" SERIAL NOT NULL,
+    "category_public_id" TEXT,
+    "category_name" TEXT,
+    "brand" TEXT,
+    "price_bucket" TEXT NOT NULL,
+    "listing_id" INTEGER NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL,
+    "source_event_count" INTEGER NOT NULL DEFAULT 0,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SegmentPopularity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CartCrossSellRule" (
+    "id" SERIAL NOT NULL,
+    "source_category_id" INTEGER,
+    "source_subcategory_id" INTEGER,
+    "source_item_id" INTEGER,
+    "source_brand" TEXT,
+    "source_model" TEXT,
+    "target_category_id" INTEGER,
+    "target_subcategory_id" INTEGER,
+    "target_item_id" INTEGER,
+    "target_brand" TEXT,
+    "priority" INTEGER NOT NULL DEFAULT 50,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CartCrossSellRule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RecommendationRefreshQueue" (
+    "id" SERIAL NOT NULL,
+    "entity_type" "RecommendationEntityType" NOT NULL,
+    "entity_id" INTEGER NOT NULL,
+    "reason" TEXT NOT NULL,
+    "priority" INTEGER NOT NULL DEFAULT 50,
+    "next_run_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "locked_at" TIMESTAMP(3),
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RecommendationRefreshQueue_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "MarketOrder" (
     "id" SERIAL NOT NULL,
     "public_id" TEXT NOT NULL,
     "buyer_id" INTEGER NOT NULL,
     "seller_id" INTEGER NOT NULL,
+    "promo_code_id" INTEGER,
+    "checkout_group_key" TEXT,
     "status" "OrderStatus" NOT NULL DEFAULT 'CREATED',
     "delivery_type" "DeliveryType" NOT NULL,
     "delivery_address" TEXT,
@@ -525,7 +683,6 @@ CREATE TABLE "Complaint" (
     "seller_id" INTEGER NOT NULL,
     "reporter_id" INTEGER NOT NULL,
     "description" TEXT NOT NULL,
-    "evidence" TEXT,
     "checked_at" TIMESTAMP(3),
     "checked_by_id" INTEGER,
     "action_taken" TEXT,
@@ -986,6 +1143,48 @@ CREATE INDEX "MarketplaceListing_status_moderation_status_created_at_idx" ON "Ma
 CREATE INDEX "MarketplaceListing_type_status_moderation_created_id_idx" ON "MarketplaceListing"("type", "status", "moderation_status", "created_at" DESC, "id" DESC);
 
 -- CreateIndex
+CREATE UNIQUE INDEX "PromoCode_public_id_key" ON "PromoCode"("public_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PromoCode_code_key" ON "PromoCode"("code");
+
+-- CreateIndex
+CREATE INDEX "PromoCode_is_enabled_starts_at_ends_at_idx" ON "PromoCode"("is_enabled", "starts_at", "ends_at");
+
+-- CreateIndex
+CREATE INDEX "PromoCode_created_at_idx" ON "PromoCode"("created_at");
+
+-- CreateIndex
+CREATE INDEX "PromoScopeTarget_promo_code_id_target_type_idx" ON "PromoScopeTarget"("promo_code_id", "target_type");
+
+-- CreateIndex
+CREATE INDEX "PromoScopeTarget_category_id_idx" ON "PromoScopeTarget"("category_id");
+
+-- CreateIndex
+CREATE INDEX "PromoScopeTarget_subcategory_id_idx" ON "PromoScopeTarget"("subcategory_id");
+
+-- CreateIndex
+CREATE INDEX "PromoScopeTarget_item_id_idx" ON "PromoScopeTarget"("item_id");
+
+-- CreateIndex
+CREATE INDEX "PromoScopeTarget_listing_id_idx" ON "PromoScopeTarget"("listing_id");
+
+-- CreateIndex
+CREATE INDEX "PromoActivation_promo_code_id_status_idx" ON "PromoActivation"("promo_code_id", "status");
+
+-- CreateIndex
+CREATE INDEX "PromoActivation_user_id_promo_code_id_status_idx" ON "PromoActivation"("user_id", "promo_code_id", "status");
+
+-- CreateIndex
+CREATE INDEX "PromoActivation_checkout_group_key_status_idx" ON "PromoActivation"("checkout_group_key", "status");
+
+-- CreateIndex
+CREATE INDEX "PromoActivation_order_id_idx" ON "PromoActivation"("order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PromoActivation_promo_group_unique" ON "PromoActivation"("promo_code_id", "checkout_group_key");
+
+-- CreateIndex
 CREATE INDEX "ListingSearchKeyword_listing_id_weight_idx" ON "ListingSearchKeyword"("listing_id", "weight" DESC);
 
 -- CreateIndex
@@ -1043,6 +1242,72 @@ CREATE INDEX "ListingQuestion_listing_id_created_at_idx" ON "ListingQuestion"("l
 CREATE UNIQUE INDEX "WishlistItem_user_id_listing_id_key" ON "WishlistItem"("user_id", "listing_id");
 
 -- CreateIndex
+CREATE INDEX "RecommendationEvent_user_id_occurred_at_idx" ON "RecommendationEvent"("user_id", "occurred_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "RecommendationEvent_listing_id_occurred_at_idx" ON "RecommendationEvent"("listing_id", "occurred_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "RecommendationEvent_event_type_occurred_at_idx" ON "RecommendationEvent"("event_type", "occurred_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "RecommendationEvent_user_id_listing_id_event_type_occurred__idx" ON "RecommendationEvent"("user_id", "listing_id", "event_type", "occurred_at" DESC);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RecommendationEvent_dedupe_key_unique" ON "RecommendationEvent"("dedupe_key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserInterestProfile_user_id_key" ON "UserInterestProfile"("user_id");
+
+-- CreateIndex
+CREATE INDEX "UserInterestProfile_updated_at_idx" ON "UserInterestProfile"("updated_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "ItemSimilarity_listing_id_score_idx" ON "ItemSimilarity"("listing_id", "score" DESC);
+
+-- CreateIndex
+CREATE INDEX "ItemSimilarity_related_listing_id_score_idx" ON "ItemSimilarity"("related_listing_id", "score" DESC);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ItemSimilarity_listing_related_source_unique" ON "ItemSimilarity"("listing_id", "related_listing_id", "source");
+
+-- CreateIndex
+CREATE INDEX "SegmentPopularity_category_public_id_brand_price_bucket_sco_idx" ON "SegmentPopularity"("category_public_id", "brand", "price_bucket", "score" DESC);
+
+-- CreateIndex
+CREATE INDEX "SegmentPopularity_updated_at_idx" ON "SegmentPopularity"("updated_at" DESC);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SegmentPopularity_segment_listing_unique" ON "SegmentPopularity"("category_public_id", "brand", "price_bucket", "listing_id");
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_is_active_priority_idx" ON "CartCrossSellRule"("is_active", "priority" DESC);
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_source_item_id_is_active_priority_idx" ON "CartCrossSellRule"("source_item_id", "is_active", "priority" DESC);
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_source_subcategory_id_is_active_prior_idx" ON "CartCrossSellRule"("source_subcategory_id", "is_active", "priority" DESC);
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_source_category_id_is_active_priority_idx" ON "CartCrossSellRule"("source_category_id", "is_active", "priority" DESC);
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_target_item_id_is_active_idx" ON "CartCrossSellRule"("target_item_id", "is_active");
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_target_subcategory_id_is_active_idx" ON "CartCrossSellRule"("target_subcategory_id", "is_active");
+
+-- CreateIndex
+CREATE INDEX "CartCrossSellRule_target_category_id_is_active_idx" ON "CartCrossSellRule"("target_category_id", "is_active");
+
+-- CreateIndex
+CREATE INDEX "RecommendationRefreshQueue_entity_type_entity_id_next_run_a_idx" ON "RecommendationRefreshQueue"("entity_type", "entity_id", "next_run_at");
+
+-- CreateIndex
+CREATE INDEX "RecommendationRefreshQueue_locked_at_next_run_at_idx" ON "RecommendationRefreshQueue"("locked_at", "next_run_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "MarketOrder_public_id_key" ON "MarketOrder"("public_id");
 
 -- CreateIndex
@@ -1050,6 +1315,12 @@ CREATE INDEX "MarketOrder_buyer_id_idx" ON "MarketOrder"("buyer_id");
 
 -- CreateIndex
 CREATE INDEX "MarketOrder_seller_id_idx" ON "MarketOrder"("seller_id");
+
+-- CreateIndex
+CREATE INDEX "MarketOrder_promo_code_id_idx" ON "MarketOrder"("promo_code_id");
+
+-- CreateIndex
+CREATE INDEX "MarketOrder_checkout_group_key_idx" ON "MarketOrder"("checkout_group_key");
 
 -- CreateIndex
 CREATE INDEX "MarketOrder_status_created_at_idx" ON "MarketOrder"("status", "created_at");
@@ -1307,6 +1578,36 @@ ALTER TABLE "MarketplaceListing" ADD CONSTRAINT "MarketplaceListing_seller_id_fk
 ALTER TABLE "MarketplaceListing" ADD CONSTRAINT "MarketplaceListing_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "CatalogItem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "PromoCode" ADD CONSTRAINT "PromoCode_created_by_id_fkey" FOREIGN KEY ("created_by_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoCode" ADD CONSTRAINT "PromoCode_updated_by_id_fkey" FOREIGN KEY ("updated_by_id") REFERENCES "AppUser"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoScopeTarget" ADD CONSTRAINT "PromoScopeTarget_promo_code_id_fkey" FOREIGN KEY ("promo_code_id") REFERENCES "PromoCode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoScopeTarget" ADD CONSTRAINT "PromoScopeTarget_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "CatalogCategory"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoScopeTarget" ADD CONSTRAINT "PromoScopeTarget_subcategory_id_fkey" FOREIGN KEY ("subcategory_id") REFERENCES "CatalogSubcategory"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoScopeTarget" ADD CONSTRAINT "PromoScopeTarget_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "CatalogItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoScopeTarget" ADD CONSTRAINT "PromoScopeTarget_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoActivation" ADD CONSTRAINT "PromoActivation_promo_code_id_fkey" FOREIGN KEY ("promo_code_id") REFERENCES "PromoCode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoActivation" ADD CONSTRAINT "PromoActivation_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoActivation" ADD CONSTRAINT "PromoActivation_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "MarketOrder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ListingSearchKeyword" ADD CONSTRAINT "ListingSearchKeyword_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1343,10 +1644,31 @@ ALTER TABLE "WishlistItem" ADD CONSTRAINT "WishlistItem_user_id_fkey" FOREIGN KE
 ALTER TABLE "WishlistItem" ADD CONSTRAINT "WishlistItem_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "RecommendationEvent" ADD CONSTRAINT "RecommendationEvent_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RecommendationEvent" ADD CONSTRAINT "RecommendationEvent_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserInterestProfile" ADD CONSTRAINT "UserInterestProfile_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ItemSimilarity" ADD CONSTRAINT "ItemSimilarity_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ItemSimilarity" ADD CONSTRAINT "ItemSimilarity_related_listing_id_fkey" FOREIGN KEY ("related_listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SegmentPopularity" ADD CONSTRAINT "SegmentPopularity_listing_id_fkey" FOREIGN KEY ("listing_id") REFERENCES "MarketplaceListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "MarketOrder" ADD CONSTRAINT "MarketOrder_buyer_id_fkey" FOREIGN KEY ("buyer_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MarketOrder" ADD CONSTRAINT "MarketOrder_seller_id_fkey" FOREIGN KEY ("seller_id") REFERENCES "AppUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MarketOrder" ADD CONSTRAINT "MarketOrder_promo_code_id_fkey" FOREIGN KEY ("promo_code_id") REFERENCES "PromoCode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MarketOrderItem" ADD CONSTRAINT "MarketOrderItem_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "MarketOrder"("id") ON DELETE CASCADE ON UPDATE CASCADE;

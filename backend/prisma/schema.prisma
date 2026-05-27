@@ -887,7 +887,7 @@ model CartCrossSellRule {
 
   @@index([is_active, priority(sort: Desc)])
   @@index([source_item_id, is_active, priority(sort: Desc)])
-  @@index([source_subcategory_id, is_active, priority(sort: Desc)])
+  @@index([source_subcategory_id, is_active, priority(sort: Desc)], map: "CartCrossSellRule_source_subcategory_id_is_active_prior_idx")
   @@index([source_category_id, is_active, priority(sort: Desc)])
   @@index([target_item_id, is_active])
   @@index([target_subcategory_id, is_active])
