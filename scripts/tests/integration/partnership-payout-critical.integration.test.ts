@@ -19,6 +19,70 @@ const safeDb = isSafeDatabaseUrl(process.env.DATABASE_URL);
 let server: Server | null = null;
 let baseUrl = "";
 
+function withEnv<T>(overrides: Record<string, string | undefined>, fn: () => Promise<T>): Promise<T> {
+  const snapshot: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(overrides)) {
+    snapshot[key] = process.env[key];
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+
+  return fn().finally(() => {
+    for (const [key, value] of Object.entries(snapshot)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+}
+
+function withMockedDadataBankLookup<T>(fn: () => Promise<T>): Promise<T> {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
+
+    if (url.includes("/findById/bank")) {
+      return new Response(
+        JSON.stringify({
+          suggestions: [
+            {
+              value: "ПАО Сбербанк",
+              data: {
+                bic: "044525225",
+                correspondent_account: "30101810400000000225",
+                name: {
+                  payment: "ПАО Сбербанк",
+                  short: "Сбербанк",
+                  full: "Публичное акционерное общество Сбербанк России",
+                },
+                state: {
+                  status: "ACTIVE",
+                },
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+          },
+        },
+      );
+    }
+
+    return originalFetch(input, init);
+  }) as typeof fetch;
+
+  return withEnv({ DADATA_API_KEY: "test-token" }, fn).finally(() => {
+    globalThis.fetch = originalFetch;
+  });
+}
+
 before(async () => {
   if (!safeDb) return;
 
@@ -199,22 +263,24 @@ test(
     });
     assert.equal(sellerAccess.profile, null);
 
-    const payoutSubmit = await apiRequest({
-      method: "PUT",
-      path: "/api/partner/payout-profile",
-      token: applicant.token,
-      expected: 200,
-      body: {
-        legalType: "COMPANY",
-        legalName: "Integration Partner LLC",
-        taxId: "7707083893",
-        bankAccount: "40702810900000000000",
-        bankBic: "044525225",
-        correspondentAccount: "30101810400000000225",
-        bankName: "ПАО Сбербанк",
-        recipientName: "Integration Partner LLC",
-      },
-    });
+    const payoutSubmit = await withMockedDadataBankLookup(() =>
+      apiRequest({
+        method: "PUT",
+        path: "/api/partner/payout-profile",
+        token: applicant.token,
+        expected: 200,
+        body: {
+          legalType: "COMPANY",
+          legalName: "Integration Partner LLC",
+          taxId: "7707083893",
+          bankAccount: "40702810900000000000",
+          bankBic: "044525225",
+          correspondentAccount: "30101810400000000225",
+          bankName: "ПАО Сбербанк",
+          recipientName: "Integration Partner LLC",
+        },
+      }),
+    );
     assert.equal(typeof payoutSubmit.profile?.id, "string");
     const payoutProfileId = payoutSubmit.profile?.id as string;
     assert.equal(payoutSubmit.profile?.status, "verified");
