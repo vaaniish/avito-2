@@ -116,11 +116,14 @@ async function main() {
   let buyer;
   let seller;
   let admin;
-  let sellerListing;
+  let checkoutListing;
+  let interactionListing;
 
   const syntheticOrderIds = [];
   let originalListingStatus = null;
   let originalModerationStatus = null;
+  let originalHasMultipleStock = null;
+  let originalAvailableQuantity = null;
 
   try {
     await runStep("health endpoints", async () => {
@@ -184,10 +187,20 @@ async function main() {
         expected: [200],
       });
       const listings = Array.isArray(listingsRes.data) ? listingsRes.data : [];
-      invariant(listings.length > 0, "seller has no listings for critical checks");
-      sellerListing = listings[0];
-      invariant(typeof sellerListing?.id === "string", "seller listing id missing");
-      return `listing=${sellerListing.id}`;
+      const activeApproved = listings.filter(
+        (listing) =>
+          listing &&
+          typeof listing === "object" &&
+          listing.status === "active" &&
+          listing.moderationStatus === "approved" &&
+          typeof listing.id === "string",
+      );
+      invariant(activeApproved.length >= 2, "seller needs at least two active approved listings");
+      [checkoutListing, interactionListing] = activeApproved;
+      invariant(typeof checkoutListing?.id === "string", "checkout listing id missing");
+      invariant(typeof interactionListing?.id === "string", "interaction listing id missing");
+      invariant(checkoutListing.id !== interactionListing.id, "fixture listings must be different");
+      return `checkout=${checkoutListing.id}, interaction=${interactionListing.id}`;
     });
 
     await runStep("checkout respects current stock model and still rejects duplicate rows", async () => {
@@ -196,7 +209,7 @@ async function main() {
          FROM "MarketplaceListing"
          WHERE public_id = $1
          LIMIT 1`,
-        [sellerListing.id],
+        [checkoutListing.id],
       );
       const listingRow = listingStock.rows[0];
       invariant(Boolean(listingRow), "listing stock row not found");
@@ -212,7 +225,7 @@ async function main() {
           "Idempotency-Key": randomUUID(),
         },
         body: {
-          items: [{ listingId: sellerListing.id, quantity: validQuantity }],
+          items: [{ listingId: checkoutListing.id, quantity: validQuantity }],
           deliveryType: "pickup",
           paymentMethod: "card",
         },
@@ -245,8 +258,8 @@ async function main() {
         },
         body: {
           items: [
-            { listingId: sellerListing.id, quantity: 1 },
-            { listingId: sellerListing.id, quantity: 1 },
+            { listingId: checkoutListing.id, quantity: 1 },
+            { listingId: checkoutListing.id, quantity: 1 },
           ],
           deliveryType: "pickup",
           paymentMethod: "card",
@@ -273,7 +286,7 @@ async function main() {
 
       const blocked = await apiRequest(
         "POST",
-        `/catalog/listings/${encodeURIComponent(sellerListing.id)}/questions`,
+        `/catalog/listings/${encodeURIComponent(interactionListing.id)}/questions`,
         {
           token: buyer.token,
           headers: { "content-type": "application/json" },
@@ -304,7 +317,7 @@ async function main() {
     await runStep("seller anti-circumvention blocks answer", async () => {
       const safeQuestion = await apiRequest(
         "POST",
-        `/catalog/listings/${encodeURIComponent(sellerListing.id)}/questions`,
+        `/catalog/listings/${encodeURIComponent(interactionListing.id)}/questions`,
         {
           token: buyer.token,
           headers: { "content-type": "application/json" },
@@ -365,17 +378,23 @@ async function main() {
          FROM "MarketplaceListing"
          WHERE public_id = $1
          LIMIT 1`,
-        [sellerListing.id],
+        [interactionListing.id],
       );
       const listing = listingRow.rows[0];
       invariant(Boolean(listing), "listing not found in DB");
 
       originalListingStatus = listing.status;
       originalModerationStatus = listing.moderation_status;
+      originalHasMultipleStock = listing.has_multiple_stock;
+      originalAvailableQuantity = Number(listing.available_quantity ?? 0);
 
       await db.query(
         `UPDATE "MarketplaceListing"
-         SET status = 'INACTIVE', moderation_status = 'APPROVED', updated_at = NOW()
+         SET status = 'INACTIVE',
+             moderation_status = 'APPROVED',
+             has_multiple_stock = TRUE,
+             available_quantity = 3,
+             updated_at = NOW()
          WHERE id = $1`,
         [listing.id],
       );
@@ -411,7 +430,7 @@ async function main() {
 
       const sellerActivationAttempt = await apiRequest(
         "PATCH",
-        `/partner/listings/${encodeURIComponent(sellerListing.id)}/status`,
+        `/partner/listings/${encodeURIComponent(interactionListing.id)}/status`,
         {
           token: seller.token,
           headers: { "content-type": "application/json" },
@@ -433,7 +452,7 @@ async function main() {
 
       const adminModeration = await apiRequest(
         "PATCH",
-        `/admin/listings/${encodeURIComponent(sellerListing.id)}/moderation`,
+        `/admin/listings/${encodeURIComponent(interactionListing.id)}/moderation`,
         {
           token: admin.token,
           headers: { "content-type": "application/json" },
@@ -444,20 +463,15 @@ async function main() {
         },
       );
 
-      const canStayActiveWithOrders =
-        Boolean(listing.has_multiple_stock) && Number(listing.available_quantity ?? 0) > 0;
-
       invariant(
-        adminModeration.data?.activationBlockedByOrder === !canStayActiveWithOrders,
-        "admin activationBlockedByOrder flag does not match listing stock mode",
+        adminModeration.data?.activationBlockedByOrder === false,
+        "multi-stock interaction listing should remain activatable after moderation",
       );
       invariant(
-        adminModeration.data?.listingStatus === (canStayActiveWithOrders ? "active" : "inactive"),
-        "listing status after moderation does not match stock mode",
+        adminModeration.data?.listingStatus === "active",
+        "multi-stock interaction listing should stay active after moderation approval",
       );
-      return canStayActiveWithOrders
-        ? "seller resubmission allowed, multi-stock listing stays activatable"
-        : "seller resubmission allowed, admin activation blocked";
+      return "seller resubmission allowed, multi-stock listing stays activatable";
     });
 
     await runStep("partner orders expose finance fields", async () => {
@@ -492,14 +506,28 @@ async function main() {
       );
     }
 
-    if (sellerListing?.id && originalListingStatus && originalModerationStatus) {
+    if (
+      interactionListing?.id &&
+      originalListingStatus &&
+      originalModerationStatus &&
+      originalHasMultipleStock !== null &&
+      originalAvailableQuantity !== null
+    ) {
       await db.query(
         `UPDATE "MarketplaceListing"
          SET status = $2::"ListingStatus",
              moderation_status = $3::"ModerationStatus",
+             has_multiple_stock = $4,
+             available_quantity = $5,
              updated_at = NOW()
          WHERE public_id = $1`,
-        [sellerListing.id, originalListingStatus, originalModerationStatus],
+        [
+          interactionListing.id,
+          originalListingStatus,
+          originalModerationStatus,
+          originalHasMultipleStock,
+          originalAvailableQuantity,
+        ],
       );
     }
 
