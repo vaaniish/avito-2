@@ -5,6 +5,7 @@ type SessionRole = "buyer" | "seller" | "admin";
 const API_BASE = process.env.PLAYWRIGHT_API_BASE_URL ?? "http://127.0.0.1:3001/api";
 const SESSION_STORAGE_KEY = "ecomm_session_user";
 const SESSION_TOKEN_STORAGE_KEY = "ecomm_session_token";
+const loginCache = new Map<string, Promise<{ sessionToken: string; user: Record<string, unknown> }>>();
 
 const credentials: Record<SessionRole, { email: string; password: string }> = {
   buyer: { email: "buyer1@ecomm.local", password: "buyer123" },
@@ -45,19 +46,47 @@ export async function loginWithCredentials(
   email: string,
   password: string,
 ): Promise<{ sessionToken: string; user: Record<string, unknown> }> {
-  const response = await request.post(`${API_BASE}/auth/login`, {
-    data: { email, password },
-  });
-  expect(response.ok()).toBeTruthy();
-  const payload = (await response.json()) as {
-    sessionToken?: string;
-    user?: Record<string, unknown>;
-  };
-  expect(typeof payload.sessionToken).toBe("string");
-  expect(typeof payload.user).toBe("object");
+  const cacheKey = `${email}\n${password}`;
+  let cached = loginCache.get(cacheKey);
+  if (!cached) {
+    cached = (async () => {
+      const response = await request.post(`${API_BASE}/auth/login`, {
+        data: { email, password },
+      });
+      const raw = await response.text();
+      let payload: {
+        sessionToken?: string;
+        user?: Record<string, unknown>;
+        error?: string;
+      } | null = null;
+      try {
+        payload = raw ? (JSON.parse(raw) as typeof payload) : null;
+      } catch {
+        payload = null;
+      }
+
+      expect(
+        response.ok(),
+        `login failed for ${email}: ${response.status()} ${raw || "<empty>"}`,
+      ).toBeTruthy();
+      expect(typeof payload?.sessionToken).toBe("string");
+      expect(typeof payload?.user).toBe("object");
+
+      return {
+        sessionToken: payload?.sessionToken as string,
+        user: payload?.user as Record<string, unknown>,
+      };
+    })().catch((error) => {
+      loginCache.delete(cacheKey);
+      throw error;
+    });
+    loginCache.set(cacheKey, cached);
+  }
+
+  const payload = await cached;
   return {
-    sessionToken: payload.sessionToken as string,
-    user: payload.user as Record<string, unknown>,
+    sessionToken: payload.sessionToken,
+    user: payload.user,
   };
 }
 
