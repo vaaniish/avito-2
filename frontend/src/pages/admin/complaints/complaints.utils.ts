@@ -30,6 +30,32 @@ export function getStatusClass(status: ComplaintStatus): string {
   return "bg-green-100 text-green-700 border-green-300";
 }
 
+export function getRelatedComplaintStatusLabel(input: {
+  status: ComplaintStatus;
+  resolutionKind: string | null;
+}): string {
+  if (
+    input.status === "rejected" &&
+    input.resolutionKind === "related_listing_removed_after_approval"
+  ) {
+    return "Объявление снято";
+  }
+  return getStatusLabel(input.status);
+}
+
+export function getRelatedComplaintResolutionText(input: {
+  status: ComplaintStatus;
+  resolutionKind: string | null;
+}): string | null {
+  if (
+    input.status === "rejected" &&
+    input.resolutionKind === "related_listing_removed_after_approval"
+  ) {
+    return "Объявление снято с продажи после рассмотрения связанной жалобы";
+  }
+  return null;
+}
+
 export function getSortLabel(sortBy: ComplaintSortBy): string {
   if (sortBy === "queueScore") return "Балл очереди";
   if (sortBy === "riskScore") return "Риск";

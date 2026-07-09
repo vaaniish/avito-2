@@ -67,15 +67,9 @@ try? FileManager.default.removeItem(at: outputURL)
 
 let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
 let videoSettings: [String: Any] = [
-    AVVideoCodecKey: AVVideoCodecType.h264,
+    AVVideoCodecKey: AVVideoCodecType.proRes422HQ,
     AVVideoWidthKey: Int(renderSize.width.rounded()),
     AVVideoHeightKey: Int(renderSize.height.rounded()),
-    AVVideoCompressionPropertiesKey: [
-        AVVideoAverageBitRateKey: 8_000_000,
-        AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-        AVVideoExpectedSourceFrameRateKey: 60,
-        AVVideoMaxKeyFrameIntervalKey: 60,
-    ],
 ]
 
 let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)

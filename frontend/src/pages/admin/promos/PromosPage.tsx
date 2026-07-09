@@ -978,6 +978,11 @@ export function PromosPage() {
               </div>
             ) : null}
 
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+              Промокоды финансируются площадкой и не уменьшают выплату партнёру.
+              Комиссия и партнёрская выручка считаются от стоимости заказа до скидки.
+            </div>
+
             <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4 md:p-5">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <label className="space-y-2">

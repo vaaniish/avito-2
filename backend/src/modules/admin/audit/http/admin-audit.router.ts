@@ -4,6 +4,7 @@ import { requireAdmin } from "../../common/http/admin-session";
 import {
   parseAuditAction,
   parseAuditEntityType,
+  parseAuditRiskType,
 } from "../domain/admin-audit.helpers";
 import type { ListAdminAuditLogsService } from "../application/services/list-admin-audit-logs.service";
 
@@ -23,6 +24,7 @@ export function createAdminAuditRouter(deps: {
           q: req.query.q,
           action: parseAuditAction(req.query.action),
           entityType: parseAuditEntityType(req.query.entityType),
+          riskType: parseAuditRiskType(req.query.riskType),
           limit: req.query.limit,
         }),
       );

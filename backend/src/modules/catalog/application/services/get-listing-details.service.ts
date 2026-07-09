@@ -33,10 +33,15 @@ export class GetListingDetailsService {
       throw notFound("Listing not found");
     }
 
+    const isSoftDeleted = Boolean(listing.deleted_at);
     const isPubliclyAvailable =
-      listing.status === "ACTIVE" && listing.moderation_status === "APPROVED";
+      !isSoftDeleted &&
+      listing.status === "ACTIVE" &&
+      listing.moderation_status === "APPROVED";
     const isPubliclyAccessibleInactiveApproved =
-      listing.status === "INACTIVE" && listing.moderation_status === "APPROVED";
+      !isSoftDeleted &&
+      listing.status === "INACTIVE" &&
+      listing.moderation_status === "APPROVED";
     const isDirectlyAccessiblePublicly =
       isPubliclyAvailable || isPubliclyAccessibleInactiveApproved;
 
@@ -65,8 +70,11 @@ export class GetListingDetailsService {
       }
     }
 
-    let unavailableReason = getListingUnavailableReason(listing);
+    let unavailableReason = isSoftDeleted
+      ? "Объявление архивировано продавцом и сохранено только для истории."
+      : getListingUnavailableReason(listing);
     if (
+      !isSoftDeleted &&
       !isPubliclyAvailable &&
       input.sessionUser &&
       listing.status === "INACTIVE" &&

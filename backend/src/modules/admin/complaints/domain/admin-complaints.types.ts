@@ -184,6 +184,7 @@ export type ComplaintStatusUpdatePayload = {
   cascade?: {
     updatedCount: number;
     cascadedComplaintIds: string[];
+    autoRejectedComplaintIds?: string[];
   };
 };
 
@@ -194,6 +195,8 @@ export type ComplaintStatusNotificationContext = {
   listingTitle: string;
   status: ComplaintStatusValue;
   enforcementMessage: string | null;
+  resolutionKind?: string | null;
+  relatedResolvedReporterIds?: number[];
 };
 
 export type LegacyComplaintStatusUpdateResult =
@@ -265,6 +268,8 @@ export interface AdminComplaintsRepositoryPort {
           reporterName: string;
           priority: ComplaintPriority;
           queueScore: number;
+          actionTaken: string | null;
+          resolutionKind: string | null;
         }>;
       }
   >;

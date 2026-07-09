@@ -5,7 +5,12 @@ export class ProfileWishlistRepository {
 
   listWishlist(userId: number) {
     return this.prisma.wishlistItem.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        listing: {
+          deleted_at: null,
+        },
+      },
       include: {
         listing: {
           include: {
@@ -29,8 +34,11 @@ export class ProfileWishlistRepository {
   }
 
   findListingByPublicId(listingPublicId: string) {
-    return this.prisma.marketplaceListing.findUnique({
-      where: { public_id: listingPublicId },
+    return this.prisma.marketplaceListing.findFirst({
+      where: {
+        public_id: listingPublicId,
+        deleted_at: null,
+      },
       select: { id: true },
     });
   }

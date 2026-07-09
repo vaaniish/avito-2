@@ -141,6 +141,30 @@ async function createListingFixture(params: {
   });
 }
 
+async function createPromoFixture(prefix: string, discountValue: number) {
+  const suffix = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  const now = Date.now();
+  return prisma.promoCode.create({
+    data: {
+      public_id: `${prefix}-${suffix}`,
+      code: `${prefix}-${suffix}`.toUpperCase(),
+      discount_type: "FIXED_AMOUNT",
+      discount_value: discountValue,
+      min_subtotal: 0,
+      max_activations: 100,
+      per_user_limit: 1,
+      starts_at: new Date(now - 60 * 60 * 1000),
+      ends_at: new Date(now + 24 * 60 * 60 * 1000),
+      is_enabled: true,
+      all_catalog: true,
+    },
+    select: {
+      id: true,
+      code: true,
+    },
+  });
+}
+
 async function ensureCheckoutPolicyAccepted(userId: number) {
   const policy = await getActivePolicy(prisma, "CHECKOUT");
   assert.ok(policy, "Active checkout policy was not found");
@@ -168,6 +192,7 @@ async function createCheckout(params: {
   listingPublicId: string;
   quantity: number;
   idempotencyKey: string;
+  promoCode?: string;
 }) {
   return fetch(`${params.baseUrl}/api/profile/orders`, {
     method: "POST",
@@ -179,6 +204,7 @@ async function createCheckout(params: {
       items: [{ listingId: params.listingPublicId, quantity: params.quantity }],
       deliveryType: "pickup",
       paymentMethod: "card",
+      promoCode: params.promoCode ?? "",
     }),
   });
 }
@@ -251,6 +277,72 @@ test(
       assert.equal(restoredListing?.available_quantity, 2);
       assert.equal(restoredListing?.status, "ACTIVE");
     } finally {
+      await prisma.appUser.deleteMany({
+        where: { id: { in: [buyer.id, seller.id] } },
+      });
+    }
+  },
+);
+
+test(
+  "integration: platform-funded promo keeps partner transaction amount before discount",
+  { skip: !safeDb },
+  async () => {
+    const buyer = await createUserFixture("CHK-PROMO-BUYER", "BUYER");
+    const seller = await createUserFixture("CHK-PROMO-SELLER", "SELLER");
+    const listing = await createListingFixture({
+      sellerId: seller.id,
+      prefix: "CHK-PROMO-LST",
+      availableQuantity: 1,
+      hasMultipleStock: false,
+    });
+    const promo = await createPromoFixture("CHKPROMO", 5_000);
+    const baseUrl = await startCheckoutServer(buyer.id);
+
+    try {
+      await ensureCheckoutPolicyAccepted(buyer.id);
+
+      const checkout = await createCheckout({
+        baseUrl,
+        listingPublicId: listing.public_id,
+        quantity: 1,
+        idempotencyKey: `checkout-promo-platform-funded-${Date.now()}`,
+        promoCode: promo.code,
+      });
+      const checkoutPayload = await checkout.json();
+
+      assert.equal(checkout.status, 201);
+      assert.equal(checkoutPayload.discount, 5_000);
+      assert.equal(checkoutPayload.total, 20_000);
+
+      const orderPublicId = checkoutPayload.orders[0]?.order_id as string;
+      assert.ok(orderPublicId);
+
+      const order = await prisma.marketOrder.findUnique({
+        where: { public_id: orderPublicId },
+        include: {
+          transactions: {
+            orderBy: [{ created_at: "desc" }, { id: "desc" }],
+            take: 1,
+          },
+        },
+      });
+
+      assert.ok(order);
+      assert.equal(order.total_price, 20_000);
+      assert.equal(order.discount, 5_000);
+
+      const transaction = order.transactions[0];
+      assert.ok(transaction);
+      assert.equal(transaction.amount, 25_000);
+      assert.equal(
+        transaction.commission,
+        Math.round((transaction.amount * transaction.commission_rate) / 100),
+      );
+    } finally {
+      await prisma.promoCode.deleteMany({
+        where: { id: promo.id },
+      });
       await prisma.appUser.deleteMany({
         where: { id: { in: [buyer.id, seller.id] } },
       });

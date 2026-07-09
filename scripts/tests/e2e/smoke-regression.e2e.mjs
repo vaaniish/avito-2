@@ -805,6 +805,18 @@ async function main() {
 
     invariant(Array.isArray(transactions.data), "transactions malformed");
     invariant(Array.isArray(auditLogs.data?.logs), "audit logs malformed");
+    invariant(
+      auditLogs.data.logs.every((log) =>
+        ["user.status_changed", "user.role_changed", "commission_tier.rate_changed"].includes(log.action),
+      ),
+      "audit logs should expose only risky admin actions",
+    );
+    invariant(
+      auditLogs.data.logs.every(
+        (log) => typeof log.riskType === "string" && typeof log.summary === "string" && log.actor,
+      ),
+      "audit logs should include normalized risk fields",
+    );
     invariant(Array.isArray(kyc.data), "kyc malformed");
     invariant(Array.isArray(listings.data), "admin listings malformed");
     invariant(Array.isArray(users.data), "admin users malformed");

@@ -242,6 +242,34 @@ export function useCheckoutDelivery(params: {
   }, [params.deliveryType]);
 
   useEffect(() => {
+    if (!import.meta.env.DEV || typeof window === "undefined") return;
+
+    const debugWindow = window as typeof window & {
+      __ecommDemoCheckout?: {
+        selectVisiblePoint: (index?: number) => boolean;
+        visiblePointKeys: string[];
+      };
+    };
+
+    const api = {
+      selectVisiblePoint(index = 0) {
+        const point = visibleDeliveryPoints[index];
+        if (!point) return false;
+        setSelectedPointKey(buildDeliveryPointSelectionKey(point));
+        return true;
+      },
+      visiblePointKeys: visibleDeliveryPoints.map((point) => buildDeliveryPointSelectionKey(point)),
+    };
+
+    debugWindow.__ecommDemoCheckout = api;
+    return () => {
+      if (debugWindow.__ecommDemoCheckout === api) {
+        delete debugWindow.__ecommDemoCheckout;
+      }
+    };
+  }, [visibleDeliveryPoints]);
+
+  useEffect(() => {
     if (params.deliveryType !== "delivery") return;
 
     let cancelled = false;

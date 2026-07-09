@@ -20,6 +20,7 @@ export class PartnerListingsReadRepository
       where: {
         seller_id: params.sellerId,
         type,
+        deleted_at: null,
       },
       include: {
         item: {

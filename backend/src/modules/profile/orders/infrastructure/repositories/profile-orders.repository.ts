@@ -1084,8 +1084,10 @@ export class ProfileOrdersRepository {
 
         const commissionRate =
           params.commissionRateBySellerId.get(preparedOrder.sellerId) ?? 3.5;
+        const partnerSettlementAmount =
+          preparedOrder.totalPrice + preparedOrder.discount;
         const commission = Math.round(
-          (preparedOrder.totalPrice * commissionRate) / 100,
+          (partnerSettlementAmount * commissionRate) / 100,
         );
         const paymentIntentId = `${params.paymentIntentIdBase}:${sequence}`;
         await tx.platformTransaction.create({
@@ -1094,7 +1096,7 @@ export class ProfileOrdersRepository {
             order_id: order.id,
             buyer_id: params.buyerId,
             seller_id: preparedOrder.sellerId,
-            amount: preparedOrder.totalPrice,
+            amount: partnerSettlementAmount,
             status: "HELD",
             commission_rate: commissionRate,
             commission,

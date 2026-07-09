@@ -1,25 +1,27 @@
 import type { AuditAction, AuditEntityType } from "../../common/domain/admin-common.helpers";
 
 export const AUDIT_ENTITY_TYPES: AuditEntityType[] = [
-  "complaint",
-  "kyc_request",
-  "partnership_request",
-  "listing",
   "user",
-  "seller_payout_profile",
   "commission_tier",
-  "moderation",
 ];
 
 export const AUDIT_ACTIONS: AuditAction[] = [
-  "complaint.status_changed",
-  "kyc.status_changed",
-  "partnership_request.status_changed",
-  "listing.moderation_changed",
   "user.status_changed",
+  "user.role_changed",
   "commission_tier.rate_changed",
-  "anti_circumvention.violation_detected",
-  "anti_circumvention.sanction_applied",
+];
+
+export type AuditRiskType =
+  | "user_blocked"
+  | "user_unblocked"
+  | "role_changed"
+  | "commission_changed";
+
+export const AUDIT_RISK_TYPES: AuditRiskType[] = [
+  "user_blocked",
+  "user_unblocked",
+  "role_changed",
+  "commission_changed",
 ];
 
 export function parseAuditAction(value: unknown): AuditAction | undefined {
@@ -32,6 +34,11 @@ export function parseAuditEntityType(
 ): AuditEntityType | undefined {
   if (typeof value !== "string") return undefined;
   return AUDIT_ENTITY_TYPES.find((entity) => entity === value);
+}
+
+export function parseAuditRiskType(value: unknown): AuditRiskType | undefined {
+  if (typeof value !== "string") return undefined;
+  return AUDIT_RISK_TYPES.find((riskType) => riskType === value);
 }
 
 function toSearchText(input: unknown): string {

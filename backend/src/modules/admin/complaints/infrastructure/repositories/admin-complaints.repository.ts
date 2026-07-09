@@ -11,6 +11,8 @@ import {
   computeComplaintQueueMetrics,
   extractPrimaryAddressInfo,
   makePublicId,
+  RELATED_LISTING_REMOVED_ACTION_TAKEN,
+  RELATED_LISTING_REMOVED_RESOLUTION_KIND,
   toClientComplaintSanctionStatus,
   toClientComplaintStatus,
 } from "../../domain/admin-complaints.service";
@@ -169,6 +171,116 @@ export class AdminComplaintsRepository {
         ip_address: params.requestIp,
       },
     });
+  }
+
+  private async rejectOpenRelatedListingComplaints(
+    tx: Prisma.TransactionClient,
+    params: {
+      listingId: number;
+      primaryComplaintId: number;
+      primaryComplaintPublicId: string;
+      actorUserId: number;
+      decisionAt: Date;
+    },
+  ): Promise<{ complaintIds: string[]; reporterIds: number[] }> {
+    const relatedOpenComplaints = await tx.complaint.findMany({
+      where: {
+        listing_id: params.listingId,
+        id: { not: params.primaryComplaintId },
+        status: { in: ["NEW", "PENDING"] },
+      },
+      select: {
+        id: true,
+        public_id: true,
+        status: true,
+        reporter_id: true,
+      },
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
+    });
+
+    const complaintIds: string[] = [];
+    const reporterIds: number[] = [];
+    for (const relatedComplaint of relatedOpenComplaints) {
+      const nextUpdate = await tx.complaint.updateMany({
+        where: {
+          id: relatedComplaint.id,
+          status: relatedComplaint.status,
+        },
+        data: {
+          status: "REJECTED",
+          checked_at: params.decisionAt,
+          checked_by_id: params.actorUserId,
+          action_taken: RELATED_LISTING_REMOVED_ACTION_TAKEN,
+        },
+      });
+
+      if (nextUpdate.count !== 1) {
+        throw new Error("COMPLAINT_STATUS_CONFLICT");
+      }
+
+      complaintIds.push(relatedComplaint.public_id);
+      reporterIds.push(relatedComplaint.reporter_id);
+
+      await tx.complaintEvent.create({
+        data: {
+          public_id: makePublicId("CME"),
+          complaint_id: relatedComplaint.id,
+          actor_user_id: params.actorUserId,
+          event_type: "STATUS_CHANGED",
+          from_status: relatedComplaint.status,
+          to_status: "REJECTED",
+          note: RELATED_LISTING_REMOVED_ACTION_TAKEN,
+          metadata: {
+            source: RELATED_LISTING_REMOVED_RESOLUTION_KIND,
+            triggerComplaintId: params.primaryComplaintPublicId,
+          },
+        },
+      });
+    }
+
+    return { complaintIds, reporterIds };
+  }
+
+  private async rejectOpenComplaintsForAlreadyApprovedListing(
+    tx: Prisma.TransactionClient,
+    params: {
+      listingId: number;
+      currentComplaintId: number;
+      approvedComplaintId: number;
+      approvedComplaintPublicId: string;
+      actorUserId: number;
+      decisionAt: Date;
+    },
+  ): Promise<{
+    updated: { status: any; action_taken: string | null };
+    autoRejectedComplaintIds: string[];
+    relatedResolvedReporterIds: number[];
+  }> {
+    const relatedResolution = await this.rejectOpenRelatedListingComplaints(tx, {
+      listingId: params.listingId,
+      primaryComplaintId: params.approvedComplaintId,
+      primaryComplaintPublicId: params.approvedComplaintPublicId,
+      actorUserId: params.actorUserId,
+      decisionAt: params.decisionAt,
+    });
+
+    const updated = await tx.complaint.findUnique({
+      where: { id: params.currentComplaintId },
+      select: {
+        status: true,
+        action_taken: true,
+      },
+    });
+
+    if (!updated) {
+      throw new Error("COMPLAINT_NOT_FOUND_AFTER_UPDATE");
+    }
+
+    return {
+      updated,
+      autoRejectedComplaintIds: relatedResolution.complaintIds,
+      relatedResolvedReporterIds: relatedResolution.reporterIds,
+    };
   }
 
   private async mapComplaintsForAdmin(
@@ -528,15 +640,54 @@ export class AdminComplaintsRepository {
     }
 
     const txResult = await this.prisma.$transaction(async (tx) => {
+      const decisionAt = new Date();
       let enforcement:
         | ComplaintStatusUpdateResult
         | null = null;
+      let autoRejectedComplaintIds: string[] = [];
+      let relatedResolvedReporterIds: number[] = [];
+      let resolutionKind: string | null = null;
+
+      if (input.nextStatus === "APPROVED" && existing.status !== "APPROVED") {
+        const alreadyApproved = await tx.complaint.findFirst({
+          where: {
+            listing_id: existing.listing_id,
+            status: "APPROVED",
+            id: { not: existing.id },
+          },
+          select: {
+            id: true,
+            public_id: true,
+          },
+          orderBy: [{ checked_at: "asc" }, { created_at: "asc" }, { id: "asc" }],
+        });
+
+        if (alreadyApproved) {
+          const resolved =
+            await this.rejectOpenComplaintsForAlreadyApprovedListing(tx, {
+              listingId: existing.listing_id,
+              currentComplaintId: existing.id,
+              approvedComplaintId: alreadyApproved.id,
+              approvedComplaintPublicId: alreadyApproved.public_id,
+              actorUserId: input.actorUserId,
+              decisionAt,
+            });
+
+          return {
+            updated: resolved.updated,
+            enforcement: null,
+            autoRejectedComplaintIds: resolved.autoRejectedComplaintIds,
+            relatedResolvedReporterIds: resolved.relatedResolvedReporterIds,
+            resolutionKind: RELATED_LISTING_REMOVED_RESOLUTION_KIND,
+          };
+        }
+      }
 
       const next = await tx.complaint.update({
         where: { id: existing.id },
         data: {
           status: input.nextStatus,
-          checked_at: new Date(),
+          checked_at: decisionAt,
           checked_by_id: input.actorUserId,
           action_taken: input.actionTaken,
         },
@@ -580,11 +731,24 @@ export class AdminComplaintsRepository {
             enforcementResult.listingModerationStatus.toLowerCase() as "rejected",
           message: enforcementResult.message,
         };
+
+        const relatedResolution = await this.rejectOpenRelatedListingComplaints(tx, {
+          listingId: existing.listing_id,
+          primaryComplaintId: existing.id,
+          primaryComplaintPublicId: existing.public_id,
+          actorUserId: input.actorUserId,
+          decisionAt,
+        });
+        autoRejectedComplaintIds = relatedResolution.complaintIds;
+        relatedResolvedReporterIds = relatedResolution.reporterIds;
       }
 
       return {
         updated: next,
         enforcement: enforcementPayload,
+        autoRejectedComplaintIds,
+        relatedResolvedReporterIds,
+        resolutionKind,
       };
     });
 
@@ -598,6 +762,7 @@ export class AdminComplaintsRepository {
         afterStatus: txResult.updated.status,
         beforeActionTaken: existing.action_taken,
         afterActionTaken: txResult.updated.action_taken,
+        autoRejectedComplaintIds: txResult.autoRejectedComplaintIds,
       }),
       requestIp: input.requestIp,
     });
@@ -648,6 +813,14 @@ export class AdminComplaintsRepository {
         success: true,
         status: txResult.updated.status.toLowerCase() as any,
         enforcement: txResult.enforcement,
+        cascade: {
+          updatedCount:
+            txResult.resolutionKind === RELATED_LISTING_REMOVED_RESOLUTION_KIND
+              ? txResult.autoRejectedComplaintIds.length
+              : 1 + txResult.autoRejectedComplaintIds.length,
+          cascadedComplaintIds: [],
+          autoRejectedComplaintIds: txResult.autoRejectedComplaintIds,
+        },
       },
       notifications: {
         reporterId: existing.reporter_id,
@@ -656,6 +829,8 @@ export class AdminComplaintsRepository {
         listingTitle: existing.listing.title,
         status: txResult.updated.status,
         enforcementMessage: txResult.enforcement?.message ?? null,
+        resolutionKind: txResult.resolutionKind,
+        relatedResolvedReporterIds: txResult.relatedResolvedReporterIds,
       },
     };
   }
@@ -724,7 +899,50 @@ export class AdminComplaintsRepository {
         }
 
         const cascadedComplaintIds: string[] = [];
+        let autoRejectedComplaintIds: string[] = [];
+        let relatedResolvedReporterIds: number[] = [];
+        let resolutionKind: string | null = null;
         let cascadeUpdatedCount = 1;
+
+        if (input.nextStatus === "APPROVED" && existing.status !== "APPROVED") {
+          const alreadyApproved = await tx.complaint.findFirst({
+            where: {
+              listing_id: existing.listing_id,
+              status: "APPROVED",
+              id: { not: existing.id },
+            },
+            select: {
+              id: true,
+              public_id: true,
+            },
+            orderBy: [{ checked_at: "asc" }, { created_at: "asc" }, { id: "asc" }],
+          });
+
+          if (alreadyApproved) {
+            const resolved =
+              await this.rejectOpenComplaintsForAlreadyApprovedListing(tx, {
+                listingId: existing.listing_id,
+                currentComplaintId: existing.id,
+                approvedComplaintId: alreadyApproved.id,
+                approvedComplaintPublicId: alreadyApproved.public_id,
+                actorUserId: input.actorUserId,
+                decisionAt,
+              });
+
+            return {
+              updated: resolved.updated,
+              enforcement: null,
+              cascade: {
+                updatedCount: resolved.autoRejectedComplaintIds.length,
+                cascadedComplaintIds,
+                autoRejectedComplaintIds: resolved.autoRejectedComplaintIds,
+              },
+              relatedResolvedReporterIds: resolved.relatedResolvedReporterIds,
+              resolutionKind: RELATED_LISTING_REMOVED_RESOLUTION_KIND,
+            };
+          }
+        }
+
         const primaryUpdate = await tx.complaint.updateMany({
           where: {
             id: primaryComplaint.id,
@@ -812,12 +1030,26 @@ export class AdminComplaintsRepository {
               },
             },
           });
+
+          const relatedResolution = await this.rejectOpenRelatedListingComplaints(tx, {
+            listingId: existing.listing_id,
+            primaryComplaintId: existing.id,
+            primaryComplaintPublicId: existing.public_id,
+            actorUserId: input.actorUserId,
+            decisionAt,
+          });
+          autoRejectedComplaintIds = relatedResolution.complaintIds;
+          relatedResolvedReporterIds = relatedResolution.reporterIds;
+          cascadeUpdatedCount += autoRejectedComplaintIds.length;
         }
 
         if (input.nextStatus === "APPROVED" && enforcement?.level === "permanent") {
           const relatedOpenComplaints = await tx.complaint.findMany({
             where: {
               seller_id: existing.seller_id,
+              listing_id: {
+                not: existing.listing_id,
+              },
               id: {
                 not: existing.id,
               },
@@ -891,7 +1123,10 @@ export class AdminComplaintsRepository {
           cascade: {
             updatedCount: cascadeUpdatedCount,
             cascadedComplaintIds,
+            autoRejectedComplaintIds,
           },
+          relatedResolvedReporterIds,
+          resolutionKind,
         };
       });
 
@@ -907,6 +1142,7 @@ export class AdminComplaintsRepository {
           afterActionTaken: txResult.updated.action_taken,
           cascadeUpdatedCount: txResult.cascade.updatedCount,
           cascadedComplaintIds: txResult.cascade.cascadedComplaintIds,
+          autoRejectedComplaintIds: txResult.cascade.autoRejectedComplaintIds,
         }),
         requestIp: input.requestIp,
       });
@@ -960,6 +1196,7 @@ export class AdminComplaintsRepository {
           cascade: {
             updatedCount: txResult.cascade.updatedCount,
             cascadedComplaintIds: txResult.cascade.cascadedComplaintIds,
+            autoRejectedComplaintIds: txResult.cascade.autoRejectedComplaintIds,
           },
         },
         notifications: {
@@ -969,9 +1206,65 @@ export class AdminComplaintsRepository {
           listingTitle: existing.listing.title,
           status: txResult.updated.status,
           enforcementMessage: txResult.enforcement?.message ?? null,
+          resolutionKind: txResult.resolutionKind,
+          relatedResolvedReporterIds: txResult.relatedResolvedReporterIds,
         },
       };
     } catch (error) {
+      if (isUniqueConstraintError(error) && input.nextStatus === "APPROVED") {
+        const decisionAt = new Date();
+        const txResult = await this.prisma.$transaction(async (tx) => {
+          const alreadyApproved = await tx.complaint.findFirst({
+            where: {
+              listing_id: existing.listing_id,
+              status: "APPROVED",
+              id: { not: existing.id },
+            },
+            select: {
+              id: true,
+              public_id: true,
+            },
+            orderBy: [{ checked_at: "asc" }, { created_at: "asc" }, { id: "asc" }],
+          });
+
+          if (!alreadyApproved) {
+            throw error;
+          }
+
+          return this.rejectOpenComplaintsForAlreadyApprovedListing(tx, {
+            listingId: existing.listing_id,
+            currentComplaintId: existing.id,
+            approvedComplaintId: alreadyApproved.id,
+            approvedComplaintPublicId: alreadyApproved.public_id,
+            actorUserId: input.actorUserId,
+            decisionAt,
+          });
+        });
+
+        return {
+          kind: "updated",
+          payload: {
+            success: true,
+            status: txResult.updated.status.toLowerCase() as any,
+            enforcement: null,
+            cascade: {
+              updatedCount: txResult.autoRejectedComplaintIds.length,
+              cascadedComplaintIds: [],
+              autoRejectedComplaintIds: txResult.autoRejectedComplaintIds,
+            },
+          },
+          notifications: {
+            reporterId: existing.reporter_id,
+            sellerId: existing.seller_id,
+            listingPublicId: existing.listing.public_id,
+            listingTitle: existing.listing.title,
+            status: txResult.updated.status,
+            enforcementMessage: null,
+            resolutionKind: RELATED_LISTING_REMOVED_RESOLUTION_KIND,
+            relatedResolvedReporterIds: txResult.relatedResolvedReporterIds,
+          },
+        };
+      }
       if (error instanceof Error && error.message === "COMPLAINT_STATUS_CONFLICT") {
         return {
           kind: "conflict",
@@ -1077,6 +1370,8 @@ export class AdminComplaintsRepository {
           reporterName: string;
           priority: any;
           queueScore: number;
+          actionTaken: string | null;
+          resolutionKind: string | null;
         }>;
       }
   > {
@@ -1113,6 +1408,12 @@ export class AdminComplaintsRepository {
         reporterName: item.reporterName,
         priority: item.priority,
         queueScore: item.queueScore,
+        actionTaken: item.actionTaken,
+        resolutionKind:
+          item.status === "rejected" &&
+          item.actionTaken === RELATED_LISTING_REMOVED_ACTION_TAKEN
+            ? RELATED_LISTING_REMOVED_RESOLUTION_KIND
+            : null,
       })),
     };
   }

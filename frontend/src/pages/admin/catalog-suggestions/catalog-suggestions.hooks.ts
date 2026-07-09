@@ -130,6 +130,7 @@ export function useCatalogSuggestionsData(params: {
 
   useEffect(() => {
     if (params.tab !== "editor") return;
+    setEditorLoading(true);
     const timeout = window.setTimeout(() => {
       void loadCategoryNodes();
     }, 220);

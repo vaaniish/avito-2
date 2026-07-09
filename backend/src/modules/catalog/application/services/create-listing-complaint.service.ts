@@ -1,4 +1,4 @@
-import { notFound, validationError } from "../../../../common/application-error";
+import { conflict, notFound, validationError } from "../../../../common/application-error";
 import {
   COMPLAINT_DEDUP_WINDOW_MINUTES,
   COMPLAINT_RATE_LIMIT_PER_HOUR,
@@ -46,6 +46,12 @@ export class CreateListingComplaintService {
     const listing = await this.repository.findComplaintListing(listingPublicId);
     if (!listing) {
       throw notFound("Listing not found");
+    }
+    if (
+      listing.status !== "ACTIVE" ||
+      listing.moderation_status !== "APPROVED"
+    ) {
+      throw conflict("Объявление снято с продажи, новая жалоба не требуется.");
     }
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);

@@ -144,6 +144,8 @@ export type RelatedListingComplaint = {
   reporterName: string;
   priority: ComplaintPriority;
   queueScore: number;
+  actionTaken: string | null;
+  resolutionKind: "related_listing_removed_after_approval" | null;
   isCurrent: boolean;
 };
 
@@ -199,6 +201,7 @@ export type ComplaintStatusUpdateResponse = {
   cascade: {
     updatedCount: number;
     cascadedComplaintIds: string[];
+    autoRejectedComplaintIds?: string[];
   };
 };
 

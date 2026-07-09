@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import readline from "node:readline";
 import { chromium } from "playwright";
 
@@ -11,6 +11,12 @@ const OUTPUT_DIR = path.resolve(ROOT_DIR, "artifacts", "demo-video");
 const RAW_DIR = path.join(OUTPUT_DIR, "raw");
 const META_PATH = path.join(OUTPUT_DIR, "manifest.json");
 const FINAL_PATH = path.join(OUTPUT_DIR, "demo-final.mov");
+const MANIFEST_1X_PATH = path.join(OUTPUT_DIR, "manifest-1x.json");
+const MANIFEST_15X_PATH = path.join(OUTPUT_DIR, "manifest-1.5x.json");
+const MANIFEST_2X_PATH = path.join(OUTPUT_DIR, "manifest-2x.json");
+const FINAL_1X_PATH = path.join(OUTPUT_DIR, "demo-final-1x.mov");
+const FINAL_15X_PATH = path.join(OUTPUT_DIR, "demo-final-1.5x.mov");
+const FINAL_2X_PATH = path.join(OUTPUT_DIR, "demo-final-2x.mov");
 const NATIVE_MOUSE_SCRIPT = path.join(ROOT_DIR, "scripts/demo/native-mouse.swift");
 const API_BASE = "http://127.0.0.1:3001/api";
 const APP_BASE = "http://127.0.0.1:3000";
@@ -20,8 +26,7 @@ const WINDOW_BOUNDS = { width: 1500, height: 1220 };
 const VIEWPORT = { width: 1440, height: 1100 };
 const RECORDING_PADDING_MS = 800;
 const END_PAUSE_MS = 900;
-
-const SCENE_NAMES = ["seller", "admin", "buyer"];
+const CURSOR_SCREEN_OFFSET = { x: 0, y: 80 };
 
 const SELLER_IMAGES = [
   path.join(
@@ -46,19 +51,14 @@ const SELLER_IMAGES = [
   ),
 ];
 
-const OPEN_DIALOG_RELATIVE_RECT = {
-  x: 276,
-  y: 366,
-  width: 890,
-  height: 448,
-};
-
-const FINDER_PICKER_POINTS = {
-  downloadsSidebar: { x: 88, y: 140 },
-  selectionDragStart: { x: 430, y: 228 },
-  selectionDragEnd: { x: 223, y: 66 },
-  openButton: { x: 822, y: 412 },
-};
+const OPEN_PANEL_PROCESS_NAME = "Google Chrome for Testing";
+const authSessionCache = new Map();
+const SPEED_VARIANTS = [
+  { speed: 1, manifestPath: META_PATH, outputPath: FINAL_PATH },
+  { speed: 1, manifestPath: MANIFEST_1X_PATH, outputPath: FINAL_1X_PATH },
+  { speed: 1.5, manifestPath: MANIFEST_15X_PATH, outputPath: FINAL_15X_PATH },
+  { speed: 2, manifestPath: MANIFEST_2X_PATH, outputPath: FINAL_2X_PATH },
+];
 
 const credentials = {
   buyer: { email: "buyer1@ecomm.local", password: "buyer123" },
@@ -74,20 +74,49 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function escapeAppleScriptString(value) {
+  return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function focusBrowserAppWindow() {
+  try {
+    execFileSync("osascript", [
+      "-e",
+      `tell application "System Events" to set frontmost of process "${escapeAppleScriptString(OPEN_PANEL_PROCESS_NAME)}" to true`,
+    ], {
+      cwd: ROOT_DIR,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+  } catch {}
+}
+
 async function login(role) {
-  const response = await fetch(`${API_BASE}/auth/login`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(credentials[role]),
-  });
-  if (!response.ok) {
+  const cached = authSessionCache.get(role);
+  if (cached?.sessionToken && cached?.user) {
+    return cached;
+  }
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const response = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(credentials[role]),
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      if (!payload?.sessionToken || !payload?.user) {
+        throw new Error(`Malformed login payload for ${role}`);
+      }
+      authSessionCache.set(role, payload);
+      return payload;
+    }
+    if (response.status === 429 && attempt < 4) {
+      await sleep(1200 * (attempt + 1));
+      continue;
+    }
     throw new Error(`Unable to login as ${role}: ${response.status}`);
   }
-  const payload = await response.json();
-  if (!payload?.sessionToken || !payload?.user) {
-    throw new Error(`Malformed login payload for ${role}`);
-  }
-  return payload;
+  throw new Error(`Unable to login as ${role}: retry limit exceeded`);
 }
 
 class NativeMouseController {
@@ -237,8 +266,8 @@ async function viewportPointToScreen(page, point) {
   const bottomInset = horizontalInset;
   const topInset = Math.max(0, Math.round(metrics.outerHeight - metrics.innerHeight - bottomInset));
   return {
-    x: Math.round(metrics.screenX + horizontalInset + point.x),
-    y: Math.round(metrics.screenY + topInset + point.y),
+    x: Math.round(metrics.screenX + horizontalInset + point.x + CURSOR_SCREEN_OFFSET.x),
+    y: Math.round(metrics.screenY + topInset + point.y + CURSOR_SCREEN_OFFSET.y),
   };
 }
 
@@ -253,15 +282,6 @@ function addPoint(rect, point) {
   return {
     x: Math.round(rect.x + point.x),
     y: Math.round(rect.y + point.y),
-  };
-}
-
-function getOpenDialogRect(windowRect) {
-  return {
-    x: windowRect.x + OPEN_DIALOG_RELATIVE_RECT.x,
-    y: windowRect.y + OPEN_DIALOG_RELATIVE_RECT.y,
-    width: OPEN_DIALOG_RELATIVE_RECT.width,
-    height: OPEN_DIALOG_RELATIVE_RECT.height,
   };
 }
 
@@ -347,6 +367,26 @@ async function getWindowRect(page) {
   return metrics;
 }
 
+async function getCaptureRect(page) {
+  const metrics = await page.evaluate(() => ({
+    screenX: window.screenX,
+    screenY: window.screenY,
+    outerWidth: window.outerWidth,
+    outerHeight: window.outerHeight,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+  }));
+  const horizontalInset = Math.max(0, Math.round((metrics.outerWidth - metrics.innerWidth) / 2));
+  const bottomInset = horizontalInset;
+  const topInset = Math.max(0, Math.round(metrics.outerHeight - metrics.innerHeight - bottomInset));
+  return {
+    x: Math.round(metrics.screenX + horizontalInset),
+    y: Math.round(metrics.screenY + topInset),
+    width: Math.round(metrics.innerWidth),
+    height: Math.round(metrics.innerHeight),
+  };
+}
+
 async function centerOf(locator) {
   await locator.scrollIntoViewIfNeeded();
   const box = await locator.boundingBox();
@@ -365,46 +405,10 @@ async function moveCursor(page, x, y, options = {}) {
     steps: options.steps ?? options.moveSteps ?? 32,
     delayMs: options.delayMs ?? options.moveDelayMs ?? 22,
   });
-  await page.mouse.move(x, y);
-}
-
-async function moveSystemCursorToWindowPoint(windowRect, point, options = {}) {
-  const absolute = windowPointToScreen(windowRect, point);
-  await nativeMouse.moveTo(absolute.x, absolute.y, {
-    steps: options.steps ?? 30,
-    delayMs: options.delayMs ?? 24,
-  });
+  if (!page.isClosed()) {
+    await page.mouse.move(x, y).catch(() => {});
+  }
   return absolute;
-}
-
-async function clickSystemPoint(windowRect, point, options = {}) {
-  const absolute = await moveSystemCursorToWindowPoint(windowRect, point, {
-    steps: options.moveSteps ?? 30,
-    delayMs: options.moveDelayMs ?? 24,
-  });
-  await sleep(options.hoverPauseMs ?? 320);
-  await nativeMouse.clickAt(absolute.x, absolute.y, {
-    count: options.count ?? 1,
-    delayMs: options.clickDelayMs ?? 60,
-    modifiers: options.modifiers ?? [],
-  });
-  await sleep(options.afterClickMs ?? 260);
-}
-
-async function dragSystemSelection(windowRect, fromPoint, toPoint, options = {}) {
-  const from = addPoint(windowRect, fromPoint);
-  const to = addPoint(windowRect, toPoint);
-  await nativeMouse.moveTo(from.x, from.y, {
-    steps: options.moveSteps ?? 28,
-    delayMs: options.moveDelayMs ?? 22,
-  });
-  await sleep(options.hoverPauseMs ?? 260);
-  await nativeMouse.dragTo(from, to, {
-    steps: options.dragSteps ?? 34,
-    delayMs: options.dragDelayMs ?? 22,
-    modifiers: options.modifiers ?? [],
-  });
-  await sleep(options.afterDragMs ?? 420);
 }
 
 async function clickLocator(page, locator, options = {}) {
@@ -414,10 +418,7 @@ async function clickLocator(page, locator, options = {}) {
     delayMs: options.moveDelayMs ?? 22,
   });
   await sleep(options.hoverPauseMs ?? 320);
-  await page.mouse.move(point.x, point.y);
-  await page.mouse.down();
-  await sleep(options.downPauseMs ?? 90);
-  await page.mouse.up();
+  await locator.click();
   await sleep(options.afterClickMs ?? 260);
 }
 
@@ -450,6 +451,54 @@ async function typeInto(page, locator, text, options = {}) {
   await sleep(options.afterTypeMs ?? 260);
 }
 
+async function visibleTypeInto(page, locator, text, options = {}) {
+  await typeInto(page, locator, text, options);
+}
+
+async function clickComboboxOption(page, inputLocator, optionText, options = {}) {
+  const option = inputLocator
+    .locator("xpath=ancestor::label[1]")
+    .locator(".listing-create-suggest__menu button")
+    .filter({ hasText: optionText })
+    .first();
+  await clickLocator(page, option, options);
+}
+
+async function revealLocatorInViewport(page, locator, options = {}) {
+  const topPadding = options.topPadding ?? 120;
+  const bottomPadding = options.bottomPadding ?? 180;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const rect = await locator.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return {
+        top: bounds.top,
+        bottom: bounds.bottom,
+        height: bounds.height,
+      };
+    });
+
+    const viewportHeight = await page.evaluate(() => window.innerHeight);
+    let deltaY = 0;
+
+    if (rect.bottom > viewportHeight - bottomPadding) {
+      deltaY = rect.bottom - (viewportHeight - bottomPadding);
+    } else if (rect.top < topPadding) {
+      deltaY = rect.top - topPadding;
+    }
+
+    if (Math.abs(deltaY) < 6) {
+      return;
+    }
+
+    await smoothScroll(page, deltaY, {
+      steps: Math.max(6, Math.ceil(Math.abs(deltaY) / 70)),
+      delayMs: options.delayMs ?? 90,
+    });
+    await sleep(options.afterScrollMs ?? 260);
+  }
+}
+
 async function smoothScroll(page, deltaY, options = {}) {
   const steps = options.steps ?? Math.max(8, Math.ceil(Math.abs(deltaY) / 95));
   const delayMs = options.delayMs ?? 125;
@@ -465,31 +514,9 @@ async function smoothScroll(page, deltaY, options = {}) {
 }
 
 async function uploadSellerPhotosWithFinder(page, windowRect) {
-  await sleep(900);
-  const openDialogRect = getOpenDialogRect(windowRect);
-  await clickSystemPoint(openDialogRect, FINDER_PICKER_POINTS.downloadsSidebar, {
-    moveSteps: 32,
-    hoverPauseMs: 520,
-    afterClickMs: 480,
-  });
-  await sleep(500);
-  await dragSystemSelection(
-    openDialogRect,
-    FINDER_PICKER_POINTS.selectionDragStart,
-    FINDER_PICKER_POINTS.selectionDragEnd,
-    {
-      moveSteps: 32,
-      hoverPauseMs: 420,
-      dragSteps: 36,
-      dragDelayMs: 20,
-      afterDragMs: 620,
-    },
-  );
-  await clickSystemPoint(openDialogRect, FINDER_PICKER_POINTS.openButton, {
-    moveSteps: 34,
-    hoverPauseMs: 420,
-    afterClickMs: 520,
-  });
+  void windowRect;
+  const fileInput = page.locator('.listing-create-photo-add input[type="file"]').first();
+  await fileInput.setInputFiles(SELLER_IMAGES);
   await page.waitForFunction(
     () => document.querySelectorAll(".listing-create-photo-item").length >= 5,
     undefined,
@@ -650,6 +677,8 @@ async function prepareBuyer(page) {
   await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
   await clearCartStorage(page);
   await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
+  focusBrowserAppWindow();
+  await page.bringToFront();
   await page.waitForSelector('[data-testid="catalog-card"]');
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(400);
@@ -659,6 +688,8 @@ async function prepareSeller(page) {
   nativeMouse.reset();
   await setSession(page, "seller");
   await page.goto(`${APP_BASE}/profile/partner-listings`, { waitUntil: "domcontentloaded" });
+  focusBrowserAppWindow();
+  await page.bringToFront();
   await page.waitForSelector("text=Мои объявления");
   await page.getByRole("button", { name: "Создать" }).first().waitFor();
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -669,6 +700,8 @@ async function prepareAdmin(page) {
   nativeMouse.reset();
   await setSession(page, "admin");
   await page.goto(`${APP_BASE}/admin/listings`, { waitUntil: "domcontentloaded" });
+  focusBrowserAppWindow();
+  await page.bringToFront();
   await page.waitForSelector("text=Модерация объявлений");
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(350);
@@ -690,8 +723,8 @@ async function runSellerScene(page, listingTitle, description) {
 
   const titleInput = page.locator('input[placeholder*="ASUS RTX"]').first();
   await typeInto(page, titleInput, "Palit GeForce RTX 5060", {
-    delay: 32,
-    afterTypeMs: 420,
+    delay: 24,
+    afterTypeMs: 260,
   });
 
   const suggestionButton = page
@@ -702,29 +735,40 @@ async function runSellerScene(page, listingTitle, description) {
   await clickLocator(page, suggestionButton, { moveSteps: 32, hoverPauseMs: 420, afterClickMs: 320 });
 
   const detailsTitle = page.locator('input[placeholder="Видеокарта"]').first();
-  await typeInto(page, detailsTitle, listingTitle, { delay: 24, afterTypeMs: 180 });
+  await typeInto(page, detailsTitle, listingTitle, { delay: 18, afterTypeMs: 140 });
 
   const usedButton = page.getByRole("button", { name: "Б/у" }).first();
   await clickLocator(page, usedButton, { moveSteps: 28, hoverPauseMs: 320 });
 
   const photoAdd = page.locator(".listing-create-photo-add").first();
-  await clickLocator(page, photoAdd, { moveSteps: 28, hoverPauseMs: 320, afterClickMs: 180 });
+  const photoAddPoint = await centerOf(photoAdd);
+  await moveCursor(page, photoAddPoint.x, photoAddPoint.y, {
+    steps: 28,
+    delayMs: 22,
+  });
+  await sleep(420);
   await uploadSellerPhotosWithFinder(page, windowRect);
 
   const brandInput = page.locator('input[placeholder="Например, ASUS"]').first();
-  await typeInto(page, brandInput, "Palit", { delay: 24, afterTypeMs: 340 });
-  const brandOption = page.getByRole("button", { name: "Palit" }).last();
-  await clickLocator(page, brandOption, { moveSteps: 26, hoverPauseMs: 320 });
+  await typeInto(page, brandInput, "Palit", { delay: 18, afterTypeMs: 200 });
+  await clickComboboxOption(page, brandInput, "Palit", {
+    moveSteps: 26,
+    hoverPauseMs: 220,
+    afterClickMs: 220,
+  });
 
   const modelInput = page
     .locator('input[placeholder*="Начните вводить цифры из названия модели"]')
     .first();
   await typeInto(page, modelInput, "GeForce RTX 5060 Dual", {
-    delay: 24,
-    afterTypeMs: 340,
+    delay: 18,
+    afterTypeMs: 220,
   });
-  const modelOption = page.getByRole("button", { name: "GeForce RTX 5060 Dual" }).last();
-  await clickLocator(page, modelOption, { moveSteps: 26, hoverPauseMs: 320 });
+  await clickComboboxOption(page, modelInput, "GeForce RTX 5060 Dual", {
+    moveSteps: 26,
+    hoverPauseMs: 220,
+    afterClickMs: 220,
+  });
   await sleep(420);
 
   // Показываем, что после выбора бренда и модели подтянулись характеристики.
@@ -735,21 +779,76 @@ async function runSellerScene(page, listingTitle, description) {
 
   const descriptionField = page.locator("textarea").first();
   await typeInto(page, descriptionField, description, {
-    delay: 18,
-    afterTypeMs: 200,
+    delay: 12,
+    afterTypeMs: 140,
   });
+  await smoothScroll(page, 260, { steps: 8, delayMs: 90 });
+  await sleep(220);
 
   const priceField = page.locator('input[type="number"]').first();
-  await typeInto(page, priceField, "29990", { delay: 26, afterTypeMs: 160 });
+  await typeInto(page, priceField, "29990", { delay: 18, afterTypeMs: 120 });
+  await sleep(240);
+
+  const sellerWarrantyCheckbox = page.getByLabel("Даю гарантию продавца на этот товар").first();
+  await clickLocator(page, sellerWarrantyCheckbox, {
+    moveSteps: 26,
+    hoverPauseMs: 320,
+    afterClickMs: 260,
+  });
+  await sleep(520);
+
+  const sellerWarrantyDaysField = page.getByPlaceholder("Например, 30").first();
+  await visibleTypeInto(page, sellerWarrantyDaysField, "30", {
+    moveSteps: 28,
+    hoverPauseMs: 320,
+    afterClickMs: 180,
+    delay: 18,
+    afterTypeMs: 140,
+  });
+  await sleep(280);
+
+  const multipleStockCheckbox = page.getByLabel("Несколько штук в наличии").first();
+  await clickLocator(page, multipleStockCheckbox, {
+    moveSteps: 26,
+    hoverPauseMs: 320,
+    afterClickMs: 260,
+  });
+  await sleep(520);
+
+  const availableQuantityField = page.getByPlaceholder("Например, 5").first();
+  await visibleTypeInto(page, availableQuantityField, "5", {
+    moveSteps: 28,
+    hoverPauseMs: 320,
+    afterClickMs: 180,
+    delay: 18,
+    afterTypeMs: 140,
+  });
+  await sleep(140);
 
   const submitButton = page.getByRole("button", { name: /Разместить объявление/i }).first();
+  await revealLocatorInViewport(page, submitButton, {
+    topPadding: 140,
+    bottomPadding: 220,
+    delayMs: 60,
+    afterScrollMs: 120,
+  });
+  await sleep(140);
   await clickLocator(page, submitButton, {
-    moveSteps: 34,
-    hoverPauseMs: 460,
-    afterClickMs: 320,
+    moveSteps: 26,
+    hoverPauseMs: 220,
+    afterClickMs: 240,
   });
 
-  await page.waitForURL(/\/profile\/partner-listings$/);
+  try {
+    await page.waitForURL(/\/profile\/partner-listings$/, { timeout: 30000 });
+  } catch (error) {
+    const inlineIssues = await page.locator(".text-red-800").allInnerTexts().catch(() => []);
+    const issue = inlineIssues.map((item) => item.trim()).filter(Boolean).join(" | ");
+    throw new Error(
+      `Seller publish did not navigate from ${page.url()}. ${issue ? `Issue: ${issue}` : "No inline issue text found."}`,
+      { cause: error },
+    );
+  }
   await page.waitForSelector(`text=${listingTitle}`);
   await sleep(850);
 
@@ -854,45 +953,328 @@ async function runAdminScene(page, listingPublicId, listingTitle) {
 }
 
 async function getFirstVisibleMapMarkerPoint(page) {
-  const point = await page.evaluate(() => {
-    const markers = Array.from(document.querySelectorAll(".ymaps-2-1-79-svg-icon"))
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const point = await page.evaluate(() => {
+      const selector = [
+        ".ymaps-2-1-79-svg-icon",
+        ".ymaps-2-1-79-image",
+        ".ymaps-2-1-79-image-with-content",
+        '[class*="ymaps-2-1-79"][class*="icon"]',
+        '[class*="ymaps-2-1-79"][class*="image"]',
+        '[class*="ymaps-2-1-79"][class*="placemark"]',
+      ].join(", ");
+
+      const markers = Array.from(document.querySelectorAll(selector))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return {
+            element,
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            right: rect.right,
+            bottom: rect.bottom,
+            visibility: style.visibility,
+            display: style.display,
+            opacity: Number(style.opacity || "1"),
+            className: element.className?.toString?.() ?? "",
+            insideControls: Boolean(
+              element.closest('[class*="controls"], [class*="control"], [class*="zoom"], [class*="toolbar"]'),
+            ),
+          };
+        })
+        .filter(
+          (marker) =>
+            marker.width >= 8 &&
+            marker.height >= 8 &&
+            marker.width <= 80 &&
+            marker.height <= 80 &&
+            marker.x >= 0 &&
+            marker.y >= 0 &&
+            marker.right <= window.innerWidth &&
+            marker.bottom <= window.innerHeight &&
+            marker.visibility !== "hidden" &&
+            marker.display !== "none" &&
+            marker.opacity > 0 &&
+            !marker.insideControls,
+        )
+        .sort((left, right) => left.y - right.y || left.x - right.x);
+
+      if (markers.length === 0) {
+        return null;
+      }
+
+      const first = markers[0];
+      return {
+        x: first.x + first.width / 2,
+        y: first.y + first.height / 2,
+      };
+    });
+
+    if (point) {
+      return point;
+    }
+
+    await sleep(500);
+  }
+
+  throw new Error("No visible map marker found on checkout page");
+}
+
+async function markVisiblePickupMarker(page) {
+  return page.evaluate(() => {
+    document
+      .querySelectorAll('[data-demo-pickup-marker="true"]')
+      .forEach((element) => element.removeAttribute("data-demo-pickup-marker"));
+
+    const selector = [
+      ".ymaps-2-1-79-image",
+      ".ymaps-2-1-79-image-with-content",
+      ".ymaps-2-1-79-svg-icon",
+      '[class*="ymaps-2-1-79"][class*="placemark"]',
+      '[class*="ymaps-2-1-79"][class*="image"]',
+    ].join(", ");
+
+    const rawMarkers = Array.from(document.querySelectorAll(selector))
       .map((element) => {
         const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
         return {
+          element,
           x: rect.x,
           y: rect.y,
           width: rect.width,
           height: rect.height,
           right: rect.right,
           bottom: rect.bottom,
+          visibility: style.visibility,
+          display: style.display,
+          opacity: Number(style.opacity || "1"),
+          text: element.textContent?.trim() ?? "",
+          className: element.className?.toString?.() ?? "",
+          insideControls: Boolean(
+            element.closest('[class*="controls"], [class*="control"], [class*="zoom"], [class*="toolbar"]'),
+          ),
         };
       })
       .filter(
         (marker) =>
-          marker.width > 0 &&
-          marker.height > 0 &&
+          marker.width >= 8 &&
+          marker.height >= 8 &&
+          marker.width <= 48 &&
+          marker.height <= 56 &&
           marker.x >= 0 &&
           marker.y >= 0 &&
           marker.right <= window.innerWidth &&
-          marker.bottom <= window.innerHeight,
+          marker.bottom <= window.innerHeight &&
+          marker.visibility !== "hidden" &&
+          marker.display !== "none" &&
+          marker.opacity > 0 &&
+          marker.text.length === 0 &&
+          !marker.insideControls,
       );
 
-    if (markers.length === 0) {
-      return null;
-    }
+    const preferredMarkers = rawMarkers.filter(
+      (marker) =>
+        marker.width <= 36 &&
+        marker.height <= 48 &&
+        !marker.className.includes("circleIcon___1E98FF_40x40"),
+    );
+
+    const markers = (preferredMarkers.length > 0 ? preferredMarkers : rawMarkers)
+      .sort((left, right) => left.y - right.y || left.x - right.x);
 
     const first = markers[0];
-    return {
-      x: first.x + first.width / 2,
-      y: first.y + first.height / 2,
-    };
-  });
+    if (!first) {
+      return false;
+    }
 
-  if (!point) {
-    throw new Error("No visible map marker found on checkout page");
+    first.element.setAttribute("data-demo-pickup-marker", "true");
+    return true;
+  });
+}
+
+async function ensurePickupPointSelected(page) {
+  const selectedPointSummary = page
+    .locator("div.rounded-xl.border.border-gray-200.bg-gray-50")
+    .filter({ hasText: /ПВЗ|Выбранная точка/i })
+    .first();
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const markerWasTagged = await markVisiblePickupMarker(page).catch(() => false);
+    if (markerWasTagged) {
+      const markerLocator = page.locator('[data-demo-pickup-marker="true"]').first();
+      const box = await markerLocator.boundingBox();
+      if (box) {
+        await clickPagePoint(
+          page,
+          { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+          {
+            moveSteps: 24,
+            hoverPauseMs: 220,
+            afterClickMs: 200,
+          },
+        );
+      } else {
+        const markerPoint = await getFirstVisibleMapMarkerPoint(page).catch(() => null);
+        if (markerPoint) {
+          await clickPagePoint(page, markerPoint, {
+            moveSteps: 24,
+            hoverPauseMs: 220,
+            afterClickMs: 200,
+          });
+        }
+      }
+    } else {
+      const markerPoint = await getFirstVisibleMapMarkerPoint(page).catch(() => null);
+      if (markerPoint) {
+        await clickPagePoint(page, markerPoint, {
+          moveSteps: 24,
+          hoverPauseMs: 220,
+          afterClickMs: 200,
+        });
+      }
+    }
+
+    try {
+      await selectedPointSummary.filter({ hasText: /Выбранная точка/i }).waitFor({
+        timeout: 1400,
+      });
+      await sleep(260);
+      return;
+    } catch {
+      await sleep(180);
+    }
   }
 
-  return point;
+  await page
+    .waitForFunction(
+      () =>
+        Array.isArray(window.__ecommDemoCheckout?.visiblePointKeys) &&
+        window.__ecommDemoCheckout.visiblePointKeys.length > 0,
+      undefined,
+      { timeout: 5000 },
+    )
+    .catch(() => {});
+
+  const selectedViaDemoHook = await page.evaluate(() => {
+    const demoApi = window.__ecommDemoCheckout;
+    if (!demoApi || typeof demoApi.selectVisiblePoint !== "function") {
+      return false;
+    }
+    return demoApi.selectVisiblePoint(0);
+  }).catch(() => false);
+
+  if (selectedViaDemoHook) {
+    await selectedPointSummary.filter({ hasText: /Выбранная точка/i }).waitFor({
+      timeout: 1500,
+    });
+    await sleep(260);
+    return;
+  }
+
+  const summaryText = (await selectedPointSummary.textContent().catch(() => ""))?.trim() ?? "";
+  throw new Error(
+    `Pickup point was not selected after clicking map markers. Summary: ${summaryText || "not found"}`,
+  );
+}
+
+async function showCheckoutPaymentMethod(page) {
+  const paymentHeading = page.getByRole("heading", { name: "Способ оплаты" }).first();
+  const cardButton = page.getByRole("button", { name: /Банковская карта/i }).first();
+
+  await revealLocatorInViewport(page, paymentHeading, {
+    topPadding: 120,
+    bottomPadding: 200,
+    delayMs: 70,
+    afterScrollMs: 160,
+  });
+  await sleep(160);
+  await clickLocator(page, cardButton, {
+    moveSteps: 24,
+    hoverPauseMs: 220,
+    afterClickMs: 200,
+  });
+  await sleep(180);
+}
+
+async function moveCursorAwayFromMap(page) {
+  const viewport = await page.evaluate(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
+  await moveCursor(
+    page,
+    Math.max(56, Math.round(viewport.width * 0.08)),
+    Math.min(Math.round(viewport.height * 0.32), viewport.height - 140),
+    {
+      steps: 26,
+      delayMs: 18,
+    },
+  );
+  await sleep(160);
+}
+
+async function waitForPaymentPopupAfterClick(page, payButton) {
+  const popupPromise = Promise.race([
+    page.waitForEvent("popup", { timeout: 15000 }).catch(() => null),
+    page.context().waitForEvent("page", { timeout: 15000 }).catch(() => null),
+  ]);
+  const checkoutResponsePromise = page
+    .waitForResponse(
+      (response) =>
+        response.url() === `${API_BASE}/profile/orders` &&
+        response.request().method() === "POST",
+      { timeout: 15000 },
+    )
+    .catch(() => null);
+
+  await clickLocator(page, payButton, {
+    moveSteps: 28,
+    hoverPauseMs: 300,
+    afterClickMs: 260,
+  });
+
+  const popup = await popupPromise;
+  if (popup) {
+    return popup;
+  }
+
+  const payButtonText = (await payButton.textContent().catch(() => ""))?.trim() ?? "";
+  const payButtonDisabled = await payButton.isDisabled().catch(() => false);
+  const selectedPointSummary = (
+    await page
+      .locator("div.rounded-xl.border.border-gray-200.bg-gray-50")
+      .filter({ hasText: /ПВЗ|Выбранная точка/i })
+      .first()
+      .textContent()
+      .catch(() => "")
+  )?.trim() ?? "";
+  const toastText = (
+    await page.locator("div.pointer-events-auto p").allTextContents().catch(() => [])
+  )
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(" | ");
+
+  const checkoutResponse = await checkoutResponsePromise;
+  let fallbackPaymentUrl = null;
+  if (checkoutResponse) {
+    const payload = await checkoutResponse.json().catch(() => null);
+    fallbackPaymentUrl = payload?.payment?.confirmationUrl ?? null;
+  }
+
+  if (fallbackPaymentUrl) {
+    const popupPage = await page.context().newPage();
+    await popupPage.goto(fallbackPaymentUrl, { waitUntil: "domcontentloaded" });
+    return popupPage;
+  }
+
+  throw new Error(
+    `Payment popup did not open. Button="${payButtonText}" disabled=${payButtonDisabled}. Selected point="${selectedPointSummary || "n/a"}". Toasts="${toastText || "none"}".`,
+  );
 }
 
 async function runBuyerScene(page, listingPublicId, listingTitle) {
@@ -969,24 +1351,20 @@ async function runBuyerScene(page, listingPublicId, listingTitle) {
     afterClickMs: 280,
   });
   await page.waitForURL(/\/checkout/, { timeout: 12000 });
-  await sleep(3600);
+  await sleep(900);
 
-  const markerPoint = await getFirstVisibleMapMarkerPoint(page);
-  await clickPagePoint(page, markerPoint, {
-    moveSteps: 28,
-    hoverPauseMs: 360,
-    afterClickMs: 360,
-  });
-  await sleep(1320);
-
-  const popupPromise = page.context().waitForEvent("page");
   const payButton = page.getByRole("button", { name: /Оплатить/ }).first();
-  await clickLocator(page, payButton, {
-    moveSteps: 28,
-    hoverPauseMs: 300,
-    afterClickMs: 260,
+  await ensurePickupPointSelected(page);
+  await moveCursorAwayFromMap(page);
+  await showCheckoutPaymentMethod(page);
+  await revealLocatorInViewport(page, payButton, {
+    topPadding: 120,
+    bottomPadding: 180,
+    delayMs: 70,
+    afterScrollMs: 140,
   });
-  const popup = await popupPromise;
+  await sleep(140);
+  const popup = await waitForPaymentPopupAfterClick(page, payButton);
   await popup.waitForLoadState("domcontentloaded");
   await popup.bringToFront();
   await sleep(1900);
@@ -1035,7 +1413,7 @@ async function runBuyerScene(page, listingPublicId, listingTitle) {
 async function recordScene(page, sceneName, prepare, action, maxSeconds) {
   console.log(`[demo] prepare ${sceneName}`);
   await prepare(page);
-  const rect = await getWindowRect(page);
+  const rect = await getCaptureRect(page);
   await nativeMouse.setAssociated(false);
   const recording = startScreenRecording(sceneName, rect, maxSeconds);
   const recordingStartedAt = Date.now();
@@ -1077,10 +1455,10 @@ async function recordScene(page, sceneName, prepare, action, maxSeconds) {
   return result;
 }
 
-async function composeVideo() {
+async function composeVideo(manifestPath = META_PATH, outputPath = FINAL_PATH) {
   const swiftScript = path.join(ROOT_DIR, "scripts/demo/compose-demo.swift");
   await new Promise((resolve, reject) => {
-    const child = spawn("swift", [swiftScript, META_PATH, FINAL_PATH], {
+    const child = spawn("swift", [swiftScript, manifestPath, outputPath], {
       cwd: ROOT_DIR,
       stdio: "inherit",
     });
@@ -1114,7 +1492,6 @@ async function main() {
     args: [
       `--window-size=${WINDOW_BOUNDS.width},${WINDOW_BOUNDS.height}`,
       "--disable-infobars",
-      "--force-device-scale-factor=1",
     ],
   });
 
@@ -1122,6 +1499,7 @@ async function main() {
     await nativeMouse.start();
     const page = await browser.newPage({
       viewport: VIEWPORT,
+      deviceScaleFactor: 2,
     });
     await page.bringToFront();
     console.log("[demo] browser ready");
@@ -1166,23 +1544,31 @@ async function main() {
       ),
     );
 
-    const manifest = {
+    const manifestBase = {
       createdAt: new Date().toISOString(),
       appBase: APP_BASE,
-      finalOutput: FINAL_PATH,
       listingPublicId: latestSellerListing.id,
       listingTitle,
       scenes,
-      speed: 1.9,
     };
 
-    fs.writeFileSync(META_PATH, JSON.stringify(manifest, null, 2));
-    console.log("[demo] composing final video");
     await browser.close();
     await nativeMouse.stop();
-    await composeVideo();
+    for (const variant of SPEED_VARIANTS) {
+      const manifest = {
+        ...manifestBase,
+        finalOutput: variant.outputPath,
+        speed: variant.speed,
+      };
+      fs.writeFileSync(variant.manifestPath, JSON.stringify(manifest, null, 2));
+      console.log(`[demo] composing video speed x${variant.speed}`);
+      await composeVideo(variant.manifestPath, variant.outputPath);
+    }
 
     console.log(`Demo video created: ${FINAL_PATH}`);
+    console.log(`Demo video created: ${FINAL_1X_PATH}`);
+    console.log(`Demo video created: ${FINAL_15X_PATH}`);
+    console.log(`Demo video created: ${FINAL_2X_PATH}`);
     console.log(`Manifest created: ${META_PATH}`);
   } catch (error) {
     await browser.close();

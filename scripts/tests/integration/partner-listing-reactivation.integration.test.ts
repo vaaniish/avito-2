@@ -201,3 +201,92 @@ test(
     }
   },
 );
+
+test(
+  "integration: seller cannot reactivate listing removed by approved complaint",
+  { skip: !safeDb },
+  async () => {
+    const sellerToken = await login("seller1@ecomm.local", "seller123");
+
+    const seller = await prisma.appUser.findUnique({
+      where: { email: "seller1@ecomm.local" },
+      select: { id: true },
+    });
+    const buyer = await prisma.appUser.findUnique({
+      where: { email: "buyer1@ecomm.local" },
+      select: { id: true },
+    });
+    assert.ok(seller?.id, "seller1 not found");
+    assert.ok(buyer?.id, "buyer1 not found");
+
+    const publicSuffix = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+    const listing = await prisma.marketplaceListing.create({
+      data: {
+        public_id: `LST-COMPLAINT-REMOVED-${publicSuffix}`,
+        seller_id: seller.id,
+        type: "PRODUCT",
+        title: "Removed by complaint test listing",
+        description: "This listing was removed after an approved complaint",
+        price: 12900,
+        condition: "USED",
+        status: "INACTIVE",
+        moderation_status: "REJECTED",
+      },
+      select: { id: true, public_id: true },
+    });
+    const complaint = await prisma.complaint.create({
+      data: {
+        public_id: `CMP-COMPLAINT-REMOVED-${publicSuffix}`,
+        status: "APPROVED",
+        complaint_type: "reactivation_block",
+        listing_id: listing.id,
+        seller_id: seller.id,
+        reporter_id: buyer.id,
+        description: "Approved complaint blocks old listing reactivation",
+      },
+      select: { id: true },
+    });
+
+    try {
+      for (const request of [
+        {
+          method: "POST" as const,
+          path: `/api/partner/listings/${encodeURIComponent(listing.public_id)}/toggle-status`,
+          body: undefined,
+        },
+        {
+          method: "PATCH" as const,
+          path: `/api/partner/listings/${encodeURIComponent(listing.public_id)}/status`,
+          body: { status: "moderation" },
+        },
+        {
+          method: "PATCH" as const,
+          path: `/api/partner/listings/${encodeURIComponent(listing.public_id)}`,
+          body: { title: "Trying to relist removed listing" },
+        },
+      ]) {
+        const response = await apiRequest({
+          method: request.method,
+          path: request.path,
+          token: sellerToken,
+          body: request.body,
+          expected: [409],
+        });
+        assert.equal(
+          response.data?.error,
+          "Это объявление снято по подтверждённой жалобе. Создайте новое объявление.",
+        );
+      }
+
+      const after = await prisma.marketplaceListing.findUnique({
+        where: { id: listing.id },
+        select: { status: true, moderation_status: true },
+      });
+      assert.equal(after?.status, "INACTIVE");
+      assert.equal(after?.moderation_status, "REJECTED");
+    } finally {
+      await prisma.complaint.deleteMany({ where: { id: complaint.id } });
+      await prisma.marketplaceListing.deleteMany({ where: { id: listing.id } });
+    }
+  },
+);

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { confirmDialog, notifyError } from "../../../shared/ui/notifications";
+import { confirmDialog, notifyError, notifySuccess } from "../../../shared/ui/notifications";
 import {
   fetchComplaintDetail,
   fetchComplaintSellerSummary,
@@ -59,7 +59,7 @@ export function useComplaintsPage() {
 
   const listQueryString = useMemo(() => {
     const params = new URLSearchParams();
-    if (filters.status !== "all") params.set("status", filters.status);
+    if (filters.status !== "all") params.set("statuses", filters.status);
     if (filters.search.trim()) params.set("q", filters.search.trim());
     if (filters.from) params.set("from", filters.from);
     if (filters.to) params.set("to", filters.to);
@@ -226,12 +226,18 @@ export function useComplaintsPage() {
 
     setIsActionLoading(nextStatus);
     try {
-      await updateComplaintStatus({
+      const result = await updateComplaintStatus({
         complaintId: selectedComplaint.id,
         status: nextStatus,
         actionTaken: moderatorComment.trim() || null,
         idempotencyKey: makeIdempotencyKey(selectedComplaint.id, nextStatus),
       });
+      const autoRejectedCount = result.cascade?.autoRejectedComplaintIds?.length ?? 0;
+      if (autoRejectedCount > 0) {
+        notifySuccess(
+          `Объявление снято с продажи. Связанные жалобы закрыты автоматически: ${autoRejectedCount}.`,
+        );
+      }
 
       await Promise.all([
         loadComplaints(),

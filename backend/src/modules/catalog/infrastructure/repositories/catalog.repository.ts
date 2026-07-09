@@ -44,6 +44,7 @@ export class CatalogRepository {
         type,
         status: "ACTIVE",
         moderation_status: "APPROVED",
+        deleted_at: null,
         item_id: {
           not: null,
         },
@@ -92,7 +93,10 @@ export class CatalogRepository {
     skip?: number;
   }) {
     return prisma.marketplaceListing.findMany({
-      where: params.where,
+      where: {
+        deleted_at: null,
+        ...params.where,
+      },
       include: catalogListingDetailInclude,
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
       ...(typeof params.take === "number"
@@ -103,7 +107,10 @@ export class CatalogRepository {
 
   async findListingCandidates(where: Record<string, unknown>) {
     return prisma.marketplaceListing.findMany({
-      where,
+      where: {
+        deleted_at: null,
+        ...where,
+      },
       select: {
         id: true,
         seller_id: true,
@@ -209,7 +216,10 @@ export class CatalogRepository {
 
   async findDetailedListingsByIds(ids: number[]) {
     return prisma.marketplaceListing.findMany({
-      where: { id: { in: ids } },
+      where: {
+        id: { in: ids },
+        deleted_at: null,
+      },
       include: catalogListingDetailInclude,
     });
   }
@@ -332,6 +342,7 @@ export class CatalogRepository {
         public_id: publicId,
         status: "ACTIVE",
         moderation_status: "APPROVED",
+        deleted_at: null,
       },
       data: {
         views: {
@@ -372,7 +383,13 @@ export class CatalogRepository {
         },
         _count: {
           select: {
-            listings: true,
+            listings: {
+              where: {
+                status: "ACTIVE",
+                moderation_status: "APPROVED",
+                deleted_at: null,
+              },
+            },
           },
         },
         seller_profile: {
@@ -390,6 +407,7 @@ export class CatalogRepository {
       where: {
         status: "ACTIVE",
         moderation_status: "APPROVED",
+        deleted_at: null,
       },
       select: {
         id: true,
@@ -435,8 +453,11 @@ export class CatalogRepository {
   }
 
   async findListingQuestionContext(publicId: string) {
-    return prisma.marketplaceListing.findUnique({
-      where: { public_id: publicId },
+    return prisma.marketplaceListing.findFirst({
+      where: {
+        public_id: publicId,
+        deleted_at: null,
+      },
       select: {
         id: true,
         title: true,
@@ -505,13 +526,18 @@ export class CatalogRepository {
   }
 
   async findComplaintListing(publicId: string) {
-    return prisma.marketplaceListing.findUnique({
-      where: { public_id: publicId },
+    return prisma.marketplaceListing.findFirst({
+      where: {
+        public_id: publicId,
+        deleted_at: null,
+      },
       select: {
         id: true,
         public_id: true,
         seller_id: true,
         title: true,
+        status: true,
+        moderation_status: true,
       },
     });
   }

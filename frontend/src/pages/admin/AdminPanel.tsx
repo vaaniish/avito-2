@@ -132,7 +132,7 @@ export function AdminPanel({
     },
     {
       id: "audit" as AdminPage,
-      name: "Аудит",
+      name: "Риски",
       icon: ClipboardList,
     },
   ];

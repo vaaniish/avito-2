@@ -51,7 +51,7 @@ export function usePartnerListingsCollection({
     try {
       await deletePartnerListing(deleteCandidateId);
       await loadListings();
-      showNotice("Объявление удалено", "success");
+      showNotice("Объявление архивировано", "success");
     } catch (error) {
       showNotice(
         error instanceof Error

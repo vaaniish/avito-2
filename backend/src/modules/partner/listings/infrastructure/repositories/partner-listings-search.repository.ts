@@ -95,6 +95,7 @@ export class PartnerListingsSearchRepository
       prisma.marketplaceListing.findMany({
         where: {
           type,
+          deleted_at: null,
           title: {
             contains: query,
             mode: "insensitive",
@@ -298,6 +299,7 @@ export class PartnerListingsSearchRepository
       prisma.marketplaceListing.findMany({
         where: {
           type,
+          deleted_at: null,
           title: {
             contains: title,
             mode: "insensitive",

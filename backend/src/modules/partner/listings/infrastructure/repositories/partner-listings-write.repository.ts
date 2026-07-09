@@ -15,6 +15,7 @@ import type {
 import {
   FALLBACK_LISTING_IMAGE,
   LISTING_ACTIVE,
+  LISTING_INACTIVE,
   LISTING_MODERATION,
   ROLE_ADMIN,
   applyCatalogAttributeDefaults,
@@ -46,7 +47,6 @@ import {
 } from "./partner-listings-catalog.repository-helper";
 import {
   loadSellerModerationContext,
-  hasBlockingOrderForListing,
   hasActivationBlockingOrderForListing,
   applyAutoModerationDecision,
   validateSellerOnboardingForListing,
@@ -113,6 +113,25 @@ function normalizeWarrantyAndStock(params: {
     hasMultipleStock,
     availableQuantity,
   };
+}
+
+const LISTING_REMOVED_BY_APPROVED_COMPLAINT_MESSAGE =
+  "Это объявление снято по подтверждённой жалобе. Создайте новое объявление.";
+
+async function assertListingCanReturnToModeration(listingId: number): Promise<void> {
+  const approvedComplaint = await prisma.complaint.findFirst({
+    where: {
+      listing_id: listingId,
+      status: "APPROVED",
+    },
+    select: { id: true },
+  });
+
+  if (approvedComplaint) {
+    throw conflict(LISTING_REMOVED_BY_APPROVED_COMPLAINT_MESSAGE, {
+      reasonCode: "LISTING_REMOVED_BY_APPROVED_COMPLAINT",
+    });
+  }
 }
 
 export class PartnerListingsWriteRepository
@@ -499,6 +518,7 @@ export class PartnerListingsWriteRepository
       where: {
         public_id: String(params.publicId),
         seller_id: params.sellerId,
+        deleted_at: null,
       },
       include: {
         item: { include: { subcategory: { include: { category: true } } } },
@@ -519,6 +539,7 @@ export class PartnerListingsWriteRepository
     if (!existing) {
       throw notFound("Listing not found");
     }
+    await assertListingCanReturnToModeration(existing.id);
 
     const price = params.body.price === undefined ? undefined : Number(params.body.price);
     if (price !== undefined && (!Number.isFinite(price) || price <= 0)) {
@@ -802,6 +823,7 @@ export class PartnerListingsWriteRepository
       where: {
         public_id: String(params.publicId),
         seller_id: params.sellerId,
+        deleted_at: null,
       },
     });
 
@@ -818,6 +840,9 @@ export class PartnerListingsWriteRepository
       });
     }
 
+    if (transition.nextStatus === LISTING_MODERATION) {
+      await assertListingCanReturnToModeration(existing.id);
+    }
     if (
       transition.nextStatus === LISTING_MODERATION &&
       (await hasActivationBlockingOrderForListing(existing.id))
@@ -893,6 +918,7 @@ export class PartnerListingsWriteRepository
       where: {
         public_id: String(params.publicId),
         seller_id: params.sellerId,
+        deleted_at: null,
       },
       select: {
         id: true,
@@ -918,6 +944,9 @@ export class PartnerListingsWriteRepository
       });
     }
 
+    if (transition.nextStatus === LISTING_MODERATION) {
+      await assertListingCanReturnToModeration(existing.id);
+    }
     if (
       transition.nextStatus === LISTING_MODERATION &&
       (await hasActivationBlockingOrderForListing(existing.id))
@@ -989,6 +1018,7 @@ export class PartnerListingsWriteRepository
       where: {
         public_id: String(params.publicId),
         seller_id: params.sellerId,
+        deleted_at: null,
       },
       select: { id: true },
     });
@@ -997,14 +1027,12 @@ export class PartnerListingsWriteRepository
       throw notFound("Listing not found");
     }
 
-    if (await hasBlockingOrderForListing(existing.id)) {
-      throw conflict(
-        "Нельзя удалить объявление, связанное с неотмененным заказом. Это нарушит финансовую прозрачность.",
-      );
-    }
-
-    await prisma.marketplaceListing.delete({
+    await prisma.marketplaceListing.update({
       where: { id: existing.id },
+      data: {
+        status: LISTING_INACTIVE,
+        deleted_at: new Date(),
+      },
     });
 
     return { success: true };

@@ -571,6 +571,7 @@ model MarketplaceListing {
   tech_included        String?
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
+  deleted_at           DateTime?
 
   seller               AppUser           @relation("seller_listings", fields: [seller_id], references: [id], onDelete: Cascade)
   item                 CatalogItem?      @relation(fields: [item_id], references: [id], onDelete: SetNull)
@@ -591,6 +592,7 @@ model MarketplaceListing {
 
   @@index([seller_id])
   @@index([item_id])
+  @@index([deleted_at])
   @@index([type, status, moderation_status])
   @@index([status, moderation_status, created_at])
   @@index([type, status, moderation_status, created_at(sort: Desc), id(sort: Desc)], map: "MarketplaceListing_type_status_moderation_created_id_idx")

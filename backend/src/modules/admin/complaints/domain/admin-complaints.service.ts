@@ -12,6 +12,10 @@ import type {
 
 export const COMPLAINT_STATUS_IDEMPOTENCY_ACTION = "complaint.status.update";
 export const MAX_COMPLAINT_PAGE_SIZE = 100;
+export const RELATED_LISTING_REMOVED_RESOLUTION_KIND =
+  "related_listing_removed_after_approval";
+export const RELATED_LISTING_REMOVED_ACTION_TAKEN =
+  "Объявление снято с продажи после рассмотрения связанной жалобы";
 
 export function parseComplaintStatus(status: unknown): ComplaintStatusValue | null {
   if (status === "approved") return "APPROVED";
@@ -135,9 +139,17 @@ export function parseComplaintPriorityFilter(input: unknown): ComplaintPriority[
   return Array.from(new Set(parsed));
 }
 
-export function parseDateQuery(input: unknown): Date | null {
+export function parseDateQuery(
+  input: unknown,
+  boundary: "start" | "end" = "start",
+): Date | null {
   if (typeof input !== "string" || !input.trim()) return null;
-  const parsed = new Date(input);
+  const normalized = input.trim();
+  const parsed = new Date(
+    boundary === "end" && /^\d{4}-\d{2}-\d{2}$/.test(normalized)
+      ? `${normalized}T23:59:59.999Z`
+      : normalized,
+  );
   if (Number.isNaN(parsed.getTime())) return null;
   return parsed;
 }
@@ -239,6 +251,7 @@ export function sortComplaints(
 }
 
 export function normalizeComplaintFilters(input: {
+  status?: unknown;
   statuses?: unknown;
   moderator?: unknown;
   from?: unknown;
@@ -247,11 +260,11 @@ export function normalizeComplaintFilters(input: {
 }): ComplaintListFilters {
   const query = normalizeQueryText(input.q);
   return {
-    statuses: parseComplaintStatusesFilter(input.statuses),
+    statuses: parseComplaintStatusesFilter(input.statuses ?? input.status),
     moderatorPublicId:
       typeof input.moderator === "string" ? input.moderator : undefined,
     from: parseDateQuery(input.from),
-    to: parseDateQuery(input.to),
+    to: parseDateQuery(input.to, "end"),
     query,
   };
 }

@@ -150,12 +150,13 @@ async function createComplaint(params: {
 }
 
 test(
-  "integration: approving non-permanent complaint does not cascade related seller complaints",
+  "integration: approving complaint rejects open related listing complaints as listing removed",
   { skip: !safeDb },
   async () => {
     const admin = await loginAdmin();
     const seller = await createUser("CASCADE-NONPERM-SELLER", "SELLER");
     const reporter = await createUser("CASCADE-NONPERM-BUYER", "BUYER");
+    const relatedReporter = await createUser("CASCADE-NONPERM-RELATED-BUYER", "BUYER");
     const listing = await createListing(seller.id, "CASCADE-NONPERM-LST");
     const primary = await createComplaint({
       publicId: `CASCADE-NONPERM-PRIMARY-${Date.now()}`,
@@ -169,7 +170,7 @@ test(
       status: "NEW",
       listingId: listing.id,
       sellerId: seller.id,
-      reporterId: reporter.id,
+      reporterId: relatedReporter.id,
     });
 
     try {
@@ -185,13 +186,159 @@ test(
       });
 
       assert.equal((payload.enforcement as { level?: unknown })?.level, "warning");
-      assert.deepEqual((payload.cascade as { cascadedComplaintIds?: unknown })?.cascadedComplaintIds, []);
+      const cascade = payload.cascade as {
+        autoRejectedComplaintIds?: unknown;
+        cascadedComplaintIds?: unknown;
+        updatedCount?: unknown;
+      };
+      assert.deepEqual(cascade.cascadedComplaintIds, []);
+      assert.deepEqual(cascade.autoRejectedComplaintIds, [related.public_id]);
+      assert.equal(cascade.updatedCount, 2);
 
       const relatedAfter = await prisma.complaint.findUnique({
         where: { id: related.id },
-        select: { status: true },
+        select: { status: true, action_taken: true, sanction: true },
       });
-      assert.equal(relatedAfter?.status, "NEW");
+      assert.equal(relatedAfter?.status, "REJECTED");
+      assert.equal(
+        relatedAfter?.action_taken,
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
+      );
+      assert.equal(relatedAfter?.sanction, null);
+
+      const listingAfter = await prisma.marketplaceListing.findUnique({
+        where: { id: listing.id },
+        select: { status: true, moderation_status: true },
+      });
+      assert.equal(listingAfter?.status, "INACTIVE");
+      assert.equal(listingAfter?.moderation_status, "REJECTED");
+
+      const relatedNotification = await prisma.notification.findFirst({
+        where: {
+          user_id: relatedReporter.id,
+          message: {
+            contains: "снято с продажи после рассмотрения жалобы",
+          },
+        },
+      });
+      assert.ok(relatedNotification, "related reporter listing removed notification missing");
+    } finally {
+      await prisma.appUser.deleteMany({
+        where: { id: { in: [seller.id, reporter.id, relatedReporter.id] } },
+      });
+    }
+  },
+);
+
+test(
+  "integration: second approval attempt on same listing becomes listing removed resolution",
+  { skip: !safeDb },
+  async () => {
+    const admin = await loginAdmin();
+    const seller = await createUser("ONE-APPROVED-SELLER", "SELLER");
+    const reporter = await createUser("ONE-APPROVED-BUYER", "BUYER");
+    const relatedReporter = await createUser("ONE-APPROVED-RELATED-BUYER", "BUYER");
+    const listing = await createListing(seller.id, "ONE-APPROVED-LST");
+    const approved = await createComplaint({
+      publicId: `ONE-APPROVED-PRIMARY-${Date.now()}`,
+      status: "APPROVED",
+      listingId: listing.id,
+      sellerId: seller.id,
+      reporterId: reporter.id,
+    });
+    const related = await createComplaint({
+      publicId: `ONE-APPROVED-RELATED-${Date.now()}`,
+      status: "NEW",
+      listingId: listing.id,
+      sellerId: seller.id,
+      reporterId: relatedReporter.id,
+    });
+
+    try {
+      const payload = await apiRequest({
+        method: "PATCH",
+        path: `/api/admin/complaints/${related.public_id}/status`,
+        token: admin.token,
+        expected: 200,
+        body: {
+          status: "approved",
+          actionTaken: "Second approval must not be created",
+        },
+      });
+
+      assert.equal(payload.status, "rejected");
+      assert.equal(payload.enforcement, null);
+      assert.deepEqual(
+        (payload.cascade as { autoRejectedComplaintIds?: unknown })?.autoRejectedComplaintIds,
+        [related.public_id],
+      );
+
+      const listingComplaints = await prisma.complaint.findMany({
+        where: { listing_id: listing.id },
+        select: { id: true, status: true, action_taken: true },
+        orderBy: { id: "asc" },
+      });
+      assert.equal(
+        listingComplaints.filter((item) => item.status === "APPROVED").length,
+        1,
+      );
+      assert.equal(
+        listingComplaints.find((item) => item.id === approved.id)?.status,
+        "APPROVED",
+      );
+      const relatedAfter = listingComplaints.find((item) => item.id === related.id);
+      assert.equal(relatedAfter?.status, "REJECTED");
+      assert.equal(
+        relatedAfter?.action_taken,
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
+      );
+    } finally {
+      await prisma.appUser.deleteMany({
+        where: { id: { in: [seller.id, reporter.id, relatedReporter.id] } },
+      });
+    }
+  },
+);
+
+test(
+  "integration: cannot create a new complaint for removed listing",
+  { skip: !safeDb },
+  async () => {
+    const admin = await loginAdmin();
+    const seller = await createUser("REMOVED-COMPLAINT-SELLER", "SELLER");
+    const reporter = await createUser("REMOVED-COMPLAINT-BUYER", "BUYER");
+    const listing = await createListing(seller.id, "REMOVED-COMPLAINT-LST");
+    await prisma.marketplaceListing.update({
+      where: { id: listing.id },
+      data: {
+        status: "INACTIVE",
+        moderation_status: "REJECTED",
+      },
+    });
+    await createComplaint({
+      publicId: `REMOVED-COMPLAINT-APPROVED-${Date.now()}`,
+      status: "APPROVED",
+      listingId: listing.id,
+      sellerId: seller.id,
+      reporterId: reporter.id,
+    });
+
+    try {
+      const payload = await apiRequest({
+        method: "POST",
+        path: `/api/listings/${encodeURIComponent(listing.public_id)}/complaints`,
+        token: admin.token,
+        expected: 409,
+        body: {
+          complaintType: "removed listing",
+          description: "This removed listing should not accept new complaints.",
+        },
+      });
+
+      assert.equal(
+        payload.error,
+        "Объявление снято с продажи, новая жалоба не требуется.",
+      );
     } finally {
       await prisma.appUser.deleteMany({
         where: { id: { in: [seller.id, reporter.id] } },

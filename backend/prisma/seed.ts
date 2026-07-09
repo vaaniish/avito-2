@@ -2554,8 +2554,8 @@ async function main(): Promise<void> {
         null,
         "sub-smartphones-gadgets",
         null,
-        "Смартфоны с тепловизором",
-        "Новая ниша устройств для строителей и инженеров",
+        "Смарт-часы и браслеты",
+        "Покупатели часто ищут умные часы отдельным типом товара, а продавцы вынуждены выбирать неподходящие категории",
         null,
         null,
         null,
@@ -2668,6 +2668,47 @@ async function main(): Promise<void> {
       ],
     ].map((suggestion: any) => {
       const createdDaysAgo = Number(suggestion[suggestion.length - 1] ?? 1);
+      const payloadByPublicId: Record<string, Record<string, string>> = {
+        "CSG-001": {
+          categoryName: "Электроника",
+          subcategoryName: "Носимая электроника",
+          proposedItem: "Смарт-часы и браслеты",
+          brand: "Amazfit",
+          model: "GTR 4",
+          importantAttributes:
+            "Экран: AMOLED 1.43\"; Навигация: GPS; Защита: 5 ATM; Автономность: до 14 дней; Датчики: пульс, SpO2, сон",
+          link: "https://amazfit.example.com/gtr-4",
+          email: "catalog@techpoint.example.com",
+          photoName: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80",
+          photoLabel: "Фото товара и упаковки",
+          comment:
+            "Покупатели часто ищут умные часы отдельным типом товара, сейчас продавцы выбирают неподходящие категории. Нужны поля для автономности, влагозащиты и датчиков здоровья.",
+        },
+        "CSG-005": {
+          categoryName: "Техника для дома",
+          subcategoryName: "Роботы-пылесосы",
+          proposedItem: "Роботы-пылесосы с самоочисткой",
+          brand: "Roborock",
+          model: "S8 MaxV Ultra",
+          importantAttributes:
+            "Уровень шума: до 67 дБ; Станция: самоочистка и сушка; Навигация: лидар; Влажная уборка: есть",
+          email: "assortment@homecomfort.example.com",
+          comment:
+            "В карточках роботов-пылесосов покупатели регулярно спрашивают уровень шума и тип станции, сейчас эти признаки не выделены в справочнике.",
+        },
+        "CSG-008": {
+          categoryName: "Электроника",
+          subcategoryName: "Носимая электроника",
+          proposedItem: "Смарт-часы",
+          brand: "Apple",
+          model: "Watch Series 9 45mm",
+          importantAttributes:
+            "Цвет корпуса: Titanium Graphite; Размер: 45 мм; Связь: GPS; Ремешок: sport band",
+          email: "catalog@mobileexpert.example.com",
+          comment:
+            "Цвет Titanium Graphite часто встречается в поставках, но отсутствует среди нормализованных значений.",
+        },
+      };
       return {
         public_id: suggestion[0],
         entity_type: suggestion[1],
@@ -2686,6 +2727,7 @@ async function main(): Promise<void> {
         normalized_value: suggestion[7].toLocaleLowerCase("ru-RU"),
         reason: suggestion[8],
         admin_note: suggestion[9],
+        payload: payloadByPublicId[suggestion[0]] ?? undefined,
         reviewed_by_id:
           suggestion[10] === null ? null : getRequired(userMap, suggestion[10], "User"),
         reviewed_at:
@@ -3402,8 +3444,8 @@ async function main(): Promise<void> {
       134900,
       129900,
       "NEW",
-      "ACTIVE",
-      "APPROVED",
+      "INACTIVE",
+      "REJECTED",
       338,
       true,
     ],
@@ -3633,13 +3675,22 @@ async function main(): Promise<void> {
   });
 
   const questionTemplates = [
-    { text: "Актуально ли объявление?", answer: "Да, актуально." },
     {
-      text: "Можно ли забрать сегодня?",
-      answer: "Да, договоримся на сегодня вечером.",
+      text: "Товар в наличии именно в той комплектации, что на фото?",
+      answer: "Да, комплект соответствует фото и описанию в карточке.",
     },
-    { text: "Есть ли гарантия?", answer: "Да, гарантия от продавца 14 дней." },
-    { text: "Возможен небольшой торг?", answer: null },
+    {
+      text: "Можно оформить доставку через безопасную сделку?",
+      answer: "Да, доставка и оплата проходят через платформу.",
+    },
+    {
+      text: "Есть ли гарантия продавца и документы после покупки?",
+      answer: "Да, гарантия продавца 14 дней, документы передадим вместе с товаром.",
+    },
+    {
+      text: "Можно уточнить состояние перед оплатой и попросить дополнительные фото?",
+      answer: null,
+    },
   ] as const;
 
   const listingQuestionsSeed = listings.flatMap((listing, listingIndex) =>
@@ -3789,7 +3840,7 @@ async function main(): Promise<void> {
       "SLR-002",
       "COMPLETED",
       "DELIVERY",
-      "Москва, Тестовая 1",
+      "Москва, Ленинградский проспект 37",
       400,
       0,
       1,
@@ -3801,7 +3852,7 @@ async function main(): Promise<void> {
       "SLR-001",
       "COMPLETED",
       "DELIVERY",
-      "Москва, Проверочная 10",
+      "Москва, Мясницкая 24",
       500,
       0,
       0,
@@ -3909,7 +3960,7 @@ async function main(): Promise<void> {
         "PAID",
         "COMPLETED",
         "SLR-002",
-        "Тестовый заказ выдан покупателю",
+        "Заказ передан покупателю после проверки комплекта",
         1,
       ],
       ["ORD-1010", "CREATED", "PAID", "BUY-004", "Покупатель оплатил заказ", 0],
@@ -3918,7 +3969,7 @@ async function main(): Promise<void> {
         "PAID",
         "COMPLETED",
         "SLR-001",
-        "Тестовый заказ seller1 завершён без оставленного отзыва",
+        "Покупатель подтвердил получение, спорных обращений нет",
         0,
       ],
     ].map((h: any) => ({
@@ -4290,7 +4341,7 @@ async function main(): Promise<void> {
       ],
       [
         "CMP-017",
-        "APPROVED",
+        "REJECTED",
         "fraud",
         "LST-026",
         "SLR-004",
@@ -4299,7 +4350,7 @@ async function main(): Promise<void> {
         null,
         1,
         "ADM-001",
-        "Жалоба подтверждена, объявление ограничено",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-018",
@@ -4316,16 +4367,16 @@ async function main(): Promise<void> {
       ],
       [
         "CMP-019",
-        "NEW",
+        "REJECTED",
         "fraud",
         "LST-026",
         "SLR-004",
         "BUY-001",
         "Категория: Нарушение правил или обман\nПричина: Чужие фото\nКомментарий: Визуалы полностью совпадают с другим объявлением.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-020",
@@ -4394,42 +4445,42 @@ async function main(): Promise<void> {
       ],
       [
         "CMP-025",
-        "NEW",
+        "REJECTED",
         "fraud",
         "LST-026",
         "SLR-004",
         "BUY-001",
         "Категория: Нарушение правил или обман\nПричина: Кажется, это мошенники\nКомментарий: Настаивает на срочной сделке, избегая стандартных шагов.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-026",
-        "PENDING",
+        "REJECTED",
         "other",
         "LST-026",
         "SLR-004",
         "BUY-004",
         "Категория: Общение с продавцом\nПричина: Невозможно связаться\nКомментарий: После публикации вопроса ответа в карточке нет длительное время.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-027",
-        "NEW",
+        "REJECTED",
         "suspicious_listing",
         "LST-026",
         "SLR-004",
         "BUY-003",
         "Категория: Информация в объявлении\nПричина: Неправдивые фото или описание\nКомментарий: Фото не соответствуют текущему состоянию лота.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-028",
@@ -4446,33 +4497,33 @@ async function main(): Promise<void> {
       ],
       [
         "CMP-029",
-        "PENDING",
+        "REJECTED",
         "suspicious_listing",
         "LST-026",
         "SLR-004",
         "BUY-001",
         "Категория: Информация в объявлении\nПричина: Неверная цена\nКомментарий: В заголовке и характеристиках объявления указаны разные цены.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-030",
-        "NEW",
+        "REJECTED",
         "other",
         "LST-026",
         "SLR-004",
         "BUY-004",
         "Категория: Общение с продавцом\nПричина: Хамство, грубость\nКомментарий: Получены оскорбительные сообщения.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-031",
-        "APPROVED",
+        "REJECTED",
         "fraud",
         "LST-026",
         "SLR-004",
@@ -4481,20 +4532,20 @@ async function main(): Promise<void> {
         null,
         2,
         "ADM-001",
-        "Жалоба подтверждена, приняты меры",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
       [
         "CMP-032",
-        "PENDING",
+        "REJECTED",
         "other",
         "LST-026",
         "SLR-004",
         "BUY-002",
         "Категория: Общение с продавцом\nПричина: Хамил в ответах на вопросы\nКомментарий: Некорректное поведение повторяется.",
         null,
-        null,
-        null,
-        null,
+        1,
+        "ADM-001",
+        "Объявление снято с продажи после рассмотрения связанной жалобы",
       ],
     ].map((c: any) => ({
       public_id: c[0],
@@ -4514,13 +4565,22 @@ async function main(): Promise<void> {
   const complaintMap = new Map(
     (
       await prisma.complaint.findMany({
-        select: { id: true, public_id: true, status: true, seller_id: true },
+        select: {
+          id: true,
+          public_id: true,
+          status: true,
+          seller_id: true,
+          action_taken: true,
+        },
       })
     ).map((complaint) => [complaint.public_id, complaint]),
   );
 
   await prisma.complaintEvent.createMany({
     data: Array.from(complaintMap.values()).flatMap((complaint, index) => {
+      const isListingRemovedResolution =
+        complaint.action_taken ===
+        "Объявление снято с продажи после рассмотрения связанной жалобы";
       const baseEvent = {
         public_id: `CME-${String(index * 2 + 1).padStart(4, "0")}`,
         complaint_id: complaint.id,
@@ -4551,9 +4611,16 @@ async function main(): Promise<void> {
             complaint.status === "APPROVED"
               ? "Нарушение подтверждено после ручной проверки."
               : complaint.status === "REJECTED"
-                ? "Жалоба закрыта без подтверждения нарушения."
+                ? isListingRemovedResolution
+                  ? "Объявление уже снято после подтверждения связанной жалобы."
+                  : "Жалоба закрыта без подтверждения нарушения."
                 : "Жалоба переведена в очередь повторной проверки.",
-          metadata: { actorRole: "admin" },
+          metadata: isListingRemovedResolution
+            ? {
+                actorRole: "admin",
+                resolutionKind: "related_listing_removed_after_approval",
+              }
+            : { actorRole: "admin" },
           created_at: daysAgo(4 + (index % 6)),
         },
       ];
@@ -4565,7 +4632,7 @@ async function main(): Promise<void> {
       ["CSN-001", "CMP-001", "SLR-004", "WARNING", "ACTIVE", "Первое подтвержденное нарушение: обход безопасной сделки", 4, null],
       ["CSN-002", "CMP-005", "SLR-004", "TEMP_3_DAYS", "COMPLETED", "Грубое общение с покупателем", 2, 0],
       ["CSN-003", "CMP-013", "SLR-002", "WARNING", "ACTIVE", "Подозрительная карточка с противоречивым описанием", 3, null],
-      ["CSN-004", "CMP-031", "SLR-004", "TEMP_30_DAYS", "ACTIVE", "Повторное использование чужих фото и признаки мошенничества", 2, 28],
+      ["CSN-004", "CMP-009", "SLR-004", "TEMP_30_DAYS", "ACTIVE", "Повторное использование чужих фото и признаки мошенничества", 2, 28],
     ].map((sanction: any) => ({
       public_id: sanction[0],
       complaint_id: getRequired(complaintMap, sanction[1], "Complaint").id,

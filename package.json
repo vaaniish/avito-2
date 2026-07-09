@@ -49,6 +49,7 @@
     "db:generate": "node node_modules/prisma/build/index.js generate --schema backend/prisma/schema.prisma",
     "db:migrate": "node node_modules/prisma/build/index.js migrate dev --schema backend/prisma/schema.prisma",
     "db:seed": "node node_modules/tsx/dist/cli.mjs backend/prisma/seed.ts",
+    "demo:polish-data": "node scripts/demo/polish-demo-data.mjs",
     "db:import-catalog-reference": "node node_modules/tsx/dist/cli.mjs scripts/catalog/import-catalog-reference-to-db.ts",
     "db:import-search-rules": "node node_modules/tsx/dist/cli.mjs scripts/catalog/import-search-rules-to-db.ts",
     "db:backfill-search-keywords": "node node_modules/tsx/dist/cli.mjs scripts/catalog/backfill-listing-search-keywords.ts",

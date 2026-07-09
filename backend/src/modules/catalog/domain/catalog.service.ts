@@ -677,7 +677,13 @@ const catalogListingDetailInclude = {
       },
       _count: {
         select: {
-          listings: true,
+          listings: {
+            where: {
+              status: "ACTIVE",
+              moderation_status: "APPROVED",
+              deleted_at: null,
+            },
+          },
         },
       },
       seller_profile: {
