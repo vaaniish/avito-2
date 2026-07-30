@@ -1110,16 +1110,13 @@ export function PartnershipPage({ onBack }: PartnershipPageProps) {
             </div>
           )}
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button type="button" disabled={step === 0} onClick={() => setStep((prev) => Math.max(0, prev - 1))} className="btn-secondary flex-1 py-2.5 disabled:opacity-50">
-              Назад
-            </button>
+          <div className="mt-6">
             {step < STEP_TITLES.length - 1 ? (
-              <button type="button" onClick={goNext} className="btn-primary flex-1 py-2.5">
+              <button type="button" onClick={goNext} className="btn-primary w-full py-2.5">
                 Далее
               </button>
             ) : (
-              <button type="submit" disabled={submitting} className="btn-primary flex-1 py-2.5 disabled:bg-gray-400">
+              <button type="submit" disabled={submitting} className="btn-primary w-full py-2.5 disabled:bg-gray-400">
                 {submitting ? "Отправляем..." : "Отправить на проверку"}
               </button>
             )}
