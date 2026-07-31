@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestMetaFromExpressLike } from "../../../../common/http/request-meta";
@@ -57,7 +58,7 @@ export function createProfilePolicyRouter(deps: {
         },
       });
     } catch (error) {
-      console.error("Error accepting policy:", error);
+      logger.error("error_accepting_policy", { error });
       sendApplicationError(res, error);
     }
   });

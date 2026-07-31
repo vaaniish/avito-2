@@ -1,0 +1,11 @@
+.git
+.github
+.env
+.env.*
+artifacts
+dist
+node_modules
+playwright-report
+test-results
+data/catalog-reference/generated
+*.log

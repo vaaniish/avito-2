@@ -4,6 +4,7 @@ import { after, before, test } from "node:test";
 import "dotenv/config";
 import { app } from "../../../backend/src/app";
 import { prisma } from "../../../backend/src/lib/prisma";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session";
 
 function isSafeDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -116,12 +117,16 @@ async function apiRequest(params: {
   const response = await fetch(`${baseUrl}${params.path}`, {
     method: params.method,
     headers: {
+      origin: "http://localhost:3000",
       ...(params.body !== undefined ? { "content-type": "application/json" } : {}),
-      ...(params.token ? { authorization: `Bearer ${params.token}` } : {}),
+      ...(params.token ? cookieSessionHeaders(params.token) : {}),
     },
     body: params.body === undefined ? undefined : JSON.stringify(params.body),
   });
   const payload = (await response.json()) as Record<string, unknown>;
+  if (params.path.endsWith("/auth/login")) {
+    payload.cookieSession = encodeCookieSession(response.headers, payload);
+  }
   assert.equal(
     response.status,
     params.expected,
@@ -137,10 +142,10 @@ async function login(email: string, password: string): Promise<{ token: string; 
     expected: 200,
     body: { email, password },
   });
-  assert.equal(typeof payload.sessionToken, "string");
+  assert.equal(typeof payload.cookieSession, "string");
   assert.equal(typeof payload.user?.id, "number");
   return {
-    token: payload.sessionToken as string,
+    token: payload.cookieSession as string,
     userId: payload.user.id as number,
   };
 }
@@ -188,8 +193,8 @@ test(
   async () => {
     const applicantEmail = "buyer2@ecomm.local";
     const applicantId = await resetApplicant(applicantEmail);
-    const applicant = await login(applicantEmail, "buyer123");
-    const admin = await login("admin@ecomm.local", "admin123");
+    const applicant = await login(applicantEmail, "DemoBuyer2026!");
+    const admin = await login("admin@ecomm.local", "DemoAdmin2026!");
 
     const beforeNotifications = await prisma.notification.count({
       where: { user_id: applicantId },
@@ -290,7 +295,7 @@ test(
       {
         method: "PATCH",
         headers: {
-          authorization: `Bearer ${admin.token}`,
+          ...cookieSessionHeaders(admin.token),
           "content-type": "application/json",
         },
         body: JSON.stringify({ status: "verified" }),

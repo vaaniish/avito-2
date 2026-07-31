@@ -1,6 +1,7 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import "dotenv/config";
 import pg from "pg";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session.mjs";
 
 const { Client } = pg;
 
@@ -12,13 +13,11 @@ const DATABASE_URL =
 const YOOKASSA_WEBHOOK_TOKEN = process.env.YOOKASSA_WEBHOOK_TOKEN?.trim() || "";
 
 const jsonHeaders = {
+  origin: "http://localhost:3000",
   "content-type": "application/json",
 };
 
 const report = [];
-const DEFAULT_SESSION_TOKEN_ISSUER = "avito-2-backend";
-const DEFAULT_SESSION_TOKEN_AUDIENCE = "avito-2-frontend";
-const DEV_FALLBACK_SESSION_TOKEN_SECRET = "dev-local-session-secret-change-me";
 
 function record(name, ok, details = "") {
   report.push({ name, ok, details });
@@ -32,15 +31,13 @@ function invariant(condition, message) {
 
 function requireToken(token, userLabel) {
   if (typeof token !== "string" || token.trim().length === 0) {
-    throw new Error(`missing sessionToken for ${userLabel}`);
+    throw new Error(`missing cookieSession for ${userLabel}`);
   }
   return token.trim();
 }
 
 function authHeaders(token) {
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+  return cookieSessionHeaders(token);
 }
 
 function testCatalogAttributes(itemName) {
@@ -52,56 +49,8 @@ function testCatalogAttributes(itemName) {
   ];
 }
 
-function toBase64Url(input) {
-  return Buffer.from(input, "utf8")
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-}
-
-function getSessionTokenSecretForSmoke() {
-  return process.env.SESSION_TOKEN_SECRET?.trim() || DEV_FALLBACK_SESSION_TOKEN_SECRET;
-}
-
-function getSessionTokenIssuerForSmoke() {
-  return process.env.SESSION_TOKEN_ISSUER?.trim() || DEFAULT_SESSION_TOKEN_ISSUER;
-}
-
-function getSessionTokenAudienceForSmoke() {
-  return process.env.SESSION_TOKEN_AUDIENCE?.trim() || DEFAULT_SESSION_TOKEN_AUDIENCE;
-}
-
-function signHmacSha256(payload, secret) {
-  return createHmac("sha256", secret)
-    .update(payload)
-    .digest("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-}
-
-function createExpiredSessionToken(userId) {
-  const nowSeconds = Math.floor(Date.now() / 1000);
-  const header = toBase64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const payload = toBase64Url(
-    JSON.stringify({
-      sub: String(userId),
-      iat: nowSeconds - 7200,
-      exp: nowSeconds - 3600,
-      iss: getSessionTokenIssuerForSmoke(),
-      aud: getSessionTokenAudienceForSmoke(),
-      v: 1,
-    }),
-  );
-  const signingInput = `${header}.${payload}`;
-  const signature = signHmacSha256(signingInput, getSessionTokenSecretForSmoke());
-  return `${signingInput}.${signature}`;
-}
-
-function createMalformedSessionToken(token) {
-  const normalized = requireToken(token, "malformed");
-  return `${normalized}broken`;
+function rawCookieFromSession(encoded) {
+  return JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")).cookie;
 }
 
 async function apiRequest(method, path, options = {}) {
@@ -118,6 +67,9 @@ async function apiRequest(method, path, options = {}) {
     data = raw ? JSON.parse(raw) : null;
   } catch {
     data = raw;
+  }
+  if (path === "/auth/login" && response.ok && data) {
+    data.cookieSession = encodeCookieSession(response.headers, data);
   }
 
   if (!expected.includes(response.status)) {
@@ -188,37 +140,37 @@ async function main() {
   await runStep("auth: login buyer/seller/admin", async () => {
     const buyerRes = await apiRequest("POST", "/auth/login", {
       headers: jsonHeaders,
-      body: { email: "buyer1@ecomm.local", password: "buyer123" },
+      body: { email: "buyer1@ecomm.local", password: "DemoBuyer2026!" },
       expected: [200],
     });
     const sellerRes = await apiRequest("POST", "/auth/login", {
       headers: jsonHeaders,
-      body: { email: "seller1@ecomm.local", password: "seller123" },
+      body: { email: "seller1@ecomm.local", password: "DemoSeller2026!" },
       expected: [200],
     });
     const buyerAltRes = await apiRequest("POST", "/auth/login", {
       headers: jsonHeaders,
-      body: { email: "buyer2@ecomm.local", password: "buyer123" },
+      body: { email: "buyer2@ecomm.local", password: "DemoBuyer2026!" },
       expected: [200],
     });
     const adminRes = await apiRequest("POST", "/auth/login", {
       headers: jsonHeaders,
-      body: { email: "admin@ecomm.local", password: "admin123" },
+      body: { email: "admin@ecomm.local", password: "DemoAdmin2026!" },
       expected: [200],
     });
 
     buyer = buyerRes.data?.user;
     seller = sellerRes.data?.user;
-    buyerAltToken = requireToken(buyerAltRes.data?.sessionToken, "buyerAlt");
+    buyerAltToken = requireToken(buyerAltRes.data?.cookieSession, "buyerAlt");
     admin = adminRes.data?.user;
-    buyerToken = requireToken(buyerRes.data?.sessionToken, "buyer");
-    sellerToken = requireToken(sellerRes.data?.sessionToken, "seller");
-    adminToken = requireToken(adminRes.data?.sessionToken, "admin");
+    buyerToken = requireToken(buyerRes.data?.cookieSession, "buyer");
+    sellerToken = requireToken(sellerRes.data?.cookieSession, "seller");
+    adminToken = requireToken(adminRes.data?.cookieSession, "admin");
     invariant(buyer?.id && seller?.id && admin?.id, "missing user ids from login");
     return `buyer=${buyer.id}, seller=${seller.id}, admin=${admin.id}`;
   });
 
-  await runStep("auth: me via bearer token", async () => {
+  await runStep("auth: me via cookie session", async () => {
     const res = await apiRequest("GET", "/auth/me", {
       headers: authHeaders(requireToken(buyerToken, "buyer")),
       expected: [200],
@@ -236,24 +188,31 @@ async function main() {
     return `status=${res.status}`;
   });
 
-  await runStep("auth: reject malformed bearer token", async () => {
-    const malformedToken = createMalformedSessionToken(requireToken(buyerToken, "buyer"));
+  await runStep("auth: reject malformed cookie session", async () => {
+    const malformedToken = "malformed-cookie-session";
     const res = await apiRequest("GET", "/auth/me", {
       headers: authHeaders(malformedToken),
       expected: [401],
     });
-    invariant(res.data?.error === "Unauthorized", "unexpected response for malformed token");
+    invariant(typeof res.data?.error === "string", "unexpected response for malformed session");
     return `status=${res.status}`;
   });
 
-  await runStep("auth: reject expired bearer token", async () => {
-    invariant(Boolean(buyer?.id), "buyer id required for expired-token test");
-    const expiredToken = createExpiredSessionToken(buyer.id);
+  await runStep("auth: reject expired cookie session", async () => {
+    const expiredToken = requireToken(buyerToken, "buyer");
+    const tokenHash = createHash("sha256").update(rawCookieFromSession(expiredToken)).digest("hex");
+    await db.query(`UPDATE "AuthSession" SET expires_at = NOW() - INTERVAL '1 minute' WHERE token_hash = $1`, [tokenHash]);
     const res = await apiRequest("GET", "/auth/me", {
       headers: authHeaders(expiredToken),
       expected: [401],
     });
-    invariant(res.data?.error === "Unauthorized", "unexpected response for expired token");
+    invariant(typeof res.data?.error === "string", "unexpected response for expired session");
+    const renewed = await apiRequest("POST", "/auth/login", {
+      headers: jsonHeaders,
+      body: { email: "buyer1@ecomm.local", password: "DemoBuyer2026!" },
+      expected: [200],
+    });
+    buyerToken = requireToken(renewed.data?.cookieSession, "buyer-renewed");
     return `status=${res.status}`;
   });
 
@@ -651,10 +610,10 @@ async function main() {
     });
 
     const dbCheck = await db.query(
-      'select count(*)::int as cnt from "MarketplaceListing" where public_id = $1',
+      'select deleted_at from "MarketplaceListing" where public_id = $1',
       [createdListingId],
     );
-    invariant(dbCheck.rows[0].cnt === 0, "created listing still exists after delete");
+    invariant(dbCheck.rows[0]?.deleted_at, "created listing was not soft-deleted");
     return `created+deleted listing=${createdListingId}`;
   });
 

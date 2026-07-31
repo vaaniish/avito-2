@@ -1,3 +1,4 @@
+import { logger } from "../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../common/http/map-application-error";
 import { normalizePolicyScope } from "../../policy/domain/policy-scope";
@@ -16,7 +17,7 @@ export function createPublicRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error fetching active policy:", error);
+      logger.error("error_fetching_active_policy", { error });
       sendApplicationError(res, error);
     }
   });

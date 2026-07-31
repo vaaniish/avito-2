@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import type { Response } from "express";
 import {
   ApplicationError,
@@ -36,6 +37,6 @@ export function sendApplicationError(res: Response, error: unknown): void {
     return;
   }
 
-  console.error("Unexpected HTTP error:", error);
+  logger.error("unexpected_http_error", { error });
   res.status(500).json({ error: "Internal server error" });
 }

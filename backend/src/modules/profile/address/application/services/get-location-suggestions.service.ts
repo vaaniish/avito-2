@@ -1,3 +1,4 @@
+import { logger } from "../../../../../lib/logger";
 import type { ProfileAddressLocationGatewayPort } from "../../domain/profile-address.types";
 
 export class GetLocationSuggestionsService {
@@ -17,7 +18,7 @@ export class GetLocationSuggestionsService {
         input.limit,
       );
     } catch (error) {
-      console.warn("Location suggest degraded to empty result:", error);
+      logger.warn("location_suggest_degraded_to_empty_result", { error });
     }
 
     return {

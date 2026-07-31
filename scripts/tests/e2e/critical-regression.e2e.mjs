@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import "dotenv/config";
 import pg from "pg";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session.mjs";
 
 const { Client } = pg;
 
@@ -32,9 +33,7 @@ function isSafeDatabaseUrl(url) {
 }
 
 function authHeaders(token) {
-  return {
-    authorization: `Bearer ${token}`,
-  };
+  return cookieSessionHeaders(token);
 }
 
 async function apiRequest(method, path, options = {}) {
@@ -46,6 +45,7 @@ async function apiRequest(method, path, options = {}) {
   } = options;
 
   const mergedHeaders = {
+    origin: "http://localhost:3000",
     ...headers,
   };
   if (token) {
@@ -67,6 +67,9 @@ async function apiRequest(method, path, options = {}) {
     data = raw ? JSON.parse(raw) : null;
   } catch {
     data = raw;
+  }
+  if (path === "/auth/login" && response.ok && data) {
+    data.cookieSession = encodeCookieSession(response.headers, data);
   }
 
   if (!expected.includes(response.status)) {
@@ -94,11 +97,11 @@ async function login(email, password) {
     expected: [200],
   });
 
-  invariant(typeof response.data?.sessionToken === "string", `sessionToken missing for ${email}`);
+  invariant(typeof response.data?.cookieSession === "string", `cookieSession missing for ${email}`);
   invariant(typeof response.data?.user?.id === "number", `user.id missing for ${email}`);
 
   return {
-    token: response.data.sessionToken,
+    token: response.data.cookieSession,
     user: response.data.user,
   };
 }
@@ -144,8 +147,8 @@ async function main() {
 
       const metricsRes = await fetch(`${BASE_URL}/health/metrics`);
       const metricsBody = await metricsRes.json();
-      invariant(metricsRes.status === 200, "metrics status is not 200");
-      invariant(typeof metricsBody?.http?.totalRequests === "number", "metrics payload malformed");
+      invariant(metricsRes.status === 404, "metrics must be hidden when access token is unset");
+      invariant(metricsBody?.error === "Not found", "hidden metrics payload malformed");
 
       return `requestId=${healthRes.headers.get("x-request-id")}`;
     });
@@ -175,9 +178,9 @@ async function main() {
     });
 
     await runStep("auth login", async () => {
-      buyer = await login("buyer1@ecomm.local", "buyer123");
-      seller = await login("seller1@ecomm.local", "seller123");
-      admin = await login("admin@ecomm.local", "admin123");
+      buyer = await login("buyer1@ecomm.local", "DemoBuyer2026!");
+      seller = await login("seller1@ecomm.local", "DemoSeller2026!");
+      admin = await login("admin@ecomm.local", "DemoAdmin2026!");
       return `buyer=${buyer.user.id}, seller=${seller.user.id}, admin=${admin.user.id}`;
     });
 

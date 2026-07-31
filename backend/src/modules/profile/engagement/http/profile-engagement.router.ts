@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import type { CreateLegacyPartnershipRequestService } from "../application/services/create-legacy-partnership-request.service";
@@ -41,7 +42,7 @@ export function createProfileEngagementRouter(deps: {
           ),
         );
       } catch (error) {
-        console.error("Error looking up partnership legal entity:", error);
+        logger.error("error_looking_up_partnership_legal_entity", { error });
         sendApplicationError(res, error);
       }
     },
@@ -65,7 +66,7 @@ export function createProfileEngagementRouter(deps: {
           }),
         );
       } catch (error) {
-        console.error("Error creating partnership draft:", error);
+        logger.error("error_creating_partnership_draft", { error });
         sendApplicationError(res, error);
       }
     },
@@ -89,7 +90,7 @@ export function createProfileEngagementRouter(deps: {
           }),
         );
       } catch (error) {
-        console.error("Error updating partnership draft:", error);
+        logger.error("error_updating_partnership_draft", { error });
         sendApplicationError(res, error);
       }
     },
@@ -112,7 +113,7 @@ export function createProfileEngagementRouter(deps: {
           }),
         );
       } catch (error) {
-        console.error("Error submitting partnership request:", error);
+        logger.error("error_submitting_partnership_request", { error });
         sendApplicationError(res, error);
       }
     },
@@ -133,7 +134,7 @@ export function createProfileEngagementRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error creating partnership request:", error);
+      logger.error("error_creating_partnership_request", { error });
       sendApplicationError(res, error);
     }
   });
@@ -158,7 +159,7 @@ export function createProfileEngagementRouter(deps: {
           }),
         );
       } catch (error) {
-        console.error("Error creating review:", error);
+        logger.error("error_creating_review", { error });
         sendApplicationError(res, error);
       }
     },

@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin } from "../../common/http/admin-session";
@@ -14,7 +15,7 @@ export function createAdminPromosRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.listPromos((req.query ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error loading admin promos:", error);
+      logger.error("error_loading_admin_promos", { error });
       sendApplicationError(res, error);
     }
   });
@@ -25,7 +26,7 @@ export function createAdminPromosRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.getPromo(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error loading promo detail:", error);
+      logger.error("error_loading_promo_detail", { error });
       sendApplicationError(res, error);
     }
   });
@@ -41,7 +42,7 @@ export function createAdminPromosRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error creating promo:", error);
+      logger.error("error_creating_promo", { error });
       sendApplicationError(res, error);
     }
   });
@@ -58,7 +59,7 @@ export function createAdminPromosRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error updating promo:", error);
+      logger.error("error_updating_promo", { error });
       sendApplicationError(res, error);
     }
   });

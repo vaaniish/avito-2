@@ -269,9 +269,25 @@ model AppUser {
   promo_codes_created  PromoCode[]           @relation("promo_codes_created_by")
   promo_codes_updated  PromoCode[]           @relation("promo_codes_updated_by")
   promo_activations    PromoActivation[]
+  auth_sessions        AuthSession[]
 
   @@index([role, status])
   @@index([created_at])
+}
+
+model AuthSession {
+  id          String    @id @default(uuid()) @db.Uuid
+  user_id     Int
+  token_hash  String    @unique @db.VarChar(64)
+  csrf_token  String    @db.VarChar(64)
+  expires_at  DateTime
+  revoked_at  DateTime?
+  created_at  DateTime  @default(now())
+
+  user        AppUser   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, revoked_at, expires_at])
+  @@index([expires_at])
 }
 
 model Notification {
@@ -711,15 +727,21 @@ model ListingDraft {
 }
 
 model ListingImage {
-  id          Int                @id @default(autoincrement())
-  listing_id  Int
-  url         String
-  sort_order  Int                @default(0)
-  created_at  DateTime           @default(now())
+  id              Int                @id @default(autoincrement())
+  listing_id      Int
+  url             String
+  object_key      String?
+  checksum_sha256 String?
+  mime_type       String?
+  byte_size       Int?
+  sort_order      Int                @default(0)
+  created_at      DateTime           @default(now())
 
   listing     MarketplaceListing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
   @@unique([listing_id, sort_order])
+  @@index([object_key])
+  @@index([checksum_sha256])
 }
 
 model ListingAttribute {

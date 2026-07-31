@@ -1,3 +1,5 @@
+import { logger } from "../../../../../lib/logger";
+import { boundedPositiveInteger } from "../../../../../lib/runtime-config";
 import {
   evaluateListingModeration,
   type ImageModerationSignal,
@@ -9,19 +11,68 @@ import type {
 } from "../../domain/partner-listings.types";
 
 export class ProcessPartnerListingModerationService {
+  private readonly queue: PartnerListingModerationJob[] = [];
+  private readonly idleResolvers = new Set<() => void>();
+  private active = 0;
+  private stopping = false;
+
   constructor(
     private readonly repository: PartnerListingsWriteRepositoryPort,
     private readonly notifications: PartnerListingsNotificationPort,
+    private readonly maxConcurrency = boundedPositiveInteger(
+      "LISTING_MODERATION_CONCURRENCY",
+      4,
+      1,
+      20,
+    ),
   ) {}
 
   schedule(job: PartnerListingModerationJob | null) {
     if (!job) return;
-
-    setImmediate(() => {
-      void this.execute(job).catch((error) => {
-        console.error("Async listing moderation job failed:", error);
+    if (this.stopping) {
+      logger.warn("listing_moderation_job_ignored_during_shutdown", {
+        listingPublicId: job.listingPublicId,
       });
-    });
+      return;
+    }
+    this.queue.push(job);
+    this.drain();
+  }
+
+  snapshot() {
+    return {
+      queued: this.queue.length,
+      active: this.active,
+      configuredConcurrency: this.maxConcurrency,
+    };
+  }
+
+  async stop(): Promise<void> {
+    this.stopping = true;
+    const discarded = this.queue.splice(0).length;
+    if (discarded > 0) logger.warn("listing_moderation_queue_discarded_on_shutdown", { discarded });
+    if (this.active === 0) return;
+    await new Promise<void>((resolve) => this.idleResolvers.add(resolve));
+  }
+
+  private drain(): void {
+    while (!this.stopping && this.active < this.maxConcurrency) {
+      const job = this.queue.shift();
+      if (!job) break;
+      this.active += 1;
+      setImmediate(() => {
+        void this.execute(job)
+          .catch((error) => logger.error("async_listing_moderation_job_failed", { error }))
+          .finally(() => {
+            this.active = Math.max(0, this.active - 1);
+            this.drain();
+            if (this.active === 0 && (this.stopping || this.queue.length === 0)) {
+              for (const resolve of this.idleResolvers) resolve();
+              this.idleResolvers.clear();
+            }
+          });
+      });
+    }
   }
 
   async execute(job: PartnerListingModerationJob) {

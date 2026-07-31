@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin } from "../../common/http/admin-session";
@@ -20,7 +21,7 @@ export function createAdminFinanceRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listAdminTransactions.execute());
     } catch (error) {
-      console.error("Error fetching transactions:", error);
+      logger.error("error_fetching_transactions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -35,7 +36,7 @@ export function createAdminFinanceRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error fetching admin finance analytics:", error);
+      logger.error("error_fetching_admin_finance_analytics", { error });
       sendApplicationError(res, error);
     }
   });

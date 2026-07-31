@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -25,7 +26,7 @@ export function createAdminPartnershipRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listPartnershipRequests.execute());
     } catch (error) {
-      console.error("Error fetching partnership requests:", error);
+      logger.error("error_fetching_partnership_requests", { error });
       sendApplicationError(res, error);
     }
   });
@@ -52,7 +53,7 @@ export function createAdminPartnershipRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating partnership request:", error);
+      logger.error("error_updating_partnership_request", { error });
       sendApplicationError(res, error);
     }
   });
@@ -63,7 +64,7 @@ export function createAdminPartnershipRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listKycRequests.execute());
     } catch (error) {
-      console.error("Error fetching KYC requests:", error);
+      logger.error("error_fetching_kyc_requests", { error });
       sendApplicationError(res, error);
     }
   });
@@ -88,7 +89,7 @@ export function createAdminPartnershipRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating KYC request:", error);
+      logger.error("error_updating_kyc_request", { error });
       sendApplicationError(res, error);
     }
   });
@@ -99,7 +100,7 @@ export function createAdminPartnershipRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listPayoutProfiles.execute());
     } catch (error) {
-      console.error("Error fetching payout profiles:", error);
+      logger.error("error_fetching_payout_profiles", { error });
       sendApplicationError(res, error);
     }
   });

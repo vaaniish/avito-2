@@ -12,6 +12,26 @@ import { dnsProductCatalogSeed } from "./dns-product-catalog.seed";
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("Переменная DATABASE_URL не задана");
 
+function assertDemoSeedTarget(rawUrl: string): void {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Demo seed запрещён при NODE_ENV=production");
+  }
+  if (process.env.DEMO_SEED_CONFIRM !== "DELETE_LOCAL_DEMO_DATA") {
+    throw new Error("Для destructive demo-seed задайте DEMO_SEED_CONFIRM=DELETE_LOCAL_DEMO_DATA");
+  }
+  const target = new URL(rawUrl);
+  const localHosts = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+  if (!localHosts.has(target.hostname)) {
+    throw new Error("Demo seed разрешён только для локального PostgreSQL");
+  }
+  const databaseName = decodeURIComponent(target.pathname.replace(/^\//, "")).trim();
+  if (!databaseName || ["postgres", "template0", "template1"].includes(databaseName)) {
+    throw new Error("Укажите отдельную development/test БД для demo-seed");
+  }
+}
+
+assertDemoSeedTarget(databaseUrl);
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
@@ -459,7 +479,7 @@ async function main(): Promise<void> {
       "ADMIN",
       "ACTIVE",
       "admin@ecomm.local",
-      "admin123",
+      "DemoAdmin2026!",
       "Главный администратор",
       "admin_main",
       "Москва",
@@ -472,7 +492,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer1@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Анна Орлова",
       "anna_orlova",
       "Москва",
@@ -485,7 +505,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer2@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Иван Петров",
       "ivan_petrov",
       "Санкт-Петербург",
@@ -498,7 +518,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer3@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Никита Смирнов",
       "nikita_smirnov",
       "Казань",
@@ -511,7 +531,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer4@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Ольга Волкова",
       "olga_volkova",
       "Сочи",
@@ -524,7 +544,7 @@ async function main(): Promise<void> {
       "BUYER",
       "BLOCKED",
       "buyer5@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Алексей Левин",
       "alex_levin",
       "Нижний Новгород",
@@ -537,7 +557,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer6@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Мария Крылова",
       "maria_krylova",
       "Новосибирск",
@@ -550,7 +570,7 @@ async function main(): Promise<void> {
       "BUYER",
       "ACTIVE",
       "buyer7@ecomm.local",
-      "buyer123",
+      "DemoBuyer2026!",
       "Дмитрий Захаров",
       "dmitry_zakharov",
       "Москва",
@@ -563,7 +583,7 @@ async function main(): Promise<void> {
       "SELLER",
       "ACTIVE",
       "seller1@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "Тех Поинт",
       "tech_point",
       "Москва",
@@ -576,7 +596,7 @@ async function main(): Promise<void> {
       "SELLER",
       "ACTIVE",
       "seller2@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "Мобайл Эксперт",
       "mobile_expert",
       "Казань",
@@ -589,7 +609,7 @@ async function main(): Promise<void> {
       "SELLER",
       "ACTIVE",
       "seller3@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "Домашний Комфорт",
       "home_comfort",
       "Екатеринбург",
@@ -602,7 +622,7 @@ async function main(): Promise<void> {
       "SELLER",
       "ACTIVE",
       "seller4@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "Сервис Хаб",
       "service_hub",
       "Краснодар",
@@ -615,7 +635,7 @@ async function main(): Promise<void> {
       "SELLER",
       "BLOCKED",
       "seller5@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "КвикФикс Про",
       "quickfix_pro",
       "Москва",
@@ -628,7 +648,7 @@ async function main(): Promise<void> {
       "SELLER",
       "ACTIVE",
       "seller6@ecomm.local",
-      "seller123",
+      "DemoSeller2026!",
       "Сетевой Контур",
       "network_contour",
       "Новосибирск",
@@ -5711,9 +5731,9 @@ async function main(): Promise<void> {
   );
 
   console.log("Данные для входа:");
-  console.log("admin -> admin@ecomm.local / admin123");
-  console.log("buyer -> buyer1@ecomm.local / buyer123");
-  console.log("seller -> seller1@ecomm.local / seller123");
+  console.log("admin -> admin@ecomm.local / DemoAdmin2026!");
+  console.log("buyer -> buyer1@ecomm.local / DemoBuyer2026!");
+  console.log("seller -> seller1@ecomm.local / DemoSeller2026!");
 }
 
 main()

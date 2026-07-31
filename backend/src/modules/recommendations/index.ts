@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import { prisma } from "../../lib/prisma";
 import { getSessionUser, requireRole } from "../../lib/session";
 import {
@@ -61,7 +62,7 @@ async function processRefreshQueueTick() {
         await repository.processRefreshJob(job);
         await repository.completeRefreshJob(job.id);
       } catch (error) {
-        console.error("Recommendation refresh job failed:", job, error);
+        logger.error("recommendation_refresh_job_failed", { details: [job, error] });
         await repository.retryRefreshJob(job.id, job.attempts + 1);
       }
     }
@@ -78,8 +79,12 @@ export function startRecommendationsWorker() {
   void processRefreshQueueTick();
 }
 
-export function stopRecommendationsWorker() {
-  if (!refreshTimer) return;
-  clearInterval(refreshTimer);
-  refreshTimer = null;
+export async function stopRecommendationsWorker(): Promise<void> {
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+  while (refreshInFlight) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
 }

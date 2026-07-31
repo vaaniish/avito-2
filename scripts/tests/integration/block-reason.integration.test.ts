@@ -5,6 +5,7 @@ import test from "node:test";
 import "dotenv/config";
 import { prisma } from "../../../backend/src/lib/prisma";
 import { app } from "../../../backend/src/app";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session";
 
 type JsonObject = Record<string, unknown>;
 
@@ -51,12 +52,16 @@ async function apiRequest(params: {
   const response = await fetch(`${params.baseUrl}/api${params.path}`, {
     method: params.method,
     headers: {
+      origin: "http://localhost:3000",
       "content-type": "application/json",
-      ...(params.token ? { authorization: `Bearer ${params.token}` } : {}),
+      ...(params.token ? cookieSessionHeaders(params.token) : {}),
     },
     body: params.body === undefined ? undefined : JSON.stringify(params.body),
   });
   const payload = (await response.json()) as JsonObject;
+  if (params.path.endsWith("/auth/login") && response.ok) {
+    payload.cookieSession = encodeCookieSession(response.headers, payload);
+  }
   assert.equal(
     response.status,
     params.expectedStatus,
@@ -106,9 +111,9 @@ test(
     });
     assert.ok(target, "Test user seller4@ecomm.local was not found");
 
-    const adminLogin = await login(baseUrl, "admin@ecomm.local", "admin123");
-    const adminToken = adminLogin.sessionToken;
-    assert.equal(typeof adminToken, "string", "Admin login did not return sessionToken");
+    const adminLogin = await login(baseUrl, "admin@ecomm.local", "DemoAdmin2026!");
+    const adminToken = adminLogin.cookieSession;
+    assert.equal(typeof adminToken, "string", "Admin login did not return cookieSession");
 
     const blockReason =
       "Подозрение на обход безопасной сделки и просьбы об оплате вне платформы";
@@ -144,7 +149,7 @@ test(
         path: "/auth/login",
         body: {
           email: "seller4@ecomm.local",
-          password: "seller123",
+          password: "DemoSeller2026!",
         },
         expectedStatus: 403,
       });

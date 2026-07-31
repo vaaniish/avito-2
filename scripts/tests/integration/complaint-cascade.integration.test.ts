@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { after, before, test } from "node:test";
 import "dotenv/config";
 import { app } from "../../../backend/src/app";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session";
 import { prisma } from "../../../backend/src/lib/prisma";
 
 function isSafeDatabaseUrl(url: string | undefined): boolean {
@@ -54,8 +55,9 @@ async function apiRequest(params: {
   const response = await fetch(`${baseUrl}${params.path}`, {
     method: params.method,
     headers: {
+      origin: "http://localhost:3000",
       "content-type": "application/json",
-      ...(params.token ? { authorization: `Bearer ${params.token}` } : {}),
+      ...(params.token ? cookieSessionHeaders(params.token) : {}),
       ...(params.method === "PATCH"
         ? { "Idempotency-Key": params.idempotencyKey ?? randomUUID() }
         : {}),
@@ -63,6 +65,9 @@ async function apiRequest(params: {
     body: params.body === undefined ? undefined : JSON.stringify(params.body),
   });
   const payload = (await response.json()) as Record<string, unknown>;
+  if (params.path.endsWith("/auth/login")) {
+    payload.cookieSession = encodeCookieSession(response.headers, payload);
+  }
   assert.equal(
     response.status,
     params.expected,
@@ -78,12 +83,12 @@ async function loginAdmin(): Promise<{ token: string; userId: number }> {
     expected: 200,
     body: {
       email: "admin@ecomm.local",
-      password: "admin123",
+      password: "DemoAdmin2026!",
     },
   });
-  assert.equal(typeof payload.sessionToken, "string");
+  assert.equal(typeof payload.cookieSession, "string");
   assert.equal(typeof payload.user?.id, "number");
-  return { token: payload.sessionToken, userId: payload.user.id };
+  return { token: payload.cookieSession, userId: payload.user.id };
 }
 
 async function createUser(prefix: string, role: "BUYER" | "SELLER") {
@@ -326,7 +331,7 @@ test(
     try {
       const payload = await apiRequest({
         method: "POST",
-        path: `/api/listings/${encodeURIComponent(listing.public_id)}/complaints`,
+        path: `/api/catalog/listings/${encodeURIComponent(listing.public_id)}/complaints`,
         token: admin.token,
         expected: 409,
         body: {

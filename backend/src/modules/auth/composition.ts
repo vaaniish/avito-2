@@ -4,31 +4,30 @@ import { AuthService } from "./application/auth.service";
 import { SessionService } from "./application/session.service";
 import { createAuthRouter } from "./http/auth.router";
 import { BcryptPasswordHasher } from "./infrastructure/bcrypt-password-hasher";
+import { PrismaAuthSessionRepository } from "./infrastructure/auth-session-prisma.repository";
 import { PrismaAuthUserRepository } from "./infrastructure/auth-prisma.repository";
 import { PrismaPolicyAcceptanceRepository } from "./infrastructure/policy-prisma.repository";
-import { JwtSessionTokenProvider } from "./infrastructure/session-token-provider";
 
 export function createAuthModule(prismaClient: PrismaClient) {
   const userRepository = new PrismaAuthUserRepository(prismaClient);
   const policyRepository = new PrismaPolicyAcceptanceRepository(prismaClient);
+  const sessionRepository = new PrismaAuthSessionRepository(prismaClient);
   const passwordHasher = new BcryptPasswordHasher();
-  const sessionTokenProvider = new JwtSessionTokenProvider();
 
   const authService = new AuthService(
     userRepository,
     policyRepository,
     passwordHasher,
-    sessionTokenProvider,
   );
   const sessionService = new SessionService(
     userRepository,
-    sessionTokenProvider,
+    sessionRepository,
   );
 
   return {
     authService,
     sessionService,
-    router: createAuthRouter({ authService }),
+    router: createAuthRouter({ authService, sessionService }),
   };
 }
 

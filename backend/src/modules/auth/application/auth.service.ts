@@ -1,3 +1,4 @@
+import { logger } from "../../../lib/logger";
 import {
   conflict,
   forbidden,
@@ -11,7 +12,6 @@ import type {
   AuthUserRepository,
   PasswordHasher,
   PolicyAcceptanceRepository,
-  SessionTokenProvider,
 } from "./auth.ports";
 
 const SUPPORT_CONTACT_MESSAGE =
@@ -47,7 +47,6 @@ export class AuthService {
     private readonly userRepository: AuthUserRepository,
     private readonly policyRepository: PolicyAcceptanceRepository,
     private readonly passwordHasher: PasswordHasher,
-    private readonly sessionTokenProvider: SessionTokenProvider,
   ) {}
 
   async login(input: {
@@ -96,7 +95,6 @@ export class AuthService {
 
     return {
       user: toAuthUserView(user),
-      sessionToken: this.sessionTokenProvider.sign(user.id),
       profile: {
         wishlist: user.wishlistListingPublicIds.map((id) => ({ id })),
       },
@@ -140,7 +138,6 @@ export class AuthService {
 
     return {
       user: toAuthUserView(user),
-      sessionToken: this.sessionTokenProvider.sign(user.id),
       profile: {
         wishlist: [],
       },
@@ -148,7 +145,7 @@ export class AuthService {
   }
 
   async getCurrentUser(input: {
-    sessionToken?: string | null;
+    userId: number;
     meta: RequestMeta;
   }): Promise<{
     user: ReturnType<typeof toAuthUserView>;
@@ -156,15 +153,7 @@ export class AuthService {
       wishlist: Array<{ id: string }>;
     };
   }> {
-    const userId = input.sessionToken
-      ? this.sessionTokenProvider.verify(input.sessionToken)
-      : null;
-
-    if (!userId) {
-      throw unauthorized("Unauthorized");
-    }
-
-    const user = await this.userRepository.findSessionUserById(userId);
+    const user = await this.userRepository.findSessionUserById(input.userId);
     if (!user) {
       throw unauthorized("Unauthorized");
     }
@@ -176,6 +165,10 @@ export class AuthService {
       user.blockedUntil.getTime() <= Date.now()
     ) {
       activeUser = await this.userRepository.refreshActiveSessionUser(user.id);
+    }
+
+    if (activeUser.status === "BLOCKED") {
+      throw forbidden("Аккаунт заблокирован");
     }
 
     await this.tryAcceptCheckoutPolicy(activeUser.id, input.meta);
@@ -199,7 +192,7 @@ export class AuthService {
         requestUserAgent: meta.requestUserAgent,
       });
     } catch (error) {
-      console.error("Error auto-accepting checkout policy:", error);
+      logger.error("error_auto_accepting_checkout_policy", { error });
     }
   }
 }

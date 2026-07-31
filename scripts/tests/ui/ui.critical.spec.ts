@@ -50,7 +50,7 @@ test("@critical auth and admin login forms keep primary actions usable", async (
   await page.goto("/auth");
   await expectAppView(page, "auth");
   await page.getByTestId("auth-email").fill("buyer1@ecomm.local");
-  await page.getByTestId("auth-password").fill("buyer123");
+  await page.getByTestId("auth-password").fill("DemoBuyer2026!");
   await page.getByTestId("auth-submit").click();
   await expectAppView(page, "profile");
   await expect(page.locator("body")).toContainText(/профил|заказ|адрес/i);
@@ -58,7 +58,7 @@ test("@critical auth and admin login forms keep primary actions usable", async (
   await page.goto("/admin/login");
   await expectAppView(page, "adminLogin");
   await page.getByTestId("admin-login-email").fill("admin@ecomm.local");
-  await page.getByTestId("admin-login-password").fill("admin123");
+  await page.getByTestId("admin-login-password").fill("DemoAdmin2026!");
   await page.getByTestId("admin-login-submit").click();
   await expectAppView(page, "adminPanel");
 });

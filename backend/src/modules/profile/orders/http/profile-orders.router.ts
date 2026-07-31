@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import {
@@ -103,7 +104,7 @@ export function createProfileOrdersHttpRouter(
         });
         res.status(200).json(result);
       } catch (error) {
-        console.error("Error in YooKassa webhook:", error);
+        logger.error("error_in_yookassa_webhook", { error });
         res.status(200).json({ success: false });
       }
     },
@@ -130,7 +131,7 @@ export function createProfileOrdersHttpRouter(
       });
       res.status(200).json(result);
     } catch (error) {
-      console.error("Error fetching order payment status:", error);
+      logger.error("error_fetching_order_payment_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -188,7 +189,7 @@ export function createProfileOrdersHttpRouter(
       });
       res.status(201).json(result);
     } catch (error) {
-      console.error("Error creating orders:", error);
+      logger.error("error_creating_orders", { error });
       sendApplicationError(res, error);
     }
   });
@@ -223,7 +224,7 @@ export function createProfileOrdersHttpRouter(
 
       res.status(200).json(result);
     } catch (error) {
-      console.error("Error previewing checkout promo:", error);
+      logger.error("error_previewing_checkout_promo", { error });
       sendApplicationError(res, error);
     }
   });
@@ -241,7 +242,7 @@ export function createProfileOrdersHttpRouter(
       });
       res.status(200).json(result);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      logger.error("error_fetching_orders", { error });
       sendApplicationError(res, error);
     }
   });
@@ -263,7 +264,7 @@ export function createProfileOrdersHttpRouter(
       });
       res.status(200).json(result);
     } catch (error) {
-      console.error("Error cancelling order:", error);
+      logger.error("error_cancelling_order", { error });
       sendApplicationError(res, error);
     }
   });

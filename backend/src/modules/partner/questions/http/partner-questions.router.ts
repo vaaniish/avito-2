@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -28,7 +29,7 @@ export function createPartnerQuestionsRouter(deps: {
 
       res.json(await deps.services.listPartnerQuestions.execute(session.user.id));
     } catch (error) {
-      console.error("Error fetching questions:", error);
+      logger.error("error_fetching_questions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -52,7 +53,7 @@ export function createPartnerQuestionsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error answering question:", error);
+      logger.error("error_answering_question", { error });
       sendApplicationError(res, error);
     }
   });

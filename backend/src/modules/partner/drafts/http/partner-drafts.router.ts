@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { parseListingType } from "../domain/partner-drafts.helpers";
@@ -36,7 +37,7 @@ export function createPartnerDraftsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching listing drafts:", error);
+      logger.error("error_fetching_listing_drafts", { error });
       sendApplicationError(res, error);
     }
   });
@@ -56,7 +57,7 @@ export function createPartnerDraftsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error creating listing draft:", error);
+      logger.error("error_creating_listing_draft", { error });
       sendApplicationError(res, error);
     }
   });
@@ -76,7 +77,7 @@ export function createPartnerDraftsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating listing draft:", error);
+      logger.error("error_updating_listing_draft", { error });
       sendApplicationError(res, error);
     }
   });
@@ -95,7 +96,7 @@ export function createPartnerDraftsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error deleting listing draft:", error);
+      logger.error("error_deleting_listing_draft", { error });
       sendApplicationError(res, error);
     }
   });

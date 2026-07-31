@@ -7,8 +7,7 @@ import {
   apiDelete,
   apiPost,
   clearSessionUser,
-  getSessionToken,
-  getSessionUser,
+  saveCsrfToken,
   saveSessionUser,
   type SessionRole,
   type SessionUser,
@@ -20,6 +19,7 @@ type AuthProfileData = { wishlist: Array<{ id: string }> };
 type SessionBootstrapResponse = {
   user: SessionUser;
   profile?: AuthProfileData;
+  csrfToken: string;
 };
 type WishlistBootstrapItem = { id: string };
 
@@ -116,7 +116,7 @@ export function useAppSessionState(params: {
     [currentProfileTab, onSetCurrentAdminPage, onSetCurrentView],
   );
 
-  const handleProfileLogout = useCallback(() => {
+  const clearLocalSession = useCallback(() => {
     clearSessionUser();
     setCurrentUser(null);
     setIsAuthenticated(false);
@@ -124,8 +124,17 @@ export function useAppSessionState(params: {
     setWishlistProductIds(new Set());
     clearWishlistIds();
     onSetCurrentAdminPage("transactions");
+  }, [onSetCurrentAdminPage]);
+
+  const handleProfileLogout = useCallback(async () => {
+    try {
+      await apiPost<{ success: boolean }>("/auth/logout");
+    } catch {
+      // Local state must still be cleared if the server is unavailable.
+    }
+    clearLocalSession();
     onSetCurrentView("auth");
-  }, [onSetCurrentAdminPage, onSetCurrentView]);
+  }, [clearLocalSession, onSetCurrentView]);
 
   const handleAdminLoginSuccess = useCallback(
     (user?: SessionUser) => {
@@ -141,49 +150,16 @@ export function useAppSessionState(params: {
     [onSetCurrentAdminPage, onSetCurrentView],
   );
 
-  const handleAdminLogout = useCallback(() => {
-    clearSessionUser();
-    setCurrentUser(null);
-    setIsAuthenticated(false);
-    setUserType("regular");
-    setWishlistProductIds(new Set());
-    clearWishlistIds();
-    onSetCurrentAdminPage("transactions");
-    onSetCurrentView("auth");
-  }, [onSetCurrentAdminPage, onSetCurrentView]);
+  const handleAdminLogout = handleProfileLogout;
 
   useEffect(() => {
     let ignore = false;
 
     const hydrateSession = async () => {
-      const existingSession = getSessionUser();
-      const existingToken = getSessionToken();
-      if (!existingSession || !existingToken) {
-        if (existingSession && !existingToken) {
-          clearSessionUser();
-        }
-        if (!ignore) {
-          setWishlistProductIds(new Set());
-          clearWishlistIds();
-          logAppDebug("session", "hydrate-empty", {
-            hasSession: Boolean(existingSession),
-            hasToken: Boolean(existingToken),
-          });
-          setIsSessionHydrated(true);
-        }
-        return;
-      }
-
-      if (!ignore) {
-        setCurrentUser(existingSession);
-        setUserType(existingSession.role);
-        setIsAuthenticated(true);
-        setWishlistProductIds(loadWishlistIds());
-      }
-
       try {
         const response = await apiGet<SessionBootstrapResponse>("/auth/me");
         if (ignore) return;
+        saveCsrfToken(response.csrfToken);
 
         let wishlistIds: string[];
         if (Array.isArray(response.profile?.wishlist)) {
@@ -206,7 +182,13 @@ export function useAppSessionState(params: {
         });
       } catch (error) {
         if (ignore) return;
-        logAppDebug("session", "hydrate-bootstrap-failed-keep-local-session", {
+        clearSessionUser();
+        setCurrentUser(null);
+        setUserType("regular");
+        setIsAuthenticated(false);
+        setWishlistProductIds(new Set());
+        clearWishlistIds();
+        logAppDebug("session", "hydrate-bootstrap-failed", {
           message: error instanceof Error ? error.message : "unknown-error",
         });
       } finally {
@@ -222,6 +204,17 @@ export function useAppSessionState(params: {
       ignore = true;
     };
   }, []);
+
+  useEffect(() => {
+    const handleExpiredSession = () => {
+      clearLocalSession();
+      if (currentView !== "auth" && currentView !== "adminLogin") {
+        onSetCurrentView("auth");
+      }
+    };
+    window.addEventListener("ecomm:session-expired", handleExpiredSession);
+    return () => window.removeEventListener("ecomm:session-expired", handleExpiredSession);
+  }, [clearLocalSession, currentView, onSetCurrentView]);
 
   useEffect(() => {
     if (!isSessionHydrated) {

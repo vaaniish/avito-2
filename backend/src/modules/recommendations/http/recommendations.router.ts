@@ -1,3 +1,4 @@
+import { logger } from "../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../common/http/map-application-error";
 import type { GetCartRecommendationsService } from "../application/services/get-cart-recommendations.service";
@@ -27,7 +28,7 @@ export function createRecommendationsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching home recommendations:", error);
+      logger.error("error_fetching_home_recommendations", { error });
       sendApplicationError(res, error);
     }
   });
@@ -42,7 +43,7 @@ export function createRecommendationsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching similar recommendations:", error);
+      logger.error("error_fetching_similar_recommendations", { error });
       sendApplicationError(res, error);
     }
   });
@@ -58,7 +59,7 @@ export function createRecommendationsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching cart recommendations:", error);
+      logger.error("error_fetching_cart_recommendations", { error });
       sendApplicationError(res, error);
     }
   });
@@ -87,7 +88,7 @@ export function createRecommendationsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error recording recommendation event:", error);
+      logger.error("error_recording_recommendation_event", { error });
       sendApplicationError(res, error);
     }
   });

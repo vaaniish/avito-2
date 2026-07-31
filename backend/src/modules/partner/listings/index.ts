@@ -28,6 +28,14 @@ const moderation = new ProcessPartnerListingModerationService(
   notifications,
 );
 
+export function getPartnerListingModerationSnapshot() {
+  return moderation.snapshot();
+}
+
+export function stopPartnerListingModerationWorker(): Promise<void> {
+  return moderation.stop();
+}
+
 export const partnerListingsRouter = createPartnerListingsRouter({
   requireAnyRole,
   services: {

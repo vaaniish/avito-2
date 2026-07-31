@@ -20,8 +20,6 @@ const FINAL_2X_PATH = path.join(OUTPUT_DIR, "demo-final-2x.mov");
 const NATIVE_MOUSE_SCRIPT = path.join(ROOT_DIR, "scripts/demo/native-mouse.swift");
 const API_BASE = "http://127.0.0.1:3001/api";
 const APP_BASE = "http://127.0.0.1:3000";
-const SESSION_STORAGE_KEY = "ecomm_session_user";
-const SESSION_TOKEN_STORAGE_KEY = "ecomm_session_token";
 const WINDOW_BOUNDS = { width: 1500, height: 1220 };
 const VIEWPORT = { width: 1440, height: 1100 };
 const RECORDING_PADDING_MS = 800;
@@ -61,9 +59,9 @@ const SPEED_VARIANTS = [
 ];
 
 const credentials = {
-  buyer: { email: "buyer1@ecomm.local", password: "buyer123" },
-  seller: { email: "seller1@ecomm.local", password: "seller123" },
-  admin: { email: "admin@ecomm.local", password: "admin123" },
+  buyer: { email: "buyer1@ecomm.local", password: "DemoBuyer2026!" },
+  seller: { email: "seller1@ecomm.local", password: "DemoSeller2026!" },
+  admin: { email: "admin@ecomm.local", password: "DemoAdmin2026!" },
 };
 
 function ensureDir(dirPath) {
@@ -92,23 +90,25 @@ function focusBrowserAppWindow() {
 
 async function login(role) {
   const cached = authSessionCache.get(role);
-  if (cached?.sessionToken && cached?.user) {
+  if (cached?.cookie && cached?.csrfToken && cached?.user) {
     return cached;
   }
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const response = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", origin: APP_BASE },
       body: JSON.stringify(credentials[role]),
     });
     if (response.ok) {
       const payload = await response.json();
-      if (!payload?.sessionToken || !payload?.user) {
+      const cookie = /ecomm_session=([^;]+)/.exec(response.headers.get("set-cookie") ?? "")?.[1];
+      if (!cookie || !payload?.csrfToken || !payload?.user) {
         throw new Error(`Malformed login payload for ${role}`);
       }
-      authSessionCache.set(role, payload);
-      return payload;
+      const session = { ...payload, cookie: decodeURIComponent(cookie) };
+      authSessionCache.set(role, session);
+      return session;
     }
     if (response.status === 429 && attempt < 4) {
       await sleep(1200 * (attempt + 1));
@@ -287,59 +287,17 @@ function addPoint(rect, point) {
 
 async function setSession(page, role) {
   const payload = await login(role);
-  await page.addInitScript(
-    ({ token, user, sessionStorageKey, sessionTokenStorageKey }) => {
-      window.localStorage.setItem(sessionTokenStorageKey, String(token));
-      window.localStorage.setItem(sessionStorageKey, JSON.stringify(user));
-    },
-    {
-      token: payload.sessionToken,
-      user: payload.user,
-      sessionStorageKey: SESSION_STORAGE_KEY,
-      sessionTokenStorageKey: SESSION_TOKEN_STORAGE_KEY,
-    },
-  );
-  if (!page.url().startsWith(APP_BASE)) {
-    await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
-  }
-  await page.evaluate(
-    ({ token, user, sessionStorageKey, sessionTokenStorageKey }) => {
-      window.localStorage.setItem(sessionTokenStorageKey, String(token));
-      window.localStorage.setItem(sessionStorageKey, JSON.stringify(user));
-    },
-    {
-      token: payload.sessionToken,
-      user: payload.user,
-      sessionStorageKey: SESSION_STORAGE_KEY,
-      sessionTokenStorageKey: SESSION_TOKEN_STORAGE_KEY,
-    },
-  );
+  await page.context().clearCookies();
+  await page.context().addCookies([{
+    name: "ecomm_session", value: payload.cookie, domain: "127.0.0.1", path: "/",
+    httpOnly: true, secure: false, sameSite: "Lax",
+  }]);
+  await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
 }
 
 async function clearSession(page) {
-  await page.addInitScript(
-    ({ sessionStorageKey, sessionTokenStorageKey }) => {
-      window.localStorage.removeItem(sessionTokenStorageKey);
-      window.localStorage.removeItem(sessionStorageKey);
-    },
-    {
-      sessionStorageKey: SESSION_STORAGE_KEY,
-      sessionTokenStorageKey: SESSION_TOKEN_STORAGE_KEY,
-    },
-  );
-  if (!page.url().startsWith(APP_BASE)) {
-    await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
-  }
-  await page.evaluate(
-    ({ sessionStorageKey, sessionTokenStorageKey }) => {
-      window.localStorage.removeItem(sessionTokenStorageKey);
-      window.localStorage.removeItem(sessionStorageKey);
-    },
-    {
-      sessionStorageKey: SESSION_STORAGE_KEY,
-      sessionTokenStorageKey: SESSION_TOKEN_STORAGE_KEY,
-    },
-  );
+  await page.context().clearCookies();
+  await page.goto(APP_BASE, { waitUntil: "domcontentloaded" });
 }
 
 async function clearCartStorage(page) {
@@ -568,7 +526,9 @@ async function fetchJsonAsRole(role, pathName, options = {}) {
     ...options,
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${auth.sessionToken}`,
+      origin: APP_BASE,
+      cookie: `ecomm_session=${encodeURIComponent(auth.cookie)}`,
+      "x-csrf-token": auth.csrfToken,
       ...(options.headers ?? {}),
     },
   });

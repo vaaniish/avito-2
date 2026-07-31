@@ -183,23 +183,32 @@ export class AdminUsersRepository implements AdminUsersRepositoryPort {
     });
   }
 
-  updateUserStatus(params: {
+  async updateUserStatus(params: {
     userId: number;
     status: UserStatusValue;
     blockReason: string | null;
   }) {
-    return this.prisma.appUser.update({
-      where: { id: params.userId },
-      data: {
-        status: params.status,
-        block_reason: params.blockReason,
-        blocked_until: null,
-      },
-      select: {
-        status: true,
-        blocked_until: true,
-        block_reason: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.appUser.update({
+        where: { id: params.userId },
+        data: {
+          status: params.status,
+          block_reason: params.blockReason,
+          blocked_until: null,
+        },
+        select: {
+          status: true,
+          blocked_until: true,
+          block_reason: true,
+        },
+      });
+      if (params.status === "BLOCKED") {
+        await tx.authSession.updateMany({
+          where: { user_id: params.userId, revoked_at: null },
+          data: { revoked_at: new Date() },
+        });
+      }
+      return updated;
     });
   }
 

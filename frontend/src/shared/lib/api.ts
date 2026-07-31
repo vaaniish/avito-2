@@ -8,8 +8,8 @@ export type SessionUser = {
   email: string;
 };
 
-const SESSION_STORAGE_KEY = "ecomm_session_user";
-const SESSION_TOKEN_STORAGE_KEY = "ecomm_session_token";
+let memorySessionUser: SessionUser | null = null;
+let memoryCsrfToken: string | null = null;
 const UTF8_DECODER = new TextDecoder("utf-8");
 
 const CP1251_SPECIAL_CHAR_TO_BYTE: Record<number, number> = {
@@ -167,45 +167,27 @@ function getViteEnvValue(key: string): string | undefined {
 
 const API_BASE =
   getViteEnvValue("VITE_API_BASE_URL")?.replace(/\/+$/, "") ||
-  "http://localhost:3001/api";
+  "/api";
 const API_REQUEST_TIMEOUT_MS = Math.max(
   1000,
   Number(getViteEnvValue("VITE_API_TIMEOUT_MS") ?? "12000") || 12000,
 );
 
 export function getSessionUser(): SessionUser | null {
-  const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as SessionUser;
-    if (typeof parsed?.id !== "number") return null;
-    return parsed;
-  } catch (_error) {
-    return null;
-  }
-}
-
-export function getSessionToken(): string | null {
-  const raw = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY);
-  if (!raw) return null;
-  const token = raw.trim();
-  return token.length > 0 ? token : null;
+  return memorySessionUser;
 }
 
 export function saveSessionUser(user: SessionUser): void {
-  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+  memorySessionUser = user;
 }
 
-export function saveSessionToken(token: string): void {
-  const normalized = token.trim();
-  if (!normalized) return;
-  localStorage.setItem(SESSION_TOKEN_STORAGE_KEY, normalized);
+export function saveCsrfToken(token: string): void {
+  memoryCsrfToken = token.trim() || null;
 }
 
 export function clearSessionUser(): void {
-  localStorage.removeItem(SESSION_STORAGE_KEY);
-  localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
+  memorySessionUser = null;
+  memoryCsrfToken = null;
 }
 
 type ApiOptions = {
@@ -216,14 +198,14 @@ type ApiOptions = {
 };
 
 async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
-  const sessionToken = getSessionToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers ?? {}),
   };
 
-  if (sessionToken) {
-    headers.Authorization = `Bearer ${sessionToken}`;
+  const method = options.method ?? "GET";
+  if (!["GET"].includes(method) && memoryCsrfToken) {
+    headers["X-CSRF-Token"] = memoryCsrfToken;
   }
 
   const controller = new AbortController();
@@ -249,6 +231,7 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
     response = await fetch(`${API_BASE}${path}`, {
       method: options.method ?? "GET",
       headers,
+      credentials: "include",
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: controller.signal,
     });
@@ -281,12 +264,11 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
   payload = normalizePayload(payload);
 
   if (!response.ok) {
-    const isAuthRoute =
-      path.startsWith("/auth/login") ||
-      path.startsWith("/auth/signup") ||
-      path.startsWith("/auth/me");
-    if (response.status === 401 && !isAuthRoute) {
+    const isCredentialSubmission =
+      path.startsWith("/auth/login") || path.startsWith("/auth/signup");
+    if (response.status === 401 && !isCredentialSubmission) {
       clearSessionUser();
+      window.dispatchEvent(new CustomEvent("ecomm:session-expired"));
     }
 
     const htmlError =
@@ -301,7 +283,7 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
             : "Ошибка запроса";
     if (
       response.status === 401 &&
-      !isAuthRoute &&
+      !isCredentialSubmission &&
       (!message || message === "Ошибка запроса")
     ) {
       message = "Сессия истекла. Войдите снова.";
@@ -362,11 +344,6 @@ export async function openNotificationStream(options: {
   signal?: AbortSignal;
   onNotification: (notification: ApiNotification) => void;
 }): Promise<void> {
-  const sessionToken = getSessionToken();
-  if (!sessionToken) {
-    throw new Error("Сессия истекла. Войдите снова.");
-  }
-
   const params = new URLSearchParams();
   if (options.after && options.after > 0) {
     params.set("after", String(options.after));
@@ -376,14 +353,16 @@ export async function openNotificationStream(options: {
   const response = await fetch(
     `${API_BASE}/profile/notifications/stream${query ? `?${query}` : ""}`,
     {
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
+      credentials: "include",
       signal: options.signal,
     },
   );
 
   if (!response.ok || !response.body) {
+    if (response.status === 401) {
+      clearSessionUser();
+      window.dispatchEvent(new CustomEvent("ecomm:session-expired"));
+    }
     throw new Error(response.status === 401 ? "Сессия истекла. Войдите снова." : "Поток уведомлений недоступен.");
   }
 

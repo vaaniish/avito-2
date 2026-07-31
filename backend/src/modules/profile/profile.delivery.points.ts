@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import { promises as fs } from "fs";
 import {
   DELIVERY_PROVIDER_LABELS,
@@ -724,9 +725,7 @@ async function searchOrganizationsByYandex(params: {
     );
     if (response.status === 403) {
       yandexOrgSearchKeyRejected = true;
-      console.warn(
-        "Yandex Organization Search key was rejected. Demo provider points will use fallback sources only.",
-      );
+      logger.warn("yandex_organization_search_key_was_rejected_demo_provider_points_will_use_fallback_sources_only");
       return [];
     }
     if (!response.ok) {
@@ -1061,7 +1060,7 @@ async function loadRussianPostDbfRows(): Promise<RussianPostDbfRow[]> {
     russianPostDbfRowsCache = rows;
     return rows;
   } catch (error) {
-    console.warn("Failed to read Russian Post DBF indexes:", error);
+    logger.warn("failed_to_read_russian_post_dbf_indexes", { error });
     russianPostDbfRowsCache = [];
     return [];
   }
@@ -1952,15 +1951,10 @@ async function loadYandexPickupPoints(
       if (points.length > 0) {
         return points;
       }
-      console.warn(
-        `Yandex pickup points request returned empty list (${attempt.label})`,
-      );
+      logger.warn("runtime_warn", { details: [`Yandex pickup points request returned empty list (${attempt.label})`] });
     } catch (error) {
       lastError = error;
-      console.warn(
-        `Yandex pickup points request failed (${attempt.label}):`,
-        error,
-      );
+      logger.warn("runtime_warn", { details: [`Yandex pickup points request failed (${attempt.label}):`, error] });
     }
   }
 
@@ -2182,14 +2176,11 @@ export async function getDeliveryPoints(
       continue;
     }
     if (loader.provider === "yandex_pvz") {
-      console.warn("Failed to load Yandex pickup points:", result.reason);
+      logger.warn("failed_to_load_yandex_pickup_points", { details: [result.reason] });
     } else if (loader.provider === "russian_post") {
-      console.warn("Failed to load Russian Post pickup points:", result.reason);
+      logger.warn("failed_to_load_russian_post_pickup_points", { details: [result.reason] });
     } else {
-      console.warn(
-        `Failed to load demo pickup points for ${loader.provider}:`,
-        result.reason,
-      );
+      logger.warn("runtime_warn", { details: [`Failed to load demo pickup points for ${loader.provider}:`, result.reason] });
     }
   }
 

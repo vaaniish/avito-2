@@ -3,14 +3,31 @@ import { expect, type APIRequestContext, type Page, type TestInfo } from "@playw
 type SessionRole = "buyer" | "seller" | "admin";
 
 const API_BASE = process.env.PLAYWRIGHT_API_BASE_URL ?? "http://127.0.0.1:3001/api";
-const SESSION_STORAGE_KEY = "ecomm_session_user";
-const SESSION_TOKEN_STORAGE_KEY = "ecomm_session_token";
-const loginCache = new Map<string, Promise<{ sessionToken: string; user: Record<string, unknown> }>>();
+const loginCache = new Map<string, Promise<{ cookieSession: string; user: Record<string, unknown> }>>();
+
+function encodeSession(setCookie: string, csrfToken: string): string {
+  const match = /(?:^|[,;]\s*)(?:__Host-)?ecomm_session=([^;]+)/.exec(setCookie);
+  if (!match?.[1] || !csrfToken) throw new Error("Login response is missing cookie or CSRF token");
+  return Buffer.from(JSON.stringify({ cookie: decodeURIComponent(match[1]), csrfToken }), "utf8").toString("base64url");
+}
+
+function decodeSession(encoded: string): { cookie: string; csrfToken: string } {
+  return JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+}
+
+function cookieSessionHeaders(encoded: string): Record<string, string> {
+  const session = decodeSession(encoded);
+  return {
+    Cookie: `ecomm_session=${encodeURIComponent(session.cookie)}`,
+    Origin: "http://localhost:3000",
+    "X-CSRF-Token": session.csrfToken,
+  };
+}
 
 const credentials: Record<SessionRole, { email: string; password: string }> = {
-  buyer: { email: "buyer1@ecomm.local", password: "buyer123" },
-  seller: { email: "seller1@ecomm.local", password: "seller123" },
-  admin: { email: "admin@ecomm.local", password: "admin123" },
+  buyer: { email: "buyer1@ecomm.local", password: "DemoBuyer2026!" },
+  seller: { email: "seller1@ecomm.local", password: "DemoSeller2026!" },
+  admin: { email: "admin@ecomm.local", password: "DemoAdmin2026!" },
 };
 
 export async function installSession(
@@ -19,25 +36,23 @@ export async function installSession(
   role: SessionRole,
 ): Promise<void> {
   const payload = await loginViaApi(request, role);
-
-  await page.addInitScript(
-    ({ sessionToken, user, sessionStorageKey, sessionTokenStorageKey }) => {
-      window.localStorage.setItem(sessionTokenStorageKey, String(sessionToken));
-      window.localStorage.setItem(sessionStorageKey, JSON.stringify(user));
-    },
-    {
-      sessionToken: payload.sessionToken,
-      user: payload.user,
-      sessionStorageKey: SESSION_STORAGE_KEY,
-      sessionTokenStorageKey: SESSION_TOKEN_STORAGE_KEY,
-    },
-  );
+  const session = decodeSession(payload.cookieSession);
+  const apiUrl = new URL(API_BASE);
+  await page.context().addCookies([{
+    name: "ecomm_session",
+    value: session.cookie,
+    domain: apiUrl.hostname,
+    path: "/",
+    httpOnly: true,
+    secure: apiUrl.protocol === "https:",
+    sameSite: "Lax",
+  }]);
 }
 
 export async function loginViaApi(
   request: APIRequestContext,
   role: SessionRole,
-): Promise<{ sessionToken: string; user: Record<string, unknown> }> {
+): Promise<{ cookieSession: string; user: Record<string, unknown> }> {
   return loginWithCredentials(request, credentials[role].email, credentials[role].password);
 }
 
@@ -45,17 +60,18 @@ export async function loginWithCredentials(
   request: APIRequestContext,
   email: string,
   password: string,
-): Promise<{ sessionToken: string; user: Record<string, unknown> }> {
+): Promise<{ cookieSession: string; user: Record<string, unknown> }> {
   const cacheKey = `${email}\n${password}`;
   let cached = loginCache.get(cacheKey);
   if (!cached) {
     cached = (async () => {
       const response = await request.post(`${API_BASE}/auth/login`, {
+        headers: { Origin: "http://localhost:3000" },
         data: { email, password },
       });
       const raw = await response.text();
       let payload: {
-        sessionToken?: string;
+        csrfToken?: string;
         user?: Record<string, unknown>;
         error?: string;
       } | null = null;
@@ -69,11 +85,11 @@ export async function loginWithCredentials(
         response.ok(),
         `login failed for ${email}: ${response.status()} ${raw || "<empty>"}`,
       ).toBeTruthy();
-      expect(typeof payload?.sessionToken).toBe("string");
+      expect(typeof payload?.csrfToken).toBe("string");
       expect(typeof payload?.user).toBe("object");
 
       return {
-        sessionToken: payload?.sessionToken as string,
+        cookieSession: encodeSession(response.headers()["set-cookie"] ?? "", payload?.csrfToken as string),
         user: payload?.user as Record<string, unknown>,
       };
     })().catch((error) => {
@@ -85,7 +101,7 @@ export async function loginWithCredentials(
 
   const payload = await cached;
   return {
-    sessionToken: payload.sessionToken,
+    cookieSession: payload.cookieSession,
     user: payload.user,
   };
 }
@@ -132,7 +148,7 @@ export async function createModerationNotificationFixture(request: APIRequestCon
 
   const createResponse = await request.post(`${API_BASE}/partner/listings`, {
     headers: {
-      authorization: `Bearer ${seller.sessionToken}`,
+      ...cookieSessionHeaders(seller.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -162,7 +178,7 @@ export async function createModerationNotificationFixture(request: APIRequestCon
 
   const moderateResponse = await request.patch(`${API_BASE}/admin/listings/${created.id}/moderation`, {
     headers: {
-      authorization: `Bearer ${admin.sessionToken}`,
+      ...cookieSessionHeaders(admin.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -174,18 +190,18 @@ export async function createModerationNotificationFixture(request: APIRequestCon
 
   return {
     listingId: created.id as string,
-    sellerToken: seller.sessionToken,
+    sellerToken: seller.cookieSession,
   };
 }
 
 export async function createComplaintFixture(request: APIRequestContext): Promise<{ complaintId: string }> {
-  const buyer = await loginWithCredentials(request, "buyer2@ecomm.local", "buyer123");
+  const buyer = await loginWithCredentials(request, "buyer2@ecomm.local", "DemoBuyer2026!");
   const seller = await loginViaApi(request, "seller");
   const admin = await loginViaApi(request, "admin");
 
   const createResponse = await request.post(`${API_BASE}/partner/listings`, {
     headers: {
-      authorization: `Bearer ${seller.sessionToken}`,
+      ...cookieSessionHeaders(seller.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -215,7 +231,7 @@ export async function createComplaintFixture(request: APIRequestContext): Promis
 
   const moderateResponse = await request.patch(`${API_BASE}/admin/listings/${created.id}/moderation`, {
     headers: {
-      authorization: `Bearer ${admin.sessionToken}`,
+      ...cookieSessionHeaders(admin.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -227,7 +243,7 @@ export async function createComplaintFixture(request: APIRequestContext): Promis
 
   const response = await request.post(`${API_BASE}/catalog/listings/${created.id}/complaints`, {
     headers: {
-      authorization: `Bearer ${buyer.sessionToken}`,
+      ...cookieSessionHeaders(buyer.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -246,7 +262,7 @@ export async function createComplaintFixture(request: APIRequestContext): Promis
 export async function createPartnershipRequestFixture(request: APIRequestContext): Promise<{
   requestId: string;
 }> {
-  const buyer = await loginWithCredentials(request, "buyer2@ecomm.local", "buyer123");
+  const buyer = await loginWithCredentials(request, "buyer2@ecomm.local", "DemoBuyer2026!");
 
   const policyResponse = await request.get(`${API_BASE}/public/policy/current?scope=partnership`);
   expect(policyResponse.ok()).toBeTruthy();
@@ -255,7 +271,7 @@ export async function createPartnershipRequestFixture(request: APIRequestContext
 
   const acceptResponse = await request.post(`${API_BASE}/profile/policy-acceptance`, {
     headers: {
-      authorization: `Bearer ${buyer.sessionToken}`,
+      ...cookieSessionHeaders(buyer.cookieSession),
       "content-type": "application/json",
     },
     data: {
@@ -267,7 +283,7 @@ export async function createPartnershipRequestFixture(request: APIRequestContext
 
   const createResponse = await request.post(`${API_BASE}/profile/partnership-requests`, {
     headers: {
-      authorization: `Bearer ${buyer.sessionToken}`,
+      ...cookieSessionHeaders(buyer.cookieSession),
       "content-type": "application/json",
     },
     data: {

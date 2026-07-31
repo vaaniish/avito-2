@@ -4,6 +4,7 @@ import { after, before, test } from "node:test";
 import "dotenv/config";
 import { app } from "../../../backend/src/app";
 import { prisma } from "../../../backend/src/lib/prisma";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session";
 
 function isSafeDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -61,12 +62,16 @@ async function apiRequest(params: {
   const response = await fetch(`${baseUrl}${params.path}`, {
     method: params.method,
     headers: {
+      origin: "http://localhost:3000",
       ...(params.body !== undefined ? { "content-type": "application/json" } : {}),
-      ...(params.token ? { authorization: `Bearer ${params.token}` } : {}),
+      ...(params.token ? cookieSessionHeaders(params.token) : {}),
     },
     body: params.body === undefined ? undefined : JSON.stringify(params.body),
   });
   const payload = (await response.json()) as Record<string, unknown>;
+  if (params.path.endsWith("/auth/login")) {
+    payload.cookieSession = encodeCookieSession(response.headers, payload);
+  }
   assert.equal(
     response.status,
     params.expected,
@@ -82,10 +87,10 @@ async function login(email: string, password: string): Promise<{ token: string; 
     expected: 200,
     body: { email, password },
   });
-  assert.equal(typeof payload.sessionToken, "string");
+  assert.equal(typeof payload.cookieSession, "string");
   assert.equal(typeof payload.user?.id, "number");
   return {
-    token: payload.sessionToken as string,
+    token: payload.cookieSession as string,
     userId: payload.user.id as number,
   };
 }
@@ -94,8 +99,8 @@ test(
   "integration: listing rejection persists moderation history, audit row and seller notification",
   { skip: !safeDb },
   async () => {
-    const admin = await login("admin@ecomm.local", "admin123");
-    const seller = await login("seller1@ecomm.local", "seller123");
+    const admin = await login("admin@ecomm.local", "DemoAdmin2026!");
+    const seller = await login("seller1@ecomm.local", "DemoSeller2026!");
 
     const createdListing = await apiRequest({
       method: "POST",
@@ -227,7 +232,7 @@ test(
       await fetch(`${baseUrl}/api/partner/listings/${encodeURIComponent(listing.public_id)}`, {
         method: "DELETE",
         headers: {
-          authorization: `Bearer ${seller.token}`,
+          ...cookieSessionHeaders(seller.token),
         },
       }).catch(() => null);
     }

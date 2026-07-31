@@ -1,10 +1,10 @@
 import type { CSSProperties, MouseEvent, ReactNode, SVGProps } from "react";
 import { useEffect, useState } from "react";
 import { notifySuccess } from "../shared/ui/notifications";
-import slide1 from "../assets/hero/final/slide-1.png";
-import slide2 from "../assets/hero/final/slide-2.png";
-import slide3 from "../assets/hero/final/slide-3.png";
-import slide4 from "../assets/hero/final/slide-4.png";
+import slide1 from "../assets/hero/final/slide-1.webp";
+import slide2 from "../assets/hero/final/slide-2.webp";
+import slide3 from "../assets/hero/final/slide-3.webp";
+import slide4 from "../assets/hero/final/slide-4.webp";
 
 interface HeroProps {
   onBannerClick?: (category: string) => void;

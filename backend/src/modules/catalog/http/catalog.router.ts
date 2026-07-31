@@ -1,3 +1,4 @@
+import { logger } from "../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { getRequestIpFromExpressLike } from "../../../common/http/request-meta";
 import { getSessionUser, requireAnyRole } from "../../../lib/session";
@@ -31,7 +32,7 @@ export function createCatalogRouter(deps: {
     try {
       res.json(await deps.services.getCategories.execute({ type: req.query.type }));
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      logger.error("error_fetching_categories", { error });
       sendApplicationError(res, error);
     }
   });
@@ -46,7 +47,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching listings:", error);
+      logger.error("error_fetching_listings", { error });
       sendApplicationError(res, error);
     }
   });
@@ -61,7 +62,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching listing by id:", error);
+      logger.error("error_fetching_listing_by_id", { error });
       sendApplicationError(res, error);
     }
   });
@@ -79,7 +80,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error incrementing listing views:", error);
+      logger.error("error_incrementing_listing_views", { error });
       sendApplicationError(res, error);
     }
   });
@@ -93,7 +94,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching seller listings:", error);
+      logger.error("error_fetching_seller_listings", { error });
       sendApplicationError(res, error);
     }
   });
@@ -106,7 +107,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching suggestions:", error);
+      logger.error("error_fetching_suggestions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -120,7 +121,7 @@ export function createCatalogRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching listing questions:", error);
+      logger.error("error_fetching_listing_questions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -143,7 +144,7 @@ export function createCatalogRouter(deps: {
       });
       res.status(201).json(result);
     } catch (error) {
-      console.error("Error creating listing question:", error);
+      logger.error("error_creating_listing_question", { error });
       sendApplicationError(res, error);
     }
   });
@@ -169,7 +170,7 @@ export function createCatalogRouter(deps: {
       });
       res.status(result.deduplicated ? 200 : 201).json(result);
     } catch (error) {
-      console.error("Error creating listing complaint:", error);
+      logger.error("error_creating_listing_complaint", { error });
       sendApplicationError(res, error);
     }
   });

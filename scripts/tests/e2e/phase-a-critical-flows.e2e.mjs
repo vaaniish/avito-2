@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import pg from "pg";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session.mjs";
 
 const { Client } = pg;
 
@@ -33,9 +34,7 @@ function isSafeDatabaseUrl(url) {
 }
 
 function authHeaders(token) {
-  return {
-    authorization: `Bearer ${token}`,
-  };
+  return cookieSessionHeaders(token);
 }
 
 async function apiRequest(method, path, options = {}) {
@@ -47,6 +46,7 @@ async function apiRequest(method, path, options = {}) {
   } = options;
 
   const mergedHeaders = {
+    origin: "http://localhost:3000",
     ...headers,
   };
   if (token) {
@@ -71,6 +71,9 @@ async function apiRequest(method, path, options = {}) {
     data = raw ? JSON.parse(raw) : null;
   } catch {
     data = raw;
+  }
+  if (path === "/auth/login" && response.ok && data) {
+    data.cookieSession = encodeCookieSession(response.headers, data);
   }
 
   if (!expected.includes(response.status)) {
@@ -98,11 +101,11 @@ async function login(email, password) {
     expected: [200],
   });
 
-  invariant(typeof response.data?.sessionToken === "string", `sessionToken missing for ${email}`);
+  invariant(typeof response.data?.cookieSession === "string", `cookieSession missing for ${email}`);
   invariant(typeof response.data?.user?.id === "number", `user.id missing for ${email}`);
 
   return {
-    token: response.data.sessionToken,
+    token: response.data.cookieSession,
     user: response.data.user,
   };
 }
@@ -293,7 +296,7 @@ async function main() {
     });
 
     await runStep("checkout with policy acceptance", async () => {
-      const buyer = await login("buyer4@ecomm.local", "buyer123");
+      const buyer = await login("buyer4@ecomm.local", "DemoBuyer2026!");
       return ensureCheckoutPolicyRejectedWithoutAcceptance({
         db,
         buyerId: buyer.user.id,
@@ -305,8 +308,8 @@ async function main() {
       const applicantEmail = "buyer2@ecomm.local";
       const applicantId = await resetPartnershipApplicant(db, applicantEmail);
 
-      const applicant = await login(applicantEmail, "buyer123");
-      const admin = await login("admin@ecomm.local", "admin123");
+      const applicant = await login(applicantEmail, "DemoBuyer2026!");
+      const admin = await login("admin@ecomm.local", "DemoAdmin2026!");
 
       const beforeAccess = await apiRequest("GET", "/partner/payout-profile", {
         token: applicant.token,
@@ -399,7 +402,7 @@ async function main() {
     });
 
     await runStep("payout profile submit -> auto verify", async () => {
-      const seller = await login("seller1@ecomm.local", "seller123");
+      const seller = await login("seller1@ecomm.local", "DemoSeller2026!");
       const submitted = await apiRequest("PUT", "/partner/payout-profile", {
         token: seller.token,
         body: {
@@ -433,24 +436,24 @@ async function main() {
     });
 
     await runStep("complaint create -> admin approve -> permanent cascade", async () => {
-      const admin = await login("admin@ecomm.local", "admin123");
+      const admin = await login("admin@ecomm.local", "DemoAdmin2026!");
       const seller = await createUserFixture(db, {
         prefix: "PHASEA-CASCADE-SELLER",
         publicIdPrefix: "PHASEA-CASCADE-SELLER",
         role: "SELLER",
-        password: "seller123",
+        password: "DemoSeller2026!",
       });
       const reporterPrimary = await createUserFixture(db, {
         prefix: "PHASEA-CASCADE-BUYER1",
         publicIdPrefix: "PHASEA-CASCADE-BUYER1",
         role: "BUYER",
-        password: "buyer123",
+        password: "DemoBuyer2026!",
       });
       const reporterRelated = await createUserFixture(db, {
         prefix: "PHASEA-CASCADE-BUYER2",
         publicIdPrefix: "PHASEA-CASCADE-BUYER2",
         role: "BUYER",
-        password: "buyer123",
+        password: "DemoBuyer2026!",
       });
 
       const seededReporters = [];
@@ -460,7 +463,7 @@ async function main() {
             prefix: `PHASEA-CASCADE-SEED-BUYER${index + 1}`,
             publicIdPrefix: `PHASEA-CASCADE-SEED-BUYER${index + 1}`,
             role: "BUYER",
-            password: "buyer123",
+            password: "DemoBuyer2026!",
           }),
         );
       }

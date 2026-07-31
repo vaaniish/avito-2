@@ -1,3 +1,4 @@
+import { logger } from "../../../../../lib/logger";
 import {
   conflict,
   externalServiceError,
@@ -361,10 +362,7 @@ export class CreateOrderService {
         try {
           await this.repository.abortCheckoutIdempotency(idempotencyRecordId);
         } catch (abortError) {
-          console.warn(
-            "Unable to cleanup checkout idempotency record:",
-            abortError,
-          );
+          logger.warn("unable_to_cleanup_checkout_idempotency_record", { abortError });
         }
       }
 

@@ -10,18 +10,16 @@ on:
   workflow_dispatch:
 
 env:
-  DATABASE_URL: postgresql://user:password@127.0.0.1:5432/avito-db-dev?schema=public
+  DATABASE_URL: postgresql://ci_user:ci-unique-password@127.0.0.1:5432/avito_ci_test?schema=public
   BASE_URL: http://127.0.0.1:3001
   PLAYWRIGHT_API_BASE_URL: http://127.0.0.1:3001/api
   PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+  CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
   PORT: 3001
-  SESSION_TOKEN_SECRET: ci-session-secret-32-chars-minimum-123456
-  SESSION_TOKEN_ISSUER: avito-2-backend
-  SESSION_TOKEN_AUDIENCE: avito-2-frontend
-  YOOKASSA_SHOP_ID: ci-shop
-  YOOKASSA_SECRET_KEY: ci-secret
-  YOOKASSA_WEBHOOK_TOKEN: ci-webhook-token
-  YOOKASSA_WEBHOOK_IP_ALLOWLIST: 127.0.0.1
+  NODE_ENV: test
+  PAYMENT_USE_LOCAL_STUB: 1
+  DEMO_SEED_CONFIRM: DELETE_LOCAL_DEMO_DATA
+  DADATA_USE_LOCAL_BANK_FIXTURES: 1
   HTTP_SLOW_REQUEST_MS: 1200
   PASSWORD_HASH_SALT_ROUNDS: 8
 
@@ -29,19 +27,13 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Build and preflight
+      - run: npm ci
+      - name: Static quality and production preflight
         run: npm run ci:verify
 
   pr-gate:
@@ -51,65 +43,36 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: avito-db-dev
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci-unique-password
+          POSTGRES_DB: avito_ci_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U user -d avito-db-dev"
-          --health-interval=10s
+          --health-cmd="pg_isready -U ci_user -d avito_ci_test"
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=10
+          --health-retries=20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Apply migrations
-        run: npm run db:migrate:deploy
-
-      - name: Seed DB
-        run: npm run db:seed
-
-      - name: Start backend
-        run: |
-          nohup npm run start:dev > /tmp/backend.log 2>&1 &
-          echo $! > /tmp/backend.pid
-
-      - name: Wait for readiness
-        run: |
-          for i in {1..60}; do
-            if curl -fsS "http://127.0.0.1:3001/health/ready" >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Backend did not become ready in time"
-          cat /tmp/backend.log || true
-          exit 1
-
-      - name: Run PR gate suites
+      - run: npm ci
+      - run: npm run db:migrate:deploy
+      - run: npm run db:seed:demo
+      - name: PR gate
         run: npm run ci:gate:pr
-
-      - name: Dump backend log on failure
+      - name: Upload API reports on failure
         if: failure()
-        run: cat /tmp/backend.log || true
-
-      - name: Stop backend
-        if: always()
-        run: |
-          if [ -f /tmp/backend.pid ]; then
-            kill "$(cat /tmp/backend.pid)" || true
-          fi
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-gate-artifacts
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
 
   main-gate:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -119,40 +82,51 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: avito-db-dev
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci-unique-password
+          POSTGRES_DB: avito_ci_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U user -d avito-db-dev"
-          --health-interval=10s
+          --health-cmd="pg_isready -U ci_user -d avito_ci_test"
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=10
+          --health-retries=20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Apply migrations
-        run: npm run db:migrate:deploy
-
-      - name: Seed DB
-        run: npm run db:seed
-
-      - name: Run main gate suites
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run db:migrate:deploy
+      - run: npm run db:seed:demo
+      - name: Main test gate
         run: npm run ci:gate:main
+      - name: Short 1000 VU harness check
+        env:
+          PERF_DATABASE_URL: postgresql://ci_user:ci-unique-password@127.0.0.1:5432/avito_ci_test?schema=public
+          PERF_TEST_CONFIRM: RUN_LOCAL_1000_VU
+          PERF_DURATION_SCALE: 0.01
+          PERF_MAX_ERROR_RATE: 1
+          PERF_MAX_TIMEOUT_RATE: 1
+          PERF_CATALOG_P95_MS: 60000
+          PERF_LOGIN_P95_MS: 60000
+          PERF_LISTING_P95_MS: 60000
+          PERF_CHECKOUT_P95_MS: 60000
+          PERF_MODERATION_P95_MS: 60000
+        run: npm run perf:1000vu
+      - name: Upload browser and perf reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-gate-artifacts
+          path: |
+            artifacts/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
 
   pre-release-gate:
     if: github.event_name == 'workflow_dispatch'
@@ -162,37 +136,35 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: avito-db-dev
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci-unique-password
+          POSTGRES_DB: avito_ci_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U user -d avito-db-dev"
-          --health-interval=10s
+          --health-cmd="pg_isready -U ci_user -d avito_ci_test"
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=10
+          --health-retries=20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Apply migrations
-        run: npm run db:migrate:deploy
-
-      - name: Seed DB
-        run: npm run db:seed
-
-      - name: Run pre-release gate
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run db:migrate:deploy
+      - run: npm run db:seed:demo
+      - name: Pre-release gate
         run: npm run ci:gate:pre-release
+      - name: Upload release reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-release-artifacts
+          path: |
+            artifacts/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

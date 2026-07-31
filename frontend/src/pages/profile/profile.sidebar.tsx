@@ -1,6 +1,8 @@
 import { LogOut, User as UserIcon } from "lucide-react";
 import { partnerBaseTabs, partnerTabs, regularTabs } from "./profile.tabs";
 import type { ProfileTab, ProfileUser, UserType } from "./profile.models";
+import { apiPost } from "../../shared/lib/api";
+import { notifyError } from "../../shared/ui/notifications";
 
 type ProfileSidebarProps = {
   userType: UserType;
@@ -109,6 +111,18 @@ export function ProfileSidebar({
         className="btn-secondary flex w-full items-center justify-center gap-2 px-3 py-2 text-sm text-gray-700"
       >
         <LogOut className="h-4 w-4" /> Выйти
+      </button>
+      <button
+        onClick={() => {
+          void apiPost<{ success: boolean }>("/auth/logout-all")
+            .then(() => onLogout())
+            .catch((error) => {
+              notifyError(error instanceof Error ? error.message : "Не удалось завершить сессии");
+            });
+        }}
+        className="mt-2 flex w-full items-center justify-center px-3 py-2 text-sm text-gray-500 hover:text-gray-900"
+      >
+        Выйти на всех устройствах
       </button>
     </aside>
   );

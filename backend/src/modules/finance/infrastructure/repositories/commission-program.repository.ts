@@ -118,58 +118,47 @@ async function computeQuarterSnapshot(params: {
     : null;
 
   if (params.persist) {
-    await params.prismaClient.sellerCommissionPeriodStat.upsert({
+    const snapshotData = {
+      period_start: params.window.periodStart,
+      period_end: params.window.periodEnd,
+      gross,
+      commission_total: commission,
+      seller_profit: sellerProfit,
+      payable,
+      held,
+      refunded_cancelled: refundedCancelled,
+      qualified_gmv: qualifiedGmv,
+      completed_orders: completedOrders,
+      successful_transactions: successfulTransactions,
+      total_transactions: transactions.length,
+      current_tier_id: tierSnapshot.currentTier.id,
+      next_tier_id: tierSnapshot.nextTier?.id ?? null,
+      sales_to_next_tier: tierSnapshot.salesToNextTier,
+      percent_to_next_tier: tierSnapshot.percentToNextTier,
+      commission_rate_at_period_end: tierSnapshot.currentTier.commission_rate,
+      snapshot_finalized_at: finalizedAt,
+    };
+    // Prisma upsert can race on the separate public_id unique constraint when
+    // many checkouts create the same seller-period row concurrently. An
+    // INSERT .. ON CONFLICT DO NOTHING followed by the composite-key update
+    // keeps the operation safe without lowering transaction isolation.
+    await params.prismaClient.sellerCommissionPeriodStat.createMany({
+      data: [{
+        public_id: `SCPS-${params.sellerId}-${params.window.periodKey}`,
+        seller_id: params.sellerId,
+        period_key: params.window.periodKey,
+        ...snapshotData,
+      }],
+      skipDuplicates: true,
+    });
+    await params.prismaClient.sellerCommissionPeriodStat.update({
       where: {
         seller_id_period_key: {
           seller_id: params.sellerId,
           period_key: params.window.periodKey,
         },
       },
-      create: {
-        public_id: `SCPS-${params.sellerId}-${params.window.periodKey}`,
-        seller_id: params.sellerId,
-        period_key: params.window.periodKey,
-        period_start: params.window.periodStart,
-        period_end: params.window.periodEnd,
-        gross,
-        commission_total: commission,
-        seller_profit: sellerProfit,
-        payable,
-        held,
-        refunded_cancelled: refundedCancelled,
-        qualified_gmv: qualifiedGmv,
-        completed_orders: completedOrders,
-        successful_transactions: successfulTransactions,
-        total_transactions: transactions.length,
-        current_tier_id: tierSnapshot.currentTier.id,
-        next_tier_id: tierSnapshot.nextTier?.id ?? null,
-        sales_to_next_tier: tierSnapshot.salesToNextTier,
-        percent_to_next_tier: tierSnapshot.percentToNextTier,
-        commission_rate_at_period_end:
-          tierSnapshot.currentTier.commission_rate,
-        snapshot_finalized_at: finalizedAt,
-      },
-      update: {
-        period_start: params.window.periodStart,
-        period_end: params.window.periodEnd,
-        gross,
-        commission_total: commission,
-        seller_profit: sellerProfit,
-        payable,
-        held,
-        refunded_cancelled: refundedCancelled,
-        qualified_gmv: qualifiedGmv,
-        completed_orders: completedOrders,
-        successful_transactions: successfulTransactions,
-        total_transactions: transactions.length,
-        current_tier_id: tierSnapshot.currentTier.id,
-        next_tier_id: tierSnapshot.nextTier?.id ?? null,
-        sales_to_next_tier: tierSnapshot.salesToNextTier,
-        percent_to_next_tier: tierSnapshot.percentToNextTier,
-        commission_rate_at_period_end:
-          tierSnapshot.currentTier.commission_rate,
-        snapshot_finalized_at: finalizedAt,
-      },
+      data: snapshotData,
     });
   }
 

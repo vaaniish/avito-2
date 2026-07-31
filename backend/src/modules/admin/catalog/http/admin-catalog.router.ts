@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin } from "../../common/http/admin-session";
@@ -14,7 +15,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.getCatalog(req.query.type));
     } catch (error) {
-      console.error("Error fetching admin catalog:", error);
+      logger.error("error_fetching_admin_catalog", { error });
       sendApplicationError(res, error);
     }
   });
@@ -25,7 +26,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.searchCatalog((req.query ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error searching admin catalog:", error);
+      logger.error("error_searching_admin_catalog", { error });
       sendApplicationError(res, error);
     }
   });
@@ -36,7 +37,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.reorderCatalog((req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error reordering catalog:", error);
+      logger.error("error_reordering_catalog", { error });
       sendApplicationError(res, error);
     }
   });
@@ -47,7 +48,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createCategory((req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog category:", error);
+      logger.error("error_creating_catalog_category", { error });
       sendApplicationError(res, error);
     }
   });
@@ -58,7 +59,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateCategory(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog category:", error);
+      logger.error("error_updating_catalog_category", { error });
       sendApplicationError(res, error);
     }
   });
@@ -69,7 +70,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteCategory(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog category:", error);
+      logger.error("error_deleting_catalog_category", { error });
       sendApplicationError(res, error);
     }
   });
@@ -80,7 +81,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createSubcategory((req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog subcategory:", error);
+      logger.error("error_creating_catalog_subcategory", { error });
       sendApplicationError(res, error);
     }
   });
@@ -91,7 +92,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateSubcategory(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog subcategory:", error);
+      logger.error("error_updating_catalog_subcategory", { error });
       sendApplicationError(res, error);
     }
   });
@@ -102,7 +103,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteSubcategory(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog subcategory:", error);
+      logger.error("error_deleting_catalog_subcategory", { error });
       sendApplicationError(res, error);
     }
   });
@@ -113,7 +114,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createItem((req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog item:", error);
+      logger.error("error_creating_catalog_item", { error });
       sendApplicationError(res, error);
     }
   });
@@ -124,7 +125,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateItem(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog item:", error);
+      logger.error("error_updating_catalog_item", { error });
       sendApplicationError(res, error);
     }
   });
@@ -135,7 +136,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteItem(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog item:", error);
+      logger.error("error_deleting_catalog_item", { error });
       sendApplicationError(res, error);
     }
   });
@@ -146,7 +147,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.getItemReference(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error fetching catalog item reference:", error);
+      logger.error("error_fetching_catalog_item_reference", { error });
       sendApplicationError(res, error);
     }
   });
@@ -157,7 +158,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createBrand(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog reference brand:", error);
+      logger.error("error_creating_catalog_reference_brand", { error });
       sendApplicationError(res, error);
     }
   });
@@ -168,7 +169,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateBrand(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog reference brand:", error);
+      logger.error("error_updating_catalog_reference_brand", { error });
       sendApplicationError(res, error);
     }
   });
@@ -179,7 +180,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteBrand(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog reference brand:", error);
+      logger.error("error_deleting_catalog_reference_brand", { error });
       sendApplicationError(res, error);
     }
   });
@@ -190,7 +191,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createModel(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog reference model:", error);
+      logger.error("error_creating_catalog_reference_model", { error });
       sendApplicationError(res, error);
     }
   });
@@ -201,7 +202,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateModel(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog reference model:", error);
+      logger.error("error_updating_catalog_reference_model", { error });
       sendApplicationError(res, error);
     }
   });
@@ -212,7 +213,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteModel(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog reference model:", error);
+      logger.error("error_deleting_catalog_reference_model", { error });
       sendApplicationError(res, error);
     }
   });
@@ -223,7 +224,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.status(201).json(await deps.service.createProduct(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error creating catalog reference product:", error);
+      logger.error("error_creating_catalog_reference_product", { error });
       sendApplicationError(res, error);
     }
   });
@@ -234,7 +235,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.updateProduct(String(req.params.publicId ?? ""), (req.body ?? {}) as Record<string, unknown>));
     } catch (error) {
-      console.error("Error updating catalog reference product:", error);
+      logger.error("error_updating_catalog_reference_product", { error });
       sendApplicationError(res, error);
     }
   });
@@ -245,7 +246,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteCharacteristic(String(req.params.id ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog reference characteristic:", error);
+      logger.error("error_deleting_catalog_reference_characteristic", { error });
       sendApplicationError(res, error);
     }
   });
@@ -256,7 +257,7 @@ export function createAdminCatalogRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.deleteProduct(String(req.params.publicId ?? "")));
     } catch (error) {
-      console.error("Error deleting catalog reference product:", error);
+      logger.error("error_deleting_catalog_reference_product", { error });
       sendApplicationError(res, error);
     }
   });

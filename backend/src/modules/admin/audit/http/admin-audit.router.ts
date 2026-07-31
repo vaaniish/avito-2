@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin } from "../../common/http/admin-session";
@@ -29,7 +30,7 @@ export function createAdminAuditRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching audit logs:", error);
+      logger.error("error_fetching_audit_logs", { error });
       sendApplicationError(res, error);
     }
   });

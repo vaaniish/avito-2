@@ -291,6 +291,11 @@ export async function enforceCircumventionViolation(
           blocked = true;
           blockedUntil = updated.blocked_until;
 
+          await tx.authSession.updateMany({
+            where: { user_id: actor.id, revoked_at: null },
+            data: { revoked_at: new Date() },
+          });
+
           await tx.auditLog.create({
             data: {
               public_id: makeAuditPublicId(),

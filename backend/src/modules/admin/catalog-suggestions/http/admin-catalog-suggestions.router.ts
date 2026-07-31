@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin } from "../../common/http/admin-session";
@@ -20,7 +21,7 @@ export function createAdminCatalogSuggestionsRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error approving catalog suggestion reference:", error);
+      logger.error("error_approving_catalog_suggestion_reference", { error });
       sendApplicationError(res, error);
     }
   });
@@ -31,7 +32,7 @@ export function createAdminCatalogSuggestionsRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.service.listSuggestions());
     } catch (error) {
-      console.error("Error fetching catalog suggestions:", error);
+      logger.error("error_fetching_catalog_suggestions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -48,7 +49,7 @@ export function createAdminCatalogSuggestionsRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error updating catalog suggestion:", error);
+      logger.error("error_updating_catalog_suggestion", { error });
       sendApplicationError(res, error);
     }
   });

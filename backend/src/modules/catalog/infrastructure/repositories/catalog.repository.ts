@@ -5,6 +5,7 @@ import {
   catalogListingDetailInclude,
   normalizeDisplayText,
 } from "../../domain/catalog.service";
+import { getCatalogRuntimeCache } from "../../catalog-runtime-cache";
 
 const APPROVED_PARTNERSHIP_STATUSES = ["APPROVED", "APPROVED_LIMITED"] as const;
 
@@ -225,6 +226,11 @@ export class CatalogRepository {
   }
 
   async loadSellerReviewMetrics(sellerIds: number[]) {
+    const cacheKey = `seller-review-metrics:${Array.from(new Set(sellerIds)).sort((a, b) => a - b).join(",")}`;
+    return getCatalogRuntimeCache(cacheKey, () => this.loadSellerReviewMetricsUncached(sellerIds));
+  }
+
+  private async loadSellerReviewMetricsUncached(sellerIds: number[]) {
     const map = new Map<number, { rating: number; reviewsCount: number }>();
     const uniqueSellerIds = Array.from(new Set(sellerIds));
     if (uniqueSellerIds.length === 0) return map;
@@ -616,6 +622,6 @@ export class CatalogRepository {
   }
 
   async loadEffectiveSearchRules() {
-    return loadEffectiveCatalogSearchRules(prisma);
+    return getCatalogRuntimeCache("effective-search-rules", () => loadEffectiveCatalogSearchRules(prisma));
   }
 }

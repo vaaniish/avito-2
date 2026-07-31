@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import "dotenv/config";
 import { app } from "../../../backend/src/app";
 import { prisma } from "../../../backend/src/lib/prisma";
+import { cookieSessionHeaders, encodeCookieSession } from "../helpers/cookie-session";
 
 function isSafeDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -49,9 +50,9 @@ async function apiRequest(params: {
   body?: unknown;
   expected: number[];
 }) {
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { origin: "http://localhost:3000" };
   if (params.body !== undefined) headers["content-type"] = "application/json";
-  if (params.token) headers.authorization = `Bearer ${params.token}`;
+  if (params.token) Object.assign(headers, cookieSessionHeaders(params.token));
 
   const response = await fetch(`${baseUrl}${params.path}`, {
     method: params.method,
@@ -60,6 +61,9 @@ async function apiRequest(params: {
   });
   const raw = await response.text();
   const data = raw ? JSON.parse(raw) : null;
+  if (params.path.endsWith("/auth/login") && data) {
+    data.cookieSession = encodeCookieSession(response.headers, data);
+  }
 
   if (!params.expected.includes(response.status)) {
     throw new Error(
@@ -77,8 +81,8 @@ async function login(email: string, password: string): Promise<string> {
     expected: [200],
     body: { email, password },
   });
-  assert.equal(typeof response.data?.sessionToken, "string");
-  return response.data.sessionToken;
+  assert.equal(typeof response.data?.cookieSession, "string");
+  return response.data.cookieSession;
 }
 
 function withEnv<T>(overrides: Record<string, string | undefined>, fn: () => Promise<T>): Promise<T> {
@@ -101,7 +105,7 @@ test(
   "integration: legal lookup rejects invalid inn before DaData request",
   { skip: !safeDb },
   async () => {
-    const sellerToken = await login("seller1@ecomm.local", "seller123");
+    const sellerToken = await login("seller1@ecomm.local", "DemoSeller2026!");
 
     const response = await withEnv({ DADATA_API_KEY: "test-token" }, () =>
       apiRequest({
@@ -121,7 +125,7 @@ test(
   "integration: legal lookup returns 502 when DaData key is missing",
   { skip: !safeDb },
   async () => {
-    const sellerToken = await login("seller1@ecomm.local", "seller123");
+    const sellerToken = await login("seller1@ecomm.local", "DemoSeller2026!");
 
     const response = await withEnv({ DADATA_API_KEY: undefined }, () =>
       apiRequest({

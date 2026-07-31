@@ -137,6 +137,13 @@ export async function applyApprovedComplaintConsequences(
           },
         });
 
+  if (sellerAfter.status === "BLOCKED") {
+    await tx.authSession.updateMany({
+      where: { user_id: params.sellerId, revoked_at: null },
+      data: { revoked_at: now },
+    });
+  }
+
   await tx.marketplaceListing.update({
     where: { id: params.listingId },
     data: {

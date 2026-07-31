@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -22,7 +23,7 @@ export function createAdminUsersRouter(deps: {
 
       res.json(await deps.services.listAdminUsers.execute());
     } catch (error) {
-      console.error("Error fetching users:", error);
+      logger.error("error_fetching_users", { error });
       sendApplicationError(res, error);
     }
   });
@@ -47,7 +48,7 @@ export function createAdminUsersRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating user status:", error);
+      logger.error("error_updating_user_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -67,7 +68,7 @@ export function createAdminUsersRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating user role:", error);
+      logger.error("error_updating_user_role", { error });
       sendApplicationError(res, error);
     }
   });

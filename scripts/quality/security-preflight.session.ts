@@ -1,65 +1,34 @@
 import "dotenv/config";
-import { assertSessionTokenConfiguration } from "../../backend/src/lib/session-token";
-
-function fail(message: string): never {
-  throw new Error(`[security-preflight] ${message}`);
-}
-
-function validateOptionalTrimmedString(name: string): void {
-  if (!(name in process.env)) {
-    return;
-  }
-
-  const value = process.env[name];
-  if (typeof value !== "string" || value.trim().length === 0) {
-    fail(`${name} is set but empty`);
-  }
-}
-
-function validateOptionalPositiveInteger(name: string): void {
-  if (!(name in process.env)) {
-    return;
-  }
-
-  const raw = process.env[name];
-  if (typeof raw !== "string" || raw.trim().length === 0) {
-    fail(`${name} is set but empty`);
-  }
-
-  const parsed = Number(raw);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    fail(`${name} must be a positive integer when provided`);
-  }
-}
+import { assertRuntimeConfiguration } from "../../backend/src/lib/runtime-config";
 
 function main(): void {
-  const originalNodeEnv = process.env.NODE_ENV;
-  const originalSessionTokenSecret = process.env.SESSION_TOKEN_SECRET;
-  if (typeof originalSessionTokenSecret !== "string" || originalSessionTokenSecret.trim().length === 0) {
-    process.env.SESSION_TOKEN_SECRET =
-      "security-preflight-session-token-secret-0123456789abcdef0123456789abcdef";
-  }
-  process.env.NODE_ENV = "production";
-
+  const saved = { ...process.env };
   try {
-    assertSessionTokenConfiguration();
-    validateOptionalTrimmedString("SESSION_TOKEN_ISSUER");
-    validateOptionalTrimmedString("SESSION_TOKEN_AUDIENCE");
-    validateOptionalPositiveInteger("SESSION_TOKEN_TTL_MS");
+    process.env.NODE_ENV = "production";
+    process.env.CORS_ALLOWED_ORIGINS = "https://preflight.example.com";
+    process.env.DATABASE_URL = "postgresql://preflight_app:a-unique-preflight-password@127.0.0.1:5432/preflight";
+    for (const optionalCredential of [
+      "YOOKASSA_SHOP_ID",
+      "YOOKASSA_SECRET_KEY",
+      "YOOKASSA_WEBHOOK_TOKEN",
+      "DADATA_API_KEY",
+      "DADATA_SECRET_KEY",
+      "YANDEX_DELIVERY_TOKEN",
+    ]) delete process.env[optionalCredential];
+    for (const obsolete of [
+      "SESSION_TOKEN_SECRET",
+      "SESSION_TOKEN_ISSUER",
+      "SESSION_TOKEN_AUDIENCE",
+      "SESSION_TOKEN_TTL_MS",
+    ]) delete process.env[obsolete];
+    assertRuntimeConfiguration();
   } finally {
-    if (typeof originalNodeEnv === "undefined") {
-      delete process.env.NODE_ENV;
-    } else {
-      process.env.NODE_ENV = originalNodeEnv;
+    for (const key of Object.keys(process.env)) {
+      if (!(key in saved)) delete process.env[key];
     }
-    if (typeof originalSessionTokenSecret === "undefined") {
-      delete process.env.SESSION_TOKEN_SECRET;
-    } else {
-      process.env.SESSION_TOKEN_SECRET = originalSessionTokenSecret;
-    }
+    Object.assign(process.env, saved);
   }
-
-  console.log("[security-preflight] PASS: production session-token configuration is valid");
+  console.log("[security-preflight] PASS: production runtime configuration is valid");
 }
 
 main();

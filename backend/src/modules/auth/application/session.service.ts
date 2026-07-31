@@ -1,76 +1,144 @@
-import {
-  forbidden,
-  unauthorized,
-} from "../../../common/application-error";
-import type { SessionUser } from "../domain/auth.types";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { forbidden, unauthorized } from "../../../common/application-error";
+import { getSessionTtlMs } from "../../../lib/session-cookie";
 import type {
+  AuthSessionRepository,
   AuthUserRepository,
-  SessionTokenProvider,
+  SessionContextUser,
 } from "./auth.ports";
 
-function parseBearerToken(authorization: string | undefined): string | null {
-  if (!authorization) return null;
-  const normalized = authorization.trim();
-  if (!normalized) return null;
-  const parts = normalized.split(/\s+/);
-  if (parts.length !== 2) return null;
-  if (parts[0].toLowerCase() !== "bearer") return null;
-  const token = parts[1]?.trim();
-  return token || null;
+const REVOKED_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_PRUNE_INTERVAL_MS = 60_000;
+
+export type AuthSessionContext = {
+  sessionId: string;
+  userId: number;
+  csrfToken: string;
+  expiresAt: Date;
+  user: SessionContextUser;
+};
+
+function randomToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+export function hashSessionToken(token: string): string {
+  return createHash("sha256").update(token, "utf8").digest("hex");
+}
+
+function constantTimeEqual(left: string, right: string): boolean {
+  const leftBuffer = Buffer.from(left, "utf8");
+  const rightBuffer = Buffer.from(right, "utf8");
+  return (
+    leftBuffer.length === rightBuffer.length &&
+    timingSafeEqual(leftBuffer, rightBuffer)
+  );
 }
 
 export class SessionService {
+  private lastPruneAt = 0;
+  private prunePromise: Promise<void> | null = null;
+
   constructor(
     private readonly userRepository: AuthUserRepository,
-    private readonly sessionTokenProvider: SessionTokenProvider,
+    private readonly sessionRepository: AuthSessionRepository,
   ) {}
 
-  async getSessionUserFromAuthorization(
-    authorization: string | undefined,
-  ): Promise<SessionUser | null> {
-    const token = parseBearerToken(authorization);
-    const userId = token ? this.sessionTokenProvider.verify(token) : null;
+  async create(userId: number, rememberMe: boolean): Promise<{
+    token: string;
+    csrfToken: string;
+    expiresAt: Date;
+  }> {
+    const now = new Date();
+    const token = randomToken();
+    const csrfToken = randomToken();
+    const expiresAt = new Date(now.getTime() + getSessionTtlMs(rememberMe));
+    await this.pruneIfDue(now);
+    await this.sessionRepository.create({
+      userId,
+      tokenHash: hashSessionToken(token),
+      csrfToken,
+      expiresAt,
+    });
+    return { token, csrfToken, expiresAt };
+  }
 
-    if (!userId) {
-      return null;
+  private async pruneIfDue(now: Date): Promise<void> {
+    const configured = Number(process.env.AUTH_SESSION_PRUNE_INTERVAL_MS ?? DEFAULT_PRUNE_INTERVAL_MS);
+    const intervalMs = Number.isInteger(configured) && configured >= 1_000 && configured <= 24 * 60 * 60 * 1000
+      ? configured
+      : DEFAULT_PRUNE_INTERVAL_MS;
+    if (now.getTime() - this.lastPruneAt < intervalMs) return;
+    if (!this.prunePromise) {
+      this.prunePromise = this.sessionRepository.prune(
+        now,
+        new Date(now.getTime() - REVOKED_RETENTION_MS),
+      ).then(() => {
+        this.lastPruneAt = now.getTime();
+      }).finally(() => {
+        this.prunePromise = null;
+      });
     }
+    await this.prunePromise;
+  }
 
-    const user = await this.userRepository.findSessionUserById(userId);
-    if (!user) {
-      return null;
-    }
+  async getContext(token: string | null): Promise<AuthSessionContext | null> {
+    if (!token) return null;
+    const session = await this.sessionRepository.findActiveByTokenHash(
+      hashSessionToken(token),
+      new Date(),
+    );
+    if (!session) return null;
 
+    let user = session.user;
     if (
       user.status === "BLOCKED" &&
       user.blockedUntil &&
       user.blockedUntil.getTime() <= Date.now()
     ) {
-      return this.userRepository.refreshActiveSessionUser(user.id);
+      user = await this.userRepository.refreshActiveSessionUser(user.id);
     }
 
-    return user;
+    return {
+      sessionId: session.id,
+      userId: session.userId,
+      csrfToken: session.csrfToken,
+      expiresAt: session.expiresAt,
+      user,
+    };
   }
 
-  async requireRoles(
-    authorization: string | undefined,
-    roles: string[],
-  ): Promise<SessionUser> {
-    const user = await this.getSessionUserFromAuthorization(authorization);
-    if (!user) {
-      throw unauthorized("Unauthorized");
-    }
-
-    if (!roles.includes(user.role)) {
-      throw forbidden("Forbidden");
-    }
-
-    if (user.status === "BLOCKED") {
-      const message = user.blockedUntil
-        ? `User is temporarily blocked until ${user.blockedUntil.toISOString()}`
+  async requireRoles(token: string | null, roles: string[]): Promise<AuthSessionContext> {
+    const session = await this.getContext(token);
+    if (!session) throw unauthorized("Unauthorized");
+    if (!roles.includes(session.user.role)) throw forbidden("Forbidden");
+    if (session.user.status === "BLOCKED") {
+      const message = session.user.blockedUntil
+        ? `User is temporarily blocked until ${session.user.blockedUntil.toISOString()}`
         : "User is blocked";
       throw forbidden(message);
     }
+    return session;
+  }
 
-    return user;
+  isCsrfTokenValid(context: AuthSessionContext, provided: string | null): boolean {
+    return Boolean(provided && constantTimeEqual(context.csrfToken, provided));
+  }
+
+  async revokeCurrent(token: string | null): Promise<void> {
+    if (!token) return;
+    await this.sessionRepository.revokeByTokenHash(hashSessionToken(token), new Date());
+  }
+
+  async revokeAll(userId: number): Promise<void> {
+    await this.sessionRepository.revokeAllByUserId(userId, new Date());
+  }
+
+  async revokeOthers(userId: number, currentSessionId: string): Promise<void> {
+    await this.sessionRepository.revokeOthersByUserId(
+      userId,
+      currentSessionId,
+      new Date(),
+    );
   }
 }

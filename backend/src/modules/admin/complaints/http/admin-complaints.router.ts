@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -32,7 +33,7 @@ export function createAdminComplaintsRouter(deps: {
 
       res.json(await deps.services.getComplaintsLegacy.execute());
     } catch (error) {
-      console.error("Error fetching complaints:", error);
+      logger.error("error_fetching_complaints", { error });
       sendApplicationError(res, error);
     }
   });
@@ -57,7 +58,7 @@ export function createAdminComplaintsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating legacy complaint:", error);
+      logger.error("error_updating_legacy_complaint", { error });
       sendApplicationError(res, error);
     }
   });
@@ -73,7 +74,7 @@ export function createAdminComplaintsRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error fetching complaint stats:", error);
+      logger.error("error_fetching_complaint_stats", { error });
       sendApplicationError(res, error);
     }
   });
@@ -89,7 +90,7 @@ export function createAdminComplaintsRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error fetching complaints:", error);
+      logger.error("error_fetching_complaints", { error });
       sendApplicationError(res, error);
     }
   });
@@ -105,7 +106,7 @@ export function createAdminComplaintsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching related listing complaints:", error);
+      logger.error("error_fetching_related_listing_complaints", { error });
       sendApplicationError(res, error);
     }
   });
@@ -121,7 +122,7 @@ export function createAdminComplaintsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching seller summary:", error);
+      logger.error("error_fetching_seller_summary", { error });
       sendApplicationError(res, error);
     }
   });
@@ -137,7 +138,7 @@ export function createAdminComplaintsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching complaint details:", error);
+      logger.error("error_fetching_complaint_details", { error });
       sendApplicationError(res, error);
     }
   });
@@ -171,7 +172,7 @@ export function createAdminComplaintsRouter(deps: {
     try {
       await handleStatusUpdate(req, res, String(req.params.id ?? ""));
     } catch (error) {
-      console.error("Error updating complaint status:", error);
+      logger.error("error_updating_complaint_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -180,7 +181,7 @@ export function createAdminComplaintsRouter(deps: {
     try {
       await handleStatusUpdate(req, res, String(req.params.publicId ?? ""));
     } catch (error) {
-      console.error("Error updating complaint status:", error);
+      logger.error("error_updating_complaint_status", { error });
       sendApplicationError(res, error);
     }
   });

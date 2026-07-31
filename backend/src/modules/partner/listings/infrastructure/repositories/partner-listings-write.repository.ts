@@ -1,3 +1,4 @@
+import { logger } from "../../../../../lib/logger";
 import {
   conflict,
   forbidden,
@@ -336,7 +337,7 @@ export class PartnerListingsWriteRepository
     const createdRow = await prisma.$transaction(async (tx) => {
       const listing = await tx.marketplaceListing.create({
         data: {
-          public_id: makeOpaquePublicId("LSTTMP", 20),
+          public_id: makeOpaquePublicId("LST", 20),
           seller_id: params.sellerId,
           type,
           title,
@@ -382,18 +383,7 @@ export class PartnerListingsWriteRepository
         });
       }
 
-      return tx.marketplaceListing.update({
-        where: { id: listing.id },
-        data: {
-          public_id: `LST-${String(listing.id).padStart(4, "0")}`,
-        },
-        select: {
-          id: true,
-          public_id: true,
-          title: true,
-          price: true,
-        },
-      });
+      return listing;
     });
 
     const created = await prisma.marketplaceListing.findUnique({
@@ -441,7 +431,7 @@ export class PartnerListingsWriteRepository
       listingPublicId: created.public_id,
       title: created.title,
     }).catch((error) => {
-      console.error("Error saving catalog suggestion:", error);
+      logger.error("error_saving_catalog_suggestion", { error });
     });
 
     await writeListingModerationEvent({
@@ -464,7 +454,7 @@ export class PartnerListingsWriteRepository
           seller_id: params.sellerId,
         },
       }).catch((error) => {
-        console.error("Error deleting submitted draft:", error);
+        logger.error("error_deleting_submitted_draft", { error });
       });
     }
 
@@ -749,7 +739,7 @@ export class PartnerListingsWriteRepository
         listingPublicId: updated.public_id,
         title: updated.title,
       }).catch((error) => {
-        console.error("Error saving catalog suggestion:", error);
+        logger.error("error_saving_catalog_suggestion", { error });
       });
     }
 

@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import {
@@ -65,7 +66,7 @@ export function createPartnerFinanceRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching partner finance analytics:", error);
+      logger.error("error_fetching_partner_finance_analytics", { error });
       sendApplicationError(res, error);
     }
   });
@@ -98,7 +99,7 @@ export function createPartnerFinanceRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching partner finance quarters:", error);
+      logger.error("error_fetching_partner_finance_quarters", { error });
       sendApplicationError(res, error);
     }
   });

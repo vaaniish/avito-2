@@ -129,4 +129,7 @@ export function validatePasswordChangeInput(input: {
   if (input.newPassword && !input.oldPassword) {
     throw validationError("Укажите текущий пароль");
   }
+  if (input.newPassword && (input.newPassword.length < 12 || input.newPassword.length > 128)) {
+    throw validationError("Новый пароль должен содержать от 12 до 128 символов");
+  }
 }

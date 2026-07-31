@@ -1,3 +1,4 @@
+import { logger } from "../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../common/http/map-application-error";
 import type {
@@ -28,7 +29,7 @@ export function createAdminRecommendationsRouter(deps: {
       }
       res.json(await deps.services.recompute.execute());
     } catch (error) {
-      console.error("Error recomputing recommendations:", error);
+      logger.error("error_recomputing_recommendations", { error });
       sendApplicationError(res, error);
     }
   });
@@ -59,7 +60,7 @@ export function createAdminRecommendationsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error explaining recommendations:", error);
+      logger.error("error_explaining_recommendations", { error });
       sendApplicationError(res, error);
     }
   });

@@ -1,0 +1,18 @@
+[Unit]
+Description=Avito-2 production containers
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/avito-2
+EnvironmentFile=/opt/avito-2/.env.production
+ExecStart=/usr/bin/docker compose -f compose.production.local.yml up -d --build
+ExecStop=/usr/bin/docker compose -f compose.production.local.yml down
+TimeoutStartSec=600
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

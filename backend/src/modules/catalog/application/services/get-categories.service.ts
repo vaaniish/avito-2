@@ -5,12 +5,17 @@ import {
   toClientAttributeDefinitionDtos,
 } from "../catalog.service";
 import type { CatalogRepositoryPort } from "../catalog.types";
+import { getCatalogRuntimeCache } from "../../catalog-runtime-cache";
 
 export class GetCategoriesService {
   constructor(private readonly repository: CatalogRepositoryPort) {}
 
   async execute(input: { type?: unknown }) {
     const type = resolveListingType(input.type);
+    return getCatalogRuntimeCache(`categories:${type}`, async () => this.load(type));
+  }
+
+  private async load(type: "PRODUCT") {
     const [categories, visibleListingCounts] = await Promise.all([
       this.repository.findCategoriesWithTree(type),
       this.repository.groupVisibleListingCountsByItem(type),

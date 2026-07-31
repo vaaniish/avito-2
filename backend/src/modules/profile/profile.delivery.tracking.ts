@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import { type PrismaClient } from "@prisma/client";
 import {
   DeliveryProviderCode,
@@ -376,10 +377,7 @@ async function ensureYandexTrackingForOrdersInternal(
         buyerEmail: order.buyer.email,
       });
     } catch (error) {
-      console.warn(
-        `Unable to create Yandex delivery request for ${order.public_id}:`,
-        error,
-      );
+      logger.warn("runtime_warn", { details: [`Unable to create Yandex delivery request for ${order.public_id}:`, error] });
     }
 
     const hasLegacyTracking =

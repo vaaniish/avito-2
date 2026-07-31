@@ -1,8 +1,11 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
 import path from "path";
-import { prisma } from "./lib/prisma";
+import { timingSafeEqual } from "node:crypto";
+import { getPostgresPoolSnapshot, prisma } from "./lib/prisma";
+import { logger } from "./lib/logger";
 import {
   getHttpMetricsSnapshot,
   httpObservabilityMiddleware,
@@ -15,9 +18,13 @@ import {
   getCheckoutRateLimit,
   getPartnerWriteRateLimit,
   isCorsOriginAllowed,
+  isRequestOriginAllowed,
   parseCorsAllowedOrigins,
   parseTrustProxySetting,
 } from "./lib/http-security";
+import { getAuthSessionContext } from "./lib/session";
+import { authSessionService } from "./modules/auth/composition";
+import { validateMutationRequest } from "./lib/api-validation";
 import { authRouter } from "./modules/auth/auth.routes";
 import { catalogRouter } from "./modules/catalog/catalog.routes";
 import { recommendationsRouter } from "./modules/recommendations";
@@ -25,9 +32,10 @@ import { profileRouter } from "./modules/profile/profile.routes";
 import { partnerRouter } from "./modules/partner/partner.routes";
 import { adminRouter } from "./modules/admin/admin.routes";
 import { publicRouter } from "./modules/public/public.routes";
+import { invalidateCatalogRuntimeCaches } from "./modules/catalog/catalog-runtime-cache";
+import { getPartnerListingModerationSnapshot } from "./modules/partner/listings";
 
 const app = express();
-const appStartedAt = Date.now();
 const allowedCorsOrigins = parseCorsAllowedOrigins(process.env.CORS_ALLOWED_ORIGINS);
 
 app.set("trust proxy", parseTrustProxySetting(process.env.TRUST_PROXY));
@@ -43,6 +51,7 @@ app.use(
       callback(new Error("Origin is not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
   }),
 );
 app.use(
@@ -53,10 +62,30 @@ app.use(
 app.use(
   express.json({
     // Listing images can be sent as data URLs from the partner form.
-    limit: "12mb",
+    limit: "42mb",
   }),
 );
+app.use(cookieParser());
 app.use(httpObservabilityMiddleware);
+app.use(validateMutationRequest);
+app.use((req, res, next) => {
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+  if (req.path === "/api/profile/payments/yookassa/webhook") return next();
+  void getAuthSessionContext(req)
+    .then((context) => {
+      if (!context) return next();
+      if (!isRequestOriginAllowed(req, allowedCorsOrigins)) {
+        res.status(403).json({ error: "Недоверенный источник запроса" });
+        return;
+      }
+      if (!authSessionService.isCsrfTokenValid(context, req.header("x-csrf-token") ?? null)) {
+        res.status(403).json({ error: "Invalid CSRF token" });
+        return;
+      }
+      next();
+    })
+    .catch(next);
+});
 app.use("/api/auth/login", getAuthLoginRateLimit());
 app.use("/api/auth/signup", getAuthSignupRateLimit());
 app.use("/api/profile/orders", applyToMutationMethods(getCheckoutRateLimit()));
@@ -76,17 +105,25 @@ app.use(
   "/api/admin/kyc-requests",
   applyToMutationMethods(getAdminWriteRateLimit()),
 );
+app.use((req, res, next) => {
+  const mutation = !["GET", "HEAD", "OPTIONS"].includes(req.method);
+  const affectsCatalog = req.path.startsWith("/api/admin/catalog") ||
+    req.path.startsWith("/api/partner/listings") ||
+    /^\/api\/profile\/listings\/[^/]+\/review\/?$/.test(req.path);
+  if (mutation && affectsCatalog) {
+    res.once("finish", () => {
+      if (res.statusCode < 400) invalidateCatalogRuntimeCaches();
+    });
+  }
+  next();
+});
 app.use(
   "/media/seed",
   express.static(path.resolve(process.cwd(), "backend/data/seed-media")),
 );
 
 app.get("/health", (_req, res) => {
-  res.json({
-    ok: true,
-    uptimeSec: Math.floor((Date.now() - appStartedAt) / 1000),
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ ok: true });
 });
 
 app.get("/health/ready", async (_req, res) => {
@@ -98,28 +135,38 @@ app.get("/health/ready", async (_req, res) => {
       ok: true,
       db: "up",
       dbLatencyMs: Math.round(durationMs * 100) / 100,
-      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Readiness probe failed:", error);
+    logger.error("readiness_probe_failed", { error });
     res.status(503).json({
       ok: false,
       db: "down",
-      timestamp: new Date().toISOString(),
     });
   }
 });
 
-app.get("/health/metrics", (_req, res) => {
+app.get("/health/metrics", (req, res) => {
+  const configured = process.env.METRICS_ACCESS_TOKEN?.trim();
+  if (!configured) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  const provided = req.header("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+  const left = Buffer.from(configured);
+  const right = Buffer.from(provided);
+  if (left.length !== right.length || !timingSafeEqual(left, right)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   res.json({
     ok: true,
     http: getHttpMetricsSnapshot(),
     process: {
-      pid: process.pid,
       rssBytes: process.memoryUsage().rss,
       heapUsedBytes: process.memoryUsage().heapUsed,
     },
-    timestamp: new Date().toISOString(),
+    postgresPool: getPostgresPoolSnapshot(),
+    backgroundModeration: getPartnerListingModerationSnapshot(),
   });
 });
 

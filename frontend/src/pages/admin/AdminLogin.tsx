@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { apiPost, saveSessionToken, type SessionUser } from "../../shared/lib/api";
+import { apiPost, saveCsrfToken, type SessionUser } from "../../shared/lib/api";
 import { notifyError } from "../../shared/ui/notifications";
 
 interface AdminLoginProps {
@@ -10,7 +10,7 @@ interface AdminLoginProps {
 
 type AuthResponse = {
   user: SessionUser;
-  sessionToken?: string;
+  csrfToken: string;
 };
 
 export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
@@ -26,10 +26,9 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
 
     try {
       const response = await apiPost<AuthResponse>("/auth/login", formData);
-      if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
-        saveSessionToken(response.sessionToken);
-      }
+      saveCsrfToken(response.csrfToken);
       if (response.user.role !== "admin") {
+        await apiPost<{ success: boolean }>("/auth/logout");
         const message = "Доступ запрещен. Нужны права администратора";
         setSubmitError(message);
         notifyError(message);
@@ -53,9 +52,7 @@ export function AdminLogin({ onLoginSuccess, onBack }: AdminLoginProps) {
         </button>
 
         <h1 className="text-2xl font-bold mb-2">Вход в админ-панель</h1>
-        <p className="text-sm text-gray-600 mb-6">
-          Используйте admin@ecomm.local / admin123
-        </p>
+        <p className="text-sm text-gray-600 mb-6">Используйте учётную запись администратора</p>
 
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
           <input

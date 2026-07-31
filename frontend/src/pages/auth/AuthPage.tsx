@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import {
   apiPost,
-  saveSessionToken,
+  saveCsrfToken,
   type SessionRole,
   type SessionUser,
 } from "../../shared/lib/api";
@@ -20,7 +20,7 @@ interface AuthPageProps {
 
 type AuthResponse = {
   user: SessionUser;
-  sessionToken?: string;
+  csrfToken: string;
   profile: {
     wishlist: Array<{ id: string }>;
   };
@@ -60,10 +60,9 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
           username: formData.username.trim(),
           email: formData.email.trim(),
           password: formData.password,
+          rememberMe: formData.rememberMe,
         });
-        if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
-          saveSessionToken(response.sessionToken);
-        }
+        saveCsrfToken(response.csrfToken);
 
         notifySuccess("Регистрация успешна");
         onLoginSuccess?.(response.user.role, response.user, response.profile);
@@ -71,10 +70,9 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
         const response = await apiPost<AuthResponse>("/auth/login", {
           email: formData.email.trim(),
           password: formData.password,
+          rememberMe: formData.rememberMe,
         });
-        if (typeof response.sessionToken === "string" && response.sessionToken.trim()) {
-          saveSessionToken(response.sessionToken);
-        }
+        saveCsrfToken(response.csrfToken);
 
         onLoginSuccess?.(response.user.role, response.user, response.profile);
       }
@@ -182,6 +180,8 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
               }}
               placeholder="Пароль"
               className="field-control pr-12"
+              minLength={isSignUp ? 12 : undefined}
+              maxLength={128}
             />
             <button
               type="button"
@@ -234,21 +234,6 @@ export function AuthPage({ onBack, onPartnershipClick, onLoginSuccess }: AuthPag
             </p>
           )}
         </form>
-
-        {!isSignUp && (
-          <div className="mt-6 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
-            <p className="font-semibold text-center">Тестовые данные для входа</p>
-            <p>
-              Пользователь: <code>buyer1@ecomm.local</code> / <code>buyer123</code>
-            </p>
-            <p>
-              Партнер: <code>seller1@ecomm.local</code> / <code>seller123</code>
-            </p>
-            <p>
-              Админ: <code>admin@ecomm.local</code>, <code>admin123</code>
-            </p>
-          </div>
-        )}
 
         <div className="mt-5 text-center">
           <button onClick={onPartnershipClick} className="text-sm text-[rgb(38,83,141)] hover:text-[rgb(58,103,161)]">

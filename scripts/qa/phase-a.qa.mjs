@@ -85,8 +85,10 @@ async function main() {
     console.log("\n[Phase A QA] db:migrate:deploy");
     await runCommand("npm", ["run", "db:migrate:deploy"]);
 
-    console.log("\n[Phase A QA] db:seed");
-    await runCommand("npm", ["run", "db:seed"]);
+    console.log("\n[Phase A QA] db:seed:demo");
+    await runCommand("npm", ["run", "db:seed:demo"], {
+      DEMO_SEED_CONFIRM: "DELETE_LOCAL_DEMO_DATA",
+    });
 
     console.log("\n[Phase A QA] unit tests");
     await runCommand("npm", ["run", "test:unit"]);
@@ -95,10 +97,7 @@ async function main() {
     await runCommand("npm", ["run", "test:integration"]);
 
     console.log("\n[Phase A QA] ci:preflight:prod-auth");
-    await runCommand("npm", ["run", "ci:preflight:prod-auth"], {
-      SESSION_TOKEN_SECRET:
-        process.env.SESSION_TOKEN_SECRET ?? "abcdefghijklmnopqrstuvwxyz012345",
-    });
+    await runCommand("npm", ["run", "ci:preflight:prod-auth"]);
 
     console.log("\n[Phase A QA] build");
     await runCommand("npm", ["run", "build"]);

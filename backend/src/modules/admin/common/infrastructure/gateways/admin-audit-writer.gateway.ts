@@ -1,3 +1,4 @@
+import { logger } from "../../../../../lib/logger";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { makeAuditPublicId } from "../../../../../common/domain/public-id";
 import type {
@@ -35,7 +36,7 @@ export class AdminAuditWriterGateway {
         },
       });
     } catch (error) {
-      console.error("Failed to write audit log:", error);
+      logger.error("failed_to_write_audit_log", { error });
     }
   }
 }

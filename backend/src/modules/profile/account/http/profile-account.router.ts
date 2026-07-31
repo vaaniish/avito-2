@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { parseNotificationsAfterId } from "../domain/profile-account.helpers";
@@ -41,7 +42,7 @@ export function createProfileAccountRouter(deps: {
       }
       res.json(await deps.services.listWishlist.execute(session.user.id));
     } catch (error) {
-      console.error("Error fetching wishlist:", error);
+      logger.error("error_fetching_wishlist", { error });
       sendApplicationError(res, error);
     }
   });
@@ -60,7 +61,7 @@ export function createProfileAccountRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error adding wishlist item:", error);
+      logger.error("error_adding_wishlist_item", { error });
       sendApplicationError(res, error);
     }
   });
@@ -79,7 +80,7 @@ export function createProfileAccountRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error deleting wishlist item:", error);
+      logger.error("error_deleting_wishlist_item", { error });
       sendApplicationError(res, error);
     }
   });
@@ -93,7 +94,7 @@ export function createProfileAccountRouter(deps: {
       }
       res.json(await deps.services.listNotifications.execute(session.user.id));
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      logger.error("error_fetching_notifications", { error });
       sendApplicationError(res, error);
     }
   });
@@ -132,7 +133,7 @@ export function createProfileAccountRouter(deps: {
           sendEvent("notification", notification);
         }
       } catch (error) {
-        console.error("Error streaming notifications:", error);
+        logger.error("error_streaming_notifications", { error });
         sendEvent("error", { message: "Notification stream error" });
       }
     };
@@ -162,7 +163,7 @@ export function createProfileAccountRouter(deps: {
       }
       res.json(await deps.services.markNotificationsRead.execute(session.user.id));
     } catch (error) {
-      console.error("Error marking notifications as read:", error);
+      logger.error("error_marking_notifications_as_read", { error });
       sendApplicationError(res, error);
     }
   });
@@ -176,7 +177,7 @@ export function createProfileAccountRouter(deps: {
       }
       res.json(await deps.services.deleteNotifications.execute(session.user.id));
     } catch (error) {
-      console.error("Error deleting notifications:", error);
+      logger.error("error_deleting_notifications", { error });
       sendApplicationError(res, error);
     }
   });

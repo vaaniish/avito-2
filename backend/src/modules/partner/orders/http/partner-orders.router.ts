@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -29,7 +30,7 @@ export function createPartnerOrdersRouter(deps: {
       }
       res.json(await deps.services.listPartnerOrders.execute(session.user.id));
     } catch (error) {
-      console.error("Error fetching partner orders:", error);
+      logger.error("error_fetching_partner_orders", { error });
       sendApplicationError(res, error);
     }
   });
@@ -52,7 +53,7 @@ export function createPartnerOrdersRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating order status:", error);
+      logger.error("error_updating_order_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -79,7 +80,7 @@ export function createPartnerOrdersRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error applying tracking number:", error);
+      logger.error("error_applying_tracking_number", { error });
       sendApplicationError(res, error);
     }
   });

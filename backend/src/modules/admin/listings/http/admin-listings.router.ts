@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIp, requireAdmin } from "../../common/http/admin-session";
@@ -24,7 +25,7 @@ export function createAdminListingsRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listAdminListings.execute());
     } catch (error) {
-      console.error("Error fetching listings:", error);
+      logger.error("error_fetching_listings", { error });
       sendApplicationError(res, error);
     }
   });
@@ -45,7 +46,7 @@ export function createAdminListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error moderating listing:", error);
+      logger.error("error_moderating_listing", { error });
       sendApplicationError(res, error);
     }
   });
@@ -60,7 +61,7 @@ export function createAdminListingsRouter(deps: {
         ),
       );
     } catch (error) {
-      console.error("Error fetching listing moderation events:", error);
+      logger.error("error_fetching_listing_moderation_events", { error });
       sendApplicationError(res, error);
     }
   });
@@ -81,7 +82,7 @@ export function createAdminListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error batch moderating listings:", error);
+      logger.error("error_batch_moderating_listings", { error });
       sendApplicationError(res, error);
     }
   });

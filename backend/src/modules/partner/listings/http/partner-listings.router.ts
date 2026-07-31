@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import type { CreateCatalogRequestService } from "../application/services/create-catalog-request.service";
@@ -55,7 +56,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error fetching partner listings:", error);
+      logger.error("error_fetching_partner_listings", { error });
       sendApplicationError(res, error);
     }
   });
@@ -71,7 +72,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error getting title suggestions:", error);
+      logger.error("error_getting_title_suggestions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -87,7 +88,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error getting create suggestions:", error);
+      logger.error("error_getting_create_suggestions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -103,7 +104,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error creating catalog request:", error);
+      logger.error("error_creating_catalog_request", { error });
       sendApplicationError(res, error);
     }
   });
@@ -120,7 +121,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error getting catalog reference:", error);
+      logger.error("error_getting_catalog_reference", { error });
       sendApplicationError(res, error);
     }
   });
@@ -136,7 +137,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error guessing listing category:", error);
+      logger.error("error_guessing_listing_category", { error });
       sendApplicationError(res, error);
     }
   });
@@ -153,7 +154,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error creating listing:", error);
+      logger.error("error_creating_listing", { error });
       sendApplicationError(res, error);
     }
   });
@@ -171,7 +172,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating listing:", error);
+      logger.error("error_updating_listing", { error });
       sendApplicationError(res, error);
     }
   });
@@ -187,7 +188,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error toggling listing status:", error);
+      logger.error("error_toggling_listing_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -205,7 +206,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error setting listing status:", error);
+      logger.error("error_setting_listing_status", { error });
       sendApplicationError(res, error);
     }
   });
@@ -221,7 +222,7 @@ export function createPartnerListingsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error deleting listing:", error);
+      logger.error("error_deleting_listing", { error });
       sendApplicationError(res, error);
     }
   });

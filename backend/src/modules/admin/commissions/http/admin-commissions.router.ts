@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { requireAdmin, getRequestIp } from "../../common/http/admin-session";
@@ -22,7 +23,7 @@ export function createAdminCommissionsRouter(deps: {
       if (!access.ok) return;
       res.json(await deps.services.listCommissionTiers.execute());
     } catch (error) {
-      console.error("Error fetching commission tiers:", error);
+      logger.error("error_fetching_commission_tiers", { error });
       sendApplicationError(res, error);
     }
   });
@@ -39,7 +40,7 @@ export function createAdminCommissionsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error batch updating commission tiers:", error);
+      logger.error("error_batch_updating_commission_tiers", { error });
       sendApplicationError(res, error);
     }
   });
@@ -57,7 +58,7 @@ export function createAdminCommissionsRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating commission tier:", error);
+      logger.error("error_updating_commission_tier", { error });
       sendApplicationError(res, error);
     }
   });

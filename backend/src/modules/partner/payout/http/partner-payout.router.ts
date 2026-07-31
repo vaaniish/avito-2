@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import { getRequestIpFromExpressLike } from "../../../../common/http/request-meta";
@@ -30,7 +31,7 @@ export function createPartnerPayoutRouter(deps: {
         await deps.services.getPartnerPayoutProfile.execute(session.user.id),
       );
     } catch (error) {
-      console.error("Error fetching payout profile:", error);
+      logger.error("error_fetching_payout_profile", { error });
       sendApplicationError(res, error);
     }
   });
@@ -52,7 +53,7 @@ export function createPartnerPayoutRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error upserting payout profile:", error);
+      logger.error("error_upserting_payout_profile", { error });
       sendApplicationError(res, error);
     }
   });

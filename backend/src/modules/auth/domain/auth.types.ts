@@ -12,7 +12,6 @@ export type AuthProfileView = {
 
 export type AuthSuccessResult = {
   user: AuthUserView;
-  sessionToken: string;
   profile: AuthProfileView;
 };
 

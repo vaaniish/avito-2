@@ -163,7 +163,7 @@ export function AdminPanel({
   };
 
   const resolvedName = userName?.trim() || "Администратор";
-  const resolvedEmail = userEmail?.trim() || "admin@ecomm.local";
+  const resolvedEmail = userEmail?.trim() || "Администратор";
 
   return (
     <div className="min-h-screen app-shell pb-10 pt-24 md:pb-16 md:pt-28">

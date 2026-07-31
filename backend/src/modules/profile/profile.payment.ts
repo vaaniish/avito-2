@@ -87,7 +87,8 @@ export async function createYooKassaPayment(params: {
   const shopId = process.env.YOOKASSA_SHOP_ID?.trim();
   const secretKey = process.env.YOOKASSA_SECRET_KEY?.trim();
   const shouldUseLocalStub =
-    !isProduction && isPlaceholderYooKassaConfig(shopId, secretKey);
+    !isProduction &&
+    (process.env.PAYMENT_USE_LOCAL_STUB === "1" || isPlaceholderYooKassaConfig(shopId, secretKey));
   if (!shopId || !secretKey) {
     if (!isProduction) {
       const paymentId = `pay_local_${randomUUID()}`;

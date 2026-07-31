@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
+import { cookieSessionHeaders, encodeCookieSession } from "../tests/helpers/cookie-session.mjs";
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:3001";
 const API_BASE = `${BASE_URL.replace(/\/+$/, "")}/api`;
@@ -58,8 +59,9 @@ function summarizeLatency(values) {
 async function apiRequest(method, path, options = {}) {
   const { headers = {}, body, expected = [200], token } = options;
   const requestHeaders = {
+    origin: "http://localhost:3000",
     ...headers,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? cookieSessionHeaders(token) : {}),
   };
   if (body !== undefined) {
     const hasContentType = Object.keys(requestHeaders).some(
@@ -89,7 +91,7 @@ async function apiRequest(method, path, options = {}) {
     );
   }
 
-  return { status: response.status, data };
+  return { status: response.status, data, headers: response.headers };
 }
 
 async function timedApiRequest(method, path, options = {}) {
@@ -102,9 +104,7 @@ async function timedApiRequest(method, path, options = {}) {
 }
 
 function authHeaders(token) {
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+  return cookieSessionHeaders(token);
 }
 
 async function collectLatency(params) {
@@ -180,27 +180,24 @@ async function main() {
 
   const adminLogin = await apiRequest("POST", "/auth/login", {
     headers: { "content-type": "application/json" },
-    body: { email: "admin@ecomm.local", password: "admin123" },
+    body: { email: "admin@ecomm.local", password: "DemoAdmin2026!" },
     expected: [200],
   });
-  const adminToken = String(adminLogin.data?.sessionToken ?? "").trim();
-  invariant(adminToken.length > 0, "admin sessionToken is required for latency benchmark");
+  const adminToken = encodeCookieSession(adminLogin.headers, adminLogin.data);
 
   const buyerLogin = await apiRequest("POST", "/auth/login", {
     headers: { "content-type": "application/json" },
-    body: { email: "buyer1@ecomm.local", password: "buyer123" },
+    body: { email: "buyer1@ecomm.local", password: "DemoBuyer2026!" },
     expected: [200],
   });
-  const buyerToken = String(buyerLogin.data?.sessionToken ?? "").trim();
-  invariant(buyerToken.length > 0, "buyer sessionToken is required for latency benchmark");
+  const buyerToken = encodeCookieSession(buyerLogin.headers, buyerLogin.data);
 
   const sellerLogin = await apiRequest("POST", "/auth/login", {
     headers: { "content-type": "application/json" },
-    body: { email: "seller1@ecomm.local", password: "seller123" },
+    body: { email: "seller1@ecomm.local", password: "DemoSeller2026!" },
     expected: [200],
   });
-  const sellerToken = String(sellerLogin.data?.sessionToken ?? "").trim();
-  invariant(sellerToken.length > 0, "seller sessionToken is required for latency benchmark");
+  const sellerToken = encodeCookieSession(sellerLogin.headers, sellerLogin.data);
 
   const productCatalog = await apiRequest("GET", "/catalog/listings?type=products&limit=50&offset=0");
   const productIds = Array.isArray(productCatalog.data)
@@ -242,7 +239,7 @@ async function main() {
         prepare: async (index) => ({
           body: {
             email: index % 2 === 0 ? "buyer1@ecomm.local" : "admin@ecomm.local",
-            password: index % 2 === 0 ? "buyer123" : "admin123",
+            password: index % 2 === 0 ? "DemoBuyer2026!" : "DemoAdmin2026!",
           },
         }),
         execute: async (plan) =>

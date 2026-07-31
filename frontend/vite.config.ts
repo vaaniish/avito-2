@@ -14,10 +14,24 @@ export default defineConfig({
     target: "esnext",
     outDir: "../dist/frontend",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("xlsx-populate")) return "xlsx-populate";
+          return "vendor";
+        },
+      },
+    },
   },
   server: {
     host: "127.0.0.1",
     port: 3000,
     open: true,
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:3001",
+      },
+    },
   },
 });

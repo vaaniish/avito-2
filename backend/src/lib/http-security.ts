@@ -1,4 +1,4 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 
 const LOCALHOST_ORIGIN_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
@@ -27,6 +27,11 @@ export function isCorsOriginAllowed(
     return LOCALHOST_ORIGIN_PATTERN.test(origin);
   }
   return allowedOrigins.includes(origin);
+}
+
+export function isRequestOriginAllowed(req: Request, allowedOrigins: string[]): boolean {
+  const origin = req.header("origin") ?? undefined;
+  return Boolean(origin && isCorsOriginAllowed(origin, allowedOrigins));
 }
 
 export function parseTrustProxySetting(

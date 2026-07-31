@@ -51,7 +51,36 @@ export interface PasswordHasher {
   hash(raw: string): Promise<string>;
 }
 
-export interface SessionTokenProvider {
-  sign(userId: number): string;
-  verify(token: string): number | null;
+export type SessionContextUser = {
+  id: number;
+  publicId: string;
+  role: string;
+  status: "ACTIVE" | "BLOCKED";
+  blockedUntil: Date | null;
+  email: string;
+  name: string;
+};
+
+export type AuthSessionRecord = {
+  id: string;
+  userId: number;
+  csrfToken: string;
+  expiresAt: Date;
+  user: SessionContextUser;
+};
+
+export type CreateAuthSessionInput = {
+  userId: number;
+  tokenHash: string;
+  csrfToken: string;
+  expiresAt: Date;
+};
+
+export interface AuthSessionRepository {
+  create(input: CreateAuthSessionInput): Promise<{ id: string }>;
+  findActiveByTokenHash(tokenHash: string, now: Date): Promise<AuthSessionRecord | null>;
+  revokeByTokenHash(tokenHash: string, now: Date): Promise<void>;
+  revokeAllByUserId(userId: number, now: Date): Promise<void>;
+  revokeOthersByUserId(userId: number, currentSessionId: string, now: Date): Promise<void>;
+  prune(now: Date, revokedBefore: Date): Promise<void>;
 }

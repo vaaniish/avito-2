@@ -1,3 +1,4 @@
+import { logger } from "../../../../lib/logger";
 import { Router, type Request, type Response } from "express";
 import { sendApplicationError } from "../../../../common/http/map-application-error";
 import type { DeliveryProviderFilter } from "../domain/profile-address.types";
@@ -39,7 +40,7 @@ export function createProfileAddressHttpRouter(deps: {
 
       res.json(await deps.services.listProfileAddresses.execute(session.user.id));
     } catch (error) {
-      console.error("Error fetching addresses:", error);
+      logger.error("error_fetching_addresses", { error });
       sendApplicationError(res, error);
     }
   });
@@ -59,7 +60,7 @@ export function createProfileAddressHttpRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error creating address:", error);
+      logger.error("error_creating_address", { error });
       sendApplicationError(res, error);
     }
   });
@@ -80,7 +81,7 @@ export function createProfileAddressHttpRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error updating address:", error);
+      logger.error("error_updating_address", { error });
       sendApplicationError(res, error);
     }
   });
@@ -100,7 +101,7 @@ export function createProfileAddressHttpRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error deleting address:", error);
+      logger.error("error_deleting_address", { error });
       sendApplicationError(res, error);
     }
   });
@@ -120,7 +121,7 @@ export function createProfileAddressHttpRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error changing default address:", error);
+      logger.error("error_changing_default_address", { error });
       sendApplicationError(res, error);
     }
   });
@@ -146,7 +147,7 @@ export function createProfileAddressHttpRouter(deps: {
         }),
       );
     } catch (error) {
-      console.error("Error loading location suggestions:", error);
+      logger.error("error_loading_location_suggestions", { error });
       sendApplicationError(res, error);
     }
   });
@@ -212,7 +213,7 @@ export function createProfileAddressHttpRouter(deps: {
           .json({ error: "Delivery points are temporarily unavailable" });
         return;
       }
-      console.error("Error loading delivery points:", error);
+      logger.error("error_loading_delivery_points", { error });
       sendApplicationError(res, error);
     }
   });
