@@ -89,10 +89,18 @@ async function main() {
 
   try {
     if (!backendAlreadyUp) {
-      backendProcess = spawn("npm", ["run", "start:dev"], {
-        stdio: "inherit",
-        env: process.env,
-      });
+      const builtBackend = process.env.BACKEND_START_MODE === "built";
+      backendProcess = spawn(
+        builtBackend ? process.execPath : "npm",
+        builtBackend ? ["dist/backend/src/server.js"] : ["run", "start:dev"],
+        {
+          stdio: "inherit",
+          env: {
+            ...process.env,
+            UV_THREADPOOL_SIZE: process.env.UV_THREADPOOL_SIZE ?? "16",
+          },
+        },
+      );
       await waitForBackend();
     }
 

@@ -39,7 +39,12 @@ export function createCatalogRouter(deps: {
 
   router.get("/listings", async (req: Request, res: Response) => {
     try {
-      const sessionUser = await getSessionUser(req);
+      const needsPersonalizedRecommendations =
+        req.query.paginated === "1" &&
+        (!req.query.sortBy || req.query.sortBy === "recommended");
+      const sessionUser = needsPersonalizedRecommendations
+        ? await getSessionUser(req)
+        : null;
       res.json(
         await deps.services.getListings.execute({
           query: req.query as Record<string, unknown>,
@@ -54,11 +59,11 @@ export function createCatalogRouter(deps: {
 
   router.get("/listings/:publicId", async (req: Request, res: Response) => {
     try {
-      const sessionUser = await getSessionUser(req);
       res.json(
         await deps.services.getListingDetails.execute({
           publicId: String(req.params.publicId ?? ""),
-          sessionUser,
+          sessionUser: null,
+          resolveSessionUser: () => getSessionUser(req),
         }),
       );
     } catch (error) {

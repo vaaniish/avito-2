@@ -17,18 +17,38 @@ import { notFound, validationError } from "../../../../common/application-error"
 import type { CatalogRepositoryPort } from "../catalog.types";
 
 export class GetListingDetailsService {
+  private readonly listingLoads = new Map<string, Promise<any>>();
+
   constructor(private readonly repository: CatalogRepositoryPort) {}
 
   async execute(input: {
     publicId: string;
     sessionUser: { id: number; role: string } | null;
+    resolveSessionUser?: () => Promise<{ id: number; role: string } | null>;
+  }) {
+    return this.executeUncached(input);
+  }
+
+  private async executeUncached(input: {
+    publicId: string;
+    sessionUser: { id: number; role: string } | null;
+    resolveSessionUser?: () => Promise<{ id: number; role: string } | null>;
   }) {
     const publicId = String(input.publicId ?? "").trim();
     if (!publicId) {
       throw validationError("Invalid listing ID");
     }
 
-    const listing = await this.repository.findListingDetailsByPublicId(publicId);
+    const existingLoad = this.listingLoads.get(publicId);
+    const listingLoad = existingLoad ?? this.repository.findListingDetailsByPublicId(publicId);
+    if (!existingLoad) {
+      this.listingLoads.set(publicId, listingLoad);
+      const clearLoad = () => {
+        if (this.listingLoads.get(publicId) === listingLoad) this.listingLoads.delete(publicId);
+      };
+      void listingLoad.then(clearLoad, clearLoad);
+    }
+    const listing = await listingLoad;
     if (!listing) {
       throw notFound("Listing not found");
     }
@@ -45,21 +65,25 @@ export class GetListingDetailsService {
     const isDirectlyAccessiblePublicly =
       isPubliclyAvailable || isPubliclyAccessibleInactiveApproved;
 
+    let sessionUser = input.sessionUser;
     let relatedOrderItemExists = false;
 
     if (!isDirectlyAccessiblePublicly) {
-      if (!input.sessionUser) {
+      if (!sessionUser && input.resolveSessionUser) {
+        sessionUser = await input.resolveSessionUser();
+      }
+      if (!sessionUser) {
         throw notFound("Listing not found");
       }
 
       let hasRelatedAccess =
-        input.sessionUser.role === "ADMIN" ||
-        listing.seller_id === input.sessionUser.id;
+        sessionUser.role === "ADMIN" ||
+        listing.seller_id === sessionUser.id;
 
       if (!hasRelatedAccess) {
         const relatedOrderItem = await this.repository.findBuyerAccessOrderItem(
           listing.id,
-          input.sessionUser.id,
+          sessionUser.id,
         );
         relatedOrderItemExists = Boolean(relatedOrderItem);
         hasRelatedAccess = relatedOrderItemExists;
@@ -76,17 +100,17 @@ export class GetListingDetailsService {
     if (
       !isSoftDeleted &&
       !isPubliclyAvailable &&
-      input.sessionUser &&
+      sessionUser &&
       listing.status === "INACTIVE" &&
       listing.moderation_status === "APPROVED"
     ) {
-      if (listing.seller_id === input.sessionUser.id) {
+      if (listing.seller_id === sessionUser.id) {
         unavailableReason =
           "Товар уже находится в истории сделки и недоступен для повторной покупки.";
       } else if (relatedOrderItemExists) {
         unavailableReason =
           "Этот товар уже куплен и находится в вашей истории заказов.";
-      } else if (input.sessionUser.role === "ADMIN") {
+      } else if (sessionUser.role === "ADMIN") {
         unavailableReason =
           "Товар уже недоступен для покупки и открыт только для просмотра истории сделки.";
       }

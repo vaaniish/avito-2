@@ -19,12 +19,37 @@ import type {
 type QueryInput = Record<string, unknown>;
 
 export class GetListingsService {
+  private readonly inFlight = new Map<string, Promise<unknown>>();
+
   constructor(
     private readonly repository: CatalogRepositoryPort,
     private readonly recommendationScores?: CatalogRecommendationScoresPort,
   ) {}
 
   async execute(input: {
+    query: QueryInput;
+    sessionUser?: { id: number } | null;
+  }) {
+    const normalizedQuery = Object.fromEntries(
+      Object.entries(input.query).sort(([left], [right]) => left.localeCompare(right)),
+    );
+    const isPersonalized =
+      input.query.paginated === "1" &&
+      (!input.query.sortBy || input.query.sortBy === "recommended");
+    const key = JSON.stringify({
+      query: normalizedQuery,
+      userId: isPersonalized ? input.sessionUser?.id ?? null : null,
+    });
+    const existing = this.inFlight.get(key);
+    if (existing) return existing;
+    const pending = this.executeUncached(input).finally(() => {
+      if (this.inFlight.get(key) === pending) this.inFlight.delete(key);
+    });
+    this.inFlight.set(key, pending);
+    return pending;
+  }
+
+  private async executeUncached(input: {
     query: QueryInput;
     sessionUser?: { id: number } | null;
   }) {

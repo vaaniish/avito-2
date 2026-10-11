@@ -10,7 +10,6 @@ export type LoginUserRecord = {
   name: string;
   passwordHash: string;
   blockReason: string | null;
-  wishlistListingPublicIds: string[];
 };
 
 export type CreateBuyerInput = {
@@ -31,6 +30,7 @@ export type CreatedBuyerRecord = {
 
 export interface AuthUserRepository {
   findLoginUserByEmail(email: string): Promise<LoginUserRecord | null>;
+  findWishlistListingPublicIds(userId: number): Promise<string[]>;
   activateUser(userId: number): Promise<void>;
   findByEmail(email: string): Promise<{ id: number } | null>;
   createBuyer(input: CreateBuyerInput): Promise<CreatedBuyerRecord>;

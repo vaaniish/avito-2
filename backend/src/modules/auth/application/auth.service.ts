@@ -91,12 +91,15 @@ export class AuthService {
       }
     }
 
-    await this.tryAcceptCheckoutPolicy(user.id, input.meta);
+    const [, wishlistListingPublicIds] = await Promise.all([
+      this.tryAcceptCheckoutPolicy(user.id, input.meta),
+      this.userRepository.findWishlistListingPublicIds(user.id),
+    ]);
 
     return {
       user: toAuthUserView(user),
       profile: {
-        wishlist: user.wishlistListingPublicIds.map((id) => ({ id })),
+        wishlist: wishlistListingPublicIds.map((id) => ({ id })),
       },
     };
   }

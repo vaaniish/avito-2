@@ -5,6 +5,7 @@ import { performance } from "node:perf_hooks";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { Pool } from "pg";
 
 const BASE_URL = (process.env.BASE_URL ?? "http://127.0.0.1:3001").replace(/\/+$/, "");
 const API = `${BASE_URL}/api`;
@@ -71,6 +72,7 @@ const databaseUrl = process.env.PERF_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("PERF_DATABASE_URL or DATABASE_URL is required");
 assertSafeTarget(databaseUrl);
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl, max: 10 }) });
+const diagnosticsPool = new Pool({ connectionString: databaseUrl, max: 1 });
 
 const stats = Object.fromEntries(SCENARIOS.map((name) => [name, {
   requests: 0, errors: 0, timeouts: 0, statuses4xx: 0, statuses5xx: 0, latencies: [],
@@ -82,11 +84,115 @@ const eventLoopSamples = [];
 const backendMetricsSamples = [];
 let eventLoopTimer;
 let backendMetricsTimer;
+let sqlDiagnostics = {
+  available: false,
+  calls: 0,
+  totalExecTimeMs: 0,
+  rows: 0,
+  topQueries: [],
+  explainAnalyzeBuffers: {},
+};
+
+async function resetSqlDiagnostics() {
+  try {
+    await diagnosticsPool.query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements");
+    await diagnosticsPool.query("SELECT pg_stat_statements_reset()");
+    sqlDiagnostics.available = true;
+  } catch {
+    sqlDiagnostics.available = false;
+  }
+}
+
+async function readSqlDiagnostics() {
+  if (!sqlDiagnostics.available) return;
+  try {
+    const totalsResult = await diagnosticsPool.query(`
+      SELECT
+        COALESCE(SUM(calls), 0)::text AS calls,
+        COALESCE(SUM(total_exec_time), 0)::text AS "totalExecTimeMs",
+        COALESCE(SUM(rows), 0)::text AS rows
+      FROM pg_stat_statements
+      WHERE dbid = (SELECT oid FROM pg_database WHERE datname = current_database())
+    `);
+    const result = await diagnosticsPool.query(`
+      SELECT
+        queryid::text AS "queryId",
+        calls::text AS calls,
+        total_exec_time::text AS "totalExecTimeMs",
+        mean_exec_time::text AS "meanExecTimeMs",
+        rows::text AS rows,
+        query
+      FROM pg_stat_statements
+      WHERE dbid = (SELECT oid FROM pg_database WHERE datname = current_database())
+      ORDER BY total_exec_time DESC
+      LIMIT 20
+    `);
+    const topQueries = result.rows.map((row) => ({
+      queryId: row.queryId,
+      calls: Number(row.calls),
+      totalExecTimeMs: Number(Number(row.totalExecTimeMs).toFixed(2)),
+      meanExecTimeMs: Number(Number(row.meanExecTimeMs).toFixed(2)),
+      rows: Number(row.rows),
+      query: row.query,
+    }));
+    const explainQueries = {
+      activeCatalog: `
+        SELECT id
+        FROM "MarketplaceListing"
+        WHERE type = 'PRODUCT'::"ListingType"
+          AND status = 'ACTIVE'::"ListingStatus"
+          AND moderation_status = 'APPROVED'::"ModerationStatus"
+          AND deleted_at IS NULL
+        ORDER BY created_at DESC, id DESC
+        LIMIT 24
+      `,
+      categoryCaseInsensitive: `
+        SELECT id
+        FROM "CatalogCategory"
+        WHERE type = 'PRODUCT'::"ListingType"
+          AND lower(name) = lower('Электроника')
+        LIMIT 1
+      `,
+      partnershipSellerCheck: `
+        SELECT id
+        FROM "PartnershipRequest"
+        WHERE user_id = (SELECT MIN(user_id) FROM "PartnershipRequest")
+          AND status IN ('APPROVED'::"PartnershipRequestStatus", 'APPROVED_LIMITED'::"PartnershipRequestStatus")
+        ORDER BY reviewed_at DESC NULLS LAST, created_at DESC
+        LIMIT 1
+      `,
+    };
+    const explainAnalyzeBuffers = {};
+    for (const [name, query] of Object.entries(explainQueries)) {
+      const explain = await diagnosticsPool.query(`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${query}`);
+      explainAnalyzeBuffers[name] = explain.rows[0]["QUERY PLAN"];
+    }
+    const totals = totalsResult.rows[0];
+    sqlDiagnostics = {
+      available: true,
+      calls: Number(totals.calls),
+      totalExecTimeMs: Number(Number(totals.totalExecTimeMs).toFixed(2)),
+      rows: Number(totals.rows),
+      topQueries,
+      explainAnalyzeBuffers,
+    };
+  } catch {
+    sqlDiagnostics.available = false;
+  }
+}
 
 function percentile(values, p) {
   if (!values.length) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * p / 100) - 1)];
+}
+
+function maximum(values) {
+  let result = 0;
+  for (const value of values) {
+    if (value > result) result = value;
+  }
+  return result;
 }
 
 function summary(value) {
@@ -99,7 +205,7 @@ function summary(value) {
     p50: Number(percentile(value.latencies, 50).toFixed(2)),
     p95: Number(percentile(value.latencies, 95).toFixed(2)),
     p99: Number(percentile(value.latencies, 99).toFixed(2)),
-    max: Number((Math.max(0, ...value.latencies)).toFixed(2)),
+    max: Number(maximum(value.latencies).toFixed(2)),
   };
 }
 
@@ -155,6 +261,8 @@ function startBackendMetricsMonitor() {
           at: Date.now(),
           activeRequests: payload?.http?.activeRequests ?? null,
           postgresPool: payload?.postgresPool ?? null,
+          process: payload?.process ?? null,
+          backgroundModeration: payload?.backgroundModeration ?? null,
         });
       }
     } catch {
@@ -557,6 +665,12 @@ async function runStages(fixtures) {
         maxActiveRequests: Math.max(0, ...samples.map((sample) => sample.activeRequests ?? 0)),
         maxPoolTotal: Math.max(0, ...samples.map((sample) => sample.postgresPool?.total ?? 0)),
         maxPoolWaiting: Math.max(0, ...samples.map((sample) => sample.postgresPool?.waiting ?? 0)),
+        maxPoolAcquireP95Ms: Math.max(0, ...samples.map((sample) => sample.postgresPool?.acquireWaitMs?.p95 ?? 0)),
+        maxCpuPercent: Math.max(0, ...samples.map((sample) => sample.process?.cpuPercent ?? 0)),
+        maxRssBytes: Math.max(0, ...samples.map((sample) => sample.process?.rssBytes ?? 0)),
+        maxHeapUsedBytes: Math.max(0, ...samples.map((sample) => sample.process?.heapUsedBytes ?? 0)),
+        maxEventLoopP95Ms: Math.max(0, ...samples.map((sample) => sample.process?.eventLoopLagMs?.p95 ?? 0)),
+        maxModerationQueued: Math.max(0, ...samples.map((sample) => sample.backgroundModeration?.queued ?? 0)),
       },
     });
   }
@@ -608,14 +722,21 @@ function buildReport(startedAt) {
     eventLoopLagMs: {
       p95: Number(percentile(eventLoopSamples, 95).toFixed(2)),
       p99: Number(percentile(eventLoopSamples, 99).toFixed(2)),
-      max: Number(Math.max(0, ...eventLoopSamples).toFixed(2)),
+      max: Number(maximum(eventLoopSamples).toFixed(2)),
     },
     backend: {
       samples: backendMetricsSamples.length,
       maxActiveRequests: Math.max(0, ...backendMetricsSamples.map((sample) => sample.activeRequests ?? 0)),
       maxPoolTotal: Math.max(0, ...backendMetricsSamples.map((sample) => sample.postgresPool?.total ?? 0)),
       maxPoolWaiting: Math.max(0, ...backendMetricsSamples.map((sample) => sample.postgresPool?.waiting ?? 0)),
+      maxPoolAcquireP95Ms: Math.max(0, ...backendMetricsSamples.map((sample) => sample.postgresPool?.acquireWaitMs?.p95 ?? 0)),
+      maxCpuPercent: Math.max(0, ...backendMetricsSamples.map((sample) => sample.process?.cpuPercent ?? 0)),
+      maxRssBytes: Math.max(0, ...backendMetricsSamples.map((sample) => sample.process?.rssBytes ?? 0)),
+      maxHeapUsedBytes: Math.max(0, ...backendMetricsSamples.map((sample) => sample.process?.heapUsedBytes ?? 0)),
+      maxEventLoopP95Ms: Math.max(0, ...backendMetricsSamples.map((sample) => sample.process?.eventLoopLagMs?.p95 ?? 0)),
+      maxModerationQueued: Math.max(0, ...backendMetricsSamples.map((sample) => sample.backgroundModeration?.queued ?? 0)),
     },
+    postgresStatements: sqlDiagnostics,
     saturationPointVus: saturationStage?.targetVus ?? null,
     stages: stageResults,
     scenarios,
@@ -627,6 +748,7 @@ const startedAt = Date.now();
 let report;
 try {
   fixtures = await setupFixtures();
+  await resetSqlDiagnostics();
   startEventLoopMonitor();
   startBackendMetricsMonitor();
   await runStages(fixtures);
@@ -635,12 +757,25 @@ try {
 } finally {
   if (eventLoopTimer) clearInterval(eventLoopTimer);
   if (backendMetricsTimer) clearInterval(backendMetricsTimer);
-  if (!report) report = buildReport(startedAt);
   try {
     await waitForBackendQuiescence();
   } catch (error) {
+    if (!report) report = buildReport(startedAt);
     report.result = "FAIL";
     report.failures.push(`quiescence failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  await readSqlDiagnostics();
+  if (!report) {
+    try {
+      report = buildReport(startedAt);
+    } catch (error) {
+      report = {
+        runId: RUN_ID,
+        result: "FAIL",
+        failures: [`report generation failed: ${error instanceof Error ? error.message : String(error)}`],
+        scenarios: {},
+      };
+    }
   }
   try {
     await cleanupFixtures();
@@ -653,6 +788,12 @@ try {
   } catch (error) {
     report.result = "FAIL";
     report.failures.push(`database disconnect failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  try {
+    await diagnosticsPool.end();
+  } catch (error) {
+    report.result = "FAIL";
+    report.failures.push(`diagnostics database disconnect failed: ${error instanceof Error ? error.message : String(error)}`);
   }
   await mkdir("artifacts/perf", { recursive: true });
   const reportPath = `artifacts/perf/${RUN_ID}.json`;

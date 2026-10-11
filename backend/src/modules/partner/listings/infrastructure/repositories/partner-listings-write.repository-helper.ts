@@ -89,15 +89,25 @@ export async function validateSellerOnboardingForListing(params: {
   sellerId: number;
   category: string;
 }): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-  type PartnershipRequestWithOnboarding = Prisma.PartnershipRequestGetPayload<{
-    include: { onboarding_profile: true };
-  }>;
-
-  const payoutProfile = await prisma.sellerPayoutProfile.findUnique({
-    where: { seller_id: params.sellerId },
-    select: { status: true },
+  const seller = await prisma.appUser.findUnique({
+    relationLoadStrategy: "join",
+    where: { id: params.sellerId },
+    select: {
+      payout_profile: { select: { status: true } },
+      seller_profile: { select: { is_verified: true } },
+      partnership_requests: {
+        where: { status: { in: ["APPROVED", "APPROVED_LIMITED"] } },
+        orderBy: [{ reviewed_at: "desc" }, { created_at: "desc" }],
+        include: { onboarding_profile: true },
+      },
+      _count: {
+        select: {
+          listings: { where: { status: { in: ["ACTIVE", "MODERATION"] } } },
+        },
+      },
+    },
   });
-  if (payoutProfile?.status !== "VERIFIED") {
+  if (seller?.payout_profile?.status !== "VERIFIED") {
     return {
       ok: false,
       status: 403,
@@ -106,49 +116,17 @@ export async function validateSellerOnboardingForListing(params: {
     };
   }
 
-  let request: PartnershipRequestWithOnboarding | null | undefined;
-  try {
-    request = await prisma.partnershipRequest.findFirst({
-      where: {
-        user_id: params.sellerId,
-        status: "APPROVED",
-      },
-      orderBy: [{ reviewed_at: "desc" }, { created_at: "desc" }],
-      include: {
-        onboarding_profile: true,
-      },
-    });
-  } catch {
-    const sellerProfile = await prisma.sellerProfile.findUnique({
-      where: { user_id: params.sellerId },
-      select: { is_verified: true },
-    });
-    request = sellerProfile?.is_verified ? null : undefined;
-  }
-
-  if (!request) {
-    request = await prisma.partnershipRequest.findFirst({
-      where: {
-        user_id: params.sellerId,
-        status: "APPROVED_LIMITED",
-      },
-      orderBy: [{ reviewed_at: "desc" }, { created_at: "desc" }],
-      include: {
-        onboarding_profile: true,
-      },
-    }).catch(() => null);
-  }
+  const request =
+    seller.partnership_requests.find((candidate) => candidate.status === "APPROVED") ??
+    seller.partnership_requests.find((candidate) => candidate.status === "APPROVED_LIMITED") ??
+    null;
 
   if (request === null) {
     return { ok: true };
   }
 
   if (!request?.onboarding_profile) {
-    const sellerProfile = await prisma.sellerProfile.findUnique({
-      where: { user_id: params.sellerId },
-      select: { is_verified: true },
-    });
-    if (sellerProfile?.is_verified) {
+    if (seller.seller_profile?.is_verified) {
       return { ok: true };
     }
     return {
@@ -170,13 +148,7 @@ export async function validateSellerOnboardingForListing(params: {
   }
 
   if (request.status === "APPROVED_LIMITED") {
-    const activeListingsCount = await prisma.marketplaceListing.count({
-      where: {
-        seller_id: params.sellerId,
-        status: { in: ["ACTIVE", "MODERATION"] },
-      },
-    });
-    if (activeListingsCount >= request.onboarding_profile.listing_limit) {
+    if (seller._count.listings >= request.onboarding_profile.listing_limit) {
       return {
         ok: false,
         status: 403,

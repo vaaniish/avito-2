@@ -8,6 +8,7 @@ import { getPostgresPoolSnapshot, prisma } from "./lib/prisma";
 import { logger } from "./lib/logger";
 import {
   getHttpMetricsSnapshot,
+  getBackendProcessMetricsSnapshot,
   httpObservabilityMiddleware,
 } from "./lib/http-observability";
 import {
@@ -32,7 +33,10 @@ import { profileRouter } from "./modules/profile/profile.routes";
 import { partnerRouter } from "./modules/partner/partner.routes";
 import { adminRouter } from "./modules/admin/admin.routes";
 import { publicRouter } from "./modules/public/public.routes";
-import { invalidateCatalogRuntimeCaches } from "./modules/catalog/catalog-runtime-cache";
+import {
+  invalidateCatalogRuntimeCachePrefixes,
+  invalidateCatalogRuntimeCaches,
+} from "./modules/catalog/catalog-runtime-cache";
 import { getPartnerListingModerationSnapshot } from "./modules/partner/listings";
 
 const app = express();
@@ -107,12 +111,26 @@ app.use(
 );
 app.use((req, res, next) => {
   const mutation = !["GET", "HEAD", "OPTIONS"].includes(req.method);
-  const affectsCatalog = req.path.startsWith("/api/admin/catalog") ||
-    req.path.startsWith("/api/partner/listings") ||
+  const affectsCatalogDefinition = req.path.startsWith("/api/admin/catalog");
+  const affectsVisibleListingCounts = req.path.startsWith("/api/partner/listings");
+  const affectsSellerReviewMetrics =
     /^\/api\/profile\/listings\/[^/]+\/review\/?$/.test(req.path);
-  if (mutation && affectsCatalog) {
+  if (
+    mutation &&
+    (affectsCatalogDefinition || affectsVisibleListingCounts || affectsSellerReviewMetrics)
+  ) {
     res.once("finish", () => {
-      if (res.statusCode < 400) invalidateCatalogRuntimeCaches();
+      if (res.statusCode >= 400) return;
+      if (affectsCatalogDefinition) {
+        invalidateCatalogRuntimeCaches();
+        return;
+      }
+      if (affectsVisibleListingCounts) {
+        invalidateCatalogRuntimeCachePrefixes(["categories:"]);
+      }
+      if (affectsSellerReviewMetrics) {
+        invalidateCatalogRuntimeCachePrefixes(["seller-review-metrics:"]);
+      }
     });
   }
   next();
@@ -161,10 +179,7 @@ app.get("/health/metrics", (req, res) => {
   res.json({
     ok: true,
     http: getHttpMetricsSnapshot(),
-    process: {
-      rssBytes: process.memoryUsage().rss,
-      heapUsedBytes: process.memoryUsage().heapUsed,
-    },
+    process: getBackendProcessMetricsSnapshot(),
     postgresPool: getPostgresPoolSnapshot(),
     backgroundModeration: getPartnerListingModerationSnapshot(),
   });

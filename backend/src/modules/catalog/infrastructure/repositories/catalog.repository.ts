@@ -10,6 +10,7 @@ import { getCatalogRuntimeCache } from "../../catalog-runtime-cache";
 const APPROVED_PARTNERSHIP_STATUSES = ["APPROVED", "APPROVED_LIMITED"] as const;
 
 export class CatalogRepository {
+  private readonly sellerReviewLoads = new Map<string, Promise<any>>();
   async findCategoriesWithTree(type: "PRODUCT") {
     return prisma.catalogCategory.findMany({
       where: { type },
@@ -94,6 +95,7 @@ export class CatalogRepository {
     skip?: number;
   }) {
     return prisma.marketplaceListing.findMany({
+      relationLoadStrategy: "join",
       where: {
         deleted_at: null,
         ...params.where,
@@ -108,6 +110,7 @@ export class CatalogRepository {
 
   async findListingCandidates(where: Record<string, unknown>) {
     return prisma.marketplaceListing.findMany({
+      relationLoadStrategy: "join",
       where: {
         deleted_at: null,
         ...where,
@@ -217,6 +220,7 @@ export class CatalogRepository {
 
   async findDetailedListingsByIds(ids: number[]) {
     return prisma.marketplaceListing.findMany({
+      relationLoadStrategy: "join",
       where: {
         id: { in: ids },
         deleted_at: null,
@@ -277,6 +281,18 @@ export class CatalogRepository {
   }
 
   async loadSellerReviews(sellerId: number, limit = 50) {
+    const boundedLimit = Math.max(1, Math.min(limit, 100));
+    const key = `${sellerId}:${boundedLimit}`;
+    const existing = this.sellerReviewLoads.get(key);
+    if (existing) return existing;
+    const pending = this.loadSellerReviewsUncached(sellerId, boundedLimit).finally(() => {
+      if (this.sellerReviewLoads.get(key) === pending) this.sellerReviewLoads.delete(key);
+    });
+    this.sellerReviewLoads.set(key, pending);
+    return pending;
+  }
+
+  private async loadSellerReviewsUncached(sellerId: number, limit: number) {
     const rows = await prisma.listingReview.findMany({
       where: {
         listing: {
@@ -284,7 +300,7 @@ export class CatalogRepository {
         },
       },
       orderBy: [{ created_at: "desc" }, { id: "desc" }],
-      take: Math.max(1, Math.min(limit, 100)),
+      take: limit,
       select: {
         id: true,
         rating: true,
@@ -325,6 +341,7 @@ export class CatalogRepository {
 
   async findListingDetailsByPublicId(publicId: string) {
     return prisma.marketplaceListing.findFirst({
+      relationLoadStrategy: "join",
       where: { public_id: publicId },
       include: catalogListingDetailInclude,
     });

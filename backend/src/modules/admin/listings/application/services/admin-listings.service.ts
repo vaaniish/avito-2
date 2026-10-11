@@ -108,7 +108,9 @@ export class UpdateAdminListingModerationService {
 
     const activationBlockedByOrder =
       parsedStatus === "APPROVED"
-        ? Boolean(await this.repository.hasBlockingOrderForListing(existing.id))
+        ? !(
+            existing.has_multiple_stock && existing.available_quantity > 0
+          ) && existing.order_items.length > 0
         : false;
     const nextListingStatus = resolveNextListingStatus({
       moderationStatus: parsedStatus,

@@ -1,5 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { forbidden, unauthorized } from "../../../common/application-error";
+import { logger } from "../../../lib/logger";
 import { getSessionTtlMs } from "../../../lib/session-cookie";
 import type {
   AuthSessionRepository,
@@ -53,7 +54,9 @@ export class SessionService {
     const token = randomToken();
     const csrfToken = randomToken();
     const expiresAt = new Date(now.getTime() + getSessionTtlMs(rememberMe));
-    await this.pruneIfDue(now);
+    void this.pruneIfDue(now).catch((error) => {
+      logger.warn("auth_session_prune_failed", { error });
+    });
     await this.sessionRepository.create({
       userId,
       tokenHash: hashSessionToken(token),

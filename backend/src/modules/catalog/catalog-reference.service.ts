@@ -2,6 +2,7 @@
 // Its Prisma access is acceptable until the reference-data contour gets its own cleanup pass.
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
+import { getCatalogRuntimeCache } from "./catalog-runtime-cache";
 
 const REFERENCE_ATTR_BRAND_KEY = "brand";
 const REFERENCE_ATTR_MODEL_KEY = "model";
@@ -235,6 +236,7 @@ async function findCatalogReferenceItemFromDb(
   itemName: string,
 ): Promise<CatalogReferenceItem | null> {
   const items = await prisma.catalogItem.findMany({
+    relationLoadStrategy: "join",
     where: {
       name: { equals: itemName, mode: "insensitive" },
     },
@@ -296,12 +298,15 @@ async function findCatalogReferenceItemFromDb(
 export async function findCatalogReferenceItem(
   itemName: string,
 ): Promise<CatalogReferenceItem | null> {
-  try {
-    return await findCatalogReferenceItemFromDb(itemName);
-  } catch (error) {
-    if (isMissingCatalogReferenceTable(error)) return null;
-    throw error;
-  }
+  const cacheKey = `catalog-reference-item:${normalizeExactText(itemName)}`;
+  return getCatalogRuntimeCache(cacheKey, async () => {
+    try {
+      return await findCatalogReferenceItemFromDb(itemName);
+    } catch (error) {
+      if (isMissingCatalogReferenceTable(error)) return null;
+      throw error;
+    }
+  });
 }
 
 export async function catalogReferenceBrandOptions(

@@ -11,39 +11,29 @@ export class PrismaPolicyAcceptanceRepository
     requestIp: string | null;
     requestUserAgent: string | null;
   }): Promise<void> {
-    const policy = await this.prisma.platformPolicy.findFirst({
-      where: {
-        scope: "CHECKOUT",
-        is_active: true,
-      },
-      orderBy: [{ activated_at: "desc" }, { id: "desc" }],
-      select: {
-        id: true,
-      },
-    });
-
-    if (!policy) {
-      return;
-    }
-
-    await this.prisma.policyAcceptance.upsert({
-      where: {
-        policy_id_user_id: {
-          policy_id: policy.id,
-          user_id: input.userId,
-        },
-      },
-      create: {
-        policy_id: policy.id,
-        user_id: input.userId,
-        accepted_ip: input.requestIp,
-        accepted_ua: input.requestUserAgent,
-      },
-      update: {
-        accepted_at: new Date(),
-        accepted_ip: input.requestIp,
-        accepted_ua: input.requestUserAgent,
-      },
-    });
+    await this.prisma.$executeRaw`
+      INSERT INTO "PolicyAcceptance" (
+        "policy_id",
+        "user_id",
+        "accepted_at",
+        "accepted_ip",
+        "accepted_ua"
+      )
+      SELECT
+        "id",
+        ${input.userId},
+        CURRENT_TIMESTAMP,
+        ${input.requestIp},
+        ${input.requestUserAgent}
+      FROM "PlatformPolicy"
+      WHERE "scope" = 'CHECKOUT'::"PolicyScope"
+        AND "is_active" = true
+      ORDER BY "activated_at" DESC, "id" DESC
+      LIMIT 1
+      ON CONFLICT ("policy_id", "user_id") DO UPDATE SET
+        "accepted_at" = CURRENT_TIMESTAMP,
+        "accepted_ip" = EXCLUDED."accepted_ip",
+        "accepted_ua" = EXCLUDED."accepted_ua"
+    `;
   }
 }

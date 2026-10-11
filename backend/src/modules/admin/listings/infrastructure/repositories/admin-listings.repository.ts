@@ -83,6 +83,7 @@ export class AdminListingsRepository {
 
   findListingForModeration(publicId: string) {
     return this.prisma.marketplaceListing.findUnique({
+      relationLoadStrategy: "join",
       where: { public_id: publicId },
       select: {
         id: true,
@@ -91,6 +92,19 @@ export class AdminListingsRepository {
         title: true,
         moderation_status: true,
         status: true,
+        has_multiple_stock: true,
+        available_quantity: true,
+        order_items: {
+          where: {
+            order: {
+              status: {
+                in: ["CREATED", "PAID", "PROCESSING", "PREPARED", "SHIPPED"],
+              },
+            },
+          },
+          select: { id: true },
+          take: 1,
+        },
       },
     });
   }
@@ -105,6 +119,10 @@ export class AdminListingsRepository {
       data: {
         moderation_status: params.moderationStatus,
         status: params.listingStatus,
+      },
+      select: {
+        moderation_status: true,
+        status: true,
       },
     });
   }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { monitorEventLoopDelay } from "node:perf_hooks";
 import type { NextFunction, Request, Response } from "express";
 import { logger, runWithRequestContext } from "./logger";
 import { boundedRatio } from "./runtime-config";
@@ -48,6 +49,10 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
 
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9._:-]{1,120}$/;
 let activeRequests = 0;
+const eventLoopDelay = monitorEventLoopDelay({ resolution: 20 });
+eventLoopDelay.enable();
+let previousCpuUsage = process.cpuUsage();
+let previousCpuSampleAt = process.hrtime.bigint();
 
 function resolveRequestId(req: Request): string {
   const headerValue = req.header("x-request-id")?.trim();
@@ -139,5 +144,31 @@ export function getHttpMetricsSnapshot(): HttpMetricsSnapshot {
     responses5xx: metrics.responses5xx,
     slowRequests: metrics.slowRequests,
     activeRequests,
+  };
+}
+
+export function getBackendProcessMetricsSnapshot(): {
+  rssBytes: number;
+  heapUsedBytes: number;
+  cpuPercent: number;
+  eventLoopLagMs: { p95: number; p99: number; max: number };
+} {
+  const now = process.hrtime.bigint();
+  const elapsedMicros = Math.max(1, Number(now - previousCpuSampleAt) / 1_000);
+  const cpu = process.cpuUsage(previousCpuUsage);
+  previousCpuUsage = process.cpuUsage();
+  previousCpuSampleAt = now;
+  const memory = process.memoryUsage();
+  const toMs = (nanoseconds: number) =>
+    Number.isFinite(nanoseconds) ? Math.round((nanoseconds / 1_000_000) * 100) / 100 : 0;
+  return {
+    rssBytes: memory.rss,
+    heapUsedBytes: memory.heapUsed,
+    cpuPercent: Math.round((((cpu.user + cpu.system) / elapsedMicros) * 100) * 100) / 100,
+    eventLoopLagMs: {
+      p95: toMs(eventLoopDelay.percentile(95)),
+      p99: toMs(eventLoopDelay.percentile(99)),
+      max: toMs(eventLoopDelay.max),
+    },
   };
 }

@@ -40,7 +40,13 @@ import {
   type PartnerCatalogSelection,
   validateAttributesAgainstSchema,
 } from "../../domain/partner-listings.helpers";
-import { syncListingSearchKeywords } from "../../../../catalog/catalog-search.shared";
+import {
+  loadEffectiveCatalogSearchRules,
+  resolveListingSearchKeywords,
+  syncListingSearchKeywords,
+} from "../../../../catalog/catalog-search.shared";
+import { getCatalogRuntimeCache } from "../../../../catalog/catalog-runtime-cache";
+import { makeListingModerationEventPublicId } from "../../../../moderation/listing-moderation.shared";
 import {
   createCatalogSuggestionsForListing,
   resolvePartnerCatalogSelection,
@@ -333,95 +339,143 @@ export class PartnerListingsWriteRepository
         availableQuantity: 1,
       },
     });
+    const listingPublicId = makeOpaquePublicId("LST", 20);
+    const [searchRules, sellerAddress] = await Promise.all([
+      getCatalogRuntimeCache("effective-search-rules", () =>
+        loadEffectiveCatalogSearchRules(prisma),
+      ),
+      prisma.userAddress.findFirst({
+        where: { user_id: params.sellerId },
+        select: { city: true },
+        orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
+      }),
+    ]);
+    const searchKeywords = resolveListingSearchKeywords(
+      {
+        id: 0,
+        title,
+        description: description || null,
+        sku: null,
+        item:
+          catalogSelection.selection.itemId &&
+          catalogSelection.selection.categoryId &&
+          catalogSelection.selection.subcategoryId
+            ? {
+                id: catalogSelection.selection.itemId,
+                name: catalogSelection.selection.itemName,
+                subcategory: {
+                  id: catalogSelection.selection.subcategoryId,
+                  name: catalogSelection.selection.subcategoryName,
+                  category: {
+                    id: catalogSelection.selection.categoryId,
+                    name: catalogSelection.selection.categoryName,
+                  },
+                },
+              }
+            : null,
+        attributes: persistedAttributes,
+      },
+      searchRules,
+    );
 
-    const createdRow = await prisma.$transaction(async (tx) => {
-      const listing = await tx.marketplaceListing.create({
-        data: {
-          public_id: makeOpaquePublicId("LST", 20),
-          seller_id: params.sellerId,
-          type,
-          title,
-          description: description || null,
-          item_id: catalogSelection.selection.itemId,
-          price: roundedPrice,
-          condition,
-          tech_grade: techState?.grade ?? null,
-          tech_battery_health: techState?.batteryHealthPercent ?? null,
-          tech_defects: techState?.defects ?? null,
-          tech_included: techState?.included ?? null,
-          seller_warranty_enabled: listingCommercialTerms.sellerWarrantyEnabled,
-          seller_warranty_days: listingCommercialTerms.sellerWarrantyDays,
-          has_multiple_stock: listingCommercialTerms.hasMultipleStock,
-          available_quantity: listingCommercialTerms.availableQuantity,
-          status: LISTING_MODERATION,
-          moderation_status: "PENDING",
-        },
-        select: {
-          id: true,
-          public_id: true,
-          title: true,
-          price: true,
-        },
-      });
-
-      await tx.listingImage.createMany({
-        data: images.map((url, index) => ({
-          listing_id: listing.id,
-          url,
-          sort_order: index,
-        })),
-      });
-
-      if (persistedAttributes.length > 0) {
-        await tx.listingAttribute.createMany({
-          data: persistedAttributes.map((attribute, index) => ({
-            listing_id: listing.id,
-            key: attribute.key,
-            value: attribute.value,
-            sort_order: index,
-          })),
-        });
-      }
-
-      return listing;
-    });
-
-    const created = await prisma.marketplaceListing.findUnique({
-      where: { id: createdRow.id },
-      include: {
-        seller: {
-          select: {
-            addresses: {
-              select: { city: true },
-              orderBy: [{ is_default: "desc" }, { created_at: "desc" }],
-              take: 1,
-            },
-          },
-        },
+    const createdRow = await prisma.marketplaceListing.create({
+      data: {
+        public_id: listingPublicId,
+        seller_id: params.sellerId,
+        type,
+        title,
+        description: description || null,
+        item_id: catalogSelection.selection.itemId,
+        price: roundedPrice,
+        condition,
+        tech_grade: techState?.grade ?? null,
+        tech_battery_health: techState?.batteryHealthPercent ?? null,
+        tech_defects: techState?.defects ?? null,
+        tech_included: techState?.included ?? null,
+        seller_warranty_enabled: listingCommercialTerms.sellerWarrantyEnabled,
+        seller_warranty_days: listingCommercialTerms.sellerWarrantyDays,
+        has_multiple_stock: listingCommercialTerms.hasMultipleStock,
+        available_quantity: listingCommercialTerms.availableQuantity,
+        status: LISTING_MODERATION,
+        moderation_status: "PENDING",
         images: {
-          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+          createMany: {
+            data: images.map((url, index) => ({ url, sort_order: index })),
+          },
         },
-        item: {
-          include: {
-            subcategory: {
-              include: { category: true },
+        ...(persistedAttributes.length > 0
+          ? {
+              attributes: {
+                createMany: {
+                  data: persistedAttributes.map((attribute, index) => ({
+                    key: attribute.key,
+                    value: attribute.value,
+                    sort_order: index,
+                  })),
+                },
+              },
+            }
+          : {}),
+        ...(searchKeywords.length > 0
+          ? {
+              search_keywords: {
+                createMany: {
+                  data: searchKeywords.map((keyword) => ({
+                    phrase: keyword.phrase,
+                    normalized_phrase: keyword.normalizedPhrase,
+                    weight: keyword.weight,
+                    source: keyword.source,
+                  })),
+                },
+              },
+            }
+          : {}),
+        moderation_events: {
+          create: {
+            public_id: makeListingModerationEventPublicId(),
+            actor_user_id: null,
+            actor_type: "SYSTEM",
+            decision: "QUEUED",
+            reason_code: "QUEUED_FOR_BACKGROUND_MODERATION",
+            reason_note: "Listing queued for automatic moderation",
+            metadata: {
+              source: "partner.create",
+              imageModerationSignals,
             },
           },
         },
-        attributes: {
-          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
-        },
+      },
+      select: {
+        id: true,
+        public_id: true,
+        title: true,
+        price: true,
+        condition: true,
+        status: true,
+        moderation_status: true,
+        views: true,
+        created_at: true,
+        description: true,
+        tech_grade: true,
+        tech_battery_health: true,
+        tech_defects: true,
+        tech_included: true,
+        seller_warranty_enabled: true,
+        seller_warranty_days: true,
+        has_multiple_stock: true,
+        available_quantity: true,
       },
     });
 
-    if (!created) {
-      throw notFound("Created listing not found after transaction");
-    }
-
-    await syncListingSearchKeywords({
-      prismaClient: prisma,
-      listingId: created.id,
-    });
+    const created = {
+      ...createdRow,
+      seller: { addresses: sellerAddress ? [sellerAddress] : [] },
+      images: images.map((url) => ({ url })),
+      item: catalogSelection.selection.itemId
+        ? { name: catalogSelection.selection.itemName }
+        : null,
+      attributes: persistedAttributes,
+    };
 
     await createCatalogSuggestionsForListing({
       type,
@@ -432,19 +486,6 @@ export class PartnerListingsWriteRepository
       title: created.title,
     }).catch((error) => {
       logger.error("error_saving_catalog_suggestion", { error });
-    });
-
-    await writeListingModerationEvent({
-      listingId: created.id,
-      actorUserId: null,
-      actorType: "SYSTEM",
-      decision: "QUEUED",
-      reasonCode: "QUEUED_FOR_BACKGROUND_MODERATION",
-      reasonNote: "Listing queued for automatic moderation",
-      metadata: {
-        source: "partner.create",
-        imageModerationSignals,
-      },
     });
 
     if (draftId) {

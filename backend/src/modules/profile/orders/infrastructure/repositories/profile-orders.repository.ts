@@ -715,6 +715,7 @@ export class ProfileOrdersRepository {
 
   async findApprovedActiveListingsByPublicIds(listingPublicIds: string[]) {
     return this.prisma.marketplaceListing.findMany({
+      relationLoadStrategy: "join",
       where: {
         public_id: { in: listingPublicIds },
         moderation_status: "APPROVED",
@@ -949,8 +950,11 @@ export class ProfileOrdersRepository {
         }
       }
 
-      const listingIdsToReserve = Array.from(quantityByListingId.keys());
-      for (const [listingId, quantity] of quantityByListingId.entries()) {
+      const reservationEntries = Array.from(quantityByListingId.entries()).sort(
+        ([leftListingId], [rightListingId]) => leftListingId - rightListingId,
+      );
+      const listingIdsToReserve = reservationEntries.map(([listingId]) => listingId);
+      for (const [listingId, quantity] of reservationEntries) {
         const reservedListing = await tx.marketplaceListing.updateMany({
           where: {
             id: listingId,

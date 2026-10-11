@@ -23,15 +23,6 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
         name: true,
         password: true,
         block_reason: true,
-        wishlist_items: {
-          select: {
-            listing: {
-              select: {
-                public_id: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -49,10 +40,15 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
       name: user.name,
       passwordHash: user.password,
       blockReason: user.block_reason,
-      wishlistListingPublicIds: user.wishlist_items.map(
-        (item) => item.listing.public_id,
-      ),
     };
+  }
+
+  async findWishlistListingPublicIds(userId: number): Promise<string[]> {
+    const rows = await this.prisma.wishlistItem.findMany({
+      where: { user_id: userId },
+      select: { listing: { select: { public_id: true } } },
+    });
+    return rows.map((row) => row.listing.public_id);
   }
 
   async activateUser(userId: number): Promise<void> {
