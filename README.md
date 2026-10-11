@@ -9,7 +9,7 @@
 Для первоначального импорта полного каталога выделить Docker не менее 6 ГБ RAM.
 
 ```bash
-git clone https://github.com/vaaniish/avito-2.git
+git clone --branch diploma-archive-2026-10-12 https://github.com/vaaniish/avito-2.git
 cd avito-2
 ./start-demo.sh
 ```
@@ -43,7 +43,8 @@ API оплаты/доставки требуют собственных дейс
 docker compose --env-file infra/demo.env -f compose.demo.yml down
 ```
 
-Подробности восстановления, автономный архив и проверки: [RESTORE.md](RESTORE.md).
+Подробности восстановления и автономный архив: [RESTORE.md](RESTORE.md).
+Результаты проверки архивной версии: [RESTORE-VERIFICATION.md](RESTORE-VERIFICATION.md).
 
 ## Локальная разработка
 

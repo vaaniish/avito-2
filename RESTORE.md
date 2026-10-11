@@ -6,6 +6,10 @@
 2. Выполнить `./start-demo.sh` из каталога репозитория.
 3. Открыть http://localhost:8080 и войти одним из аккаунтов в README.
 
+Проверенная архивная версия закреплена тегом `diploma-archive-2026-10-12`.
+Для возврата именно к этому состоянию клонировать с `--branch diploma-archive-2026-10-12`,
+как показано в README. Результаты проверки: [RESTORE-VERIFICATION.md](RESTORE-VERIFICATION.md).
+
 В Windows можно использовать WSL/Git Bash либо напрямую:
 
 ```bash
