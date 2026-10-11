@@ -1,0 +1,4 @@
+# Used after loading the images from export-offline.sh; no registry requests.
+services:
+  db:
+    image: avito-diploma-postgres:archive-v1

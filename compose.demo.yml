@@ -1,0 +1,90 @@
+name: avito-diploma-demo
+
+services:
+  db:
+    image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: diploma
+      POSTGRES_PASSWORD: diploma-local-demo-only
+      POSTGRES_DB: diploma_demo
+    volumes:
+      - demo_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U diploma -d diploma_demo"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    networks: [private]
+
+  bootstrap:
+    image: avito-diploma-init:archive-v1
+    build:
+      context: .
+      target: demo-init
+    # Share the database network namespace: seed remains restricted to localhost.
+    network_mode: service:db
+    environment:
+      DATABASE_URL: postgresql://diploma:diploma-local-demo-only@127.0.0.1:5432/diploma_demo?schema=public
+      NODE_ENV: development
+      DEMO_SEED_CONFIRM: DELETE_LOCAL_DEMO_DATA
+      SEED_MEDIA_BASE_URL: /media/seed
+      NODE_OPTIONS: --max-old-space-size=4096
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    image: avito-diploma-backend:archive-v1
+    build:
+      context: .
+      target: backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://diploma:diploma-local-demo-only@db:5432/diploma_demo?schema=public
+      CORS_ALLOWED_ORIGINS: http://localhost:${DEMO_HTTP_PORT:-8080},http://127.0.0.1:${DEMO_HTTP_PORT:-8080},http://localhost:3000,http://127.0.0.1:3000
+      TRUST_PROXY: 1
+      IMAGE_STORAGE_DRIVER: inline
+      PAYMENT_USE_LOCAL_STUB: 1
+      DADATA_USE_LOCAL_BANK_FIXTURES: 1
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [private]
+    security_opt: [no-new-privileges:true]
+
+  frontend:
+    image: avito-diploma-frontend:archive-v1
+    build:
+      context: .
+      target: frontend
+      args:
+        VITE_API_BASE_URL: /api
+    restart: unless-stopped
+    environment:
+      BACKEND_UPSTREAM: backend:3001
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:${DEMO_HTTP_PORT:-8080}:8080
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [private, edge]
+    security_opt: [no-new-privileges:true]
+
+networks:
+  private:
+    internal: true
+  edge:
+
+volumes:
+  demo_postgres:

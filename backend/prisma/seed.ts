@@ -136,240 +136,109 @@ const referenceScopeKey = (
 
 async function seedCatalogReferenceData(items: SeedCatalogItemRow[]): Promise<void> {
   if (!fs.existsSync(CATALOG_REFERENCE_PATH)) {
-    console.warn(
-      `Справочник DNS не найден, пропускаю импорт reference-данных: ${CATALOG_REFERENCE_PATH}`,
-    );
+    console.warn(`Справочник DNS не найден, пропускаю импорт reference-данных: ${CATALOG_REFERENCE_PATH}`);
     return;
   }
 
-  const reference = JSON.parse(
-    fs.readFileSync(CATALOG_REFERENCE_PATH, "utf8"),
-  ) as CatalogReferenceSeed;
-
+  const reference = JSON.parse(fs.readFileSync(CATALOG_REFERENCE_PATH, "utf8")) as CatalogReferenceSeed;
   const itemByScope = new Map<string, SeedCatalogItemRow>();
   const itemsByName = new Map<string, SeedCatalogItemRow[]>();
   for (const item of items) {
-    itemByScope.set(
-      referenceScopeKey(
-        item.subcategory.category.name,
-        item.subcategory.name,
-        item.name,
-      ),
-      item,
-    );
+    itemByScope.set(referenceScopeKey(item.subcategory.category.name, item.subcategory.name, item.name), item);
     const nameKey = item.name.trim().toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
-    const namedItems = itemsByName.get(nameKey) ?? [];
-    namedItems.push(item);
-    itemsByName.set(nameKey, namedItems);
+    itemsByName.set(nameKey, [...(itemsByName.get(nameKey) ?? []), item]);
   }
 
-  const brandRows: Array<{
-    public_id: string;
-    item_id: number;
-    name: string;
-    order_index: number;
-  }> = [];
-  const modelDrafts: Array<{
-    publicId: string;
-    itemId: number;
-    brandName: string;
-    name: string;
-    orderIndex: number;
-    variants: CatalogReferenceVariantSeed[];
-  }> = [];
-
+  // Import one branch at a time and release it afterwards. The complete
+  // characteristic set must never be copied into a second in-memory array.
+  let processedItems = 0;
   let skippedItems = 0;
-  for (const [itemIndex, referenceItem] of (reference.items ?? []).entries()) {
-    const scopedItem =
-      itemByScope.get(
-        referenceScopeKey(
-          referenceItem.categoryName,
-          referenceItem.subcategoryName,
-          referenceItem.itemName,
-        ),
-      ) ??
-      (() => {
-        const byName =
-          itemsByName.get(
-            referenceItem.itemName.trim().toLocaleLowerCase("ru-RU").replace(/ё/g, "е"),
-          ) ?? [];
-        return byName.length === 1 ? byName[0] : null;
-      })();
-
-    if (!scopedItem) {
+  let characteristicCount = 0;
+  const pendingItems = reference.items ?? [];
+  while (pendingItems.length > 0) {
+    const referenceItem = pendingItems.shift()!;
+    processedItems += 1;
+    const namedItems = itemsByName.get(referenceItem.itemName.trim().toLocaleLowerCase("ru-RU").replace(/ё/g, "е")) ?? [];
+    const item = itemByScope.get(referenceScopeKey(referenceItem.categoryName, referenceItem.subcategoryName, referenceItem.itemName))
+      ?? (namedItems.length === 1 ? namedItems[0] : null);
+    if (!item) {
       skippedItems += 1;
       continue;
     }
 
-    for (const [brandIndex, brand] of (referenceItem.brands ?? []).entries()) {
-      const brandName = brand.brand.trim();
-      if (!brandName) continue;
-      const brandPublicId = `CRB-${scopedItem.public_id}-${String(brandIndex + 1).padStart(4, "0")}`;
-      brandRows.push({
-        public_id: brandPublicId,
-        item_id: scopedItem.id,
-        name: brandName,
-        order_index: brandIndex + 1,
-      });
-
-      for (const [modelIndex, model] of (brand.models ?? []).entries()) {
-        const modelName = model.model.trim();
-        if (!modelName) continue;
-        modelDrafts.push({
-          publicId: `CRM-${scopedItem.public_id}-${String(brandIndex + 1).padStart(4, "0")}-${String(modelIndex + 1).padStart(5, "0")}`,
-          itemId: scopedItem.id,
-          brandName,
-          name: modelName,
-          orderIndex: modelIndex + 1,
-          variants: model.variants ?? [],
-        });
+    const brands = (referenceItem.brands ?? []).map((brand, index) => ({
+      publicId: `CRB-${item.public_id}-${String(index + 1).padStart(4, "0")}`,
+      name: brand.brand.trim(),
+      orderIndex: index + 1,
+      models: brand.models ?? [],
+    })).filter((brand) => brand.name);
+    await createManyInChunks("CatalogReferenceBrand", brands.map((brand) => ({
+      public_id: brand.publicId, item_id: item.id, name: brand.name, order_index: brand.orderIndex,
+    })), (chunk) => prisma.catalogReferenceBrand.createMany({ data: chunk, skipDuplicates: true }));
+    const storedBrands = await prisma.catalogReferenceBrand.findMany({
+      where: { item_id: item.id }, select: { id: true, name: true },
+    });
+    const brandIdByName = new Map(storedBrands.map((brand) => [brand.name, brand.id]));
+    const models = brands.flatMap((brand) => brand.models.map((model, index) => ({
+      publicId: `CRM-${item.public_id}-${String(brand.orderIndex).padStart(4, "0")}-${String(index + 1).padStart(5, "0")}`,
+      brandId: brandIdByName.get(brand.name)!,
+      name: model.model.trim(),
+      orderIndex: index + 1,
+      variants: model.variants ?? [],
+    })).filter((model) => model.name && model.brandId));
+    await createManyInChunks("CatalogReferenceModel", models.map((model) => ({
+      public_id: model.publicId, brand_id: model.brandId, name: model.name, order_index: model.orderIndex,
+    })), (chunk) => prisma.catalogReferenceModel.createMany({ data: chunk, skipDuplicates: true }));
+    const storedModels = await prisma.catalogReferenceModel.findMany({
+      where: { brand: { item_id: item.id } }, select: { id: true, public_id: true },
+    });
+    const modelIdByPublicId = new Map(storedModels.map((model) => [model.public_id, model.id]));
+    const variants = models.flatMap((model) => model.variants.map((variant, index) => ({
+      publicId: `CRV-${model.publicId.replace(/^CRM-/, "")}-${String(index + 1).padStart(4, "0")}`,
+      modelId: modelIdByPublicId.get(model.publicId)!,
+      productId: variant.productId?.trim() || null,
+      title: variant.title.trim(),
+      orderIndex: index + 1,
+      characteristics: variant.characteristics ?? [],
+    })).filter((variant) => variant.title && variant.modelId));
+    await createManyInChunks("CatalogReferenceVariant", variants.map((variant) => ({
+      public_id: variant.publicId, model_id: variant.modelId, external_product_id: variant.productId,
+      title: variant.title, order_index: variant.orderIndex,
+    })), (chunk) => prisma.catalogReferenceVariant.createMany({ data: chunk, skipDuplicates: true }));
+    const storedVariants = await prisma.catalogReferenceVariant.findMany({
+      where: { model: { brand: { item_id: item.id } } }, select: { id: true, public_id: true },
+    });
+    const variantIdByPublicId = new Map(storedVariants.map((variant) => [variant.public_id, variant.id]));
+    const rows: Array<{
+      variant_id: number; key: string; label: string; value: string; raw_value: string;
+      source_group_index: number; source: string; order_index: number;
+    }> = [];
+    const flush = async (): Promise<void> => {
+      if (rows.length === 0) return;
+      await prisma.catalogReferenceCharacteristic.createMany({ data: rows });
+      characteristicCount += rows.length;
+      rows.length = 0;
+    };
+    for (const variant of variants) {
+      const variantId = variantIdByPublicId.get(variant.publicId);
+      if (!variantId) continue;
+      for (const [index, characteristic] of variant.characteristics.entries()) {
+        const row = {
+          variant_id: variantId, key: characteristic.key.trim(), label: characteristic.label.trim(),
+          value: characteristic.value.trim(), raw_value: (characteristic.rawValue ?? characteristic.value).trim(),
+          source_group_index: characteristic.sourceGroupIndex ?? 0,
+          source: characteristic.source ?? "bracketGroups", order_index: index + 1,
+        };
+        if (!row.key || !row.label || !row.value || !row.raw_value) continue;
+        rows.push(row);
+        if (rows.length >= 5_000) await flush();
       }
     }
-
-    if ((itemIndex + 1) % 50 === 0) {
-      console.log(`Подготовка DNS reference: ${itemIndex + 1} видов обработано`);
-    }
+    await flush();
+    if (processedItems % 25 === 0) console.log(`DNS reference: импортировано ${processedItems} из ${processedItems + pendingItems.length} веток`);
   }
-
-  if (skippedItems > 0) {
-    console.warn(`DNS reference: пропущено видов вне текущего каталога: ${skippedItems}`);
-  }
-
-  await createManyInChunks(
-    "CatalogReferenceBrand",
-    brandRows,
-    (chunk) =>
-      prisma.catalogReferenceBrand.createMany({
-        data: chunk,
-        skipDuplicates: true,
-      }),
-  );
-
-  const brandIdByItemAndName = new Map(
-    (
-      await prisma.catalogReferenceBrand.findMany({
-        select: { id: true, item_id: true, name: true },
-      })
-    ).map((brand) => [`${brand.item_id}::${brand.name}`, brand.id]),
-  );
-
-  const modelRows = modelDrafts
-    .map((model) => {
-      const brandId = brandIdByItemAndName.get(`${model.itemId}::${model.brandName}`);
-      if (!brandId) return null;
-      return {
-        public_id: model.publicId,
-        brand_id: brandId,
-        name: model.name,
-        order_index: model.orderIndex,
-      };
-    })
-    .filter((row): row is NonNullable<typeof row> => row !== null);
-
-  await createManyInChunks(
-    "CatalogReferenceModel",
-    modelRows,
-    (chunk) =>
-      prisma.catalogReferenceModel.createMany({
-        data: chunk,
-        skipDuplicates: true,
-      }),
-  );
-
-  const modelIdByPublicId = new Map(
-    (
-      await prisma.catalogReferenceModel.findMany({
-        select: { id: true, public_id: true },
-      })
-    ).map((model) => [model.public_id, model.id]),
-  );
-
-  const variantDrafts: Array<{
-    publicId: string;
-    modelPublicId: string;
-    productId: string | null;
-    title: string;
-    orderIndex: number;
-    characteristics: CatalogReferenceCharacteristicSeed[];
-  }> = [];
-  for (const model of modelDrafts) {
-    for (const [variantIndex, variant] of model.variants.entries()) {
-      const title = variant.title.trim();
-      if (!title) continue;
-      variantDrafts.push({
-        publicId: `CRV-${model.publicId.replace(/^CRM-/, "")}-${String(variantIndex + 1).padStart(4, "0")}`,
-        modelPublicId: model.publicId,
-        productId: variant.productId?.trim() || null,
-        title,
-        orderIndex: variantIndex + 1,
-        characteristics: variant.characteristics ?? [],
-      });
-    }
-  }
-
-  const variantRows = variantDrafts
-    .map((variant) => {
-      const modelId = modelIdByPublicId.get(variant.modelPublicId);
-      if (!modelId) return null;
-      return {
-        public_id: variant.publicId,
-        model_id: modelId,
-        external_product_id: variant.productId,
-        title: variant.title,
-        order_index: variant.orderIndex,
-      };
-    })
-    .filter((row): row is NonNullable<typeof row> => row !== null);
-
-  await createManyInChunks(
-    "CatalogReferenceVariant",
-    variantRows,
-    (chunk) =>
-      prisma.catalogReferenceVariant.createMany({
-        data: chunk,
-        skipDuplicates: true,
-      }),
-  );
-
-  const variantIdByPublicId = new Map(
-    (
-      await prisma.catalogReferenceVariant.findMany({
-        select: { id: true, public_id: true },
-      })
-    ).map((variant) => [variant.public_id, variant.id]),
-  );
-
-  const characteristicRows = variantDrafts.flatMap((variant) => {
-    const variantId = variantIdByPublicId.get(variant.publicId);
-    if (!variantId) return [];
-    return variant.characteristics
-      .map((characteristic, index) => ({
-        variant_id: variantId,
-        key: characteristic.key.trim(),
-        label: characteristic.label.trim(),
-        value: characteristic.value.trim(),
-        raw_value: (characteristic.rawValue ?? characteristic.value).trim(),
-        source_group_index: characteristic.sourceGroupIndex ?? 0,
-        source: characteristic.source ?? "bracketGroups",
-        order_index: index + 1,
-      }))
-      .filter(
-        (characteristic) =>
-          characteristic.key &&
-          characteristic.label &&
-          characteristic.value &&
-          characteristic.raw_value,
-      );
-  });
-
-  await createManyInChunks(
-    "CatalogReferenceCharacteristic",
-    characteristicRows,
-    (chunk) =>
-      prisma.catalogReferenceCharacteristic.createMany({
-        data: chunk,
-      }),
-  );
+  if (skippedItems > 0) console.warn(`DNS reference: пропущено видов вне текущего каталога: ${skippedItems}`);
+  console.log(`CatalogReferenceCharacteristic: импортировано ${characteristicCount}`);
 }
 
 async function seedCartCrossSellRules(items: Array<{

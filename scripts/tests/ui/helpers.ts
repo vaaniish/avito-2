@@ -66,7 +66,9 @@ export async function loginWithCredentials(
   if (!cached) {
     cached = (async () => {
       const response = await request.post(`${API_BASE}/auth/login`, {
-        headers: { Origin: "http://localhost:3000" },
+        // Each fixture login starts anonymously, independently of a previous
+        // account's cookie stored by this APIRequestContext.
+        headers: { Origin: "http://localhost:3000", Cookie: "" },
         data: { email, password },
       });
       const raw = await response.text();

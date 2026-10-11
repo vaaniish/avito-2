@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "source": "Local Diploma catalog, archived 2026-10-12",
+  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "items": 254,
+  "brands": 6360,
+  "models": 89099,
+  "variants": 110050,
+  "byteSize": 155311374,
+  "sha256": "f9fb53c04dd1353e633f4bc8a88022b60f2ba5a781f001f047e0818b6e0f87d7",
+  "compressedByteSize": 4600467,
+  "compressedSha256": "a92eb5910b7cad30b0b3074ac0015c751180d25d27f714146e5cb2960e4cfe89",
+  "report": {
+    "byteSize": 543966,
+    "sha256": "1490bf5ab2622f86b800ece4beaeba4d80e6fbf3e7fbf5689044d586fdb5fd12",
+    "compressedByteSize": 50817,
+    "compressedSha256": "214723afb0d2948e4db11751a9016e6fd5530d81dc1105d7b94f28ca967cedc3"
+  }
+}

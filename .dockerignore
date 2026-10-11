@@ -9,3 +9,6 @@ playwright-report
 test-results
 data/catalog-reference/generated
 *.log
+.codex_tmp
+docs
+output

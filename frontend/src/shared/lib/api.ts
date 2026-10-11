@@ -190,6 +190,14 @@ export function clearSessionUser(): void {
   memoryCsrfToken = null;
 }
 
+function handleUnauthenticatedResponse(): void {
+  // An anonymous bootstrap is expected to return 401. Only a previously known
+  // session can expire; public pages must remain available to new visitors.
+  const hadSession = memorySessionUser !== null || memoryCsrfToken !== null;
+  clearSessionUser();
+  if (hadSession) window.dispatchEvent(new CustomEvent("ecomm:session-expired"));
+}
+
 type ApiOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
@@ -267,8 +275,7 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
     const isCredentialSubmission =
       path.startsWith("/auth/login") || path.startsWith("/auth/signup");
     if (response.status === 401 && !isCredentialSubmission) {
-      clearSessionUser();
-      window.dispatchEvent(new CustomEvent("ecomm:session-expired"));
+      handleUnauthenticatedResponse();
     }
 
     const htmlError =
@@ -360,8 +367,7 @@ export async function openNotificationStream(options: {
 
   if (!response.ok || !response.body) {
     if (response.status === 401) {
-      clearSessionUser();
-      window.dispatchEvent(new CustomEvent("ecomm:session-expired"));
+      handleUnauthenticatedResponse();
     }
     throw new Error(response.status === 401 ? "Сессия истекла. Войдите снова." : "Поток уведомлений недоступен.");
   }

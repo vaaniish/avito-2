@@ -1,5 +1,4 @@
-# syntax=docker/dockerfile:1.7
-FROM node:22-bookworm-slim AS node-base
+FROM node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 AS node-base
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates openssl \
   && rm -rf /var/lib/apt/lists/*
@@ -34,7 +33,7 @@ WORKDIR /app
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=backend-build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=backend-build /app/dist/backend ./dist/backend
-COPY backend/data/seed-media ./backend/data/seed-media
+COPY backend/data ./backend/data
 COPY package.json ./package.json
 USER node
 EXPOSE 3001
@@ -47,7 +46,12 @@ COPY backend ./backend
 COPY prisma.config.ts ./prisma.config.ts
 CMD ["npm", "run", "db:migrate:deploy"]
 
-FROM nginx:1.27-alpine AS frontend
+FROM migrate AS demo-init
+COPY data/archive ./data/archive
+COPY scripts/demo/prepare-catalog.mjs scripts/demo/bootstrap.mjs ./scripts/demo/
+CMD ["node", "scripts/demo/bootstrap.mjs"]
+
+FROM nginx:stable-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94 AS frontend
 COPY infra/nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=frontend-build /app/dist/frontend /usr/share/nginx/html
 EXPOSE 8080

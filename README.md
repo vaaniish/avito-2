@@ -1,79 +1,81 @@
-# Avito-2
+# Diploma / Avito-2
 
-Монорепозиторий с фронтендом на `React + Vite` и бэкендом на `Express + Prisma`.
+Маркетплейс: React + Vite, Express + Prisma, PostgreSQL.
 
-## Что находится в проекте
+## Восстановление после скачивания из Git
 
-- `frontend/` — клиентское приложение.
-- `backend/` — API, бизнес-логика и Prisma-схема.
-- `scripts/` — тестовые, QA- и служебные сценарии.
-- `docs/` — актуальная документация по структуре, аудиту и проверкам.
+Нужен установленный и запущенный Docker Desktop (или Docker Engine с Compose).
+Локальные Node.js, npm, PostgreSQL и реальные API-ключи не нужны.
+Для первоначального импорта полного каталога выделить Docker не менее 6 ГБ RAM.
 
-## Быстрый старт
+```bash
+git clone https://github.com/vaaniish/avito-2.git
+cd avito-2
+./start-demo.sh
+```
 
-1. Установить зависимости:
-   `npm i`
-2. Поднять PostgreSQL:
-   `docker compose up -d`
-3. Подготовить базу:
-   `npm run db:push && npm run db:seed`
-4. Запустить фронтенд и бэкенд:
-   `npm run dev`
+Открыть **http://localhost:8080**. Первый запуск скачивает зависимости и создаёт
+демо-базу; наполнение большого каталога может занять несколько минут.
 
-## Полезные команды
-- `npm run dev:all` — запуск всего dev
-- `npm run dev:frontend` — только фронтенд
-- `npm run dev:backend` — только бэкенд
-- `npm run build` — сборка фронтенда и бэкенда
-- `npm run test:unit` — модульные тесты
-- `npm run test:integration` — интеграционные тесты
-- `npm run test:e2e:ui:smoke` — UI smoke на Playwright
-- `npm run test:visual:smoke` — визуальный smoke
-- `npm run db:generate` — генерация Prisma client
-- `npm run db:migrate` — dev-миграции Prisma
-- `npm run db:seed` — наполнение демо-данными
-- `npm run db:push` — синхронизация схемы без миграции
+Скрипт использует `compose.demo.yml` и `infra/demo.env`, не читает личный `.env`.
+PostgreSQL демо изолирован от остальных баз. Повторный запуск сохраняет
+наполненную базу. Точные версии Docker-образов закреплены по SHA-256,
+npm-зависимости — в `package-lock.json`.
 
-## Переменные окружения
+Демо-аккаунты:
 
-### Фронтенд
+| Роль | Логин | Пароль |
+| --- | --- | --- |
+| Покупатель | `buyer1@ecomm.local` | `DemoBuyer2026!` |
+| Партнёр | `seller1@ecomm.local` | `DemoSeller2026!` |
+| Администратор | `admin@ecomm.local` | `DemoAdmin2026!` |
 
-- `VITE_API_BASE_URL` — базовый URL API, по умолчанию `http://localhost:3001/api`
-- `VITE_YANDEX_MAPS_API_KEY` — ключ для карт Яндекса
+Каталог сохранён целиком в сжатом архиве в Git и восстанавливается с проверкой
+контрольных сумм. Пользователи, объявления и заказы создаются демо-сценарием.
+Платежи работают через локальную тестовую реализацию. Карты Яндекса и реальные
+API оплаты/доставки требуют собственных действующих ключей; базовое приложение
+и ручной ввод адреса работают без них. Этот сценарий предназначен для локальной
+демонстрации.
 
-### Бэкенд
+Остановить, сохранив данные:
 
-- `DATABASE_URL` — строка подключения к PostgreSQL
-- `CORS_ALLOWED_ORIGINS` — список разрешенных origin через запятую; если пусто, локально разрешаются только `localhost` и `127.0.0.1`
-- `TRUST_PROXY` — настройка `Express trust proxy`: `true`, `false`, число хопов или CSV-список доверенных прокси
-- `RATE_LIMIT_AUTH_LOGIN_WINDOW_MS` — окно rate limit для `/api/auth/login`
-- `RATE_LIMIT_AUTH_LOGIN_MAX` — максимум попыток логина за окно
-- `RATE_LIMIT_AUTH_SIGNUP_WINDOW_MS` — окно rate limit для `/api/auth/signup`
-- `RATE_LIMIT_AUTH_SIGNUP_MAX` — максимум регистраций за окно
-- `RATE_LIMIT_CHECKOUT_WINDOW_MS` — окно rate limit для мутаций checkout `/api/profile/orders`
-- `RATE_LIMIT_CHECKOUT_MAX` — максимум checkout-запросов за окно
-- `RATE_LIMIT_PARTNER_WRITE_WINDOW_MS` — окно rate limit для partner write API
-- `RATE_LIMIT_PARTNER_WRITE_MAX` — максимум partner write-запросов за окно
-- `RATE_LIMIT_ADMIN_WRITE_WINDOW_MS` — окно rate limit для admin write API
-- `RATE_LIMIT_ADMIN_WRITE_MAX` — максимум admin write-запросов за окно
-- `YOOKASSA_SHOP_ID` — тестовый магазин YooKassa
-- `YOOKASSA_SECRET_KEY` — секрет YooKassa
-- `YOOKASSA_RETURN_URL` — URL возврата после оплаты
-- `YOOKASSA_API_URL` — URL API YooKassa
-- `RUSSIAN_POST_API_BASE_URL` — базовый URL API Почты России
-- `RUSSIAN_POST_API_PATH` — путь к tracking endpoint
-- `RUSSIAN_POST_ACCESS_TOKEN` — токен Почты России
-- `RUSSIAN_POST_USER_AUTH` — base64 `login:password` для `X-User-Authorization`
-- `RUSSIAN_POST_API_TIMEOUT_MS` — таймаут запросов к Почте России
+```bash
+docker compose --env-file infra/demo.env -f compose.demo.yml down
+```
 
-## Демо-аккаунты
+Подробности восстановления, автономный архив и проверки: [RESTORE.md](RESTORE.md).
 
-- Обычный пользователь: `demo@ecomm.ru / demo123`
-- Партнёр: `partner@ecomm.ru / partner123`
-- Администратор: `admin@ecomm.ru / admin123`
+## Локальная разработка
 
-## Актуальная документация
+Node.js 22.23.3 указан в `.nvmrc`. Следующие команды предназначены для новой
+локальной development-базы; demo-seed очищает выбранную базу.
 
-- [project.md](/Users/vanish/Documents/Study/avito-2/project.md) — краткая карта проекта
-- [docs/architecture/frontend-structure.md](/Users/vanish/Documents/Study/avito-2/docs/architecture/frontend-structure.md) — правила структуры фронтенда
-- [docs/audit/README.md](/Users/vanish/Documents/Study/avito-2/docs/audit/README.md) — актуальный набор audit-документов
+```bash
+cp .env.example .env
+npm ci
+docker compose up -d
+npm run catalog:restore
+npm run db:migrate:deploy
+DEMO_SEED_CONFIRM=DELETE_LOCAL_DEMO_DATA npm run db:seed:demo
+npm run dev
+```
+
+Фронтенд: http://127.0.0.1:3000, API: http://127.0.0.1:3001.
+Не перезаписывать существующий `.env` и не запускать demo-seed на базе,
+содержимое которой нужно сохранить.
+
+## Структура и команды
+
+- `frontend/` — интерфейс.
+- `backend/` — API, Prisma-схема, миграции и демо-сценарий.
+- `data/archive/` — сохранённый каталог и его контрольные суммы.
+- `scripts/` — проверки и служебные сценарии.
+- `npm run build` — сборка интерфейса и API.
+- `npm run test:fast` — unit/integration-проверки.
+- `npm run test:e2e:api:critical` — основные сценарии API на отдельной тестовой базе.
+- `npm run test:demo:ui` — браузерные smoke-проверки запущенного Docker-демо.
+- `npm run ci:verify` — статические проверки и сборка.
+
+Конфигурация внешних интеграций: `.env.example`. Шаблон production-настроек:
+`infra/production.env.example`. Дополнительные инфраструктурные проверки:
+[DEMO_DEPLOY.md](DEMO_DEPLOY.md).

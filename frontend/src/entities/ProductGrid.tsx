@@ -371,7 +371,7 @@ export function ProductGrid({
                     <div className="text-sm font-medium sm:text-[15px]">
                       {option.label}
                     </div>
-                    {"description" in option && option.description ? (
+                    {"description" in option && typeof option.description === "string" && option.description ? (
                       <div className="mt-1 text-xs leading-5 text-slate-500">
                         {option.description}
                       </div>
